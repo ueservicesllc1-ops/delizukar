@@ -566,43 +566,153 @@ const AdminDashboard = () => {
         <Dialog
           open={salesReportOpen}
           onClose={() => setSalesReportOpen(false)}
-          maxWidth="md"
+          maxWidth="lg"
           fullWidth
+          PaperProps={{
+            sx: {
+              minHeight: '80vh',
+              maxHeight: '90vh'
+            }
+          }}
         >
           <DialogTitle>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              <Assessment sx={{ color: '#8B4513' }} />
-              <Typography variant="h6" sx={{ fontWeight: 600, color: '#8B4513' }}>
-                Reporte de Ventas
-              </Typography>
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <Assessment sx={{ color: '#8B4513' }} />
+                <Typography variant="h6" sx={{ fontWeight: 600, color: '#8B4513' }}>
+                  📊 Reporte de Ventas
+                </Typography>
+              </Box>
+              <Button
+                onClick={() => setSalesReportOpen(false)}
+                variant="outlined"
+                sx={{
+                  borderColor: '#8B4513',
+                  color: '#8B4513',
+                  '&:hover': { backgroundColor: '#8B451320' }
+                }}
+              >
+                Cerrar
+              </Button>
             </Box>
           </DialogTitle>
-          <DialogContent>
-            <Box sx={{ p: 3, textAlign: 'center' }}>
-              <Typography variant="h6" sx={{ mb: 2, color: '#666' }}>
-                📊 Reporte de Ventas
-              </Typography>
-              <Typography variant="body1" sx={{ mb: 3, color: '#666' }}>
-                Esta funcionalidad estará disponible próximamente.
-              </Typography>
-              <Typography variant="body2" sx={{ color: '#999' }}>
-                Aquí podrás ver estadísticas de ventas, productos más vendidos, 
-                ingresos por período y más métricas importantes.
-              </Typography>
+          <DialogContent sx={{ p: 0 }}>
+            <Box sx={{ p: 3 }}>
+              <Grid container spacing={3}>
+                {/* Métricas Principales */}
+                <Grid item xs={12}>
+                  <Typography variant="h6" sx={{ mb: 2, color: '#8B4513', fontWeight: 600 }}>
+                    📈 Métricas Generales
+                  </Typography>
+                  <Grid container spacing={2}>
+                    <Grid item xs={12} sm={6} md={3}>
+                      <Card sx={{ p: 2, backgroundColor: '#f8f9fa', border: '1px solid #e0e0e0' }}>
+                        <Typography variant="h4" sx={{ color: '#4CAF50', fontWeight: 700 }}>
+                          $0.00
+                        </Typography>
+                        <Typography variant="body2" sx={{ color: '#666' }}>
+                          Ingresos Totales
+                        </Typography>
+                      </Card>
+                    </Grid>
+                    <Grid item xs={12} sm={6} md={3}>
+                      <Card sx={{ p: 2, backgroundColor: '#f8f9fa', border: '1px solid #e0e0e0' }}>
+                        <Typography variant="h4" sx={{ color: '#2196F3', fontWeight: 700 }}>
+                          0
+                        </Typography>
+                        <Typography variant="body2" sx={{ color: '#666' }}>
+                          Órdenes Totales
+                        </Typography>
+                      </Card>
+                    </Grid>
+                    <Grid item xs={12} sm={6} md={3}>
+                      <Card sx={{ p: 2, backgroundColor: '#f8f9fa', border: '1px solid #e0e0e0' }}>
+                        <Typography variant="h4" sx={{ color: '#FF9800', fontWeight: 700 }}>
+                          $0.00
+                        </Typography>
+                        <Typography variant="body2" sx={{ color: '#666' }}>
+                          Promedio por Orden
+                        </Typography>
+                      </Card>
+                    </Grid>
+                    <Grid item xs={12} sm={6} md={3}>
+                      <Card sx={{ p: 2, backgroundColor: '#f8f9fa', border: '1px solid #e0e0e0' }}>
+                        <Typography variant="h4" sx={{ color: '#9C27B0', fontWeight: 700 }}>
+                          0
+                        </Typography>
+                        <Typography variant="body2" sx={{ color: '#666' }}>
+                          Productos Vendidos
+                        </Typography>
+                      </Card>
+                    </Grid>
+                  </Grid>
+                </Grid>
+
+                {/* Órdenes Recientes */}
+                <Grid item xs={12} md={6}>
+                  <Typography variant="h6" sx={{ mb: 2, color: '#8B4513', fontWeight: 600 }}>
+                    🛒 Órdenes Recientes
+                  </Typography>
+                  <Card sx={{ p: 2, backgroundColor: '#f8f9fa', border: '1px solid #e0e0e0' }}>
+                    <Typography variant="body2" sx={{ color: '#666', textAlign: 'center', py: 4 }}>
+                      No hay órdenes registradas aún
+                    </Typography>
+                  </Card>
+                </Grid>
+
+                {/* Productos Más Vendidos */}
+                <Grid item xs={12} md={6}>
+                  <Typography variant="h6" sx={{ mb: 2, color: '#8B4513', fontWeight: 600 }}>
+                    🏆 Productos Más Vendidos
+                  </Typography>
+                  <Card sx={{ p: 2, backgroundColor: '#f8f9fa', border: '1px solid #e0e0e0' }}>
+                    <Typography variant="body2" sx={{ color: '#666', textAlign: 'center', py: 4 }}>
+                      No hay datos de ventas aún
+                    </Typography>
+                  </Card>
+                </Grid>
+
+                {/* Resumen por Período */}
+                <Grid item xs={12}>
+                  <Typography variant="h6" sx={{ mb: 2, color: '#8B4513', fontWeight: 600 }}>
+                    📅 Resumen por Período
+                  </Typography>
+                  <Grid container spacing={2}>
+                    <Grid item xs={12} sm={4}>
+                      <Card sx={{ p: 2, backgroundColor: '#f8f9fa', border: '1px solid #e0e0e0' }}>
+                        <Typography variant="h5" sx={{ color: '#4CAF50', fontWeight: 700 }}>
+                          $0.00
+                        </Typography>
+                        <Typography variant="body2" sx={{ color: '#666' }}>
+                          Esta Semana
+                        </Typography>
+                      </Card>
+                    </Grid>
+                    <Grid item xs={12} sm={4}>
+                      <Card sx={{ p: 2, backgroundColor: '#f8f9fa', border: '1px solid #e0e0e0' }}>
+                        <Typography variant="h5" sx={{ color: '#2196F3', fontWeight: 700 }}>
+                          $0.00
+                        </Typography>
+                        <Typography variant="body2" sx={{ color: '#666' }}>
+                          Este Mes
+                        </Typography>
+                      </Card>
+                    </Grid>
+                    <Grid item xs={12} sm={4}>
+                      <Card sx={{ p: 2, backgroundColor: '#f8f9fa', border: '1px solid #e0e0e0' }}>
+                        <Typography variant="h5" sx={{ color: '#FF9800', fontWeight: 700 }}>
+                          $0.00
+                        </Typography>
+                        <Typography variant="body2" sx={{ color: '#666' }}>
+                          Este Año
+                        </Typography>
+                      </Card>
+                    </Grid>
+                  </Grid>
+                </Grid>
+              </Grid>
             </Box>
           </DialogContent>
-          <DialogActions sx={{ p: 3 }}>
-            <Button
-              onClick={() => setSalesReportOpen(false)}
-              variant="contained"
-              sx={{
-                backgroundColor: '#8B4513',
-                '&:hover': { backgroundColor: '#A0522D' }
-              }}
-            >
-              Cerrar
-            </Button>
-          </DialogActions>
         </Dialog>
 
         </Box>
