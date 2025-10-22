@@ -32,6 +32,13 @@ import {
 } from '@mui/icons-material';
 import { useStore } from '../context/StoreContext';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { auth } from '../firebase/config';
+import { 
+  signInWithPopup, 
+  GoogleAuthProvider, 
+  signOut, 
+  onAuthStateChanged 
+} from 'firebase/auth';
 
 const Header = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -53,25 +60,60 @@ const Header = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  // Escuchar cambios de autenticación
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setUser({
+          displayName: user.displayName,
+          email: user.email,
+          photoURL: user.photoURL,
+          uid: user.uid
+        });
+      } else {
+        setUser(null);
+      }
+    });
+
+    return () => unsubscribe();
+  }, []);
+
   const handleGoogleAuth = async () => {
     try {
-      // Aquí se implementará la autenticación con Google
       console.log('Iniciando autenticación con Google...');
-      // Por ahora, simulamos un usuario
-      setUser({
-        displayName: 'Usuario Google',
-        email: 'usuario@gmail.com',
-        photoURL: 'https://via.placeholder.com/40'
-      });
-      setAuthMenuOpen(false);
+      
+      const provider = new GoogleAuthProvider();
+      provider.addScope('email');
+      provider.addScope('profile');
+      
+      const result = await signInWithPopup(auth, provider);
+      const user = result.user;
+      
+      console.log('✅ Usuario autenticado:', user.displayName);
+      
+      // El estado se actualizará automáticamente por onAuthStateChanged
     } catch (error) {
-      console.error('Error en autenticación:', error);
+      console.error('❌ Error en autenticación:', error);
+      
+      // Mostrar mensaje de error al usuario
+      if (error.code === 'auth/popup-closed-by-user') {
+        console.log('Usuario cerró el popup de autenticación');
+      } else if (error.code === 'auth/popup-blocked') {
+        console.log('Popup bloqueado por el navegador');
+      } else {
+        console.log('Error de autenticación:', error.message);
+      }
     }
   };
 
-  const handleLogout = () => {
-    setUser(null);
-    setAuthMenuOpen(false);
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      console.log('✅ Usuario deslogueado');
+      // El estado se actualizará automáticamente por onAuthStateChanged
+    } catch (error) {
+      console.error('❌ Error al cerrar sesión:', error);
+    }
   };
 
   // No mostrar header en la página de checkout
