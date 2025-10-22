@@ -35,8 +35,7 @@ import {
   Select,
   MenuItem,
   TextField,
-  CircularProgress,
-  Chip
+  CircularProgress
 } from '@mui/material';
 import {
   ShoppingCart,
