@@ -789,6 +789,7 @@ app.listen(PORT, '0.0.0.0', () => {
   console.log(`🔥 Firebase connected to project: ${process.env.REACT_APP_FIREBASE_PROJECT_ID}`);
   console.log(`🔍 Health check available at: /health and /api/health`);
   console.log(`📁 Static files served from: ${path.join(__dirname, 'build')}`);
+  console.log(`✅ Server is ready for Railway healthcheck`);
 });
 
 module.exports = app;
