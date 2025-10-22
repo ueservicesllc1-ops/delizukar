@@ -275,7 +275,7 @@ const PopupHeroManager = ({ open, onClose }) => {
       }}
     >
       <DialogTitle sx={{ 
-        backgroundColor: '#8B4513', 
+        backgroundColor: '#C8626D', 
         color: 'white',
         display: 'flex',
         alignItems: 'center',
@@ -301,7 +301,7 @@ const PopupHeroManager = ({ open, onClose }) => {
               borderBottom: '1px solid #e0e0e0',
               backgroundColor: '#f8f9fa'
             }}>
-              <Typography variant="h6" sx={{ fontWeight: 700, color: '#8B4513' }}>
+              <Typography variant="h6" sx={{ fontWeight: 700, color: '#C8626D' }}>
                 Configuración del Popup
               </Typography>
             </Box>
@@ -310,7 +310,7 @@ const PopupHeroManager = ({ open, onClose }) => {
               <Grid container spacing={3}>
                 <Grid item xs={12}>
                   <Card sx={{ p: 3 }}>
-                    <Typography variant="h6" sx={{ mb: 2, fontWeight: 700, color: '#8B4513' }}>
+                    <Typography variant="h6" sx={{ mb: 2, fontWeight: 700, color: '#C8626D' }}>
                       Configuración General
                     </Typography>
                     
@@ -364,7 +364,7 @@ const PopupHeroManager = ({ open, onClose }) => {
                     
                     <Divider sx={{ my: 3 }} />
                     
-                    <Typography variant="h6" sx={{ mb: 2, fontWeight: 600, color: '#8B4513' }}>
+                    <Typography variant="h6" sx={{ mb: 2, fontWeight: 600, color: '#C8626D' }}>
                       Configuración de Duración
                     </Typography>
                     
@@ -390,7 +390,7 @@ const PopupHeroManager = ({ open, onClose }) => {
                           disabled={saving}
                           startIcon={<Save />}
                           sx={{
-                            backgroundColor: '#8B4513',
+                            backgroundColor: '#C8626D',
                             '&:hover': { backgroundColor: '#A0522D' }
                           }}
                         >
@@ -403,7 +403,7 @@ const PopupHeroManager = ({ open, onClose }) => {
                 
                 <Grid item xs={12}>
                   <Card sx={{ p: 3 }}>
-                    <Typography variant="h6" sx={{ mb: 2, fontWeight: 700, color: '#8B4513' }}>
+                    <Typography variant="h6" sx={{ mb: 2, fontWeight: 700, color: '#C8626D' }}>
                       Configuración de Imagen
                     </Typography>
                     
@@ -469,7 +469,7 @@ const PopupHeroManager = ({ open, onClose }) => {
                 <Grid item xs={12}>
                   <Card sx={{ p: 3 }}>
                     <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-                      <Typography variant="h6" sx={{ fontWeight: 700, color: '#8B4513' }}>
+                      <Typography variant="h6" sx={{ fontWeight: 700, color: '#C8626D' }}>
                         Ofertas Existentes
                       </Typography>
                       <Button
@@ -478,7 +478,7 @@ const PopupHeroManager = ({ open, onClose }) => {
                         onClick={handleAddNew}
                         size="small"
                         sx={{
-                          backgroundColor: '#8B4513',
+                          backgroundColor: '#C8626D',
                           '&:hover': { backgroundColor: '#A0522D' }
                         }}
                       >
@@ -530,7 +530,7 @@ const PopupHeroManager = ({ open, onClose }) => {
               justifyContent: 'space-between',
               alignItems: 'center'
             }}>
-              <Typography variant="h6" sx={{ fontWeight: 700, color: '#8B4513' }}>
+              <Typography variant="h6" sx={{ fontWeight: 700, color: '#C8626D' }}>
                 Vista Previa en Tiempo Real
               </Typography>
               <Button
@@ -538,9 +538,9 @@ const PopupHeroManager = ({ open, onClose }) => {
                 size="small"
                 onClick={() => setPreviewOpen(true)}
                 sx={{
-                  borderColor: '#8B4513',
-                  color: '#8B4513',
-                  '&:hover': { backgroundColor: '#8B451320' }
+                  borderColor: '#C8626D',
+                  color: '#C8626D',
+                  '&:hover': { backgroundColor: '#C8626D20' }
                 }}
               >
                 Pantalla Completa
@@ -1197,7 +1197,7 @@ const PopupHeroManager = ({ open, onClose }) => {
           startIcon={<Save />}
           disabled={saving}
           sx={{
-            backgroundColor: '#8B4513',
+            backgroundColor: '#C8626D',
             '&:hover': { backgroundColor: '#A0522D' },
             mr: 2
           }}
@@ -1228,7 +1228,7 @@ const PopupHeroManager = ({ open, onClose }) => {
         }}
       >
         <DialogTitle sx={{ 
-          backgroundColor: '#8B4513', 
+          backgroundColor: '#C8626D', 
           color: 'white',
           display: 'flex',
           justifyContent: 'space-between',
