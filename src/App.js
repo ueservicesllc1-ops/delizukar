@@ -33,7 +33,6 @@ import Shipping from './pages/Shipping';
 import CookieCare from './pages/CookieCare';
 import Nosotros from './pages/Nosotros';
 import Contacto from './pages/Contacto';
-import Login from './pages/Login';
 
 // Tema personalizado
 const theme = createTheme({
@@ -189,12 +188,6 @@ function App() {
                 <>
                   <Header />
                   <Nosotros />
-                </>
-              } />
-              <Route path="/login" element={
-                <>
-                  <Header />
-                  <Login />
                 </>
               } />
               <Route path="/admin" element={

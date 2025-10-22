@@ -128,6 +128,9 @@ const Header = () => {
         photoURL: user.photoURL
       });
       
+      // Redirigir a home después del login
+      navigate('/');
+      
       // El estado se actualizará automáticamente por onAuthStateChanged
     } catch (error) {
       console.error('❌ Error en autenticación:', error);

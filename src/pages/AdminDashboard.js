@@ -108,7 +108,7 @@ const AdminDashboard = () => {
       } else {
         setUser(null);
         setLoading(false);
-        navigate('/login'); // Redirigir a login si no está autenticado
+        navigate('/'); // Redirigir a home si no está autenticado
       }
     });
 
