@@ -26,7 +26,9 @@ import {
   Person,
   Favorite,
   Close,
-  Security
+  Security,
+  Login,
+  PersonAdd
 } from '@mui/icons-material';
 import { useStore } from '../context/StoreContext';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -35,6 +37,8 @@ const Header = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
+  const [user, setUser] = useState(null);
+  const [authMenuOpen, setAuthMenuOpen] = useState(false);
   const { cart, getCartItemsCount } = useStore();
   const navigate = useNavigate();
   const location = useLocation();
@@ -48,6 +52,27 @@ const Header = () => {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  const handleGoogleAuth = async () => {
+    try {
+      // Aquí se implementará la autenticación con Google
+      console.log('Iniciando autenticación con Google...');
+      // Por ahora, simulamos un usuario
+      setUser({
+        displayName: 'Usuario Google',
+        email: 'usuario@gmail.com',
+        photoURL: 'https://via.placeholder.com/40'
+      });
+      setAuthMenuOpen(false);
+    } catch (error) {
+      console.error('Error en autenticación:', error);
+    }
+  };
+
+  const handleLogout = () => {
+    setUser(null);
+    setAuthMenuOpen(false);
+  };
 
   // No mostrar header en la página de checkout
   if (location.pathname === '/checkout') {
@@ -189,7 +214,7 @@ const Header = () => {
                   </Box>
                 </motion.div>
 
-                {/* Cart, Profile and Admin Icons - Right */}
+                {/* Auth Buttons, Cart, Profile and Admin Icons - Right */}
                 <Box sx={{ 
                   display: 'flex', 
                   alignItems: 'center', 
@@ -197,6 +222,79 @@ const Header = () => {
                   position: 'absolute',
                   right: 0
                 }}>
+                  {/* Authentication Buttons */}
+                  {!user ? (
+                    <Box sx={{ display: 'flex', gap: 0.5, mr: 1 }}>
+                      <Button
+                        size="small"
+                        variant="outlined"
+                        startIcon={<Login />}
+                        onClick={handleGoogleAuth}
+                        sx={{
+                          borderColor: '#c8626d',
+                          color: '#c8626d',
+                          fontSize: '0.7rem',
+                          py: 0.5,
+                          px: 1,
+                          minWidth: 'auto',
+                          '&:hover': {
+                            backgroundColor: '#c8626d',
+                            color: 'white',
+                            borderColor: '#c8626d'
+                          }
+                        }}
+                      >
+                        Iniciar
+                      </Button>
+                      <Button
+                        size="small"
+                        variant="contained"
+                        startIcon={<PersonAdd />}
+                        onClick={handleGoogleAuth}
+                        sx={{
+                          backgroundColor: '#8B4513',
+                          fontSize: '0.7rem',
+                          py: 0.5,
+                          px: 1,
+                          minWidth: 'auto',
+                          '&:hover': {
+                            backgroundColor: '#A0522D'
+                          }
+                        }}
+                      >
+                        Registro
+                      </Button>
+                    </Box>
+                  ) : (
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mr: 1 }}>
+                      <Avatar
+                        src={user.photoURL}
+                        alt={user.displayName}
+                        sx={{ width: 32, height: 32 }}
+                      />
+                      <Button
+                        size="small"
+                        variant="outlined"
+                        onClick={handleLogout}
+                        sx={{
+                          borderColor: '#c8626d',
+                          color: '#c8626d',
+                          fontSize: '0.7rem',
+                          py: 0.5,
+                          px: 1,
+                          minWidth: 'auto',
+                          '&:hover': {
+                            backgroundColor: '#c8626d',
+                            color: 'white',
+                            borderColor: '#c8626d'
+                          }
+                        }}
+                      >
+                        Salir
+                      </Button>
+                    </Box>
+                  )}
+
                   {/* Shopping Cart */}
                   <motion.div
                     whileHover={{ scale: 1.1 }}
