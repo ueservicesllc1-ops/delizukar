@@ -259,7 +259,6 @@ const AdminDashboard = () => {
                               index === 6 ? () => setFeaturedProductsManagerOpen(true) :
                               index === 7 ? () => setSocialMediaManagerOpen(true) :
                               index === 8 ? () => setPopupHeroManagerOpen(true) :
-                              index === 9 ? () => setStripeBalanceOpen(true) :
                               index === 12 ? () => setMinProductsManagerOpen(true) :
                               undefined
                             }
@@ -534,11 +533,6 @@ const AdminDashboard = () => {
           onClose={() => setPopupHeroManagerOpen(false)}
         />
 
-        {/* Balance de Stripe */}
-        <StripeBalance
-          open={stripeBalanceOpen}
-          onClose={() => setStripeBalanceOpen(false)}
-        />
         </Box>
       );
     };
