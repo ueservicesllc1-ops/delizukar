@@ -1,7 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY || 'sk_test_dummy_key_for_development', {
-  apiVersion: '2024-09-30.acacia', // Latest API version
+  apiVersion: '2023-10-16', // Stable API version
   maxNetworkRetries: 3, // Enhanced retry logic
   timeout: 30000, // 30 second timeout
 });

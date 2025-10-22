@@ -180,7 +180,7 @@ const CheckoutForm = ({ cartItems, total, customerInfo, onSuccess, onError }) =>
 const stripePromise = loadStripe(
   process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY || 'pk_test_51234567890abcdef...',
   {
-    apiVersion: '2024-09-30.acacia', // Latest API version
+    apiVersion: '2023-10-16', // Stable API version
     locale: 'es' // Spanish locale
   }
 );
