@@ -485,6 +485,10 @@ app.get('/api/balance', async (req, res) => {
 
     const balance = await stripe.balance.retrieve();
     
+    console.log('🔍 Raw Stripe balance response:', JSON.stringify(balance, null, 2));
+    console.log('🔍 Available balance:', balance.available);
+    console.log('🔍 Pending balance:', balance.pending);
+    
     res.json({
       balance: {
         available: balance.available.map(b => ({
