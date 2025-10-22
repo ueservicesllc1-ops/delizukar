@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { auth, db } from '../firebase/config';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
+import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, query, orderBy } from 'firebase/firestore';
 import * as XLSX from 'xlsx';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
@@ -33,7 +34,9 @@ import {
   InputLabel,
   Select,
   MenuItem,
-  TextField
+  TextField,
+  CircularProgress,
+  Chip
 } from '@mui/material';
 import {
   ShoppingCart,
@@ -86,6 +89,8 @@ const AdminDashboard = () => {
   const [stripeBalanceOpen, setStripeBalanceOpen] = useState(false);
   const [salesReportOpen, setSalesReportOpen] = useState(false);
   const [userManagementOpen, setUserManagementOpen] = useState(false);
+  const [registeredUsers, setRegisteredUsers] = useState([]);
+  const [loadingUsers, setLoadingUsers] = useState(false);
   const [selectedPeriod, setSelectedPeriod] = useState('current'); // Added period selector
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1); // Added month selector
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear()); // Added year selector
@@ -110,6 +115,13 @@ const AdminDashboard = () => {
 
     return () => unsubscribe();
   }, [navigate]);
+
+  // Cargar usuarios cuando se abre el modal de gestión
+  useEffect(() => {
+    if (userManagementOpen) {
+      loadRegisteredUsers();
+    }
+  }, [userManagementOpen]);
 
 
   const handleSignOut = async () => {
@@ -208,6 +220,48 @@ const AdminDashboard = () => {
         return `Año ${selectedYear}`;
       default:
         return 'Período Actual';
+    }
+  };
+
+  const loadRegisteredUsers = async () => {
+    try {
+      setLoadingUsers(true);
+      console.log('Cargando usuarios registrados...');
+      
+      const usersRef = collection(db, 'registeredUsers');
+      const q = query(usersRef, orderBy('createdAt', 'desc'));
+      const querySnapshot = await getDocs(q);
+      
+      const users = [];
+      querySnapshot.forEach((doc) => {
+        users.push({
+          id: doc.id,
+          ...doc.data()
+        });
+      });
+      
+      setRegisteredUsers(users);
+      console.log('✅ Usuarios cargados:', users.length);
+    } catch (error) {
+      console.error('❌ Error cargando usuarios:', error);
+    } finally {
+      setLoadingUsers(false);
+    }
+  };
+
+  const saveUserToFirestore = async (userData) => {
+    try {
+      const usersRef = collection(db, 'registeredUsers');
+      await addDoc(usersRef, {
+        ...userData,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        role: 'user', // Default role
+        status: 'active'
+      });
+      console.log('✅ Usuario guardado en Firestore');
+    } catch (error) {
+      console.error('❌ Error guardando usuario:', error);
     }
   };
 
@@ -1231,17 +1285,74 @@ const AdminDashboard = () => {
           </DialogTitle>
           
           <DialogContent sx={{ p: 3, backgroundColor: '#fafafa' }}>
-            <Box sx={{ textAlign: 'center', py: 4 }}>
-              <AdminPanelSettings sx={{ fontSize: 64, color: '#8B4513', mb: 2 }} />
+            <Box sx={{ mb: 3 }}>
               <Typography variant="h6" sx={{ color: '#8B4513', mb: 2, fontWeight: 600 }}>
-                Gestión de Usuarios
+                Usuarios Registrados ({registeredUsers.length})
               </Typography>
-              <Typography variant="body1" sx={{ color: '#666', mb: 3 }}>
-                Aquí podrás gestionar usuarios registrados, roles, permisos y más.
-              </Typography>
-              <Typography variant="body2" sx={{ color: '#999' }}>
-                Esta funcionalidad estará disponible próximamente.
-              </Typography>
+              
+              {loadingUsers ? (
+                <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
+                  <CircularProgress sx={{ color: '#8B4513' }} />
+                </Box>
+              ) : registeredUsers.length === 0 ? (
+                <Box sx={{ textAlign: 'center', py: 4 }}>
+                  <AdminPanelSettings sx={{ fontSize: 64, color: '#8B4513', mb: 2 }} />
+                  <Typography variant="h6" sx={{ color: '#8B4513', mb: 2, fontWeight: 600 }}>
+                    No hay usuarios registrados
+                  </Typography>
+                  <Typography variant="body1" sx={{ color: '#666' }}>
+                    Los usuarios aparecerán aquí cuando se registren con Google.
+                  </Typography>
+                </Box>
+              ) : (
+                <Grid container spacing={2}>
+                  {registeredUsers.map((user) => (
+                    <Grid item xs={12} sm={6} md={4} key={user.id}>
+                      <Card sx={{ 
+                        p: 2, 
+                        backgroundColor: 'white', 
+                        borderRadius: '8px',
+                        border: '1px solid #e0e0e0',
+                        '&:hover': {
+                          boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+                        }
+                      }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                          <Avatar
+                            src={user.photoURL}
+                            alt={user.displayName}
+                            sx={{ width: 40, height: 40, mr: 2 }}
+                          />
+                          <Box sx={{ flex: 1 }}>
+                            <Typography variant="subtitle1" sx={{ fontWeight: 600, color: '#8B4513' }}>
+                              {user.displayName}
+                            </Typography>
+                            <Typography variant="body2" sx={{ color: '#666', fontSize: '0.8rem' }}>
+                              {user.email}
+                            </Typography>
+                          </Box>
+                        </Box>
+                        
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+                          <Typography variant="caption" sx={{ color: '#666' }}>
+                            Rol: {user.role || 'user'}
+                          </Typography>
+                          <Chip 
+                            label={user.status || 'active'} 
+                            size="small"
+                            color={user.status === 'active' ? 'success' : 'default'}
+                            sx={{ fontSize: '0.7rem' }}
+                          />
+                        </Box>
+                        
+                        <Typography variant="caption" sx={{ color: '#999', fontSize: '0.7rem' }}>
+                          Registrado: {new Date(user.createdAt).toLocaleDateString('es-ES')}
+                        </Typography>
+                      </Card>
+                    </Grid>
+                  ))}
+                </Grid>
+              )}
             </Box>
           </DialogContent>
         </Dialog>
