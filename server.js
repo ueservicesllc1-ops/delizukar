@@ -728,14 +728,22 @@ app.use(express.static(path.join(__dirname, 'build')));
 // ==================== HEALTH CHECK ====================
 
 app.get('/api/health', (req, res) => {
-  res.json({ 
+  console.log('🔍 Health check requested');
+  res.status(200).json({ 
     status: 'OK', 
     timestamp: new Date().toISOString(),
+    uptime: process.uptime(),
     stripe: {
       configured: !!process.env.STRIPE_SECRET_KEY,
       mode: process.env.STRIPE_SECRET_KEY?.startsWith('sk_test_') ? 'test' : 'live'
     }
   });
+});
+
+// Simple health check for Railway
+app.get('/health', (req, res) => {
+  console.log('🔍 Simple health check requested');
+  res.status(200).json({ status: 'OK' });
 });
 
 // ==================== CATCH ALL HANDLER ====================
@@ -757,10 +765,12 @@ app.use((err, req, res, next) => {
 
 // ==================== START SERVER ====================
 
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
   console.log(`🚀 Server running on port ${PORT}`);
   console.log(`💳 Stripe configured in ${process.env.STRIPE_SECRET_KEY?.startsWith('sk_test_') ? 'TEST' : 'LIVE'} mode`);
   console.log(`🔥 Firebase connected to project: ${process.env.REACT_APP_FIREBASE_PROJECT_ID}`);
+  console.log(`🔍 Health check available at: /health and /api/health`);
+  console.log(`📁 Static files served from: ${path.join(__dirname, 'build')}`);
 });
 
 module.exports = app;
