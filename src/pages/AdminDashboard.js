@@ -52,7 +52,8 @@ import {
   Person,
   LocalOffer,
   Share,
-  Assessment
+  Assessment,
+  Close
 } from '@mui/icons-material';
 import FontManager from '../components/FontManager';
 import BannerPhotoManager from '../components/BannerPhotoManager';
@@ -857,7 +858,8 @@ const AdminDashboard = () => {
             backgroundColor: '#c8626d', 
             color: 'white', 
             textAlign: 'center',
-            py: 2
+            py: 2,
+            position: 'relative'
           }}>
             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1 }}>
               <Assessment sx={{ fontSize: 24, color: 'white' }} />
@@ -865,6 +867,21 @@ const AdminDashboard = () => {
                 Reporte de Ventas
               </Typography>
             </Box>
+            <IconButton
+              onClick={() => setSalesReportOpen(false)}
+              sx={{
+                position: 'absolute',
+                right: 16,
+                top: '50%',
+                transform: 'translateY(-50%)',
+                color: 'white',
+                '&:hover': {
+                  backgroundColor: 'rgba(255,255,255,0.1)'
+                }
+              }}
+            >
+              <Close />
+            </IconButton>
           </DialogTitle>
           
           <DialogContent sx={{ p: 3, backgroundColor: '#fafafa' }}>
