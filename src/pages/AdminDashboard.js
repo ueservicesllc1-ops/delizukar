@@ -4,6 +4,8 @@ import { useNavigate } from 'react-router-dom';
 import { auth, db } from '../firebase/config';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
 import * as XLSX from 'xlsx';
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
 import {
   Box,
   Container,
@@ -203,6 +205,183 @@ const AdminDashboard = () => {
       default:
         return 'Período Actual';
     }
+  };
+
+  const generatePDFReport = () => {
+    // Crear un elemento temporal para el reporte
+    const reportElement = document.createElement('div');
+    reportElement.style.cssText = `
+      width: 210mm;
+      min-height: 297mm;
+      padding: 20mm;
+      background: white;
+      font-family: Arial, sans-serif;
+      color: #333;
+      line-height: 1.4;
+    `;
+
+    // Generar el HTML del reporte
+    reportElement.innerHTML = `
+      <div style="text-align: center; margin-bottom: 30px; border-bottom: 3px solid #c8626d; padding-bottom: 20px;">
+        <h1 style="color: #c8626d; margin: 0; font-size: 28px; font-weight: bold;">DELIZUKAR</h1>
+        <h2 style="color: #8B4513; margin: 10px 0; font-size: 20px; font-weight: 600;">REPORTE FINANCIERO DE VENTAS</h2>
+        <div style="margin-top: 15px;">
+          <p style="margin: 5px 0; color: #666; font-size: 14px;"><strong>Empresa:</strong> Delizukar S.A.</p>
+          <p style="margin: 5px 0; color: #666; font-size: 14px;"><strong>Dirección:</strong> Av. Principal 123, Ciudad, País</p>
+          <p style="margin: 5px 0; color: #666; font-size: 14px;"><strong>Teléfono:</strong> +1 (555) 123-4567 | <strong>Email:</strong> info@delizukar.com</p>
+        </div>
+      </div>
+
+      <div style="display: flex; justify-content: space-between; margin-bottom: 30px; background: #f8f9fa; padding: 15px; border-radius: 8px;">
+        <div>
+          <p style="margin: 5px 0; font-size: 14px;"><strong>Fecha del Reporte:</strong> ${new Date().toLocaleDateString('es-ES')}</p>
+          <p style="margin: 5px 0; font-size: 14px;"><strong>Período:</strong> ${getPeriodDescription()}</p>
+        </div>
+        <div>
+          <p style="margin: 5px 0; font-size: 14px;"><strong>Generado por:</strong> ${user?.displayName || 'Administrador'}</p>
+          <p style="margin: 5px 0; font-size: 14px;"><strong>Usuario:</strong> ${user?.email || 'admin@delizukar.com'}</p>
+        </div>
+      </div>
+
+      <div style="margin-bottom: 30px;">
+        <h3 style="color: #c8626d; border-bottom: 2px solid #c8626d; padding-bottom: 10px; margin-bottom: 20px;">📊 MÉTRICAS FINANCIERAS</h3>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+          <div style="background: #c8626d; color: white; padding: 20px; border-radius: 8px; text-align: center;">
+            <h4 style="margin: 0 0 10px 0; font-size: 18px;">INGRESOS TOTALES</h4>
+            <p style="margin: 0; font-size: 24px; font-weight: bold;">$0.00</p>
+          </div>
+          <div style="background: #8B4513; color: white; padding: 20px; border-radius: 8px; text-align: center;">
+            <h4 style="margin: 0 0 10px 0; font-size: 18px;">ÓRDENES TOTALES</h4>
+            <p style="margin: 0; font-size: 24px; font-weight: bold;">0</p>
+          </div>
+          <div style="background: #be8782; color: white; padding: 20px; border-radius: 8px; text-align: center;">
+            <h4 style="margin: 0 0 10px 0; font-size: 18px;">PROMEDIO POR ORDEN</h4>
+            <p style="margin: 0; font-size: 24px; font-weight: bold;">$0.00</p>
+          </div>
+          <div style="background: #A0522D; color: white; padding: 20px; border-radius: 8px; text-align: center;">
+            <h4 style="margin: 0 0 10px 0; font-size: 18px;">PRODUCTOS VENDIDOS</h4>
+            <p style="margin: 0; font-size: 24px; font-weight: bold;">0</p>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-bottom: 30px;">
+        <h3 style="color: #c8626d; border-bottom: 2px solid #c8626d; padding-bottom: 10px; margin-bottom: 20px;">📅 RESUMEN POR PERÍODO</h3>
+        <table style="width: 100%; border-collapse: collapse; background: white; border: 1px solid #ddd;">
+          <thead>
+            <tr style="background: #c8626d; color: white;">
+              <th style="padding: 12px; text-align: left; border: 1px solid #ddd;">Período</th>
+              <th style="padding: 12px; text-align: right; border: 1px solid #ddd;">Ingresos</th>
+              <th style="padding: 12px; text-align: right; border: 1px solid #ddd;">Órdenes</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="padding: 12px; border: 1px solid #ddd; font-weight: 600;">Esta Semana</td>
+              <td style="padding: 12px; border: 1px solid #ddd; text-align: right; color: #c8626d; font-weight: bold;">$0.00</td>
+              <td style="padding: 12px; border: 1px solid #ddd; text-align: right; color: #8B4513; font-weight: bold;">0</td>
+            </tr>
+            <tr style="background: #f8f9fa;">
+              <td style="padding: 12px; border: 1px solid #ddd; font-weight: 600;">Este Mes</td>
+              <td style="padding: 12px; border: 1px solid #ddd; text-align: right; color: #c8626d; font-weight: bold;">$0.00</td>
+              <td style="padding: 12px; border: 1px solid #ddd; text-align: right; color: #8B4513; font-weight: bold;">0</td>
+            </tr>
+            <tr>
+              <td style="padding: 12px; border: 1px solid #ddd; font-weight: 600;">Este Año</td>
+              <td style="padding: 12px; border: 1px solid #ddd; text-align: right; color: #c8626d; font-weight: bold;">$0.00</td>
+              <td style="padding: 12px; border: 1px solid #ddd; text-align: right; color: #8B4513; font-weight: bold;">0</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div style="margin-bottom: 30px;">
+        <h3 style="color: #c8626d; border-bottom: 2px solid #c8626d; padding-bottom: 10px; margin-bottom: 20px;">🛒 ÓRDENES RECIENTES</h3>
+        <table style="width: 100%; border-collapse: collapse; background: white; border: 1px solid #ddd;">
+          <thead>
+            <tr style="background: #8B4513; color: white;">
+              <th style="padding: 12px; text-align: left; border: 1px solid #ddd;">ID</th>
+              <th style="padding: 12px; text-align: left; border: 1px solid #ddd;">Fecha</th>
+              <th style="padding: 12px; text-align: left; border: 1px solid #ddd;">Cliente</th>
+              <th style="padding: 12px; text-align: right; border: 1px solid #ddd;">Total</th>
+              <th style="padding: 12px; text-align: center; border: 1px solid #ddd;">Estado</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="padding: 12px; border: 1px solid #ddd; text-align: center; color: #666;">-</td>
+              <td style="padding: 12px; border: 1px solid #ddd; color: #666;">-</td>
+              <td style="padding: 12px; border: 1px solid #ddd; color: #666;">-</td>
+              <td style="padding: 12px; border: 1px solid #ddd; text-align: right; color: #666;">-</td>
+              <td style="padding: 12px; border: 1px solid #ddd; text-align: center; color: #666;">-</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div style="margin-bottom: 30px;">
+        <h3 style="color: #c8626d; border-bottom: 2px solid #c8626d; padding-bottom: 10px; margin-bottom: 20px;">🏆 PRODUCTOS MÁS VENDIDOS</h3>
+        <table style="width: 100%; border-collapse: collapse; background: white; border: 1px solid #ddd;">
+          <thead>
+            <tr style="background: #be8782; color: white;">
+              <th style="padding: 12px; text-align: left; border: 1px solid #ddd;">Producto</th>
+              <th style="padding: 12px; text-align: center; border: 1px solid #ddd;">Cantidad</th>
+              <th style="padding: 12px; text-align: right; border: 1px solid #ddd;">Ingresos</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="padding: 12px; border: 1px solid #ddd; color: #666;">-</td>
+              <td style="padding: 12px; border: 1px solid #ddd; text-align: center; color: #666;">-</td>
+              <td style="padding: 12px; border: 1px solid #ddd; text-align: right; color: #666;">-</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div style="margin-top: 40px; padding-top: 20px; border-top: 2px solid #c8626d; text-align: center; color: #666; font-size: 12px;">
+        <p style="margin: 5px 0;"><strong>Reporte generado automáticamente por Delizukar</strong></p>
+        <p style="margin: 5px 0;">Este documento es confidencial y está destinado únicamente para uso interno.</p>
+        <p style="margin: 5px 0;">Fecha de generación: ${new Date().toLocaleString('es-ES')}</p>
+      </div>
+    `;
+
+    // Agregar al DOM temporalmente
+    document.body.appendChild(reportElement);
+
+    // Generar PDF
+    html2canvas(reportElement, {
+      scale: 2,
+      useCORS: true,
+      allowTaint: true
+    }).then(canvas => {
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      
+      const imgWidth = 210;
+      const pageHeight = 295;
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      let heightLeft = imgHeight;
+
+      let position = 0;
+
+      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+      heightLeft -= pageHeight;
+
+      while (heightLeft >= 0) {
+        position = heightLeft - imgHeight;
+        pdf.addPage();
+        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+        heightLeft -= pageHeight;
+      }
+
+      // Guardar el PDF
+      const fileName = `Reporte_Financiero_Delizukar_${getPeriodDescription().replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.pdf`;
+      pdf.save(fileName);
+
+      // Limpiar
+      document.body.removeChild(reportElement);
+    });
   };
 
   if (loading) {
@@ -777,7 +956,25 @@ const AdminDashboard = () => {
                       width: '100%'
                     }}
                   >
-                    📊 Generar Reporte Excel
+                    📊 Generar Excel
+                  </Button>
+                </Grid>
+                <Grid item xs={12} sm={4}>
+                  <Button
+                    variant="outlined"
+                    size="small"
+                    onClick={generatePDFReport}
+                    sx={{
+                      borderColor: '#8B4513',
+                      color: '#8B4513',
+                      '&:hover': { 
+                        backgroundColor: '#8B4513',
+                        color: 'white'
+                      },
+                      width: '100%'
+                    }}
+                  >
+                    📄 Generar PDF
                   </Button>
                 </Grid>
               </Grid>
