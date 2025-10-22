@@ -755,11 +755,7 @@ app.get('/api/health', (req, res) => {
 // Health check for Railway - must be very simple and fast
 app.get('/health', (req, res) => {
   console.log('🔍 Health check requested from:', req.get('host'));
-  res.status(200).json({ 
-    status: 'OK', 
-    timestamp: new Date().toISOString(),
-    port: PORT 
-  });
+  res.status(200).send('OK');
 });
 
 // Root endpoint for Railway healthcheck
