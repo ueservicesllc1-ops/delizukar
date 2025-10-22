@@ -53,7 +53,9 @@ import {
   LocalOffer,
   Share,
   Assessment,
-  Close
+  Close,
+  Group,
+  AdminPanelSettings
 } from '@mui/icons-material';
 import FontManager from '../components/FontManager';
 import BannerPhotoManager from '../components/BannerPhotoManager';
@@ -83,6 +85,7 @@ const AdminDashboard = () => {
   const [popupHeroManagerOpen, setPopupHeroManagerOpen] = useState(false);
   const [stripeBalanceOpen, setStripeBalanceOpen] = useState(false);
   const [salesReportOpen, setSalesReportOpen] = useState(false);
+  const [userManagementOpen, setUserManagementOpen] = useState(false);
   const [selectedPeriod, setSelectedPeriod] = useState('current'); // Added period selector
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1); // Added month selector
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear()); // Added year selector
@@ -548,6 +551,7 @@ const AdminDashboard = () => {
                               index === 8 ? () => setPopupHeroManagerOpen(true) :
                               index === 9 ? () => setStripeBalanceOpen(true) :
                               index === 10 ? () => setSalesReportOpen(true) :
+                              index === 11 ? () => setUserManagementOpen(true) :
                               index === 12 ? () => setMinProductsManagerOpen(true) :
                               undefined
                             }
@@ -619,6 +623,20 @@ const AdminDashboard = () => {
                                   }}
                                 >
                                   Reporte de Ventas
+                                </Typography>
+                              </Box>
+                            ) : index === 11 ? (
+                              <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1 }}>
+                                <Group sx={{ color: 'white', fontSize: '2rem' }} />
+                                <Typography
+                                  variant="body2"
+                                  sx={{
+                                    color: 'white',
+                                    fontWeight: 600,
+                                    textShadow: '1px 1px 2px rgba(0,0,0,0.5)'
+                                  }}
+                                >
+                                  Gestión de Usuarios
                                 </Typography>
                               </Box>
                             ) : index === 15 ? (
@@ -1182,6 +1200,49 @@ const AdminDashboard = () => {
                 </Grid>
               </Grid>
             </Grid>
+          </DialogContent>
+        </Dialog>
+
+        {/* Gestión de Usuarios */}
+        <Dialog
+          open={userManagementOpen}
+          onClose={() => setUserManagementOpen(false)}
+          maxWidth="md"
+          fullWidth
+          PaperProps={{
+            sx: {
+              borderRadius: '12px',
+              boxShadow: '0 4px 20px rgba(0,0,0,0.1)'
+            }
+          }}
+        >
+          <DialogTitle sx={{ 
+            backgroundColor: '#8B4513', 
+            color: 'white', 
+            textAlign: 'center',
+            py: 2
+          }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1 }}>
+              <Group sx={{ fontSize: 24, color: 'white' }} />
+              <Typography variant="h6" sx={{ fontWeight: 600, color: 'white' }}>
+                Gestión de Usuarios
+              </Typography>
+            </Box>
+          </DialogTitle>
+          
+          <DialogContent sx={{ p: 3, backgroundColor: '#fafafa' }}>
+            <Box sx={{ textAlign: 'center', py: 4 }}>
+              <AdminPanelSettings sx={{ fontSize: 64, color: '#8B4513', mb: 2 }} />
+              <Typography variant="h6" sx={{ color: '#8B4513', mb: 2, fontWeight: 600 }}>
+                Gestión de Usuarios
+              </Typography>
+              <Typography variant="body1" sx={{ color: '#666', mb: 3 }}>
+                Aquí podrás gestionar usuarios registrados, roles, permisos y más.
+              </Typography>
+              <Typography variant="body2" sx={{ color: '#999' }}>
+                Esta funcionalidad estará disponible próximamente.
+              </Typography>
+            </Box>
           </DialogContent>
         </Dialog>
 
