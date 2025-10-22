@@ -14,8 +14,6 @@ import { FeaturedProductsProvider } from './context/FeaturedProductsContext';
 // Components
 import Header from './components/Header';
 import Footer from './components/Footer';
-import HeroBanner from './components/HeroBanner';
-import FeaturedProducts from './components/FeaturedProducts';
 
 // Pages
 import Home from './pages/Home';
@@ -23,6 +21,7 @@ import Products from './pages/Products';
 import ProductDetail from './pages/ProductDetail';
 import Cart from './pages/Cart';
 import Checkout from './pages/Checkout';
+import CheckoutSuccess from './pages/CheckoutSuccess';
 import UserDashboard from './pages/UserDashboard';
 import AdminDashboard from './pages/AdminDashboard';
 import AdminProducts from './pages/AdminProducts';
@@ -142,26 +141,110 @@ function App() {
           }}
         >
           <div className="App">
-            <Header />
-            
             <Routes>
-              <Route path="/" element={<Home />} />
-              <Route path="/productos" element={<Products />} />
-              <Route path="/producto/:id" element={<ProductDetail />} />
-              <Route path="/carrito" element={<Cart />} />
-              <Route path="/checkout" element={<Checkout />} />
-              <Route path="/mi-cuenta" element={<UserDashboard />} />
-              <Route path="/contacto" element={<Contacto />} />
-              <Route path="/nosotros" element={<Nosotros />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/admin" element={<AdminDashboard />} />
-              <Route path="/admin/productos" element={<AdminProducts />} />
-              <Route path="/terms" element={<Terms />} />
-              <Route path="/terms-service" element={<TermsService />} />
-              <Route path="/faq" element={<FAQ />} />
-              <Route path="/allergy" element={<Allergy />} />
-              <Route path="/shipping" element={<Shipping />} />
-              <Route path="/cookie-care" element={<CookieCare />} />
+              <Route path="/" element={
+                <>
+                  <Header />
+                  <Home />
+                </>
+              } />
+              <Route path="/productos" element={
+                <>
+                  <Header />
+                  <Products />
+                </>
+              } />
+              <Route path="/producto/:id" element={
+                <>
+                  <Header />
+                  <ProductDetail />
+                </>
+              } />
+              <Route path="/carrito" element={
+                <>
+                  <Header />
+                  <Cart />
+                </>
+              } />
+              <Route path="/checkout" element={
+                <>
+                  <Header />
+                  <Checkout />
+                </>
+              } />
+              <Route path="/checkout/success" element={<CheckoutSuccess />} />
+              <Route path="/mi-cuenta" element={
+                <>
+                  <Header />
+                  <UserDashboard />
+                </>
+              } />
+              <Route path="/contacto" element={
+                <>
+                  <Header />
+                  <Contacto />
+                </>
+              } />
+              <Route path="/nosotros" element={
+                <>
+                  <Header />
+                  <Nosotros />
+                </>
+              } />
+              <Route path="/login" element={
+                <>
+                  <Header />
+                  <Login />
+                </>
+              } />
+              <Route path="/admin" element={
+                <>
+                  <Header />
+                  <AdminDashboard />
+                </>
+              } />
+              <Route path="/admin/productos" element={
+                <>
+                  <Header />
+                  <AdminProducts />
+                </>
+              } />
+              <Route path="/terms" element={
+                <>
+                  <Header />
+                  <Terms />
+                </>
+              } />
+              <Route path="/terms-service" element={
+                <>
+                  <Header />
+                  <TermsService />
+                </>
+              } />
+              <Route path="/faq" element={
+                <>
+                  <Header />
+                  <FAQ />
+                </>
+              } />
+              <Route path="/allergy" element={
+                <>
+                  <Header />
+                  <Allergy />
+                </>
+              } />
+              <Route path="/shipping" element={
+                <>
+                  <Header />
+                  <Shipping />
+                </>
+              } />
+              <Route path="/cookie-care" element={
+                <>
+                  <Header />
+                  <CookieCare />
+                </>
+              } />
             </Routes>
             
             <Footer />

@@ -98,7 +98,7 @@ const Home = () => {
             {featuredProducts.length > 0 ? (
               <Grid container spacing={4} justifyContent="center">
                 {featuredProducts.map((product, index) => (
-                  <Grid item xs={12} sm={6} md={3} key={product.id}>
+                  <Grid size={{ xs: 12, sm: 6, md: 3 }} key={product.id}>
                     <motion.div
                       initial={{ opacity: 0, y: 30 }}
                       whileInView={{ opacity: 1, y: 0 }}

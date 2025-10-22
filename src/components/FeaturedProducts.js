@@ -92,7 +92,7 @@ const FeaturedProducts = () => {
 
           <Grid container spacing={4}>
             {featuredProducts.map((product, index) => (
-              <Grid item xs={12} sm={6} md={3} key={product.id}>
+              <Grid size={{ xs: 12, sm: 6, md: 3 }} key={product.id}>
                 <motion.div
                   variants={itemVariants}
                   whileHover={{ y: -10 }}

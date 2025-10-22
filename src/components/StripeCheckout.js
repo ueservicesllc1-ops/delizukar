@@ -8,29 +8,51 @@ import {
   Card,
   CardContent,
   Divider,
-  Chip,
-  Snackbar
+  Chip
 } from '@mui/material';
-import { CreditCard, Lock, Apple, Google, AccountBalance, Payment, Security, CheckCircle } from '@mui/icons-material';
-import { loadStripe } from '@stripe/stripe-js';
+import { CreditCard, Apple, Google, AccountBalance, Payment, Security } from '@mui/icons-material';
 import { Elements, PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js';
+import { stripePromise, STRIPE_ELEMENTS_CONFIG } from '../stripe/config';
 
 const CheckoutForm = ({ cartItems, total, customerInfo, onSuccess, onError }) => {
   const stripe = useStripe();
   const elements = useElements();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [isMounted, setIsMounted] = useState(true);
+  const [paymentSuccess, setPaymentSuccess] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+    return () => setIsMounted(false);
+  }, []);
+
+  useEffect(() => {
+    if (paymentSuccess) {
+      console.log('🎉 Payment success state changed to true');
+    }
+  }, [paymentSuccess]);
 
   const handlePayment = async (event) => {
     event.preventDefault();
+    event.stopPropagation();
+    console.log('🔍 handlePayment called');
+
+    if (!isMounted) {
+      console.log('❌ Component not mounted, returning');
+      return;
+    }
 
     if (!stripe || !elements) {
+      console.log('❌ Stripe not available');
       setError('Stripe no está disponible. Por favor, recarga la página.');
       return;
     }
 
+    console.log('✅ Starting payment process');
     setLoading(true);
     setError(null);
+    setPaymentSuccess(false); // Reset success state
 
     try {
       // Enhanced error handling based on Stripe documentation
@@ -41,6 +63,8 @@ const CheckoutForm = ({ cartItems, total, customerInfo, onSuccess, onError }) =>
         },
         redirect: 'if_required'
       });
+
+      if (!isMounted) return;
 
       if (stripeError) {
         // Enhanced error handling with specific error types
@@ -69,14 +93,67 @@ const CheckoutForm = ({ cartItems, total, customerInfo, onSuccess, onError }) =>
         setError(errorMessage);
         onError && onError(stripeError);
       } else if (paymentIntent && paymentIntent.status === 'succeeded') {
-        onSuccess && onSuccess(paymentIntent);
+        console.log('✅ Payment succeeded:', paymentIntent);
+        console.log('🔍 Setting paymentSuccess to true');
+        setPaymentSuccess(true);
+        
+        // Guardar el payment intent ID para la página de éxito
+        localStorage.setItem('lastPaymentIntentId', paymentIntent.id);
+        console.log('💾 Payment Intent ID saved:', paymentIntent.id);
+        
+        // Guardar la orden en Firestore
+        try {
+          const orderData = {
+            sessionId: paymentIntent.id, // Usar paymentIntent.id como sessionId
+            paymentIntentId: paymentIntent.id,
+            customerInfo: customerInfo,
+            cartItems: cartItems,
+            total: total,
+            paymentStatus: 'paid',
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString()
+          };
+          
+          const response = await fetch('http://localhost:5000/api/create-order', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(orderData)
+          });
+          
+          if (response.ok) {
+            const result = await response.json();
+            console.log('✅ Order saved to Firestore:', result.orderId);
+            localStorage.setItem('lastOrderId', result.orderId);
+          } else {
+            console.error('❌ Error saving order to Firestore');
+          }
+        } catch (error) {
+          console.error('❌ Error saving order:', error);
+        }
+        
+        console.log('🔍 Payment success state set, showing success message');
+        // Mostrar mensaje de éxito por 3 segundos antes de redirigir
+        setTimeout(() => {
+          console.log('🔍 Timeout completed, calling onSuccess');
+          // Pasar el payment intent ID al callback
+          onSuccess && onSuccess(paymentIntent);
+        }, 3000);
+      } else {
+        console.log('🔍 Payment result:', { stripeError, paymentIntent });
       }
     } catch (err) {
-      console.error('Payment error:', err);
-      setError('Error inesperado al procesar el pago');
-      onError && onError(err);
+      console.error('❌ Payment error:', err);
+      if (isMounted) {
+        setError('Error inesperado al procesar el pago');
+        onError && onError(err);
+      }
     } finally {
-      setLoading(false);
+      console.log('🔍 Payment process finished');
+      if (isMounted) {
+        setLoading(false);
+      }
     }
   };
 
@@ -109,48 +186,82 @@ const CheckoutForm = ({ cartItems, total, customerInfo, onSuccess, onError }) =>
           </Alert>
         )}
 
-        {/* Payment Form */}
-        <form onSubmit={handlePayment}>
-          <Box sx={{ mb: 3 }}>
-            <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
-              Información de la Tarjeta
+        {paymentSuccess && (
+          <Alert severity="success" sx={{ mb: 2 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+              <Box sx={{ mr: 1 }}>✅</Box>
+              <Box sx={{ flex: 1 }}>
+                <Typography variant="h6" sx={{ fontWeight: 700, mb: 1 }}>
+                  ¡Pago Exitoso!
+                </Typography>
+                <Typography variant="body2" sx={{ mb: 2 }}>
+                  Tu pago ha sido procesado correctamente. Redirigiendo...
+                </Typography>
+                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <CircularProgress size={20} sx={{ mr: 1 }} />
+                  <Typography variant="body2" sx={{ color: '#666' }}>
+                    Preparando tu pedido...
+                  </Typography>
+                </Box>
+              </Box>
+            </Box>
+          </Alert>
+        )}
+
+        {/* Debug info */}
+        {process.env.NODE_ENV === 'development' && (
+          <Box sx={{ mt: 2, p: 2, backgroundColor: '#f5f5f5', borderRadius: 1 }}>
+            <Typography variant="body2" sx={{ color: '#666' }}>
+              Debug: paymentSuccess = {paymentSuccess ? 'true' : 'false'}
             </Typography>
-            <PaymentElement 
-              options={{
-                layout: 'tabs',
-                fields: {
-                  billingDetails: 'auto'
-                }
-              }}
-            />
           </Box>
-          
-          <Button
-            type="submit"
-            disabled={!stripe || loading}
-            fullWidth
-            variant="contained"
-            size="large"
-            sx={{
-              backgroundColor: '#8B4513',
-              '&:hover': { backgroundColor: '#6B3410' },
-              py: 2,
-              borderRadius: '25px',
-              textTransform: 'none',
-              fontWeight: 600,
-              fontSize: '1.1rem'
-            }}
-          >
-            {loading ? (
-              <CircularProgress size={24} color="inherit" />
-            ) : (
-              <>
-                <CreditCard sx={{ mr: 1 }} />
-                Pagar ${total.toFixed(2)}
-              </>
-            )}
-          </Button>
-        </form>
+        )}
+
+        {/* Payment Form */}
+        {!paymentSuccess && (
+          <form>
+            <Box sx={{ mb: 3 }}>
+              <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
+                Información de la Tarjeta
+              </Typography>
+              <PaymentElement 
+                options={{
+                  layout: 'tabs',
+                  fields: {
+                    billingDetails: 'auto'
+                  }
+                }}
+              />
+            </Box>
+            
+            <Button
+              type="button"
+              onClick={handlePayment}
+              disabled={!stripe || loading}
+              fullWidth
+              variant="contained"
+              size="large"
+              sx={{
+                backgroundColor: '#8B4513',
+                '&:hover': { backgroundColor: '#6B3410' },
+                py: 2,
+                borderRadius: '25px',
+                textTransform: 'none',
+                fontWeight: 600,
+                fontSize: '1.1rem'
+              }}
+            >
+              {loading ? (
+                <CircularProgress size={24} color="inherit" />
+              ) : (
+                <>
+                  <CreditCard sx={{ mr: 1 }} />
+                  Pagar ${total.toFixed(2)}
+                </>
+              )}
+            </Button>
+          </form>
+        )}
 
         <Divider sx={{ my: 2 }} />
 
@@ -177,22 +288,23 @@ const CheckoutForm = ({ cartItems, total, customerInfo, onSuccess, onError }) =>
 };
 
 // Enhanced Stripe initialization with better error handling
-const stripePromise = loadStripe(
-  process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY || 'pk_test_51234567890abcdef...',
-  {
-    apiVersion: '2023-10-16', // Stable API version
-    locale: 'es' // Spanish locale
-  }
-);
 
 const StripeCheckout = ({ cartItems, total, customerInfo, onSuccess, onError }) => {
   const [clientSecret, setClientSecret] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [retryCount, setRetryCount] = useState(0);
+  const [isMounted, setIsMounted] = useState(true);
+
+  useEffect(() => {
+    setIsMounted(true);
+    return () => setIsMounted(false);
+  }, []);
 
   useEffect(() => {
     const createPaymentIntent = async () => {
+      if (!isMounted) return;
+      
       try {
         setLoading(true);
         setError(null);
@@ -222,19 +334,26 @@ const StripeCheckout = ({ cartItems, total, customerInfo, onSuccess, onError }) 
         }
 
         const { clientSecret } = await response.json();
-        setClientSecret(clientSecret);
+        console.log('✅ ClientSecret received:', clientSecret ? 'Present' : 'Missing');
+        if (isMounted) {
+          setClientSecret(clientSecret);
+        }
       } catch (err) {
         console.error('Error creating payment intent:', err);
-        setError(`Error al configurar el pago: ${err.message}`);
+        if (isMounted) {
+          setError(`Error al configurar el pago: ${err.message}`);
+        }
       } finally {
-        setLoading(false);
+        if (isMounted) {
+          setLoading(false);
+        }
       }
     };
 
-    if (total > 0) {
+    if (total > 0 && isMounted) {
       createPaymentIntent();
     }
-  }, [total, cartItems, customerInfo]);
+  }, [total, cartItems, customerInfo, isMounted]);
 
   const handleRetry = () => {
     setRetryCount(prev => prev + 1);
@@ -314,19 +433,30 @@ const StripeCheckout = ({ cartItems, total, customerInfo, onSuccess, onError }) 
   }
 
   if (!clientSecret) {
+    console.log('❌ No clientSecret available');
     return (
       <Card sx={{ maxWidth: 600, mx: 'auto', mt: 2 }}>
         <CardContent>
           <Alert severity="warning">
             No se pudo configurar el pago. Por favor, verifica tu conexión.
           </Alert>
+          <Typography variant="body2" sx={{ mt: 2, color: '#666' }}>
+            Debug: clientSecret = {clientSecret ? 'Present' : 'Missing'}
+          </Typography>
         </CardContent>
       </Card>
     );
   }
 
+  console.log('🔍 Rendering Elements with clientSecret:', clientSecret ? 'Present' : 'Missing');
+  console.log('🔍 Stripe options:', options);
+  
   return (
-    <Elements stripe={stripePromise} options={options}>
+    <Elements 
+      stripe={stripePromise} 
+      options={options}
+      key={`stripe-${clientSecret}-${Date.now()}`}
+    >
       <CheckoutForm 
         cartItems={cartItems}
         total={total}

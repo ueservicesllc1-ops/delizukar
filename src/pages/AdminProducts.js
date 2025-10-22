@@ -301,7 +301,7 @@ const AdminProducts = () => {
             </Grid>
           ) : (
             filteredProducts.map((product, index) => (
-            <Grid item xs={12} sm={6} md={4} lg={3} key={product.id}>
+            <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }} key={product.id}>
               <motion.div
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}

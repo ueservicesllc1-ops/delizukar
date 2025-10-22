@@ -83,16 +83,26 @@ const Nosotros = () => {
           {pageData.title}
         </Typography>
 
-        <Grid container spacing={3} alignItems="stretch">
+        <Box sx={{ 
+          display: 'flex', 
+          flexDirection: { xs: 'column', md: 'row' },
+          gap: 3,
+          alignItems: 'stretch'
+        }}>
           {/* Left: Text box */}
-          <Grid item xs={12} md={6}>
+          <Box sx={{ 
+            flex: 1,
+            display: 'flex',
+            flexDirection: 'column'
+          }}>
             <Box
               sx={{
                 height: '100%',
                 borderRadius: 2,
                 p: 3,
                 bgcolor: '#fafafa',
-                boxShadow: '0 4px 15px rgba(0,0,0,0.08)'
+                boxShadow: '0 4px 15px rgba(0,0,0,0.08)',
+                flex: 1
               }}
             >
               <Typography
@@ -108,18 +118,22 @@ const Nosotros = () => {
                 {pageData.content}
               </Typography>
             </Box>
-          </Grid>
+          </Box>
 
           {/* Right: Photo box */}
-          <Grid item xs={12} md={6}>
+          <Box sx={{ 
+            flex: 1,
+            display: 'flex',
+            justifyContent: 'center'
+          }}>
             <Box
               sx={{
-                width: { xs: '80%', md: '80%' },
-                mx: 'auto',
+                width: '100%',
+                maxWidth: '500px',
                 borderRadius: 2,
                 overflow: 'hidden',
                 bgcolor: '#f1f1f1',
-                minHeight: { xs: 128, md: 192 },
+                minHeight: { xs: 200, md: 300 },
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -142,8 +156,8 @@ const Nosotros = () => {
                 <Typography sx={{ color: '#999' }}>Photo goes here</Typography>
               )}
             </Box>
-          </Grid>
-        </Grid>
+          </Box>
+        </Box>
       </Container>
     </Box>
   );

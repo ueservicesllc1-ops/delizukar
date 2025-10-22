@@ -4,7 +4,9 @@ import { Payment } from '@mui/icons-material';
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements, PaymentMethodMessagingElement } from '@stripe/react-stripe-js';
 
-const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY || 'pk_test_51234567890abcdef...');
+const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY || 'pk_test_51234567890abcdef...', {
+  locale: 'es'
+});
 
 const PaymentMethodMessaging = ({ amount, currency = 'USD', countryCode = 'US' }) => {
   // Convert amount to cents for Stripe

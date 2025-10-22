@@ -127,9 +127,9 @@ const TestimonialsSection = () => {
           </Typography>
           
 
-          <Grid container spacing={4}>
+          <Grid container spacing={4} justifyContent="center" sx={{ mt: 6 }}>
             {testimonials.map((testimonial, index) => (
-              <Grid item xs={12} md={4} key={testimonial.id || index}>
+              <Grid item xs={12} md={4} key={testimonial.id || index} sx={{ display: 'flex', justifyContent: 'center' }}>
                 <motion.div
                   initial={{ opacity: 0, y: 30 }}
                   whileInView={{ opacity: 1, y: 0 }}
@@ -138,20 +138,30 @@ const TestimonialsSection = () => {
                 >
                   <Card
                     sx={{
-                      p: 4,
-                      height: '100%',
+                      p: 2,
+                      width: '350px',
+                      height: '300px',
                       borderRadius: '20px',
                       boxShadow: '0 8px 32px rgba(0,0,0,0.1)',
                       backgroundColor: 'white',
                       transition: 'all 0.3s ease',
+                      display: 'flex',
+                      flexDirection: 'column',
                       '&:hover': {
                         transform: 'translateY(-5px)',
                         boxShadow: '0 16px 48px rgba(0,0,0,0.15)'
                       }
                     }}
                   >
-                    <CardContent>
-                      <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
+                    <CardContent sx={{ 
+                      display: 'flex', 
+                      flexDirection: 'column', 
+                      height: '100%',
+                      justifyContent: 'space-between',
+                      paddingTop: '16px !important',
+                      paddingBottom: '16px !important'
+                    }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', mb: 0.5 }}>
                         <Avatar
                           src={testimonial.photoUrl}
                           alt={testimonial.name}
@@ -185,7 +195,7 @@ const TestimonialsSection = () => {
                         </Box>
                       </Box>
 
-                      <Box sx={{ display: 'flex', mb: 2 }}>
+                      <Box sx={{ display: 'flex', mb: 0.5 }}>
                         <Rating
                           value={testimonial.rating || 5}
                           readOnly

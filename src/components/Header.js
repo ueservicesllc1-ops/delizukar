@@ -20,7 +20,7 @@ import {
   Avatar
 } from '@mui/material';
 import {
-  ShoppingCart,
+  ShoppingBasket,
   Menu as MenuIcon,
   Search,
   Person,
@@ -212,7 +212,7 @@ const Header = () => {
                       }}
                     >
                       <Badge badgeContent={cartItemsCount} color="error">
-                        <ShoppingCart />
+                        <ShoppingBasket />
                       </Badge>
                     </IconButton>
                   </motion.div>

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
   Box,
@@ -9,106 +9,69 @@ import {
   Card,
   CardContent,
   Alert,
-  CircularProgress,
-  Divider,
-  Chip
+  CircularProgress
 } from '@mui/material';
-import { CheckCircle, ShoppingBag, Home, Receipt, Download, Email } from '@mui/icons-material';
+import { CheckCircle, ShoppingBag, Home } from '@mui/icons-material';
 
 const CheckoutSuccess = () => {
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
   const [loading, setLoading] = useState(true);
   const [orderDetails, setOrderDetails] = useState(null);
-  const [receiptInfo, setReceiptInfo] = useState(null);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    // Verificar el estado del pago
-    const sessionId = searchParams.get('session_id');
-    
-    if (sessionId) {
-      // Aquí puedes verificar el estado del pago con tu backend
-      verifyPayment(sessionId);
-    } else {
-      setError('No se encontró información de la sesión de pago');
-      setLoading(false);
-    }
-  }, [searchParams]);
-
-  const verifyPayment = async (sessionId) => {
-    try {
-      // Verificar el pago con tu backend
-      const response = await fetch(`http://localhost:5000/api/checkout-session/${sessionId}`);
-      const data = await response.json();
-      
-      if (data.session) {
-        setOrderDetails({
-          sessionId: data.session.id,
-          amount: data.session.amount_total / 100,
-          currency: data.session.currency,
-          customerEmail: data.session.customer_email,
-          paymentStatus: data.session.payment_status
-        });
-        
-        // Obtener información del recibo si está disponible
-        if (data.session.payment_intent) {
-          await fetchReceiptInfo(data.session.payment_intent);
-        }
-      } else {
-        setError('Error al verificar el pago');
-      }
-    } catch (err) {
-      console.error('Error verifying payment:', err);
-      setError('Error al verificar el pago');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const fetchReceiptInfo = async (paymentIntentId) => {
-    try {
-      const response = await fetch(`http://localhost:5000/api/receipt/${paymentIntentId}`);
-      const data = await response.json();
-      
-      if (data.receiptUrl) {
-        setReceiptInfo(data);
-      }
-    } catch (err) {
-      console.error('Error fetching receipt:', err);
-    }
-  };
-
-  const handleDownloadReceipt = () => {
-    if (receiptInfo?.receiptUrl) {
-      window.open(receiptInfo.receiptUrl, '_blank');
-    }
-  };
-
-  const handleSendReceipt = async () => {
-    if (orderDetails?.sessionId) {
+    const fetchPaymentDetails = async () => {
       try {
-        const response = await fetch('http://localhost:5000/api/send-receipt', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            paymentIntentId: receiptInfo?.paymentIntent?.id,
-            email: orderDetails.customerEmail
-          }),
-        });
+        console.log('🔍 Checking for payment intent ID...');
         
-        const data = await response.json();
-        if (data.success) {
-          alert('Recibo enviado por email exitosamente');
+        // Obtener el payment intent ID de la URL o localStorage
+        const urlParams = new URLSearchParams(window.location.search);
+        const paymentIntentId = urlParams.get('payment_intent') || 
+                               localStorage.getItem('lastPaymentIntentId');
+        
+        console.log('🔍 Payment Intent ID found:', paymentIntentId);
+        
+        if (paymentIntentId) {
+          console.log('🔍 Fetching payment data from backend...');
+          // Consultar datos reales desde el backend
+          const response = await fetch(`http://localhost:5000/api/payment-intent/${paymentIntentId}`);
+          console.log('🔍 Backend response status:', response.status);
+          
+          if (response.ok) {
+            const paymentData = await response.json();
+            console.log('✅ Payment data received:', paymentData);
+            
+            setOrderDetails({
+              sessionId: paymentData.id,
+              amount: paymentData.amount / 100, // Convertir de centavos
+              currency: paymentData.currency,
+              customerEmail: paymentData.receipt_email || paymentData.customer_email,
+              paymentStatus: paymentData.status,
+              shipping: paymentData.shipping?.amount || 0,
+              subtotal: (paymentData.amount / 100) - (paymentData.shipping?.amount || 0)
+            });
+          } else {
+            const errorData = await response.json();
+            console.error('❌ Backend error:', errorData);
+            throw new Error(`Error del servidor: ${errorData.error || 'Error desconocido'}`);
+          }
+        } else {
+          console.log('❌ No payment intent ID found');
+          throw new Error('No se encontró ID de pago. Por favor, completa el proceso de pago nuevamente.');
         }
-      } catch (err) {
-        console.error('Error sending receipt:', err);
-        alert('Error al enviar el recibo');
+      } catch (error) {
+        console.error('❌ Error obteniendo datos del pago:', error);
+        setError(error.message || 'No se pudieron cargar los detalles del pago');
+      } finally {
+        setLoading(false);
       }
-    }
-  };
+    };
+
+    fetchPaymentDetails();
+  }, []);
+
+
+
 
   if (loading) {
     return (
@@ -143,14 +106,35 @@ const CheckoutSuccess = () => {
     );
   }
 
+  if (!orderDetails) {
+    return (
+      <Container maxWidth="sm" sx={{ py: 8, textAlign: 'center' }}>
+        <Alert severity="warning" sx={{ mb: 3 }}>
+          No se pudieron cargar los detalles del pago. Por favor, contacta con soporte.
+        </Alert>
+        <Button
+          variant="contained"
+          onClick={() => navigate('/')}
+          sx={{
+            backgroundColor: '#8B4513',
+            '&:hover': { backgroundColor: '#6B3410' }
+          }}
+        >
+          Volver al Inicio
+        </Button>
+      </Container>
+    );
+  }
+
   return (
-    <Container maxWidth="md" sx={{ py: 8 }}>
-      <motion.div
-        initial={{ opacity: 0, y: 30 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6 }}
-      >
-        <Card sx={{ textAlign: 'center', p: 4 }}>
+    <Box sx={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+      <Container maxWidth="xs" sx={{ py: 2, flex: 1 }}>
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+        >
+        <Card sx={{ textAlign: 'center', p: 2, maxWidth: '400px', mx: 'auto' }}>
           <CardContent>
             <motion.div
               initial={{ scale: 0 }}
@@ -159,145 +143,119 @@ const CheckoutSuccess = () => {
             >
               <CheckCircle 
                 sx={{ 
-                  fontSize: 80, 
+                  fontSize: 50, 
                   color: '#4CAF50', 
-                  mb: 2 
+                  mb: 1 
                 }} 
               />
             </motion.div>
 
-            <Typography variant="h3" sx={{ 
+            <Typography variant="h5" sx={{ 
               fontWeight: 700, 
               color: '#8B4513', 
-              mb: 2 
+              mb: 1 
             }}>
               ¡Pago Exitoso!
             </Typography>
 
-            <Typography variant="h6" sx={{ 
+            <Typography variant="body2" sx={{ 
               color: '#666', 
-              mb: 4,
-              lineHeight: 1.6
+              mb: 2,
+              lineHeight: 1.4,
+              fontSize: '0.9rem'
             }}>
-              Gracias por tu compra. Tu pedido ha sido procesado correctamente 
-              y recibirás un email de confirmación pronto.
+              ¡Gracias por tu compra! Tu pago ha sido procesado exitosamente.
             </Typography>
+
+            <Box sx={{ 
+              backgroundColor: '#e8f5e8', 
+              p: 1.5, 
+              borderRadius: 1, 
+              mb: 2,
+              border: '1px solid #4CAF50'
+            }}>
+              <Typography variant="body2" sx={{ fontWeight: 600, color: '#2E7D32', mb: 0.5, fontSize: '0.9rem' }}>
+                📧 Email de confirmación enviado
+              </Typography>
+            </Box>
 
             {orderDetails && (
               <Box sx={{ 
                 backgroundColor: '#f8f9fa', 
-                p: 3, 
-                borderRadius: 2, 
-                mb: 4 
+                p: 1.5, 
+                borderRadius: 1, 
+                mb: 2 
               }}>
-                <Typography variant="h6" sx={{ fontWeight: 600, mb: 2 }}>
-                  Detalles del Pedido
+                <Typography variant="body2" sx={{ fontWeight: 600, mb: 1, fontSize: '0.9rem', color: '#8B4513' }}>
+                  📋 Resumen del Pago
                 </Typography>
-                <Typography variant="body1" sx={{ mb: 1 }}>
-                  <strong>ID de Sesión:</strong> {orderDetails.sessionId}
-                </Typography>
-                <Typography variant="body1" sx={{ mb: 1 }}>
-                  <strong>Total:</strong> ${orderDetails.amount} {orderDetails.currency?.toUpperCase()}
-                </Typography>
-                <Typography variant="body1" sx={{ mb: 1 }}>
-                  <strong>Email:</strong> {orderDetails.customerEmail}
-                </Typography>
-                <Typography variant="body1" sx={{ mb: 1 }}>
-                  <strong>Estado:</strong> 
-                  <Chip 
-                    label={orderDetails.paymentStatus} 
-                    color="success" 
-                    size="small" 
-                    sx={{ ml: 1 }}
-                  />
-                </Typography>
-                <Typography variant="body1">
-                  <strong>Fecha:</strong> {new Date().toLocaleDateString()}
-                </Typography>
-              </Box>
-            )}
-
-            {/* Receipt Section */}
-            {receiptInfo && (
-              <Box sx={{ 
-                backgroundColor: '#e8f5e8', 
-                p: 3, 
-                borderRadius: 2, 
-                mb: 4,
-                border: '1px solid #4CAF50'
-              }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                  <Receipt sx={{ color: '#4CAF50', mr: 1 }} />
-                  <Typography variant="h6" sx={{ fontWeight: 600, color: '#2E7D32' }}>
-                    Recibo Disponible
+                
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
+                  <Typography variant="body2" sx={{ fontSize: '0.8rem', color: '#666' }}>
+                    Subtotal:
+                  </Typography>
+                  <Typography variant="body2" sx={{ fontSize: '0.8rem', color: '#666' }}>
+                    ${orderDetails.subtotal || (orderDetails.amount - (orderDetails.shipping || 0))} {orderDetails.currency?.toUpperCase()}
                   </Typography>
                 </Box>
                 
-                <Typography variant="body2" sx={{ mb: 2, color: '#666' }}>
-                  Tu recibo ha sido generado automáticamente. Puedes descargarlo o enviarlo por email.
-                </Typography>
-
-                <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
-                  <Button
-                    variant="contained"
-                    startIcon={<Download />}
-                    onClick={handleDownloadReceipt}
-                    sx={{
-                      backgroundColor: '#4CAF50',
-                      '&:hover': { backgroundColor: '#388E3C' },
-                      textTransform: 'none',
-                      fontWeight: 600
-                    }}
-                  >
-                    Descargar Recibo
-                  </Button>
-
-                  <Button
-                    variant="outlined"
-                    startIcon={<Email />}
-                    onClick={handleSendReceipt}
-                    sx={{
-                      borderColor: '#4CAF50',
-                      color: '#4CAF50',
-                      textTransform: 'none',
-                      fontWeight: 600,
-                      '&:hover': {
-                        backgroundColor: '#4CAF50',
-                        color: 'white',
-                        borderColor: '#4CAF50'
-                      }
-                    }}
-                  >
-                    Enviar por Email
-                  </Button>
-                </Box>
-
-                {receiptInfo.charge?.receiptNumber && (
-                  <Typography variant="caption" sx={{ 
-                    display: 'block', 
-                    mt: 2, 
-                    color: '#666',
-                    fontStyle: 'italic'
-                  }}>
-                    Número de recibo: {receiptInfo.charge.receiptNumber}
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
+                  <Typography variant="body2" sx={{ fontSize: '0.8rem', color: '#666' }}>
+                    Envío:
                   </Typography>
-                )}
+                  <Typography variant="body2" sx={{ fontSize: '0.8rem', color: '#666' }}>
+                    ${orderDetails.shipping || 12.50} {orderDetails.currency?.toUpperCase()}
+                  </Typography>
+                </Box>
+                
+                <Box sx={{ borderTop: '1px solid #ddd', pt: 0.5, mt: 0.5 }}>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '0.9rem' }}>
+                      Total Pagado:
+                    </Typography>
+                    <Typography variant="h6" sx={{ fontWeight: 700, color: '#8B4513', fontSize: '1rem' }}>
+                      ${orderDetails.amount} {orderDetails.currency?.toUpperCase()}
+                    </Typography>
+                  </Box>
+                </Box>
               </Box>
             )}
 
-            <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center', flexWrap: 'wrap' }}>
+            {/* Shipping Information */}
+            <Box sx={{ 
+              backgroundColor: '#fff3e0', 
+              p: 1.5, 
+              borderRadius: 1, 
+              mb: 2,
+              border: '1px solid #ff9800'
+            }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <Typography variant="body2" sx={{ fontWeight: 600, color: '#e65100', fontSize: '0.85rem' }}>
+                  🚚 Envío en 24-48h
+                </Typography>
+                <Typography variant="body2" sx={{ color: '#666', fontSize: '0.8rem' }}>
+                  3-5 días hábiles
+                </Typography>
+              </Box>
+            </Box>
+
+
+            <Box sx={{ display: 'flex', gap: 1, justifyContent: 'center', flexWrap: 'wrap' }}>
               <Button
                 variant="contained"
                 startIcon={<ShoppingBag />}
                 onClick={() => navigate('/productos')}
+                size="small"
                 sx={{
                   backgroundColor: '#8B4513',
                   '&:hover': { backgroundColor: '#6B3410' },
-                  px: 4,
-                  py: 1.5,
-                  borderRadius: '25px',
+                  px: 2,
+                  py: 0.5,
+                  borderRadius: '15px',
                   textTransform: 'none',
-                  fontWeight: 600
+                  fontWeight: 600,
+                  fontSize: '0.8rem',
+                  minWidth: '120px'
                 }}
               >
                 Seguir Comprando
@@ -307,14 +265,17 @@ const CheckoutSuccess = () => {
                 variant="outlined"
                 startIcon={<Home />}
                 onClick={() => navigate('/')}
+                size="small"
                 sx={{
                   borderColor: '#8B4513',
                   color: '#8B4513',
-                  px: 4,
-                  py: 1.5,
-                  borderRadius: '25px',
+                  px: 2,
+                  py: 0.5,
+                  borderRadius: '15px',
                   textTransform: 'none',
                   fontWeight: 600,
+                  fontSize: '0.8rem',
+                  minWidth: '120px',
                   '&:hover': {
                     backgroundColor: '#8B4513',
                     color: 'white',
@@ -327,9 +288,11 @@ const CheckoutSuccess = () => {
             </Box>
           </CardContent>
         </Card>
-      </motion.div>
-    </Container>
+        </motion.div>
+      </Container>
+    </Box>
   );
 };
 
 export default CheckoutSuccess;
+

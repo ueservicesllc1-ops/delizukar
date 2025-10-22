@@ -8,13 +8,15 @@ class ShippoService {
     this.baseURL = SHIPPO_API_BASE;
   }
 
-  // Método helper para hacer requests a la API
+  // Método helper para hacer requests a la API (ahora a través del backend)
   async makeRequest(endpoint, method = 'GET', data = null) {
-    const url = `${this.baseURL}${endpoint}`;
+    // Mapear endpoints de Shippo a endpoints del backend
+    const backendEndpoint = this.mapToBackendEndpoint(endpoint);
+    const url = `http://localhost:5000/api/shippo${backendEndpoint}`;
+    
     const options = {
       method,
       headers: {
-        'Authorization': `ShippoToken ${this.apiToken}`,
         'Content-Type': 'application/json'
       }
     };
@@ -45,6 +47,18 @@ class ShippoService {
       console.error(`Error making request to ${endpoint}:`, error);
       throw error;
     }
+  }
+
+  // Mapear endpoints de Shippo a endpoints del backend
+  mapToBackendEndpoint(shippoEndpoint) {
+    if (shippoEndpoint === '/account/') {
+      return '/account';
+    } else if (shippoEndpoint === '/addresses/') {
+      return '/create-address';
+    } else if (shippoEndpoint === '/shipments/') {
+      return '/rates';
+    }
+    return shippoEndpoint;
   }
 
   // Probar la conexión con Shippo

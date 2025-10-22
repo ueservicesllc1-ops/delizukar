@@ -7,6 +7,7 @@
 
 const { spawn } = require('child_process');
 const path = require('path');
+require('dotenv').config();
 
 console.log('🚀 Iniciando aplicación con Stripe API v2...\n');
 

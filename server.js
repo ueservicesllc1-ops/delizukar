@@ -1,3 +1,7 @@
+require('dotenv').config();
+console.log('🔍 Environment variables loaded:');
+console.log('STRIPE_SECRET_KEY:', process.env.STRIPE_SECRET_KEY ? 'SET' : 'NOT SET');
+console.log('REACT_APP_STRIPE_PUBLISHABLE_KEY:', process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY ? 'SET' : 'NOT SET');
 const express = require('express');
 const cors = require('cors');
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY || 'sk_test_dummy_key_for_development', {
@@ -52,6 +56,85 @@ app.use((req, res, next) => {
 
 // Middleware para webhook (raw body)
 app.use('/api/webhook', express.raw({ type: 'application/json' }));
+
+// Health check endpoint for Railway
+app.get('/api/health', (req, res) => {
+  res.status(200).json({ 
+    status: 'OK', 
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime()
+  });
+});
+
+// ==================== SHIPPO ENDPOINTS ====================
+
+// 1. Crear dirección en Shippo
+app.post('/api/shippo/create-address', async (req, res) => {
+  try {
+    console.log('🔍 DEBUG: Creating address in Shippo');
+    
+    const response = await fetch('https://api.goshippo.com/addresses/', {
+      method: 'POST',
+      headers: {
+        'Authorization': `ShippoToken ${process.env.SHIPPO_API_TOKEN || 'shippo_test_placeholder'}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(req.body),
+    });
+
+    const data = await response.json();
+    console.log('✅ Shippo address created:', data.object_id);
+    res.json(data);
+  } catch (error) {
+    console.error('❌ Shippo error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// 2. Obtener información de cuenta de Shippo
+app.get('/api/shippo/account', async (req, res) => {
+  try {
+    console.log('🔍 DEBUG: Getting Shippo account info');
+    
+    const response = await fetch('https://api.goshippo.com/account/', {
+      method: 'GET',
+      headers: {
+        'Authorization': `ShippoToken ${process.env.SHIPPO_API_TOKEN || 'shippo_test_placeholder'}`,
+        'Content-Type': 'application/json',
+      },
+    });
+
+    const data = await response.json();
+    console.log('✅ Shippo account info retrieved');
+    res.json(data);
+  } catch (error) {
+    console.error('❌ Shippo account error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// 3. Calcular tarifas de envío
+app.post('/api/shippo/rates', async (req, res) => {
+  try {
+    console.log('🔍 DEBUG: Calculating shipping rates');
+    
+    const response = await fetch('https://api.goshippo.com/shipments/', {
+      method: 'POST',
+      headers: {
+        'Authorization': `ShippoToken ${process.env.SHIPPO_API_TOKEN || 'shippo_test_placeholder'}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(req.body),
+    });
+
+    const data = await response.json();
+    console.log('✅ Shipping rates calculated');
+    res.json(data);
+  } catch (error) {
+    console.error('❌ Shippo rates error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
 
 // ==================== STRIPE ENDPOINTS ====================
 
@@ -131,13 +214,20 @@ app.post('/api/create-checkout-session', async (req, res) => {
 // 2. Crear Payment Intent
 app.post('/api/create-payment-intent', async (req, res) => {
   try {
+    console.log('🔍 DEBUG: Received request to create-payment-intent');
+    console.log('🔍 DEBUG: STRIPE_SECRET_KEY exists:', !!process.env.STRIPE_SECRET_KEY);
+    console.log('🔍 DEBUG: STRIPE_SECRET_KEY value:', process.env.STRIPE_SECRET_KEY ? process.env.STRIPE_SECRET_KEY.substring(0, 20) + '...' : 'undefined');
+    
     // Verificar si Stripe está configurado
     if (!process.env.STRIPE_SECRET_KEY || process.env.STRIPE_SECRET_KEY === 'sk_test_dummy_key_for_development') {
+      console.log('❌ ERROR: Stripe not configured');
       return res.status(500).json({ 
         error: 'Stripe not configured. Please set STRIPE_SECRET_KEY environment variable.' 
       });
     }
+    
     const { cartItems, total, customerInfo, captureMethod } = req.body;
+    console.log('🔍 DEBUG: Request body:', { cartItems, total, customerInfo, captureMethod });
 
     console.log('Creating payment intent for:', customerInfo.email);
 
@@ -149,19 +239,21 @@ app.post('/api/create-payment-intent', async (req, res) => {
         enabled: true,
         allow_redirects: 'always', // Permitir métodos que requieren redirección
       },
-      payment_method_types: ['card', 'afterpay_clearpay', 'klarna', 'affirm', 'link'],
       capture_method: captureMethod || 'automatic',
       metadata: {
-        customer_email: customerInfo.email,
-        customer_name: `${customerInfo.firstName} ${customerInfo.lastName}`,
-        order_items: JSON.stringify(cartItems),
+        customer_email: customerInfo.email || 'test@example.com',
+        customer_name: `${customerInfo.firstName || 'Usuario'} ${customerInfo.lastName || 'Test'}`,
+        order_items: JSON.stringify(cartItems.map(item => ({
+          id: item.id,
+          name: item.name,
+          price: item.price,
+          quantity: item.quantity
+        }))),
         source: 'web_checkout',
         version: '2.0',
         integration: 'stripe_js_v2'
       },
-      receipt_email: customerInfo.email,
-      // Enhanced configuration for better user experience
-      confirmation_method: 'automatic',
+      receipt_email: customerInfo.email || 'test@example.com',
       setup_future_usage: 'off_session', // For future payments
       // Configuración para autorización separada
       ...(captureMethod === 'manual' && {
@@ -174,11 +266,24 @@ app.post('/api/create-payment-intent', async (req, res) => {
       maxNetworkRetries: 3
     });
 
-    console.log('Payment intent created:', paymentIntent.id);
+    console.log('✅ Payment intent created:', paymentIntent.id);
     res.json({ clientSecret: paymentIntent.client_secret });
   } catch (error) {
-    console.error('Error creating payment intent:', error);
-    res.status(500).json({ error: error.message });
+    console.error('❌ ERROR creating payment intent:', error);
+    console.error('❌ Error details:', {
+      message: error.message,
+      type: error.type,
+      code: error.code,
+      statusCode: error.statusCode
+    });
+    res.status(500).json({ 
+      error: error.message,
+      details: {
+        type: error.type,
+        code: error.code,
+        statusCode: error.statusCode
+      }
+    });
   }
 });
 
@@ -216,29 +321,49 @@ app.get('/api/checkout-session/:sessionId', async (req, res) => {
   }
 });
 
+// 5. Obtener Payment Intent
+app.get('/api/payment-intent/:paymentIntentId', async (req, res) => {
+  try {
+    const { paymentIntentId } = req.params;
+    console.log('🔍 DEBUG: Getting payment intent:', paymentIntentId);
+    
+    const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
+    console.log('✅ Payment intent retrieved:', paymentIntent.id);
+    
+    res.json(paymentIntent);
+  } catch (error) {
+    console.error('❌ Error getting payment intent:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // 5. Crear orden en Firestore
 app.post('/api/create-order', async (req, res) => {
   try {
-    const { sessionId, customerInfo, cartItems, total, paymentStatus } = req.body;
+    const { sessionId, paymentIntentId, customerInfo, cartItems, total, paymentStatus, createdAt, updatedAt } = req.body;
 
     console.log('Creating order in Firestore for session:', sessionId);
+    console.log('Order data received:', { sessionId, paymentIntentId, customerInfo: !!customerInfo, cartItems: cartItems?.length, total });
 
     const orderData = {
-      sessionId,
+      sessionId: sessionId || paymentIntentId, // Usar sessionId o paymentIntentId como fallback
+      paymentIntentId: paymentIntentId || sessionId,
       customerInfo,
       cartItems,
       total,
-      paymentStatus: paymentStatus || 'pending',
-      createdAt: new Date(),
-      updatedAt: new Date(),
+      paymentStatus: paymentStatus || 'paid',
+      createdAt: createdAt ? new Date(createdAt) : new Date(),
+      updatedAt: updatedAt ? new Date(updatedAt) : new Date(),
     };
+
+    console.log('Order data to save:', orderData);
 
     const docRef = await addDoc(collection(db, 'orders'), orderData);
     
-    console.log('Order created with ID:', docRef.id);
+    console.log('✅ Order created with ID:', docRef.id);
     res.json({ orderId: docRef.id, order: orderData });
   } catch (error) {
-    console.error('Error creating order:', error);
+    console.error('❌ Error creating order:', error);
     res.status(500).json({ error: error.message });
   }
 });

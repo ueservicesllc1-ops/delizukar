@@ -38,7 +38,14 @@ const AddressCorrection = ({
       setLoading(true);
       setError(null);
       
-      const result = await shippoService.correctAddress(originalAddress);
+      // Corregir automáticamente Paterson de NY a NJ
+      let correctedAddress = { ...originalAddress };
+      if (correctedAddress.city && correctedAddress.city.toLowerCase().includes('paterson') && correctedAddress.state === 'NY') {
+        correctedAddress.state = 'NJ';
+        console.log('🔧 Auto-correcting Paterson from NY to NJ');
+      }
+      
+      const result = await shippoService.correctAddress(correctedAddress);
       setCorrectionResult(result);
     } catch (err) {
       console.error('Error validating address:', err);

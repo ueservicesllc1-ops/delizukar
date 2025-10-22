@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Box, Container, Typography, Grid, Card, CardContent, TextField, Button, FormControlLabel, Checkbox, Divider, Alert } from '@mui/material';
+import { Box, Container, Typography, Grid, Card, CardContent, TextField, Button, Divider, Alert } from '@mui/material';
 import { CreditCard, LocalShipping, Security, ArrowBack } from '@mui/icons-material';
 import { useStore } from '../context/StoreContext';
 import { useNavigate } from 'react-router-dom';
@@ -214,7 +214,7 @@ const Checkout = () => {
         <form onSubmit={handleSubmit}>
           <Grid container spacing={2}>
             {/* Información de contacto - Izquierda */}
-            <Grid item xs={12} sx={{ width: '700px', flex: '0 0 700px' }}>
+            <Grid size={12} sx={{ width: '700px', flex: '0 0 700px' }}>
               <motion.div
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
@@ -236,7 +236,7 @@ const Checkout = () => {
                     </Typography>
                     
                     <Grid container spacing={2}>
-                      <Grid item xs={12} md={6}>
+                      <Grid size={{ xs: 12, md: 6 }}>
                         <TextField
                           fullWidth
                           label="Nombre"
@@ -252,7 +252,7 @@ const Checkout = () => {
                           }}
                         />
                       </Grid>
-                      <Grid item xs={12} md={6}>
+                      <Grid size={{ xs: 12, md: 6 }}>
                         <TextField
                           fullWidth
                           label="Apellido"
@@ -268,7 +268,7 @@ const Checkout = () => {
                           }}
                         />
                       </Grid>
-                      <Grid item xs={12} md={6}>
+                      <Grid size={{ xs: 12, md: 6 }}>
                         <TextField
                           fullWidth
                           label="Correo electrónico"
@@ -285,7 +285,7 @@ const Checkout = () => {
                           }}
                         />
                       </Grid>
-                      <Grid item xs={12} md={6}>
+                      <Grid size={{ xs: 12, md: 6 }}>
                         <TextField
                           fullWidth
                           label="Teléfono"
@@ -323,7 +323,7 @@ const Checkout = () => {
                     </Box>
                     
                     <Grid container spacing={2}>
-                      <Grid item xs={12}>
+                      <Grid size={12}>
                         <TextField
                           fullWidth
                           label="Dirección"
@@ -339,7 +339,7 @@ const Checkout = () => {
                           }}
                         />
                       </Grid>
-                      <Grid item xs={12} sm={6}>
+                      <Grid size={{ xs: 12, sm: 6 }}>
                         <TextField
                           fullWidth
                           label="Ciudad"
@@ -355,7 +355,7 @@ const Checkout = () => {
                           }}
                         />
                       </Grid>
-                      <Grid item xs={12} sm={6}>
+                      <Grid size={{ xs: 12, sm: 6 }}>
                         <TextField
                           fullWidth
                           label="Código Postal"
@@ -378,7 +378,7 @@ const Checkout = () => {
             </Grid>
 
             {/* Información de pago y resumen - Derecha */}
-            <Grid item xs={12} sx={{ width: '400px', flex: '0 0 400px' }}>
+            <Grid size={12} sx={{ width: '400px', flex: '0 0 400px' }}>
               <motion.div
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
@@ -493,30 +493,86 @@ const Checkout = () => {
                       </Typography>
                     </Box>
                     
-                    {/* Método de pago con Stripe */}
-                    <StripeCheckout 
-                      cartItems={cart}
-                      total={cartTotal + (shippingInfo ? parseFloat(shippingInfo.cost || 0) : 0)}
-                      customerInfo={{
-                        email: formData.email,
-                        name: `${formData.firstName} ${formData.lastName}`,
-                        address: {
-                          line1: formData.address,
-                          city: formData.city,
-                          postal_code: formData.zipCode,
-                          state: 'NY',
-                          country: 'US'
-                        },
-                        phone: formData.phone
-                      }}
-                      onSuccess={() => {
-                        clearCart();
-                        navigate('/checkout/success');
-                      }}
-                      onError={(error) => {
-                        setStripeError(error.message);
-                      }}
-                    />
+                    {/* Método de pago con Stripe - Solo mostrar si hay datos completos */}
+                    {formData.email && formData.firstName && formData.lastName && formData.address && formData.city && formData.zipCode ? (
+                      <StripeCheckout 
+                        key={`stripe-${formData.email}-${cartTotal}`}
+                        cartItems={cart}
+                        total={cartTotal + (shippingInfo ? parseFloat(shippingInfo.cost || 0) : 0)}
+                        customerInfo={{
+                          email: formData.email,
+                          firstName: formData.firstName,
+                          lastName: formData.lastName,
+                          address: {
+                            line1: formData.address,
+                            city: formData.city,
+                            postal_code: formData.zipCode,
+                            state: 'NY',
+                            country: 'US'
+                          },
+                          phone: formData.phone
+                        }}
+                        onSuccess={(paymentIntent) => {
+                          console.log('✅ Payment successful, clearing cart and navigating');
+                          clearCart();
+                          // Pasar el payment intent ID en la URL
+                          navigate(`/checkout/success?payment_intent=${paymentIntent.id}`);
+                        }}
+                        onError={(error) => {
+                          console.log('❌ Payment error:', error);
+                          setStripeError(error.message);
+                        }}
+                      />
+                    ) : (
+                      <Box sx={{ textAlign: 'center', py: 3 }}>
+                        <Typography variant="body1" sx={{ color: '#666', mb: 2 }}>
+                          Completa la información de contacto para continuar con el pago
+                        </Typography>
+                        <Box sx={{ textAlign: 'left', maxWidth: '300px', mx: 'auto' }}>
+                          <Typography variant="body2" sx={{ color: '#999', fontSize: '0.9rem', mb: 1 }}>
+                            Campos requeridos:
+                          </Typography>
+                          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                              <Box sx={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: formData.email ? '#4CAF50' : '#ff9800' }} />
+                              <Typography variant="body2" sx={{ fontSize: '0.8rem', color: formData.email ? '#4CAF50' : '#666' }}>
+                                Email {formData.email ? '✓' : ''}
+                              </Typography>
+                            </Box>
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                              <Box sx={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: formData.firstName ? '#4CAF50' : '#ff9800' }} />
+                              <Typography variant="body2" sx={{ fontSize: '0.8rem', color: formData.firstName ? '#4CAF50' : '#666' }}>
+                                Nombre {formData.firstName ? '✓' : ''}
+                              </Typography>
+                            </Box>
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                              <Box sx={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: formData.lastName ? '#4CAF50' : '#ff9800' }} />
+                              <Typography variant="body2" sx={{ fontSize: '0.8rem', color: formData.lastName ? '#4CAF50' : '#666' }}>
+                                Apellido {formData.lastName ? '✓' : ''}
+                              </Typography>
+                            </Box>
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                              <Box sx={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: formData.address ? '#4CAF50' : '#ff9800' }} />
+                              <Typography variant="body2" sx={{ fontSize: '0.8rem', color: formData.address ? '#4CAF50' : '#666' }}>
+                                Dirección {formData.address ? '✓' : ''}
+                              </Typography>
+                            </Box>
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                              <Box sx={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: formData.city ? '#4CAF50' : '#ff9800' }} />
+                              <Typography variant="body2" sx={{ fontSize: '0.8rem', color: formData.city ? '#4CAF50' : '#666' }}>
+                                Ciudad {formData.city ? '✓' : ''}
+                              </Typography>
+                            </Box>
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                              <Box sx={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: formData.zipCode ? '#4CAF50' : '#ff9800' }} />
+                              <Typography variant="body2" sx={{ fontSize: '0.8rem', color: formData.zipCode ? '#4CAF50' : '#666' }}>
+                                Código Postal {formData.zipCode ? '✓' : ''}
+                              </Typography>
+                            </Box>
+                          </Box>
+                        </Box>
+                      </Box>
+                    )}
                     
                     {stripeError && (
                       <Alert severity="error" sx={{ mt: 2 }}>
