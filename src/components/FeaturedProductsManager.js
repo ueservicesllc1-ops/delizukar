@@ -37,7 +37,9 @@ import {
   Delete,
   Star,
   StarBorder,
-  Refresh
+  Refresh,
+  SwapHoriz,
+  Add
 } from '@mui/icons-material';
 import { collection, getDocs, doc, setDoc, updateDoc } from 'firebase/firestore';
 import { db } from '../firebase/config';
@@ -48,6 +50,7 @@ const FeaturedProductsManager = ({ open, onClose }) => {
   const [featuredProducts, setFeaturedProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
+  const [replacingProduct, setReplacingProduct] = useState(null);
   
   // Configuración del título
   const [titleConfig, setTitleConfig] = useState({
@@ -138,6 +141,24 @@ const FeaturedProductsManager = ({ open, onClose }) => {
         return prev;
       }
     });
+  };
+
+  const handleReplaceProduct = (productToReplace) => {
+    setReplacingProduct(productToReplace);
+  };
+
+  const handleReplaceWithProduct = (newProductId) => {
+    if (replacingProduct) {
+      setFeaturedProducts(prev => 
+        prev.map(id => id === replacingProduct.id ? newProductId : id)
+      );
+      setReplacingProduct(null);
+      showSnackbar('Producto reemplazado exitosamente', 'success');
+    }
+  };
+
+  const cancelReplacement = () => {
+    setReplacingProduct(null);
   };
 
   const handleSave = async () => {
@@ -346,14 +367,19 @@ const FeaturedProductsManager = ({ open, onClose }) => {
                 <Grid container spacing={2}>
                   {getSelectedProducts().map((product) => (
                     <Grid item xs={12} sm={6} md={3} key={product.id}>
-                      <Card sx={{ p: 2, backgroundColor: '#f8f9fa', border: '1px solid #8B4513' }}>
-                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                      <Card sx={{ 
+                        p: 2, 
+                        backgroundColor: replacingProduct?.id === product.id ? '#fff3cd' : '#f8f9fa', 
+                        border: replacingProduct?.id === product.id ? '2px solid #ffc107' : '1px solid #8B4513',
+                        position: 'relative'
+                      }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
                           <Avatar
                             src={product.image}
                             alt={product.name}
                             sx={{ width: 40, height: 40, mr: 2 }}
                           />
-                          <Box>
+                          <Box sx={{ flex: 1 }}>
                             <Typography variant="body2" sx={{ fontWeight: 600 }}>
                               {product.name}
                             </Typography>
@@ -362,6 +388,69 @@ const FeaturedProductsManager = ({ open, onClose }) => {
                             </Typography>
                           </Box>
                         </Box>
+                        
+                        {replacingProduct?.id === product.id ? (
+                          <Box sx={{ mt: 2 }}>
+                            <Typography variant="caption" sx={{ color: '#856404', fontWeight: 600, display: 'block', mb: 1 }}>
+                              Selecciona un producto para reemplazar:
+                            </Typography>
+                            <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+                              {products
+                                .filter(p => !featuredProducts.includes(p.id))
+                                .slice(0, 3)
+                                .map(availableProduct => (
+                                  <Button
+                                    key={availableProduct.id}
+                                    size="small"
+                                    variant="outlined"
+                                    startIcon={<SwapHoriz />}
+                                    onClick={() => handleReplaceWithProduct(availableProduct.id)}
+                                    sx={{ 
+                                      fontSize: '0.7rem',
+                                      py: 0.5,
+                                      px: 1,
+                                      minWidth: 'auto'
+                                    }}
+                                  >
+                                    {availableProduct.name.substring(0, 15)}...
+                                  </Button>
+                                ))}
+                              <Button
+                                size="small"
+                                variant="text"
+                                onClick={cancelReplacement}
+                                sx={{ 
+                                  fontSize: '0.7rem',
+                                  color: '#dc3545',
+                                  minWidth: 'auto'
+                                }}
+                              >
+                                Cancelar
+                              </Button>
+                            </Box>
+                          </Box>
+                        ) : (
+                          <Button
+                            size="small"
+                            variant="outlined"
+                            startIcon={<SwapHoriz />}
+                            onClick={() => handleReplaceProduct(product)}
+                            sx={{ 
+                              mt: 1,
+                              fontSize: '0.7rem',
+                              py: 0.5,
+                              px: 1,
+                              borderColor: '#8B4513',
+                              color: '#8B4513',
+                              '&:hover': {
+                                backgroundColor: '#8B4513',
+                                color: 'white'
+                              }
+                            }}
+                          >
+                            Reemplazar
+                          </Button>
+                        )}
                       </Card>
                     </Grid>
                   ))}
