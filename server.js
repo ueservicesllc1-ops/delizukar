@@ -38,6 +38,14 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Stripe-Signature']
 }));
 
+// Allow Railway healthcheck hostname
+app.use((req, res, next) => {
+  if (req.get('host') === 'healthcheck.railway.app') {
+    console.log('🔍 Railway healthcheck detected');
+  }
+  next();
+});
+
 // Enhanced JSON parsing with size limits
 app.use(express.json({ 
   limit: '10mb',
@@ -744,15 +752,19 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-// Simple health check for Railway
+// Health check for Railway - must be very simple and fast
 app.get('/health', (req, res) => {
-  console.log('🔍 Health check requested');
-  res.status(200).send('OK');
+  console.log('🔍 Health check requested from:', req.get('host'));
+  res.status(200).json({ 
+    status: 'OK', 
+    timestamp: new Date().toISOString(),
+    port: PORT 
+  });
 });
 
 // Root endpoint for Railway healthcheck
 app.get('/', (req, res) => {
-  console.log('🔍 Root health check requested');
+  console.log('🔍 Root health check requested from:', req.get('host'));
   res.sendFile(path.join(__dirname, 'build', 'index.html'));
 });
 
