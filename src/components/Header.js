@@ -32,13 +32,14 @@ import {
 } from '@mui/icons-material';
 import { useStore } from '../context/StoreContext';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { auth } from '../firebase/config';
+import { auth, db } from '../firebase/config';
 import { 
   signInWithPopup, 
   GoogleAuthProvider, 
   signOut, 
   onAuthStateChanged 
 } from 'firebase/auth';
+import { collection, addDoc, getDocs, query, where } from 'firebase/firestore';
 
 const Header = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -78,6 +79,34 @@ const Header = () => {
     return () => unsubscribe();
   }, []);
 
+  const saveUserToFirestore = async (userData) => {
+    try {
+      // Verificar si el usuario ya existe
+      const usersRef = collection(db, 'registeredUsers');
+      const q = query(usersRef, where('uid', '==', userData.uid));
+      const querySnapshot = await getDocs(q);
+      
+      if (querySnapshot.empty) {
+        // Usuario no existe, guardarlo
+        await addDoc(usersRef, {
+          uid: userData.uid,
+          displayName: userData.displayName,
+          email: userData.email,
+          photoURL: userData.photoURL,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          role: 'user',
+          status: 'active'
+        });
+        console.log('✅ Usuario guardado en Firestore');
+      } else {
+        console.log('ℹ️ Usuario ya existe en Firestore');
+      }
+    } catch (error) {
+      console.error('❌ Error guardando usuario en Firestore:', error);
+    }
+  };
+
   const handleGoogleAuth = async () => {
     try {
       console.log('Iniciando autenticación con Google...');
@@ -90,6 +119,14 @@ const Header = () => {
       const user = result.user;
       
       console.log('✅ Usuario autenticado:', user.displayName);
+      
+      // Guardar usuario en Firestore
+      await saveUserToFirestore({
+        uid: user.uid,
+        displayName: user.displayName,
+        email: user.email,
+        photoURL: user.photoURL
+      });
       
       // El estado se actualizará automáticamente por onAuthStateChanged
     } catch (error) {
