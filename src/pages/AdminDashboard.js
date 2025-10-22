@@ -25,7 +25,12 @@ import {
   Dialog,
   DialogTitle,
   DialogContent,
-  DialogActions
+  DialogActions,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  TextField
 } from '@mui/material';
 import {
   ShoppingCart,
@@ -74,6 +79,9 @@ const AdminDashboard = () => {
   const [popupHeroManagerOpen, setPopupHeroManagerOpen] = useState(false);
   const [stripeBalanceOpen, setStripeBalanceOpen] = useState(false);
   const [salesReportOpen, setSalesReportOpen] = useState(false);
+  const [selectedPeriod, setSelectedPeriod] = useState('current'); // Added period selector
+  const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1); // Added month selector
+  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear()); // Added year selector
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [selectedFont, setSelectedFont] = useState(null);
@@ -590,6 +598,82 @@ const AdminDashboard = () => {
           </DialogTitle>
           
           <DialogContent sx={{ p: 3, backgroundColor: '#fafafa' }}>
+            {/* Selector de Período */}
+            <Box sx={{ mb: 3, p: 2, backgroundColor: 'white', borderRadius: '8px', border: '1px solid #e0e0e0' }}>
+              <Typography variant="h6" sx={{ mb: 2, color: '#c8626d', fontWeight: 600, textAlign: 'center' }}>
+                📅 Seleccionar Período
+              </Typography>
+              <Grid container spacing={2} alignItems="center">
+                <Grid item xs={12} sm={4}>
+                  <FormControl fullWidth size="small">
+                    <InputLabel>Período</InputLabel>
+                    <Select
+                      value={selectedPeriod}
+                      onChange={(e) => setSelectedPeriod(e.target.value)}
+                      label="Período"
+                    >
+                      <MenuItem value="current">Actual</MenuItem>
+                      <MenuItem value="custom">Personalizado</MenuItem>
+                      <MenuItem value="last30">Últimos 30 días</MenuItem>
+                      <MenuItem value="last90">Últimos 90 días</MenuItem>
+                      <MenuItem value="year">Año completo</MenuItem>
+                    </Select>
+                  </FormControl>
+                </Grid>
+                {selectedPeriod === 'custom' && (
+                  <>
+                    <Grid item xs={12} sm={4}>
+                      <FormControl fullWidth size="small">
+                        <InputLabel>Mes</InputLabel>
+                        <Select
+                          value={selectedMonth}
+                          onChange={(e) => setSelectedMonth(e.target.value)}
+                          label="Mes"
+                        >
+                          <MenuItem value={1}>Enero</MenuItem>
+                          <MenuItem value={2}>Febrero</MenuItem>
+                          <MenuItem value={3}>Marzo</MenuItem>
+                          <MenuItem value={4}>Abril</MenuItem>
+                          <MenuItem value={5}>Mayo</MenuItem>
+                          <MenuItem value={6}>Junio</MenuItem>
+                          <MenuItem value={7}>Julio</MenuItem>
+                          <MenuItem value={8}>Agosto</MenuItem>
+                          <MenuItem value={9}>Septiembre</MenuItem>
+                          <MenuItem value={10}>Octubre</MenuItem>
+                          <MenuItem value={11}>Noviembre</MenuItem>
+                          <MenuItem value={12}>Diciembre</MenuItem>
+                        </Select>
+                      </FormControl>
+                    </Grid>
+                    <Grid item xs={12} sm={4}>
+                      <TextField
+                        fullWidth
+                        size="small"
+                        label="Año"
+                        type="number"
+                        value={selectedYear}
+                        onChange={(e) => setSelectedYear(parseInt(e.target.value))}
+                        inputProps={{ min: 2020, max: 2030 }}
+                      />
+                    </Grid>
+                  </>
+                )}
+                <Grid item xs={12} sm={4}>
+                  <Button
+                    variant="contained"
+                    size="small"
+                    sx={{
+                      backgroundColor: '#c8626d',
+                      '&:hover': { backgroundColor: '#b8555a' },
+                      width: '100%'
+                    }}
+                  >
+                    Aplicar Filtro
+                  </Button>
+                </Grid>
+              </Grid>
+            </Box>
+
             <Grid container spacing={2}>
               {/* Métricas Principales */}
               <Grid item xs={12}>
