@@ -21,7 +21,11 @@ import {
   ListItemAvatar,
   Divider,
   useTheme,
-  useMediaQuery
+  useMediaQuery,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions
 } from '@mui/material';
 import {
   ShoppingCart,
