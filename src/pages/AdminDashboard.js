@@ -243,60 +243,60 @@ const AdminDashboard = () => {
         </div>
       </div>
 
-      <div style="margin-bottom: 30px;">
-        <h3 style="color: #c8626d; border-bottom: 2px solid #c8626d; padding-bottom: 10px; margin-bottom: 20px;">📊 MÉTRICAS FINANCIERAS</h3>
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-          <div style="background: #c8626d; color: white; padding: 20px; border-radius: 8px; text-align: center;">
-            <h4 style="margin: 0 0 10px 0; font-size: 18px;">INGRESOS TOTALES</h4>
-            <p style="margin: 0; font-size: 24px; font-weight: bold;">$0.00</p>
+      <div style="margin-bottom: 25px;">
+        <h3 style="color: #c8626d; border-bottom: 2px solid #c8626d; padding-bottom: 8px; margin-bottom: 15px; font-size: 16px;">📊 MÉTRICAS FINANCIERAS</h3>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+          <div style="background: #c8626d; color: white; padding: 12px; border-radius: 6px; text-align: center;">
+            <h4 style="margin: 0 0 6px 0; font-size: 12px; font-weight: 600;">INGRESOS TOTALES</h4>
+            <p style="margin: 0; font-size: 18px; font-weight: bold;">$0.00</p>
           </div>
-          <div style="background: #8B4513; color: white; padding: 20px; border-radius: 8px; text-align: center;">
-            <h4 style="margin: 0 0 10px 0; font-size: 18px;">ÓRDENES TOTALES</h4>
-            <p style="margin: 0; font-size: 24px; font-weight: bold;">0</p>
+          <div style="background: #8B4513; color: white; padding: 12px; border-radius: 6px; text-align: center;">
+            <h4 style="margin: 0 0 6px 0; font-size: 12px; font-weight: 600;">ÓRDENES TOTALES</h4>
+            <p style="margin: 0; font-size: 18px; font-weight: bold;">0</p>
           </div>
-          <div style="background: #be8782; color: white; padding: 20px; border-radius: 8px; text-align: center;">
-            <h4 style="margin: 0 0 10px 0; font-size: 18px;">PROMEDIO POR ORDEN</h4>
-            <p style="margin: 0; font-size: 24px; font-weight: bold;">$0.00</p>
+          <div style="background: #be8782; color: white; padding: 12px; border-radius: 6px; text-align: center;">
+            <h4 style="margin: 0 0 6px 0; font-size: 12px; font-weight: 600;">PROMEDIO POR ORDEN</h4>
+            <p style="margin: 0; font-size: 18px; font-weight: bold;">$0.00</p>
           </div>
-          <div style="background: #A0522D; color: white; padding: 20px; border-radius: 8px; text-align: center;">
-            <h4 style="margin: 0 0 10px 0; font-size: 18px;">PRODUCTOS VENDIDOS</h4>
-            <p style="margin: 0; font-size: 24px; font-weight: bold;">0</p>
+          <div style="background: #A0522D; color: white; padding: 12px; border-radius: 6px; text-align: center;">
+            <h4 style="margin: 0 0 6px 0; font-size: 12px; font-weight: 600;">PRODUCTOS VENDIDOS</h4>
+            <p style="margin: 0; font-size: 18px; font-weight: bold;">0</p>
           </div>
         </div>
       </div>
 
-      <div style="margin-bottom: 30px;">
-        <h3 style="color: #c8626d; border-bottom: 2px solid #c8626d; padding-bottom: 10px; margin-bottom: 20px;">📅 RESUMEN POR PERÍODO</h3>
+      <div style="margin-bottom: 25px;">
+        <h3 style="color: #c8626d; border-bottom: 2px solid #c8626d; padding-bottom: 8px; margin-bottom: 15px; font-size: 16px;">📅 RESUMEN POR PERÍODO</h3>
         <table style="width: 100%; border-collapse: collapse; background: white; border: 1px solid #ddd;">
           <thead>
             <tr style="background: #c8626d; color: white;">
-              <th style="padding: 12px; text-align: left; border: 1px solid #ddd;">Período</th>
-              <th style="padding: 12px; text-align: right; border: 1px solid #ddd;">Ingresos</th>
-              <th style="padding: 12px; text-align: right; border: 1px solid #ddd;">Órdenes</th>
+              <th style="padding: 8px; text-align: left; border: 1px solid #ddd; font-size: 12px;">Período</th>
+              <th style="padding: 8px; text-align: right; border: 1px solid #ddd; font-size: 12px;">Ingresos</th>
+              <th style="padding: 8px; text-align: right; border: 1px solid #ddd; font-size: 12px;">Órdenes</th>
             </tr>
           </thead>
           <tbody>
             <tr>
-              <td style="padding: 12px; border: 1px solid #ddd; font-weight: 600;">Esta Semana</td>
-              <td style="padding: 12px; border: 1px solid #ddd; text-align: right; color: #c8626d; font-weight: bold;">$0.00</td>
-              <td style="padding: 12px; border: 1px solid #ddd; text-align: right; color: #8B4513; font-weight: bold;">0</td>
+              <td style="padding: 8px; border: 1px solid #ddd; font-weight: 600; font-size: 11px;">Esta Semana</td>
+              <td style="padding: 8px; border: 1px solid #ddd; text-align: right; color: #c8626d; font-weight: bold; font-size: 11px;">$0.00</td>
+              <td style="padding: 8px; border: 1px solid #ddd; text-align: right; color: #8B4513; font-weight: bold; font-size: 11px;">0</td>
             </tr>
             <tr style="background: #f8f9fa;">
-              <td style="padding: 12px; border: 1px solid #ddd; font-weight: 600;">Este Mes</td>
-              <td style="padding: 12px; border: 1px solid #ddd; text-align: right; color: #c8626d; font-weight: bold;">$0.00</td>
-              <td style="padding: 12px; border: 1px solid #ddd; text-align: right; color: #8B4513; font-weight: bold;">0</td>
+              <td style="padding: 8px; border: 1px solid #ddd; font-weight: 600; font-size: 11px;">Este Mes</td>
+              <td style="padding: 8px; border: 1px solid #ddd; text-align: right; color: #c8626d; font-weight: bold; font-size: 11px;">$0.00</td>
+              <td style="padding: 8px; border: 1px solid #ddd; text-align: right; color: #8B4513; font-weight: bold; font-size: 11px;">0</td>
             </tr>
             <tr>
-              <td style="padding: 12px; border: 1px solid #ddd; font-weight: 600;">Este Año</td>
-              <td style="padding: 12px; border: 1px solid #ddd; text-align: right; color: #c8626d; font-weight: bold;">$0.00</td>
-              <td style="padding: 12px; border: 1px solid #ddd; text-align: right; color: #8B4513; font-weight: bold;">0</td>
+              <td style="padding: 8px; border: 1px solid #ddd; font-weight: 600; font-size: 11px;">Este Año</td>
+              <td style="padding: 8px; border: 1px solid #ddd; text-align: right; color: #c8626d; font-weight: bold; font-size: 11px;">$0.00</td>
+              <td style="padding: 8px; border: 1px solid #ddd; text-align: right; color: #8B4513; font-weight: bold; font-size: 11px;">0</td>
             </tr>
           </tbody>
         </table>
       </div>
 
-      <div style="margin-bottom: 30px;">
-        <h3 style="color: #c8626d; border-bottom: 2px solid #c8626d; padding-bottom: 10px; margin-bottom: 20px;">🛒 ÓRDENES RECIENTES</h3>
+      <div style="margin-bottom: 25px;">
+        <h3 style="color: #c8626d; border-bottom: 2px solid #c8626d; padding-bottom: 8px; margin-bottom: 15px; font-size: 16px;">🛒 ÓRDENES RECIENTES</h3>
         <table style="width: 100%; border-collapse: collapse; background: white; border: 1px solid #ddd;">
           <thead>
             <tr style="background: #8B4513; color: white;">
@@ -319,8 +319,8 @@ const AdminDashboard = () => {
         </table>
       </div>
 
-      <div style="margin-bottom: 30px;">
-        <h3 style="color: #c8626d; border-bottom: 2px solid #c8626d; padding-bottom: 10px; margin-bottom: 20px;">🏆 PRODUCTOS MÁS VENDIDOS</h3>
+      <div style="margin-bottom: 25px;">
+        <h3 style="color: #c8626d; border-bottom: 2px solid #c8626d; padding-bottom: 8px; margin-bottom: 15px; font-size: 16px;">🏆 PRODUCTOS MÁS VENDIDOS</h3>
         <table style="width: 100%; border-collapse: collapse; background: white; border: 1px solid #ddd;">
           <thead>
             <tr style="background: #be8782; color: white;">
