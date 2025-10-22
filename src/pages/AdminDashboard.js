@@ -570,143 +570,257 @@ const AdminDashboard = () => {
           fullWidth
           PaperProps={{
             sx: {
-              minHeight: '80vh',
-              maxHeight: '90vh'
+              minHeight: '85vh',
+              maxHeight: '95vh',
+              borderRadius: 0,
+              boxShadow: '0 8px 32px rgba(0,0,0,0.3)'
             }
           }}
         >
-          <DialogTitle>
-            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                <Assessment sx={{ color: '#8B4513' }} />
-                <Typography variant="h6" sx={{ fontWeight: 600, color: '#8B4513' }}>
-                  📊 Reporte de Ventas
-                </Typography>
-              </Box>
-              <Button
-                onClick={() => setSalesReportOpen(false)}
-                variant="outlined"
-                sx={{
-                  borderColor: '#8B4513',
-                  color: '#8B4513',
-                  '&:hover': { backgroundColor: '#8B451320' }
-                }}
-              >
-                Cerrar
-              </Button>
+          <DialogTitle sx={{ 
+            backgroundColor: '#000', 
+            color: 'white', 
+            textAlign: 'center',
+            py: 3,
+            borderBottom: '3px solid #1e3a8a'
+          }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 2 }}>
+              <Assessment sx={{ fontSize: 32, color: '#1e3a8a' }} />
+              <Typography variant="h4" sx={{ fontWeight: 700, color: 'white' }}>
+                REPORTE DE VENTAS
+              </Typography>
             </Box>
           </DialogTitle>
-          <DialogContent sx={{ p: 0 }}>
-            <Box sx={{ p: 3 }}>
-              <Grid container spacing={3}>
+          
+          <DialogContent sx={{ p: 0, backgroundColor: '#f8fafc' }}>
+            <Box sx={{ p: 4 }}>
+              <Grid container spacing={4} justifyContent="center">
                 {/* Métricas Principales */}
                 <Grid item xs={12}>
-                  <Typography variant="h6" sx={{ mb: 2, color: '#8B4513', fontWeight: 600 }}>
-                    📈 Métricas Generales
+                  <Typography variant="h5" sx={{ 
+                    mb: 3, 
+                    color: '#000', 
+                    fontWeight: 700, 
+                    textAlign: 'center',
+                    textTransform: 'uppercase',
+                    letterSpacing: '1px'
+                  }}>
+                    MÉTRICAS GENERALES
                   </Typography>
-                  <Grid container spacing={2}>
+                  <Grid container spacing={3} justifyContent="center">
                     <Grid item xs={12} sm={6} md={3}>
-                      <Card sx={{ p: 2, backgroundColor: '#f8f9fa', border: '1px solid #e0e0e0' }}>
-                        <Typography variant="h4" sx={{ color: '#4CAF50', fontWeight: 700 }}>
+                      <Box sx={{ 
+                        backgroundColor: '#1e3a8a', 
+                        color: 'white', 
+                        p: 3, 
+                        textAlign: 'center',
+                        border: '2px solid #000',
+                        minHeight: '120px',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        justifyContent: 'center'
+                      }}>
+                        <Typography variant="h3" sx={{ fontWeight: 900, mb: 1 }}>
                           $0.00
                         </Typography>
-                        <Typography variant="body2" sx={{ color: '#666' }}>
-                          Ingresos Totales
+                        <Typography variant="h6" sx={{ fontWeight: 600, textTransform: 'uppercase' }}>
+                          INGRESOS TOTALES
                         </Typography>
-                      </Card>
+                      </Box>
                     </Grid>
                     <Grid item xs={12} sm={6} md={3}>
-                      <Card sx={{ p: 2, backgroundColor: '#f8f9fa', border: '1px solid #e0e0e0' }}>
-                        <Typography variant="h4" sx={{ color: '#2196F3', fontWeight: 700 }}>
+                      <Box sx={{ 
+                        backgroundColor: '#000', 
+                        color: 'white', 
+                        p: 3, 
+                        textAlign: 'center',
+                        border: '2px solid #1e3a8a',
+                        minHeight: '120px',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        justifyContent: 'center'
+                      }}>
+                        <Typography variant="h3" sx={{ fontWeight: 900, mb: 1 }}>
                           0
                         </Typography>
-                        <Typography variant="body2" sx={{ color: '#666' }}>
-                          Órdenes Totales
+                        <Typography variant="h6" sx={{ fontWeight: 600, textTransform: 'uppercase' }}>
+                          ÓRDENES TOTALES
                         </Typography>
-                      </Card>
+                      </Box>
                     </Grid>
                     <Grid item xs={12} sm={6} md={3}>
-                      <Card sx={{ p: 2, backgroundColor: '#f8f9fa', border: '1px solid #e0e0e0' }}>
-                        <Typography variant="h4" sx={{ color: '#FF9800', fontWeight: 700 }}>
+                      <Box sx={{ 
+                        backgroundColor: '#1e3a8a', 
+                        color: 'white', 
+                        p: 3, 
+                        textAlign: 'center',
+                        border: '2px solid #000',
+                        minHeight: '120px',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        justifyContent: 'center'
+                      }}>
+                        <Typography variant="h3" sx={{ fontWeight: 900, mb: 1 }}>
                           $0.00
                         </Typography>
-                        <Typography variant="body2" sx={{ color: '#666' }}>
-                          Promedio por Orden
+                        <Typography variant="h6" sx={{ fontWeight: 600, textTransform: 'uppercase' }}>
+                          PROMEDIO POR ORDEN
                         </Typography>
-                      </Card>
+                      </Box>
                     </Grid>
                     <Grid item xs={12} sm={6} md={3}>
-                      <Card sx={{ p: 2, backgroundColor: '#f8f9fa', border: '1px solid #e0e0e0' }}>
-                        <Typography variant="h4" sx={{ color: '#9C27B0', fontWeight: 700 }}>
+                      <Box sx={{ 
+                        backgroundColor: '#000', 
+                        color: 'white', 
+                        p: 3, 
+                        textAlign: 'center',
+                        border: '2px solid #1e3a8a',
+                        minHeight: '120px',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        justifyContent: 'center'
+                      }}>
+                        <Typography variant="h3" sx={{ fontWeight: 900, mb: 1 }}>
                           0
                         </Typography>
-                        <Typography variant="body2" sx={{ color: '#666' }}>
-                          Productos Vendidos
+                        <Typography variant="h6" sx={{ fontWeight: 600, textTransform: 'uppercase' }}>
+                          PRODUCTOS VENDIDOS
                         </Typography>
-                      </Card>
+                      </Box>
                     </Grid>
                   </Grid>
                 </Grid>
 
                 {/* Órdenes Recientes */}
                 <Grid item xs={12} md={6}>
-                  <Typography variant="h6" sx={{ mb: 2, color: '#8B4513', fontWeight: 600 }}>
-                    🛒 Órdenes Recientes
+                  <Typography variant="h5" sx={{ 
+                    mb: 3, 
+                    color: '#000', 
+                    fontWeight: 700, 
+                    textAlign: 'center',
+                    textTransform: 'uppercase',
+                    letterSpacing: '1px'
+                  }}>
+                    ÓRDENES RECIENTES
                   </Typography>
-                  <Card sx={{ p: 2, backgroundColor: '#f8f9fa', border: '1px solid #e0e0e0' }}>
-                    <Typography variant="body2" sx={{ color: '#666', textAlign: 'center', py: 4 }}>
-                      No hay órdenes registradas aún
+                  <Box sx={{ 
+                    backgroundColor: '#1e3a8a', 
+                    color: 'white', 
+                    p: 4, 
+                    textAlign: 'center',
+                    border: '2px solid #000',
+                    minHeight: '200px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}>
+                    <Typography variant="h6" sx={{ fontWeight: 600, textTransform: 'uppercase' }}>
+                      NO HAY ÓRDENES REGISTRADAS AÚN
                     </Typography>
-                  </Card>
+                  </Box>
                 </Grid>
 
                 {/* Productos Más Vendidos */}
                 <Grid item xs={12} md={6}>
-                  <Typography variant="h6" sx={{ mb: 2, color: '#8B4513', fontWeight: 600 }}>
-                    🏆 Productos Más Vendidos
+                  <Typography variant="h5" sx={{ 
+                    mb: 3, 
+                    color: '#000', 
+                    fontWeight: 700, 
+                    textAlign: 'center',
+                    textTransform: 'uppercase',
+                    letterSpacing: '1px'
+                  }}>
+                    PRODUCTOS MÁS VENDIDOS
                   </Typography>
-                  <Card sx={{ p: 2, backgroundColor: '#f8f9fa', border: '1px solid #e0e0e0' }}>
-                    <Typography variant="body2" sx={{ color: '#666', textAlign: 'center', py: 4 }}>
-                      No hay datos de ventas aún
+                  <Box sx={{ 
+                    backgroundColor: '#000', 
+                    color: 'white', 
+                    p: 4, 
+                    textAlign: 'center',
+                    border: '2px solid #1e3a8a',
+                    minHeight: '200px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}>
+                    <Typography variant="h6" sx={{ fontWeight: 600, textTransform: 'uppercase' }}>
+                      NO HAY DATOS DE VENTAS AÚN
                     </Typography>
-                  </Card>
+                  </Box>
                 </Grid>
 
                 {/* Resumen por Período */}
                 <Grid item xs={12}>
-                  <Typography variant="h6" sx={{ mb: 2, color: '#8B4513', fontWeight: 600 }}>
-                    📅 Resumen por Período
+                  <Typography variant="h5" sx={{ 
+                    mb: 3, 
+                    color: '#000', 
+                    fontWeight: 700, 
+                    textAlign: 'center',
+                    textTransform: 'uppercase',
+                    letterSpacing: '1px'
+                  }}>
+                    RESUMEN POR PERÍODO
                   </Typography>
-                  <Grid container spacing={2}>
+                  <Grid container spacing={3} justifyContent="center">
                     <Grid item xs={12} sm={4}>
-                      <Card sx={{ p: 2, backgroundColor: '#f8f9fa', border: '1px solid #e0e0e0' }}>
-                        <Typography variant="h5" sx={{ color: '#4CAF50', fontWeight: 700 }}>
+                      <Box sx={{ 
+                        backgroundColor: '#1e3a8a', 
+                        color: 'white', 
+                        p: 3, 
+                        textAlign: 'center',
+                        border: '2px solid #000',
+                        minHeight: '100px',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        justifyContent: 'center'
+                      }}>
+                        <Typography variant="h4" sx={{ fontWeight: 900, mb: 1 }}>
                           $0.00
                         </Typography>
-                        <Typography variant="body2" sx={{ color: '#666' }}>
-                          Esta Semana
+                        <Typography variant="h6" sx={{ fontWeight: 600, textTransform: 'uppercase' }}>
+                          ESTA SEMANA
                         </Typography>
-                      </Card>
+                      </Box>
                     </Grid>
                     <Grid item xs={12} sm={4}>
-                      <Card sx={{ p: 2, backgroundColor: '#f8f9fa', border: '1px solid #e0e0e0' }}>
-                        <Typography variant="h5" sx={{ color: '#2196F3', fontWeight: 700 }}>
+                      <Box sx={{ 
+                        backgroundColor: '#000', 
+                        color: 'white', 
+                        p: 3, 
+                        textAlign: 'center',
+                        border: '2px solid #1e3a8a',
+                        minHeight: '100px',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        justifyContent: 'center'
+                      }}>
+                        <Typography variant="h4" sx={{ fontWeight: 900, mb: 1 }}>
                           $0.00
                         </Typography>
-                        <Typography variant="body2" sx={{ color: '#666' }}>
-                          Este Mes
+                        <Typography variant="h6" sx={{ fontWeight: 600, textTransform: 'uppercase' }}>
+                          ESTE MES
                         </Typography>
-                      </Card>
+                      </Box>
                     </Grid>
                     <Grid item xs={12} sm={4}>
-                      <Card sx={{ p: 2, backgroundColor: '#f8f9fa', border: '1px solid #e0e0e0' }}>
-                        <Typography variant="h5" sx={{ color: '#FF9800', fontWeight: 700 }}>
+                      <Box sx={{ 
+                        backgroundColor: '#1e3a8a', 
+                        color: 'white', 
+                        p: 3, 
+                        textAlign: 'center',
+                        border: '2px solid #000',
+                        minHeight: '100px',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        justifyContent: 'center'
+                      }}>
+                        <Typography variant="h4" sx={{ fontWeight: 900, mb: 1 }}>
                           $0.00
                         </Typography>
-                        <Typography variant="body2" sx={{ color: '#666' }}>
-                          Este Año
+                        <Typography variant="h6" sx={{ fontWeight: 600, textTransform: 'uppercase' }}>
+                          ESTE AÑO
                         </Typography>
-                      </Card>
+                      </Box>
                     </Grid>
                   </Grid>
                 </Grid>
