@@ -195,27 +195,27 @@ const FeaturedProductsManager = ({ open, onClose }) => {
     <Dialog
       open={open}
       onClose={onClose}
-      maxWidth="xl"
+      maxWidth="md"
       fullWidth
       sx={{
         '& .MuiDialog-paper': {
-          borderRadius: '20px',
-          maxHeight: '95vh',
-          height: '95vh'
+          borderRadius: '12px',
+          maxHeight: '80vh',
+          height: '80vh'
         }
       }}
     >
       <DialogTitle>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-            <Star sx={{ color: '#8B4513', fontSize: '2rem' }} />
-            <Typography variant="h5" sx={{ fontWeight: 700, color: '#8B4513' }}>
+            <Star sx={{ color: '#C8626D', fontSize: '1.5rem' }} />
+            <Typography variant="h6" sx={{ fontWeight: 700, color: '#C8626D' }}>
               Configurar Galletas Destacadas
             </Typography>
           </Box>
           <Button
             onClick={onClose}
-            sx={{ color: '#8B4513' }}
+            sx={{ color: '#C8626D' }}
           >
             ✕
           </Button>
@@ -225,14 +225,14 @@ const FeaturedProductsManager = ({ open, onClose }) => {
       <DialogContent>
         {loading && <LinearProgress />}
         
-        <Box sx={{ mt: 2 }}>
+        <Box sx={{ mt: 1 }}>
           {/* Configuración del Título */}
-          <Card sx={{ mb: 4, p: 3, backgroundColor: '#f8f9fa' }}>
-            <Typography variant="h6" sx={{ mb: 3, color: '#8B4513', fontWeight: 600 }}>
+          <Card sx={{ mb: 2, p: 2, backgroundColor: '#f8f9fa' }}>
+            <Typography variant="subtitle1" sx={{ mb: 2, color: '#C8626D', fontWeight: 600 }}>
               Configuración del Título
             </Typography>
             
-            <Grid container spacing={3}>
+            <Grid container spacing={2}>
               <Grid item xs={12} md={6}>
                 <TextField
                   fullWidth
@@ -286,19 +286,20 @@ const FeaturedProductsManager = ({ open, onClose }) => {
           </Card>
 
           {/* Selección de Productos */}
-          <Card sx={{ p: 3 }}>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-              <Typography variant="h6" sx={{ color: '#8B4513', fontWeight: 600 }}>
+          <Card sx={{ p: 2 }}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+              <Typography variant="subtitle1" sx={{ color: '#C8626D', fontWeight: 600 }}>
                 Seleccionar Productos Destacados
               </Typography>
               <Chip 
                 label={`${featuredProducts.length}/4 seleccionados`}
                 color={featuredProducts.length === 4 ? 'success' : 'default'}
+                size="small"
                 sx={{ fontWeight: 600 }}
               />
             </Box>
 
-            <Grid container spacing={1.5}>
+            <Grid container spacing={1}>
               {products.map((product) => {
                 const isSelected = featuredProducts.includes(product.id);
                 const isMaxReached = featuredProducts.length >= 4 && !isSelected;
@@ -309,7 +310,7 @@ const FeaturedProductsManager = ({ open, onClose }) => {
                       sx={{
                         cursor: isMaxReached ? 'not-allowed' : 'pointer',
                         opacity: isMaxReached ? 0.5 : 1,
-                        border: isSelected ? '2px solid #8B4513' : '1px solid #ddd',
+                        border: isSelected ? '2px solid #C8626D' : '1px solid #ddd',
                         transition: 'all 0.3s ease',
                         '&:hover': !isMaxReached ? {
                           transform: 'translateY(-2px)',
@@ -318,38 +319,39 @@ const FeaturedProductsManager = ({ open, onClose }) => {
                       }}
                       onClick={() => handleProductToggle(product.id)}
                     >
-                      <CardContent>
-                        <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                      <CardContent sx={{ p: 1.5 }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
                           <Checkbox
                             checked={isSelected}
                             disabled={isMaxReached}
-                            sx={{ color: '#8B4513' }}
+                            size="small"
+                            sx={{ color: '#C8626D' }}
                           />
                           <Avatar
                             src={product.image}
                             alt={product.name}
-                            sx={{ width: 50, height: 50, mr: 2 }}
+                            sx={{ width: 40, height: 40, mr: 1.5 }}
                           />
                           <Box sx={{ flex: 1 }}>
-                            <Typography variant="h6" sx={{ fontWeight: 600, fontSize: '0.9rem' }}>
+                            <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '0.85rem' }}>
                               {product.name}
                             </Typography>
-                            <Typography variant="body2" sx={{ color: '#666' }}>
+                            <Typography variant="caption" sx={{ color: '#666', fontSize: '0.75rem' }}>
                               ${product.price}
                             </Typography>
                           </Box>
                         </Box>
                         
                         {product.description && (
-                          <Typography variant="body2" sx={{ color: '#666', fontSize: '0.8rem' }}>
-                            {product.description.substring(0, 80)}...
+                          <Typography variant="caption" sx={{ color: '#666', fontSize: '0.7rem' }}>
+                            {product.description.substring(0, 60)}...
                           </Typography>
                         )}
                         
-                        <Box sx={{ display: 'flex', gap: 1, mt: 1 }}>
-                          {product.featured && <Chip label="Destacado" size="small" color="primary" />}
-                          {product.bestSeller && <Chip label="Más Vendido" size="small" color="success" />}
-                          {product.isNew && <Chip label="Nuevo" size="small" color="warning" />}
+                        <Box sx={{ display: 'flex', gap: 0.5, mt: 0.5 }}>
+                          {product.featured && <Chip label="Destacado" size="small" color="primary" sx={{ fontSize: '0.6rem', height: '20px' }} />}
+                          {product.bestSeller && <Chip label="Más Vendido" size="small" color="success" sx={{ fontSize: '0.6rem', height: '20px' }} />}
+                          {product.isNew && <Chip label="Nuevo" size="small" color="warning" sx={{ fontSize: '0.6rem', height: '20px' }} />}
                         </Box>
                       </CardContent>
                     </Card>
