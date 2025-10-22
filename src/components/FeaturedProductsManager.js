@@ -195,13 +195,15 @@ const FeaturedProductsManager = ({ open, onClose }) => {
     <Dialog
       open={open}
       onClose={onClose}
-      maxWidth="md"
+      maxWidth={false}
       fullWidth
       sx={{
         '& .MuiDialog-paper': {
           borderRadius: '12px',
-          maxHeight: '80vh',
-          height: '80vh'
+          maxHeight: '90vh',
+          height: '90vh',
+          width: '1200px',
+          maxWidth: '1200px'
         }
       }}
     >
@@ -312,8 +314,8 @@ const FeaturedProductsManager = ({ open, onClose }) => {
                         opacity: isMaxReached ? 0.5 : 1,
                         border: isSelected ? '2px solid #C8626D' : '1px solid #ddd',
                         transition: 'all 0.3s ease',
-                        width: '250px',
-                        height: '250px',
+                        width: '200px',
+                        height: '200px',
                         '&:hover': !isMaxReached ? {
                           transform: 'translateY(-2px)',
                           boxShadow: '0 4px 12px rgba(0,0,0,0.15)'

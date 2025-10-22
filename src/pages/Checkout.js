@@ -43,6 +43,44 @@ const Checkout = () => {
   const cartTotal = getCartTotal();
   const cartItemsCount = getCartItemsCount();
 
+  // Función para calcular fecha de entrega estimada
+  const calculateDeliveryDate = () => {
+    const today = new Date();
+    const currentDay = today.getDay(); // 0 = domingo, 1 = lunes, ..., 6 = sábado
+    
+    // Calcular días hasta el próximo lunes
+    let daysToMonday;
+    if (currentDay === 0) { // Domingo
+      daysToMonday = 1;
+    } else if (currentDay === 1) { // Lunes
+      daysToMonday = 7; // Siguiente lunes
+    } else {
+      daysToMonday = 8 - currentDay; // Martes=6, Miércoles=5, Jueves=4, Viernes=3, Sábado=2
+    }
+    
+    // Fecha de envío (próximo lunes)
+    const shippingDate = new Date(today.getTime() + (daysToMonday * 24 * 60 * 60 * 1000));
+    
+    // Días de tránsito del proveedor (usando el rango medio)
+    let transitDays = 3; // Default
+    if (shippingInfo?.transitDays) {
+      const transitRange = shippingInfo.transitDays.split('-');
+      if (transitRange.length === 2) {
+        transitDays = Math.ceil((parseInt(transitRange[0]) + parseInt(transitRange[1])) / 2);
+      }
+    }
+    
+    // Fecha estimada de entrega
+    const deliveryDate = new Date(shippingDate.getTime() + (transitDays * 24 * 60 * 60 * 1000));
+    
+    return {
+      shippingDate,
+      deliveryDate,
+      transitDays: shippingInfo?.transitDays || '2-3',
+      daysToMonday
+    };
+  };
+
   const handleInputChange = (e) => {
     setFormData({
       ...formData,
@@ -442,6 +480,44 @@ const Checkout = () => {
                         <Typography variant="body1" sx={{ mb: 0.5, color: '#8B4513', fontWeight: 600, fontSize: '0.9rem' }}>
                           ✓ Envío Configurado
                         </Typography>
+                        
+                        {/* Información de fecha de entrega */}
+                        {(() => {
+                          const deliveryInfo = calculateDeliveryDate();
+                          
+                          // Validar que las fechas sean válidas
+                          if (isNaN(deliveryInfo.shippingDate.getTime()) || isNaN(deliveryInfo.deliveryDate.getTime())) {
+                            return (
+                              <Box sx={{ mt: 1 }}>
+                                <Typography variant="body2" sx={{ color: '#666', fontSize: '0.85rem' }}>
+                                  📦 Cálculo de fecha de entrega en proceso...
+                                </Typography>
+                              </Box>
+                            );
+                          }
+                          
+                          return (
+                            <Box sx={{ mt: 1 }}>
+                              <Typography variant="body2" sx={{ color: '#666', fontSize: '0.85rem', mb: 0.5 }}>
+                                📦 Su pedido se enviará el {deliveryInfo.shippingDate.toLocaleDateString('es-ES', { 
+                                  weekday: 'long', 
+                                  day: 'numeric', 
+                                  month: 'long' 
+                                })}
+                              </Typography>
+                              <Typography variant="body2" sx={{ color: '#666', fontSize: '0.85rem', mb: 0.5 }}>
+                                🚚 Tránsito estimado: {deliveryInfo.transitDays} días
+                              </Typography>
+                              <Typography variant="body2" sx={{ color: '#8B4513', fontWeight: 600, fontSize: '0.85rem' }}>
+                                📅 Entrega estimada: {deliveryInfo.deliveryDate.toLocaleDateString('es-ES', { 
+                                  weekday: 'long', 
+                                  day: 'numeric', 
+                                  month: 'long' 
+                                })}
+                              </Typography>
+                            </Box>
+                          );
+                        })()}
                         <Typography variant="body2" sx={{ color: '#666', fontSize: '0.8rem' }}>
                           Tracking: {shippingInfo.trackingNumber}
                         </Typography>

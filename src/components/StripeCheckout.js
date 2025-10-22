@@ -208,14 +208,6 @@ const CheckoutForm = ({ cartItems, total, customerInfo, onSuccess, onError }) =>
           </Alert>
         )}
 
-        {/* Debug info */}
-        {process.env.NODE_ENV === 'development' && (
-          <Box sx={{ mt: 2, p: 2, backgroundColor: '#f5f5f5', borderRadius: 1 }}>
-            <Typography variant="body2" sx={{ color: '#666' }}>
-              Debug: paymentSuccess = {paymentSuccess ? 'true' : 'false'}
-            </Typography>
-          </Box>
-        )}
 
         {/* Payment Form */}
         {!paymentSuccess && (
