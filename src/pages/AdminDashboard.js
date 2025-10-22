@@ -264,6 +264,41 @@ const AdminDashboard = () => {
     }
   };
 
+  const updateUserRole = async (userId, newRole) => {
+    try {
+      const userRef = doc(db, 'registeredUsers', userId);
+      await updateDoc(userRef, {
+        role: newRole,
+        updatedAt: new Date().toISOString()
+      });
+      console.log('✅ Rol de usuario actualizado:', newRole);
+      
+      // Recargar la lista de usuarios
+      loadRegisteredUsers();
+    } catch (error) {
+      console.error('❌ Error actualizando rol:', error);
+    }
+  };
+
+  const makeDeveloper = async () => {
+    try {
+      // Buscar el usuario por email
+      const usersRef = collection(db, 'registeredUsers');
+      const q = query(usersRef, where('email', '==', 'ueservicesllc1@gmail.com'));
+      const querySnapshot = await getDocs(q);
+      
+      if (!querySnapshot.empty) {
+        const userDoc = querySnapshot.docs[0];
+        await updateUserRole(userDoc.id, 'developer');
+        console.log('✅ Usuario ueservicesllc1@gmail.com ahora es desarrollador');
+      } else {
+        console.log('❌ Usuario ueservicesllc1@gmail.com no encontrado');
+      }
+    } catch (error) {
+      console.error('❌ Error asignando rol de desarrollador:', error);
+    }
+  };
+
   const generatePDFReport = () => {
     // Crear un elemento temporal para el reporte
     const reportElement = document.createElement('div');
@@ -1272,7 +1307,7 @@ const AdminDashboard = () => {
           }}
         >
           <DialogTitle sx={{ 
-            backgroundColor: '#8B4513', 
+            backgroundColor: '#C8626D', 
             color: 'white', 
             py: 2
           }}>
@@ -1299,18 +1334,39 @@ const AdminDashboard = () => {
           
           <DialogContent sx={{ p: 3, backgroundColor: '#fafafa' }}>
             <Box sx={{ mb: 3 }}>
-              <Typography variant="h6" sx={{ color: '#8B4513', mb: 2, fontWeight: 600 }}>
-                Usuarios Registrados ({registeredUsers.length})
-              </Typography>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                <Typography variant="h6" sx={{ color: '#C8626D', fontWeight: 600 }}>
+                  Usuarios Registrados ({registeredUsers.length})
+                </Typography>
+                <Button
+                  variant="outlined"
+                  size="small"
+                  onClick={makeDeveloper}
+                  sx={{
+                    borderColor: '#C8626D',
+                    color: '#C8626D',
+                    fontSize: '0.8rem',
+                    py: 0.5,
+                    px: 1.5,
+                    '&:hover': {
+                      backgroundColor: '#C8626D',
+                      color: 'white',
+                      borderColor: '#C8626D'
+                    }
+                  }}
+                >
+                  Hacer Desarrollador
+                </Button>
+              </Box>
               
               {loadingUsers ? (
                 <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
-                  <CircularProgress sx={{ color: '#8B4513' }} />
+                  <CircularProgress sx={{ color: '#C8626D' }} />
                 </Box>
               ) : registeredUsers.length === 0 ? (
                 <Box sx={{ textAlign: 'center', py: 4 }}>
-                  <AdminPanelSettings sx={{ fontSize: 64, color: '#8B4513', mb: 2 }} />
-                  <Typography variant="h6" sx={{ color: '#8B4513', mb: 2, fontWeight: 600 }}>
+                  <AdminPanelSettings sx={{ fontSize: 64, color: '#C8626D', mb: 2 }} />
+                  <Typography variant="h6" sx={{ color: '#C8626D', mb: 2, fontWeight: 600 }}>
                     No hay usuarios registrados
                   </Typography>
                   <Typography variant="body1" sx={{ color: '#666' }}>
@@ -1325,7 +1381,7 @@ const AdminDashboard = () => {
                   overflow: 'hidden'
                 }}>
                   <Box sx={{ 
-                    backgroundColor: '#8B4513', 
+                    backgroundColor: '#C8626D', 
                     color: 'white', 
                     p: 2,
                     display: 'flex',
@@ -1352,7 +1408,7 @@ const AdminDashboard = () => {
                         backgroundColor: '#f5f5f5',
                         borderBottom: '1px solid #e0e0e0',
                         fontWeight: 600,
-                        color: '#8B4513'
+                        color: '#C8626D'
                       }}>
                         <Box sx={{ flex: '0 0 60px', p: 2, textAlign: 'center' }}>Avatar</Box>
                         <Box sx={{ flex: '1 1 200px', p: 2 }}>Nombre</Box>
@@ -1382,7 +1438,7 @@ const AdminDashboard = () => {
                             />
                           </Box>
                           <Box sx={{ flex: '1 1 200px', p: 2, display: 'flex', alignItems: 'center' }}>
-                            <Typography variant="body2" sx={{ fontWeight: 600, color: '#8B4513' }}>
+                            <Typography variant="body2" sx={{ fontWeight: 600, color: '#C8626D' }}>
                               {user.displayName}
                             </Typography>
                           </Box>
