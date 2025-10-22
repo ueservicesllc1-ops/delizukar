@@ -47,9 +47,9 @@ cd src && npm install
 
 ### 2. Configurar Variables de Entorno
 
-Tu archivo `.env` ya está configurado con:
-- ✅ Clave pública de Stripe: `pk_test_51S37NHIfvAAsTaPnMUhWitBIraJUsz8fPmZkQeT8DyXxOILtroJbXDoJF96C36wSahGimqLb2zEFTdq9yggPf8Mq00wARuJH6Q`
-- ✅ Clave secreta de Stripe: `sk_test_51S37NHIfvAAsTaPnNqJm82kGLE8swr8sGcTTqeGoPXR56JoUyNYKrCgDOPiliO11s5VAvfXZcfQpsbQZQI48m3bt00J7Bgr4yz`
+Tu archivo `.env` debe configurarse con:
+- ✅ Clave pública de Stripe: `REACT_APP_STRIPE_PUBLISHABLE_KEY=pk_test_...`
+- ✅ Clave secreta de Stripe: `STRIPE_SECRET_KEY=sk_test_...`
 
 **Necesitas agregar:**
 ```bash
