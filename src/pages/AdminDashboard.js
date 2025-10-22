@@ -1260,26 +1260,40 @@ const AdminDashboard = () => {
         <Dialog
           open={userManagementOpen}
           onClose={() => setUserManagementOpen(false)}
-          maxWidth="md"
+          maxWidth="lg"
           fullWidth
           PaperProps={{
             sx: {
               borderRadius: '12px',
-              boxShadow: '0 4px 20px rgba(0,0,0,0.1)'
+              boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
+              minHeight: '80vh',
+              maxHeight: '90vh'
             }
           }}
         >
           <DialogTitle sx={{ 
             backgroundColor: '#8B4513', 
             color: 'white', 
-            textAlign: 'center',
             py: 2
           }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1 }}>
-              <Group sx={{ fontSize: 24, color: 'white' }} />
-              <Typography variant="h6" sx={{ fontWeight: 600, color: 'white' }}>
-                Gestión de Usuarios
-              </Typography>
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <Group sx={{ fontSize: 24, color: 'white' }} />
+                <Typography variant="h6" sx={{ fontWeight: 600, color: 'white' }}>
+                  Gestión de Usuarios
+                </Typography>
+              </Box>
+              <IconButton
+                onClick={() => setUserManagementOpen(false)}
+                sx={{
+                  color: 'white',
+                  '&:hover': {
+                    backgroundColor: 'rgba(255,255,255,0.1)'
+                  }
+                }}
+              >
+                <Close />
+              </IconButton>
             </Box>
           </DialogTitle>
           
@@ -1304,53 +1318,102 @@ const AdminDashboard = () => {
                   </Typography>
                 </Box>
               ) : (
-                <Grid container spacing={2}>
-                  {registeredUsers.map((user) => (
-                    <Grid item xs={12} sm={6} md={4} key={user.id}>
-                      <Card sx={{ 
-                        p: 2, 
-                        backgroundColor: 'white', 
-                        borderRadius: '8px',
-                        border: '1px solid #e0e0e0',
-                        '&:hover': {
-                          boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
-                        }
+                <Box sx={{ 
+                  backgroundColor: 'white', 
+                  borderRadius: '8px',
+                  border: '1px solid #e0e0e0',
+                  overflow: 'hidden'
+                }}>
+                  <Box sx={{ 
+                    backgroundColor: '#8B4513', 
+                    color: 'white', 
+                    p: 2,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 2
+                  }}>
+                    <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                      Lista de Usuarios
+                    </Typography>
+                    <Typography variant="body2" sx={{ opacity: 0.9 }}>
+                      {registeredUsers.length} usuario{registeredUsers.length !== 1 ? 's' : ''}
+                    </Typography>
+                  </Box>
+                  
+                  <Box sx={{ overflowX: 'auto' }}>
+                    <Box sx={{ 
+                      display: 'flex', 
+                      flexDirection: 'column',
+                      minWidth: '600px'
+                    }}>
+                      {/* Header */}
+                      <Box sx={{ 
+                        display: 'flex', 
+                        backgroundColor: '#f5f5f5',
+                        borderBottom: '1px solid #e0e0e0',
+                        fontWeight: 600,
+                        color: '#8B4513'
                       }}>
-                        <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                          <Avatar
-                            src={user.photoURL}
-                            alt={user.displayName}
-                            sx={{ width: 40, height: 40, mr: 2 }}
-                          />
-                          <Box sx={{ flex: 1 }}>
-                            <Typography variant="subtitle1" sx={{ fontWeight: 600, color: '#8B4513' }}>
+                        <Box sx={{ flex: '0 0 60px', p: 2, textAlign: 'center' }}>Avatar</Box>
+                        <Box sx={{ flex: '1 1 200px', p: 2 }}>Nombre</Box>
+                        <Box sx={{ flex: '1 1 250px', p: 2 }}>Email</Box>
+                        <Box sx={{ flex: '0 0 100px', p: 2, textAlign: 'center' }}>Rol</Box>
+                        <Box sx={{ flex: '0 0 100px', p: 2, textAlign: 'center' }}>Estado</Box>
+                        <Box sx={{ flex: '0 0 120px', p: 2, textAlign: 'center' }}>Registrado</Box>
+                      </Box>
+                      
+                      {/* Rows */}
+                      {registeredUsers.map((user, index) => (
+                        <Box 
+                          key={user.id}
+                          sx={{ 
+                            display: 'flex', 
+                            borderBottom: index < registeredUsers.length - 1 ? '1px solid #f0f0f0' : 'none',
+                            '&:hover': {
+                              backgroundColor: '#f9f9f9'
+                            }
+                          }}
+                        >
+                          <Box sx={{ flex: '0 0 60px', p: 2, textAlign: 'center', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <Avatar
+                              src={user.photoURL}
+                              alt={user.displayName}
+                              sx={{ width: 32, height: 32 }}
+                            />
+                          </Box>
+                          <Box sx={{ flex: '1 1 200px', p: 2, display: 'flex', alignItems: 'center' }}>
+                            <Typography variant="body2" sx={{ fontWeight: 600, color: '#8B4513' }}>
                               {user.displayName}
                             </Typography>
-                            <Typography variant="body2" sx={{ color: '#666', fontSize: '0.8rem' }}>
+                          </Box>
+                          <Box sx={{ flex: '1 1 250px', p: 2, display: 'flex', alignItems: 'center' }}>
+                            <Typography variant="body2" sx={{ color: '#666', fontSize: '0.9rem' }}>
                               {user.email}
                             </Typography>
                           </Box>
+                          <Box sx={{ flex: '0 0 100px', p: 2, textAlign: 'center', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <Typography variant="caption" sx={{ color: '#666', fontSize: '0.8rem' }}>
+                              {user.role || 'user'}
+                            </Typography>
+                          </Box>
+                          <Box sx={{ flex: '0 0 100px', p: 2, textAlign: 'center', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <Chip 
+                              label={user.status || 'active'} 
+                              size="small"
+                              color={user.status === 'active' ? 'success' : 'default'}
+                              sx={{ fontSize: '0.7rem', height: '20px' }}
+                            />
+                          </Box>
+                          <Box sx={{ flex: '0 0 120px', p: 2, textAlign: 'center', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <Typography variant="caption" sx={{ color: '#999', fontSize: '0.8rem' }}>
+                              {new Date(user.createdAt).toLocaleDateString('es-ES')}
+                            </Typography>
+                          </Box>
                         </Box>
-                        
-                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
-                          <Typography variant="caption" sx={{ color: '#666' }}>
-                            Rol: {user.role || 'user'}
-                          </Typography>
-                          <Chip 
-                            label={user.status || 'active'} 
-                            size="small"
-                            color={user.status === 'active' ? 'success' : 'default'}
-                            sx={{ fontSize: '0.7rem' }}
-                          />
-                        </Box>
-                        
-                        <Typography variant="caption" sx={{ color: '#999', fontSize: '0.7rem' }}>
-                          Registrado: {new Date(user.createdAt).toLocaleDateString('es-ES')}
-                        </Typography>
-                      </Card>
-                    </Grid>
-                  ))}
-                </Grid>
+                      ))}
+                    </Box>
+                  </Box>
+                </Box>
               )}
             </Box>
           </DialogContent>
