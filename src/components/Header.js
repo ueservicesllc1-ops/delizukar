@@ -163,6 +163,86 @@ const Header = () => {
               minHeight: '92px', // reduce altura total
               justifyContent: 'center'
             }}>
+              {/* Authentication Buttons - Top Right */}
+              <Box sx={{ 
+                position: 'absolute', 
+                top: 8, 
+                right: 16, 
+                zIndex: 10 
+              }}>
+                {!user ? (
+                  <Box sx={{ display: 'flex', gap: 0.5 }}>
+                    <Button
+                      size="small"
+                      variant="outlined"
+                      startIcon={<Login />}
+                      onClick={handleGoogleAuth}
+                      sx={{
+                        borderColor: '#c8626d',
+                        color: '#c8626d',
+                        fontSize: '0.7rem',
+                        py: 0.5,
+                        px: 1,
+                        minWidth: 'auto',
+                        '&:hover': {
+                          backgroundColor: '#c8626d',
+                          color: 'white',
+                          borderColor: '#c8626d'
+                        }
+                      }}
+                    >
+                      Iniciar
+                    </Button>
+                    <Button
+                      size="small"
+                      variant="contained"
+                      startIcon={<PersonAdd />}
+                      onClick={handleGoogleAuth}
+                      sx={{
+                        backgroundColor: '#8B4513',
+                        fontSize: '0.7rem',
+                        py: 0.5,
+                        px: 1,
+                        minWidth: 'auto',
+                        '&:hover': {
+                          backgroundColor: '#A0522D'
+                        }
+                      }}
+                    >
+                      Registro
+                    </Button>
+                  </Box>
+                ) : (
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <Avatar
+                      src={user.photoURL}
+                      alt={user.displayName}
+                      sx={{ width: 28, height: 28 }}
+                    />
+                    <Button
+                      size="small"
+                      variant="outlined"
+                      onClick={handleLogout}
+                      sx={{
+                        borderColor: '#c8626d',
+                        color: '#c8626d',
+                        fontSize: '0.7rem',
+                        py: 0.5,
+                        px: 1,
+                        minWidth: 'auto',
+                        '&:hover': {
+                          backgroundColor: '#c8626d',
+                          color: 'white',
+                          borderColor: '#c8626d'
+                        }
+                      }}
+                    >
+                      Salir
+                    </Button>
+                  </Box>
+                )}
+              </Box>
+
               {/* Logo with Search and User Icons */}
               <Box sx={{ 
                 display: 'flex', 
@@ -274,79 +354,6 @@ const Header = () => {
                   >
                     <Person />
                   </IconButton>
-
-                  {/* Authentication Buttons */}
-                  {!user ? (
-                    <Box sx={{ display: 'flex', gap: 0.5 }}>
-                      <Button
-                        size="small"
-                        variant="outlined"
-                        startIcon={<Login />}
-                        onClick={handleGoogleAuth}
-                        sx={{
-                          borderColor: '#c8626d',
-                          color: '#c8626d',
-                          fontSize: '0.7rem',
-                          py: 0.5,
-                          px: 1,
-                          minWidth: 'auto',
-                          '&:hover': {
-                            backgroundColor: '#c8626d',
-                            color: 'white',
-                            borderColor: '#c8626d'
-                          }
-                        }}
-                      >
-                        Iniciar
-                      </Button>
-                      <Button
-                        size="small"
-                        variant="contained"
-                        startIcon={<PersonAdd />}
-                        onClick={handleGoogleAuth}
-                        sx={{
-                          backgroundColor: '#8B4513',
-                          fontSize: '0.7rem',
-                          py: 0.5,
-                          px: 1,
-                          minWidth: 'auto',
-                          '&:hover': {
-                            backgroundColor: '#A0522D'
-                          }
-                        }}
-                      >
-                        Registro
-                      </Button>
-                    </Box>
-                  ) : (
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                      <Avatar
-                        src={user.photoURL}
-                        alt={user.displayName}
-                        sx={{ width: 32, height: 32 }}
-                      />
-                      <Button
-                        size="small"
-                        variant="outlined"
-                        onClick={handleLogout}
-                        sx={{
-                          borderColor: '#c8626d',
-                          color: '#c8626d',
-                          fontSize: '0.7rem',
-                          py: 0.5,
-                          px: 1,
-                          minWidth: 'auto',
-                          '&:hover': {
-                            backgroundColor: '#c8626d',
-                            color: 'white',
-                            borderColor: '#c8626d'
-                          }
-                        }}
-                      >
-                        Salir
-                      </Button>
-                    </Box>
-                  )}
                 </Box>
               </Box>
 
