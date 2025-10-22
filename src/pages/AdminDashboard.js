@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { auth, db } from '../firebase/config';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
+import * as XLSX from 'xlsx';
 import {
   Box,
   Container,
@@ -111,6 +112,96 @@ const AdminDashboard = () => {
       navigate('/');
     } catch (error) {
       console.error('Error al cerrar sesión:', error);
+    }
+  };
+
+  const generateExcelReport = () => {
+    // Crear el workbook
+    const workbook = XLSX.utils.book_new();
+    
+    // Datos del encabezado de la empresa
+    const headerData = [
+      ['DELIZUKAR - REPORTE DE VENTAS'],
+      [''],
+      ['Empresa: Delizukar'],
+      ['Dirección: Tu dirección aquí'],
+      ['Teléfono: +1 (555) 123-4567'],
+      ['Email: info@delizukar.com'],
+      [''],
+      [`Fecha del Reporte: ${new Date().toLocaleDateString('es-ES')}`],
+      [`Período: ${getPeriodDescription()}`],
+      [''],
+      [''],
+    ];
+
+    // Datos de métricas
+    const metricsData = [
+      ['MÉTRICAS GENERALES'],
+      [''],
+      ['Concepto', 'Valor'],
+      ['Ingresos Totales', '$0.00'],
+      ['Órdenes Totales', '0'],
+      ['Promedio por Orden', '$0.00'],
+      ['Productos Vendidos', '0'],
+      [''],
+      ['RESUMEN POR PERÍODO'],
+      [''],
+      ['Período', 'Ingresos'],
+      ['Esta Semana', '$0.00'],
+      ['Este Mes', '$0.00'],
+      ['Este Año', '$0.00'],
+      [''],
+      ['ÓRDENES RECIENTES'],
+      [''],
+      ['ID', 'Fecha', 'Cliente', 'Total', 'Estado'],
+      ['-', '-', '-', '-', '-'],
+      [''],
+      ['PRODUCTOS MÁS VENDIDOS'],
+      [''],
+      ['Producto', 'Cantidad', 'Ingresos'],
+      ['-', '-', '-'],
+    ];
+
+    // Combinar todos los datos
+    const allData = [...headerData, ...metricsData];
+
+    // Crear la hoja de trabajo
+    const worksheet = XLSX.utils.aoa_to_sheet(allData);
+
+    // Configurar estilos y anchos de columna
+    const colWidths = [
+      { wch: 20 }, // Columna A
+      { wch: 15 }, // Columna B
+      { wch: 15 }, // Columna C
+      { wch: 15 }, // Columna D
+      { wch: 15 }, // Columna E
+    ];
+    worksheet['!cols'] = colWidths;
+
+    // Agregar la hoja al workbook
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Reporte de Ventas');
+
+    // Generar el archivo Excel
+    const fileName = `Reporte_Ventas_${getPeriodDescription().replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.xlsx`;
+    XLSX.writeFile(workbook, fileName);
+  };
+
+  const getPeriodDescription = () => {
+    switch (selectedPeriod) {
+      case 'current':
+        return 'Período Actual';
+      case 'custom':
+        const monthNames = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 
+                           'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+        return `${monthNames[selectedMonth - 1]} ${selectedYear}`;
+      case 'last30':
+        return 'Últimos 30 días';
+      case 'last90':
+        return 'Últimos 90 días';
+      case 'year':
+        return `Año ${selectedYear}`;
+      default:
+        return 'Período Actual';
     }
   };
 
@@ -669,6 +760,24 @@ const AdminDashboard = () => {
                     }}
                   >
                     Aplicar Filtro
+                  </Button>
+                </Grid>
+                <Grid item xs={12} sm={4}>
+                  <Button
+                    variant="outlined"
+                    size="small"
+                    onClick={generateExcelReport}
+                    sx={{
+                      borderColor: '#c8626d',
+                      color: '#c8626d',
+                      '&:hover': { 
+                        backgroundColor: '#c8626d',
+                        color: 'white'
+                      },
+                      width: '100%'
+                    }}
+                  >
+                    📊 Generar Reporte Excel
                   </Button>
                 </Grid>
               </Grid>
