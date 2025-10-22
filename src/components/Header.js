@@ -205,14 +205,72 @@ const Header = () => {
               minHeight: '92px', // reduce altura total
               justifyContent: 'center'
             }}>
-              {/* Authentication Buttons - Top Right */}
-              <Box sx={{ 
-                position: 'absolute', 
-                top: 8, 
-                right: 16, 
-                zIndex: 10 
-              }}>
-                {!user ? (
+              {/* User Info - Top Right */}
+              {user && (
+                <Box sx={{ 
+                  position: 'absolute', 
+                  top: 8, 
+                  right: 16, 
+                  zIndex: 10,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 1,
+                  backgroundColor: 'rgba(255,255,255,0.9)',
+                  padding: '4px 8px',
+                  borderRadius: '20px',
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+                }}>
+                  <Avatar
+                    src={user.photoURL}
+                    alt={user.displayName}
+                    sx={{ width: 24, height: 24 }}
+                  />
+                  <Typography 
+                    variant="caption" 
+                    sx={{ 
+                      color: '#8B4513', 
+                      fontWeight: 600,
+                      fontSize: '0.7rem',
+                      maxWidth: '100px',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap'
+                    }}
+                  >
+                    {user.displayName}
+                  </Typography>
+                  <Button
+                    size="small"
+                    variant="outlined"
+                    onClick={handleLogout}
+                    sx={{
+                      borderColor: '#c8626d',
+                      color: '#c8626d',
+                      fontSize: '0.6rem',
+                      py: 0.3,
+                      px: 0.8,
+                      minWidth: 'auto',
+                      minHeight: '20px',
+                      '&:hover': {
+                        backgroundColor: '#c8626d',
+                        color: 'white',
+                        borderColor: '#c8626d'
+                      }
+                    }}
+                  >
+                    Salir
+                  </Button>
+                </Box>
+              )}
+
+              {/* Authentication Buttons - Top Right (when not logged in) */}
+              {!user && (
+                <Box sx={{ 
+                  position: 'absolute', 
+                  top: 8, 
+                  right: 16, 
+                  zIndex: 10 
+                }}>
                   <Box sx={{ display: 'flex', gap: 0.5 }}>
                     <Button
                       size="small"
@@ -254,36 +312,8 @@ const Header = () => {
                       Registro
                     </Button>
                   </Box>
-                ) : (
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <Avatar
-                      src={user.photoURL}
-                      alt={user.displayName}
-                      sx={{ width: 28, height: 28 }}
-                    />
-                    <Button
-                      size="small"
-                      variant="outlined"
-                      onClick={handleLogout}
-                      sx={{
-                        borderColor: '#c8626d',
-                        color: '#c8626d',
-                        fontSize: '0.7rem',
-                        py: 0.5,
-                        px: 1,
-                        minWidth: 'auto',
-                        '&:hover': {
-                          backgroundColor: '#c8626d',
-                          color: 'white',
-                          borderColor: '#c8626d'
-                        }
-                      }}
-                    >
-                      Salir
-                    </Button>
-                  </Box>
-                )}
-              </Box>
+                </Box>
+              )}
 
               {/* Logo with Search and User Icons */}
               <Box sx={{ 
