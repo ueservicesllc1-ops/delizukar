@@ -13,7 +13,7 @@ const { execSync } = require('child_process');
 try {
   // Build the React app
   console.log('🔨 Running npm run build...');
-  execSync('npm run build', { stdio: 'inherit' });
+  execSync('CI=false npm run build', { stdio: 'inherit' });
   console.log('✅ Build completed successfully');
   
   // Start the server

@@ -746,8 +746,14 @@ app.get('/api/health', (req, res) => {
 
 // Simple health check for Railway
 app.get('/health', (req, res) => {
-  console.log('🔍 Simple health check requested');
-  res.status(200).json({ status: 'OK' });
+  console.log('🔍 Health check requested');
+  res.status(200).send('OK');
+});
+
+// Root endpoint for Railway healthcheck
+app.get('/', (req, res) => {
+  console.log('🔍 Root health check requested');
+  res.sendFile(path.join(__dirname, 'build', 'index.html'));
 });
 
 // ==================== CATCH ALL HANDLER ====================
