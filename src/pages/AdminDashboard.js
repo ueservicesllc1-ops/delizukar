@@ -39,7 +39,8 @@ import {
   People,
   Person,
   LocalOffer,
-  Share
+  Share,
+  Assessment
 } from '@mui/icons-material';
 import FontManager from '../components/FontManager';
 import BannerPhotoManager from '../components/BannerPhotoManager';
@@ -68,6 +69,7 @@ const AdminDashboard = () => {
   const [socialMediaManagerOpen, setSocialMediaManagerOpen] = useState(false);
   const [popupHeroManagerOpen, setPopupHeroManagerOpen] = useState(false);
   const [stripeBalanceOpen, setStripeBalanceOpen] = useState(false);
+  const [salesReportOpen, setSalesReportOpen] = useState(false);
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [selectedFont, setSelectedFont] = useState(null);
@@ -262,6 +264,7 @@ const AdminDashboard = () => {
                               index === 7 ? () => setSocialMediaManagerOpen(true) :
                               index === 8 ? () => setPopupHeroManagerOpen(true) :
                               index === 9 ? () => setStripeBalanceOpen(true) :
+                              index === 10 ? () => setSalesReportOpen(true) :
                               index === 12 ? () => setMinProductsManagerOpen(true) :
                               undefined
                             }
@@ -319,6 +322,20 @@ const AdminDashboard = () => {
                                   }}
                                 >
                                   Balance Stripe
+                                </Typography>
+                              </Box>
+                            ) : index === 10 ? (
+                              <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1 }}>
+                                <Assessment sx={{ color: 'white', fontSize: '2rem' }} />
+                                <Typography
+                                  variant="body2"
+                                  sx={{
+                                    color: 'white',
+                                    fontWeight: 600,
+                                    textShadow: '1px 1px 2px rgba(0,0,0,0.5)'
+                                  }}
+                                >
+                                  Reporte de Ventas
                                 </Typography>
                               </Box>
                             ) : index === 15 ? (
@@ -540,6 +557,49 @@ const AdminDashboard = () => {
           open={stripeBalanceOpen}
           onClose={() => setStripeBalanceOpen(false)}
         />
+
+        {/* Reporte de Ventas */}
+        <Dialog
+          open={salesReportOpen}
+          onClose={() => setSalesReportOpen(false)}
+          maxWidth="md"
+          fullWidth
+        >
+          <DialogTitle>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <Assessment sx={{ color: '#8B4513' }} />
+              <Typography variant="h6" sx={{ fontWeight: 600, color: '#8B4513' }}>
+                Reporte de Ventas
+              </Typography>
+            </Box>
+          </DialogTitle>
+          <DialogContent>
+            <Box sx={{ p: 3, textAlign: 'center' }}>
+              <Typography variant="h6" sx={{ mb: 2, color: '#666' }}>
+                📊 Reporte de Ventas
+              </Typography>
+              <Typography variant="body1" sx={{ mb: 3, color: '#666' }}>
+                Esta funcionalidad estará disponible próximamente.
+              </Typography>
+              <Typography variant="body2" sx={{ color: '#999' }}>
+                Aquí podrás ver estadísticas de ventas, productos más vendidos, 
+                ingresos por período y más métricas importantes.
+              </Typography>
+            </Box>
+          </DialogContent>
+          <DialogActions sx={{ p: 3 }}>
+            <Button
+              onClick={() => setSalesReportOpen(false)}
+              variant="contained"
+              sx={{
+                backgroundColor: '#8B4513',
+                '&:hover': { backgroundColor: '#A0522D' }
+              }}
+            >
+              Cerrar
+            </Button>
+          </DialogActions>
+        </Dialog>
 
         </Box>
       );
