@@ -4,6 +4,7 @@ console.log('STRIPE_SECRET_KEY:', process.env.STRIPE_SECRET_KEY ? 'SET' : 'NOT S
 console.log('REACT_APP_STRIPE_PUBLISHABLE_KEY:', process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY ? 'SET' : 'NOT SET');
 const express = require('express');
 const cors = require('cors');
+const path = require('path');
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY || 'sk_test_dummy_key_for_development', {
   apiVersion: '2023-10-16', // Stable API version
   maxNetworkRetries: 3, // Enhanced retry logic
@@ -719,6 +720,11 @@ async function handleInvoicePaymentSucceeded(invoice) {
   }
 }
 
+// ==================== STATIC FILES ====================
+
+// Serve static files from the React app build directory
+app.use(express.static(path.join(__dirname, 'build')));
+
 // ==================== HEALTH CHECK ====================
 
 app.get('/api/health', (req, res) => {
@@ -730,6 +736,13 @@ app.get('/api/health', (req, res) => {
       mode: process.env.STRIPE_SECRET_KEY?.startsWith('sk_test_') ? 'test' : 'live'
     }
   });
+});
+
+// ==================== CATCH ALL HANDLER ====================
+
+// Catch all handler: send back React's index.html file for any non-API routes
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'build', 'index.html'));
 });
 
 // ==================== ERROR HANDLING ====================
