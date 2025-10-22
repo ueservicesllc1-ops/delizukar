@@ -52,6 +52,7 @@ import TestimonialsManager from '../components/TestimonialsManager';
 import FeaturedProductsManager from '../components/FeaturedProductsManager';
 import SocialMediaManager from '../components/SocialMediaManager';
 import PopupHeroManager from '../components/PopupHeroManager';
+import StripeBalance from '../components/StripeBalance';
 
 const AdminDashboard = () => {
   const [fontManagerOpen, setFontManagerOpen] = useState(false);
@@ -66,6 +67,7 @@ const AdminDashboard = () => {
   const [featuredProductsManagerOpen, setFeaturedProductsManagerOpen] = useState(false);
   const [socialMediaManagerOpen, setSocialMediaManagerOpen] = useState(false);
   const [popupHeroManagerOpen, setPopupHeroManagerOpen] = useState(false);
+  const [stripeBalanceOpen, setStripeBalanceOpen] = useState(false);
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [selectedFont, setSelectedFont] = useState(null);
@@ -259,6 +261,7 @@ const AdminDashboard = () => {
                               index === 6 ? () => setFeaturedProductsManagerOpen(true) :
                               index === 7 ? () => setSocialMediaManagerOpen(true) :
                               index === 8 ? () => setPopupHeroManagerOpen(true) :
+                              index === 9 ? () => setStripeBalanceOpen(true) :
                               index === 12 ? () => setMinProductsManagerOpen(true) :
                               undefined
                             }
@@ -531,6 +534,11 @@ const AdminDashboard = () => {
         <PopupHeroManager
           open={popupHeroManagerOpen}
           onClose={() => setPopupHeroManagerOpen(false)}
+        />
+
+        <StripeBalance
+          open={stripeBalanceOpen}
+          onClose={() => setStripeBalanceOpen(false)}
         />
 
         </Box>
