@@ -35,6 +35,9 @@ const StripeBalance = ({ open, onClose }) => {
         setBalance(data.balance);
         // Detectar si estamos en modo test basado en la clave de Stripe
         const isTest = data.isTestMode || false;
+        console.log('🔍 Frontend - isTestMode from server:', isTest);
+        console.log('🔍 Frontend - data.isTestMode:', data.isTestMode);
+        console.log('🔍 Frontend - data.mode:', data.mode);
         setIsTestMode(isTest);
       } else {
         setError('No se pudo obtener la información del balance');

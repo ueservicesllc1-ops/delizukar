@@ -486,7 +486,10 @@ app.get('/api/balance', async (req, res) => {
     const balance = await stripe.balance.retrieve();
     
     // Detectar si estamos en modo test
+    console.log('🔍 STRIPE_SECRET_KEY:', process.env.STRIPE_SECRET_KEY ? 'SET' : 'NOT SET');
+    console.log('🔍 Key starts with sk_test_:', process.env.STRIPE_SECRET_KEY?.startsWith('sk_test_'));
     const isTestMode = process.env.STRIPE_SECRET_KEY?.startsWith('sk_test_') || false;
+    console.log('🔍 isTestMode:', isTestMode);
     
     res.json({
       balance: {
