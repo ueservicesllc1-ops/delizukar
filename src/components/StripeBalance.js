@@ -21,6 +21,7 @@ const StripeBalance = ({ open, onClose }) => {
   const [balance, setBalance] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [isTestMode, setIsTestMode] = useState(true);
 
   const fetchBalance = async () => {
     try {
@@ -32,6 +33,9 @@ const StripeBalance = ({ open, onClose }) => {
       
       if (data.balance) {
         setBalance(data.balance);
+        // Detectar si estamos en modo test basado en la clave de Stripe
+        const isTest = data.isTestMode || false;
+        setIsTestMode(isTest);
       } else {
         setError('No se pudo obtener la información del balance');
       }
@@ -105,6 +109,20 @@ const StripeBalance = ({ open, onClose }) => {
       </DialogTitle>
       <DialogContent>
         <Box>
+          {/* Indicador de modo */}
+          <Box sx={{ mb: 3, display: 'flex', justifyContent: 'center' }}>
+            <Chip 
+              label={isTestMode ? "MODO TEST" : "MODO LIVE"} 
+              color={isTestMode ? "warning" : "success"} 
+              size="large"
+              sx={{ 
+                fontWeight: 600,
+                fontSize: '0.9rem',
+                px: 2,
+                py: 1
+              }}
+            />
+          </Box>
 
       <Grid container spacing={3}>
         {/* Balance Disponible */}

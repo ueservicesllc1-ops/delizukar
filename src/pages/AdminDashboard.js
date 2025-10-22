@@ -48,7 +48,6 @@ import PagesManager from '../components/PagesManager';
 import MinProductsManager from '../components/MinProductsManager';
 import ProductsManager from '../components/ProductsManager';
 import InventoryManager from '../components/InventoryManager';
-import StripeBalance from '../components/StripeBalance';
 import TestimonialsManager from '../components/TestimonialsManager';
 import FeaturedProductsManager from '../components/FeaturedProductsManager';
 import SocialMediaManager from '../components/SocialMediaManager';
@@ -67,7 +66,6 @@ const AdminDashboard = () => {
   const [featuredProductsManagerOpen, setFeaturedProductsManagerOpen] = useState(false);
   const [socialMediaManagerOpen, setSocialMediaManagerOpen] = useState(false);
   const [popupHeroManagerOpen, setPopupHeroManagerOpen] = useState(false);
-  const [stripeBalanceOpen, setStripeBalanceOpen] = useState(false);
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [selectedFont, setSelectedFont] = useState(null);
