@@ -566,266 +566,215 @@ const AdminDashboard = () => {
         <Dialog
           open={salesReportOpen}
           onClose={() => setSalesReportOpen(false)}
-          maxWidth="lg"
+          maxWidth="md"
           fullWidth
           PaperProps={{
             sx: {
-              minHeight: '85vh',
-              maxHeight: '95vh',
-              borderRadius: 0,
-              boxShadow: '0 8px 32px rgba(0,0,0,0.3)'
+              borderRadius: '12px',
+              boxShadow: '0 4px 20px rgba(0,0,0,0.1)'
             }
           }}
         >
           <DialogTitle sx={{ 
-            backgroundColor: '#000', 
+            backgroundColor: '#c8626d', 
             color: 'white', 
             textAlign: 'center',
-            py: 3,
-            borderBottom: '3px solid #1e3a8a'
+            py: 2
           }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 2 }}>
-              <Assessment sx={{ fontSize: 32, color: '#1e3a8a' }} />
-              <Typography variant="h4" sx={{ fontWeight: 700, color: 'white' }}>
-                REPORTE DE VENTAS
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1 }}>
+              <Assessment sx={{ fontSize: 24, color: 'white' }} />
+              <Typography variant="h6" sx={{ fontWeight: 600, color: 'white' }}>
+                Reporte de Ventas
               </Typography>
             </Box>
           </DialogTitle>
           
-          <DialogContent sx={{ p: 0, backgroundColor: '#f8fafc' }}>
-            <Box sx={{ p: 4 }}>
-              <Grid container spacing={4} justifyContent="center">
-                {/* Métricas Principales */}
-                <Grid item xs={12}>
-                  <Typography variant="h5" sx={{ 
-                    mb: 3, 
-                    color: '#000', 
-                    fontWeight: 700, 
-                    textAlign: 'center',
-                    textTransform: 'uppercase',
-                    letterSpacing: '1px'
-                  }}>
-                    MÉTRICAS GENERALES
-                  </Typography>
-                  <Grid container spacing={3} justifyContent="center">
-                    <Grid item xs={12} sm={6} md={3}>
-                      <Box sx={{ 
-                        backgroundColor: '#1e3a8a', 
-                        color: 'white', 
-                        p: 3, 
-                        textAlign: 'center',
-                        border: '2px solid #000',
-                        minHeight: '120px',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        justifyContent: 'center'
-                      }}>
-                        <Typography variant="h3" sx={{ fontWeight: 900, mb: 1 }}>
-                          $0.00
-                        </Typography>
-                        <Typography variant="h6" sx={{ fontWeight: 600, textTransform: 'uppercase' }}>
-                          INGRESOS TOTALES
-                        </Typography>
-                      </Box>
-                    </Grid>
-                    <Grid item xs={12} sm={6} md={3}>
-                      <Box sx={{ 
-                        backgroundColor: '#000', 
-                        color: 'white', 
-                        p: 3, 
-                        textAlign: 'center',
-                        border: '2px solid #1e3a8a',
-                        minHeight: '120px',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        justifyContent: 'center'
-                      }}>
-                        <Typography variant="h3" sx={{ fontWeight: 900, mb: 1 }}>
-                          0
-                        </Typography>
-                        <Typography variant="h6" sx={{ fontWeight: 600, textTransform: 'uppercase' }}>
-                          ÓRDENES TOTALES
-                        </Typography>
-                      </Box>
-                    </Grid>
-                    <Grid item xs={12} sm={6} md={3}>
-                      <Box sx={{ 
-                        backgroundColor: '#1e3a8a', 
-                        color: 'white', 
-                        p: 3, 
-                        textAlign: 'center',
-                        border: '2px solid #000',
-                        minHeight: '120px',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        justifyContent: 'center'
-                      }}>
-                        <Typography variant="h3" sx={{ fontWeight: 900, mb: 1 }}>
-                          $0.00
-                        </Typography>
-                        <Typography variant="h6" sx={{ fontWeight: 600, textTransform: 'uppercase' }}>
-                          PROMEDIO POR ORDEN
-                        </Typography>
-                      </Box>
-                    </Grid>
-                    <Grid item xs={12} sm={6} md={3}>
-                      <Box sx={{ 
-                        backgroundColor: '#000', 
-                        color: 'white', 
-                        p: 3, 
-                        textAlign: 'center',
-                        border: '2px solid #1e3a8a',
-                        minHeight: '120px',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        justifyContent: 'center'
-                      }}>
-                        <Typography variant="h3" sx={{ fontWeight: 900, mb: 1 }}>
-                          0
-                        </Typography>
-                        <Typography variant="h6" sx={{ fontWeight: 600, textTransform: 'uppercase' }}>
-                          PRODUCTOS VENDIDOS
-                        </Typography>
-                      </Box>
-                    </Grid>
+          <DialogContent sx={{ p: 3, backgroundColor: '#fafafa' }}>
+            <Grid container spacing={2}>
+              {/* Métricas Principales */}
+              <Grid item xs={12}>
+                <Typography variant="h6" sx={{ 
+                  mb: 2, 
+                  color: '#c8626d', 
+                  fontWeight: 600, 
+                  textAlign: 'center'
+                }}>
+                  Métricas Generales
+                </Typography>
+                <Grid container spacing={2}>
+                  <Grid item xs={6} sm={3}>
+                    <Card sx={{ 
+                      p: 2, 
+                      backgroundColor: '#c8626d', 
+                      color: 'white',
+                      textAlign: 'center',
+                      borderRadius: '8px'
+                    }}>
+                      <Typography variant="h5" sx={{ fontWeight: 700, mb: 0.5 }}>
+                        $0.00
+                      </Typography>
+                      <Typography variant="body2" sx={{ fontSize: '0.8rem' }}>
+                        Ingresos
+                      </Typography>
+                    </Card>
                   </Grid>
-                </Grid>
-
-                {/* Órdenes Recientes */}
-                <Grid item xs={12} md={6}>
-                  <Typography variant="h5" sx={{ 
-                    mb: 3, 
-                    color: '#000', 
-                    fontWeight: 700, 
-                    textAlign: 'center',
-                    textTransform: 'uppercase',
-                    letterSpacing: '1px'
-                  }}>
-                    ÓRDENES RECIENTES
-                  </Typography>
-                  <Box sx={{ 
-                    backgroundColor: '#1e3a8a', 
-                    color: 'white', 
-                    p: 4, 
-                    textAlign: 'center',
-                    border: '2px solid #000',
-                    minHeight: '200px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center'
-                  }}>
-                    <Typography variant="h6" sx={{ fontWeight: 600, textTransform: 'uppercase' }}>
-                      NO HAY ÓRDENES REGISTRADAS AÚN
-                    </Typography>
-                  </Box>
-                </Grid>
-
-                {/* Productos Más Vendidos */}
-                <Grid item xs={12} md={6}>
-                  <Typography variant="h5" sx={{ 
-                    mb: 3, 
-                    color: '#000', 
-                    fontWeight: 700, 
-                    textAlign: 'center',
-                    textTransform: 'uppercase',
-                    letterSpacing: '1px'
-                  }}>
-                    PRODUCTOS MÁS VENDIDOS
-                  </Typography>
-                  <Box sx={{ 
-                    backgroundColor: '#000', 
-                    color: 'white', 
-                    p: 4, 
-                    textAlign: 'center',
-                    border: '2px solid #1e3a8a',
-                    minHeight: '200px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center'
-                  }}>
-                    <Typography variant="h6" sx={{ fontWeight: 600, textTransform: 'uppercase' }}>
-                      NO HAY DATOS DE VENTAS AÚN
-                    </Typography>
-                  </Box>
-                </Grid>
-
-                {/* Resumen por Período */}
-                <Grid item xs={12}>
-                  <Typography variant="h5" sx={{ 
-                    mb: 3, 
-                    color: '#000', 
-                    fontWeight: 700, 
-                    textAlign: 'center',
-                    textTransform: 'uppercase',
-                    letterSpacing: '1px'
-                  }}>
-                    RESUMEN POR PERÍODO
-                  </Typography>
-                  <Grid container spacing={3} justifyContent="center">
-                    <Grid item xs={12} sm={4}>
-                      <Box sx={{ 
-                        backgroundColor: '#1e3a8a', 
-                        color: 'white', 
-                        p: 3, 
-                        textAlign: 'center',
-                        border: '2px solid #000',
-                        minHeight: '100px',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        justifyContent: 'center'
-                      }}>
-                        <Typography variant="h4" sx={{ fontWeight: 900, mb: 1 }}>
-                          $0.00
-                        </Typography>
-                        <Typography variant="h6" sx={{ fontWeight: 600, textTransform: 'uppercase' }}>
-                          ESTA SEMANA
-                        </Typography>
-                      </Box>
-                    </Grid>
-                    <Grid item xs={12} sm={4}>
-                      <Box sx={{ 
-                        backgroundColor: '#000', 
-                        color: 'white', 
-                        p: 3, 
-                        textAlign: 'center',
-                        border: '2px solid #1e3a8a',
-                        minHeight: '100px',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        justifyContent: 'center'
-                      }}>
-                        <Typography variant="h4" sx={{ fontWeight: 900, mb: 1 }}>
-                          $0.00
-                        </Typography>
-                        <Typography variant="h6" sx={{ fontWeight: 600, textTransform: 'uppercase' }}>
-                          ESTE MES
-                        </Typography>
-                      </Box>
-                    </Grid>
-                    <Grid item xs={12} sm={4}>
-                      <Box sx={{ 
-                        backgroundColor: '#1e3a8a', 
-                        color: 'white', 
-                        p: 3, 
-                        textAlign: 'center',
-                        border: '2px solid #000',
-                        minHeight: '100px',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        justifyContent: 'center'
-                      }}>
-                        <Typography variant="h4" sx={{ fontWeight: 900, mb: 1 }}>
-                          $0.00
-                        </Typography>
-                        <Typography variant="h6" sx={{ fontWeight: 600, textTransform: 'uppercase' }}>
-                          ESTE AÑO
-                        </Typography>
-                      </Box>
-                    </Grid>
+                  <Grid item xs={6} sm={3}>
+                    <Card sx={{ 
+                      p: 2, 
+                      backgroundColor: '#be8782', 
+                      color: 'white',
+                      textAlign: 'center',
+                      borderRadius: '8px'
+                    }}>
+                      <Typography variant="h5" sx={{ fontWeight: 700, mb: 0.5 }}>
+                        0
+                      </Typography>
+                      <Typography variant="body2" sx={{ fontSize: '0.8rem' }}>
+                        Órdenes
+                      </Typography>
+                    </Card>
+                  </Grid>
+                  <Grid item xs={6} sm={3}>
+                    <Card sx={{ 
+                      p: 2, 
+                      backgroundColor: '#A0522D', 
+                      color: 'white',
+                      textAlign: 'center',
+                      borderRadius: '8px'
+                    }}>
+                      <Typography variant="h5" sx={{ fontWeight: 700, mb: 0.5 }}>
+                        $0.00
+                      </Typography>
+                      <Typography variant="body2" sx={{ fontSize: '0.8rem' }}>
+                        Promedio
+                      </Typography>
+                    </Card>
+                  </Grid>
+                  <Grid item xs={6} sm={3}>
+                    <Card sx={{ 
+                      p: 2, 
+                      backgroundColor: '#D2B48C', 
+                      color: 'white',
+                      textAlign: 'center',
+                      borderRadius: '8px'
+                    }}>
+                      <Typography variant="h5" sx={{ fontWeight: 700, mb: 0.5 }}>
+                        0
+                      </Typography>
+                      <Typography variant="body2" sx={{ fontSize: '0.8rem' }}>
+                        Productos
+                      </Typography>
+                    </Card>
                   </Grid>
                 </Grid>
               </Grid>
-            </Box>
+
+              {/* Órdenes Recientes */}
+              <Grid item xs={12} md={6}>
+                <Typography variant="h6" sx={{ 
+                  mb: 2, 
+                  color: '#c8626d', 
+                  fontWeight: 600, 
+                  textAlign: 'center'
+                }}>
+                  Órdenes Recientes
+                </Typography>
+                <Card sx={{ 
+                  p: 2, 
+                  backgroundColor: 'white', 
+                  borderRadius: '8px',
+                  border: '1px solid #e0e0e0'
+                }}>
+                  <Typography variant="body2" sx={{ color: '#666', textAlign: 'center', py: 2 }}>
+                    No hay órdenes registradas aún
+                  </Typography>
+                </Card>
+              </Grid>
+
+              {/* Productos Más Vendidos */}
+              <Grid item xs={12} md={6}>
+                <Typography variant="h6" sx={{ 
+                  mb: 2, 
+                  color: '#c8626d', 
+                  fontWeight: 600, 
+                  textAlign: 'center'
+                }}>
+                  Productos Más Vendidos
+                </Typography>
+                <Card sx={{ 
+                  p: 2, 
+                  backgroundColor: 'white', 
+                  borderRadius: '8px',
+                  border: '1px solid #e0e0e0'
+                }}>
+                  <Typography variant="body2" sx={{ color: '#666', textAlign: 'center', py: 2 }}>
+                    No hay datos de ventas aún
+                  </Typography>
+                </Card>
+              </Grid>
+
+              {/* Resumen por Período */}
+              <Grid item xs={12}>
+                <Typography variant="h6" sx={{ 
+                  mb: 2, 
+                  color: '#c8626d', 
+                  fontWeight: 600, 
+                  textAlign: 'center'
+                }}>
+                  Resumen por Período
+                </Typography>
+                <Grid container spacing={2}>
+                  <Grid item xs={4}>
+                    <Card sx={{ 
+                      p: 2, 
+                      backgroundColor: '#c8626d', 
+                      color: 'white',
+                      textAlign: 'center',
+                      borderRadius: '8px'
+                    }}>
+                      <Typography variant="h6" sx={{ fontWeight: 700, mb: 0.5 }}>
+                        $0.00
+                      </Typography>
+                      <Typography variant="body2" sx={{ fontSize: '0.8rem' }}>
+                        Esta Semana
+                      </Typography>
+                    </Card>
+                  </Grid>
+                  <Grid item xs={4}>
+                    <Card sx={{ 
+                      p: 2, 
+                      backgroundColor: '#be8782', 
+                      color: 'white',
+                      textAlign: 'center',
+                      borderRadius: '8px'
+                    }}>
+                      <Typography variant="h6" sx={{ fontWeight: 700, mb: 0.5 }}>
+                        $0.00
+                      </Typography>
+                      <Typography variant="body2" sx={{ fontSize: '0.8rem' }}>
+                        Este Mes
+                      </Typography>
+                    </Card>
+                  </Grid>
+                  <Grid item xs={4}>
+                    <Card sx={{ 
+                      p: 2, 
+                      backgroundColor: '#A0522D', 
+                      color: 'white',
+                      textAlign: 'center',
+                      borderRadius: '8px'
+                    }}>
+                      <Typography variant="h6" sx={{ fontWeight: 700, mb: 0.5 }}>
+                        $0.00
+                      </Typography>
+                      <Typography variant="body2" sx={{ fontSize: '0.8rem' }}>
+                        Este Año
+                      </Typography>
+                    </Card>
+                  </Grid>
+                </Grid>
+              </Grid>
+            </Grid>
           </DialogContent>
         </Dialog>
 
