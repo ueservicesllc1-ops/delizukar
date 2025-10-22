@@ -195,27 +195,28 @@ const FeaturedProductsManager = ({ open, onClose }) => {
     <Dialog
       open={open}
       onClose={onClose}
-      maxWidth="md"
+      maxWidth="lg"
       fullWidth
       sx={{
         '& .MuiDialog-paper': {
           borderRadius: '12px',
-          maxHeight: '80vh',
-          height: '80vh'
+          maxHeight: '90vh',
+          height: '90vh'
         }
       }}
     >
-      <DialogTitle>
+      <DialogTitle sx={{ py: 1.5 }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-            <Star sx={{ color: '#C8626D', fontSize: '1.5rem' }} />
-            <Typography variant="h6" sx={{ fontWeight: 700, color: '#C8626D' }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Star sx={{ color: '#C8626D', fontSize: '1.2rem' }} />
+            <Typography variant="subtitle1" sx={{ fontWeight: 700, color: '#C8626D' }}>
               Configurar Galletas Destacadas
             </Typography>
           </Box>
           <Button
             onClick={onClose}
-            sx={{ color: '#C8626D' }}
+            size="small"
+            sx={{ color: '#C8626D', minWidth: 'auto', p: 0.5 }}
           >
             ✕
           </Button>
@@ -225,65 +226,7 @@ const FeaturedProductsManager = ({ open, onClose }) => {
       <DialogContent>
         {loading && <LinearProgress />}
         
-        <Box sx={{ mt: 1 }}>
-          {/* Configuración del Título */}
-          <Card sx={{ mb: 2, p: 2, backgroundColor: '#f8f9fa' }}>
-            <Typography variant="subtitle1" sx={{ mb: 2, color: '#C8626D', fontWeight: 600 }}>
-              Configuración del Título
-            </Typography>
-            
-            <Grid container spacing={2}>
-              <Grid item xs={12} md={6}>
-                <TextField
-                  fullWidth
-                  label="Texto del título"
-                  value={titleConfig.text}
-                  onChange={(e) => setTitleConfig(prev => ({ ...prev, text: e.target.value }))}
-                  placeholder="Galletas Destacadas"
-                />
-              </Grid>
-              
-              <Grid item xs={12} md={6}>
-                <FormControl fullWidth>
-                  <InputLabel>Fuente del título</InputLabel>
-                  <Select
-                    value={titleConfig.font}
-                    onChange={(e) => setTitleConfig(prev => ({ ...prev, font: e.target.value }))}
-                  >
-                    {/* Fuentes predefinidas */}
-                    {availableFonts.map(font => (
-                      <MenuItem key={`predefined-${font.id}`} value={font.name} sx={{ fontFamily: `"${font.name}", sans-serif` }}>
-                        {font.name}
-                      </MenuItem>
-                    ))}
-                    {/* Separador */}
-                    <MenuItem disabled>
-                      <Box sx={{ width: '100%', height: '1px', backgroundColor: '#ddd', my: 1 }} />
-                    </MenuItem>
-                    {/* Fuentes personalizadas */}
-                    {uploadedFonts.map(font => (
-                      <MenuItem key={`uploaded-${font.id}`} value={font.name} sx={{ fontFamily: `"${font.name}", sans-serif` }}>
-                        {font.name}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-              </Grid>
-              
-              {/* Vista previa del título */}
-              <Grid item xs={12}>
-                <Box sx={{ p: 2, backgroundColor: 'white', borderRadius: 2, textAlign: 'center', border: '1px solid #ddd' }}>
-                  <Typography variant="h4" sx={{ 
-                    fontFamily: `"${titleConfig.font}", serif`,
-                    color: '#EC8C8D',
-                    fontWeight: 800
-                  }}>
-                    Vista previa: {titleConfig.text}
-                  </Typography>
-                </Box>
-              </Grid>
-            </Grid>
-          </Card>
+        <Box sx={{ mt: 0.5 }}>
 
           {/* Selección de Productos */}
           <Card sx={{ p: 2 }}>
