@@ -26,13 +26,17 @@ const PopupHero = ({ open, onClose }) => {
   const [offers, setOffers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [currentOffer, setCurrentOffer] = useState(0);
+  const [duration, setDuration] = useState(8); // Duración por defecto: 8 segundos
+  const [timeLeft, setTimeLeft] = useState(8);
+  const [isClosing, setIsClosing] = useState(false);
 
   console.log('PopupHero - open:', open, 'loading:', loading, 'offers:', offers.length);
 
-  // Cargar ofertas desde Firebase
+  // Cargar ofertas y configuración desde Firebase
   useEffect(() => {
     const loadOffers = async () => {
       try {
+        // Cargar ofertas
         const querySnapshot = await getDocs(collection(db, 'popupOffers'));
         const offersData = querySnapshot.docs.map(doc => ({
           id: doc.id,
@@ -48,6 +52,21 @@ const PopupHero = ({ open, onClose }) => {
         } else {
           setOffers(activeOffers);
         }
+
+        // Cargar configuración de duración
+        const configSnapshot = await getDocs(collection(db, 'appConfig'));
+        const configData = configSnapshot.docs.find(doc => doc.id === 'popupHero');
+        
+        if (configData) {
+          const config = configData.data();
+          const popupDuration = config.duration || 8; // Duración por defecto: 8 segundos
+          setDuration(popupDuration);
+          setTimeLeft(popupDuration);
+        } else {
+          setDuration(8);
+          setTimeLeft(8);
+        }
+        
         setLoading(false);
       } catch (error) {
         console.error('Error cargando ofertas:', error);
@@ -60,6 +79,8 @@ const PopupHero = ({ open, onClose }) => {
           actionUrl: '/productos',
           isActive: true
         }]);
+        setDuration(8);
+        setTimeLeft(8);
         setLoading(false);
       }
     };
@@ -69,16 +90,28 @@ const PopupHero = ({ open, onClose }) => {
     }
   }, [open]);
 
-  // Popup fijo - no se cierra automáticamente
-  // useEffect(() => {
-  //   if (open) {
-  //     const timer = setTimeout(() => {
-  //       onClose();
-  //     }, 10000);
+  // Cuenta regresiva y cierre automático
+  useEffect(() => {
+    if (open && !loading && offers.length > 0) {
+      setTimeLeft(duration);
+      setIsClosing(false);
+      
+      const timer = setInterval(() => {
+        setTimeLeft(prev => {
+          if (prev <= 1) {
+            setIsClosing(true);
+            setTimeout(() => {
+              onClose();
+            }, 500); // Pequeño delay para la animación de salida
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
 
-  //     return () => clearTimeout(timer);
-  //   }
-  // }, [open, onClose]);
+      return () => clearInterval(timer);
+    }
+  }, [open, loading, offers.length, duration, onClose]);
 
   // Cambiar oferta cada 4 segundos si hay múltiples ofertas
   useEffect(() => {
@@ -155,6 +188,54 @@ const PopupHero = ({ open, onClose }) => {
                 }
               }}
             />
+
+            {/* Indicador de cuenta regresiva */}
+            <Box
+              sx={{
+                position: 'absolute',
+                top: 16,
+                left: 16,
+                zIndex: 10,
+                display: 'flex',
+                alignItems: 'center',
+                gap: 1
+              }}
+            >
+              <Box
+                sx={{
+                  width: 40,
+                  height: 40,
+                  borderRadius: '50%',
+                  backgroundColor: 'rgba(0,0,0,0.1)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  backdropFilter: 'blur(10px)',
+                  border: '1px solid rgba(255,255,255,0.2)'
+                }}
+              >
+                <Typography
+                  variant="h6"
+                  sx={{
+                    fontWeight: 700,
+                    color: timeLeft <= 3 ? '#ff4444' : '#333',
+                    fontSize: '1.1rem'
+                  }}
+                >
+                  {timeLeft}
+                </Typography>
+              </Box>
+              <Typography
+                variant="caption"
+                sx={{
+                  color: '#666',
+                  fontWeight: 500,
+                  fontSize: '0.8rem'
+                }}
+              >
+                seg
+              </Typography>
+            </Box>
 
             {/* Partículas de fondo flotantes */}
             <motion.div

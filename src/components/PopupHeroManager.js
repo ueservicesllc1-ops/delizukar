@@ -48,6 +48,9 @@ const PopupHeroManager = ({ open, onClose }) => {
   const [offers, setOffers] = useState([]);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [popupConfig, setPopupConfig] = useState({
+    duration: 8
+  });
   const [editingOffer, setEditingOffer] = useState(null);
   const [showForm, setShowForm] = useState(false);
   const [error, setError] = useState('');
@@ -101,6 +104,17 @@ const PopupHeroManager = ({ open, onClose }) => {
         }
       } else {
         setOffers([]);
+      }
+
+      // Cargar configuración del popup
+      const configSnap = await getDocs(collection(db, 'appConfig'));
+      const configDoc = configSnap.docs.find(doc => doc.id === 'popupHero');
+      
+      if (configDoc) {
+        const config = configDoc.data();
+        setPopupConfig({
+          duration: config.duration || 8
+        });
       }
     } catch (error) {
       setError('Error cargando ofertas: ' + error.message);
@@ -218,6 +232,26 @@ const PopupHeroManager = ({ open, onClose }) => {
     }
   };
 
+  const handleSaveConfig = async () => {
+    try {
+      setSaving(true);
+      const configRef = doc(db, 'appConfig', 'popupHero');
+      await setDoc(configRef, {
+        duration: popupConfig.duration,
+        updatedAt: new Date().toISOString()
+      });
+      setSnackbarMessage('Configuración guardada correctamente');
+      setSnackbarSeverity('success');
+      setSnackbarOpen(true);
+    } catch (error) {
+      setSnackbarMessage('Error guardando configuración: ' + error.message);
+      setSnackbarSeverity('error');
+      setSnackbarOpen(true);
+    } finally {
+      setSaving(false);
+    }
+  };
+
   const handleClose = () => {
     setShowForm(false);
     setEditingOffer(null);
@@ -327,6 +361,43 @@ const PopupHeroManager = ({ open, onClose }) => {
                       }
                       label="Popup Activo"
                     />
+                    
+                    <Divider sx={{ my: 3 }} />
+                    
+                    <Typography variant="h6" sx={{ mb: 2, fontWeight: 600, color: '#8B4513' }}>
+                      Configuración de Duración
+                    </Typography>
+                    
+                    <Grid container spacing={2} alignItems="center">
+                      <Grid item xs={12} sm={6}>
+                        <TextField
+                          fullWidth
+                          label="Duración del Popup (segundos)"
+                          type="number"
+                          value={popupConfig.duration}
+                          onChange={(e) => setPopupConfig(prev => ({ 
+                            ...prev, 
+                            duration: parseInt(e.target.value) || 8 
+                          }))}
+                          inputProps={{ min: 3, max: 30 }}
+                          helperText="Tiempo que permanece visible el popup (3-30 segundos)"
+                        />
+                      </Grid>
+                      <Grid item xs={12} sm={6}>
+                        <Button
+                          variant="contained"
+                          onClick={handleSaveConfig}
+                          disabled={saving}
+                          startIcon={<Save />}
+                          sx={{
+                            backgroundColor: '#8B4513',
+                            '&:hover': { backgroundColor: '#A0522D' }
+                          }}
+                        >
+                          {saving ? 'Guardando...' : 'Guardar Configuración'}
+                        </Button>
+                      </Grid>
+                    </Grid>
                   </Card>
                 </Grid>
                 
