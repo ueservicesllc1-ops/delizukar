@@ -141,6 +141,30 @@
     text-align: center !important;
   }
   
+  /* Products Mobile */
+  .products-grid-mobile {
+    justify-content: center !important;
+    align-items: center !important;
+  }
+  
+  .product-card-mobile {
+    margin: 0 auto !important;
+    display: flex !important;
+    justify-content: center !important;
+  }
+  
+  /* Nosotros Mobile */
+  .nosotros-mobile {
+    padding-top: 35px !important;
+  }
+  
+  .nosotros-title-mobile {
+    margin-bottom: 32px !important;
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+  
   /* Forms Mobile */
   .form-mobile {
     padding: 16px !important;

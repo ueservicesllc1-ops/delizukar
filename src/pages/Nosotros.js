@@ -49,7 +49,7 @@ const Nosotros = () => {
   }, []);
 
   return (
-    <Box sx={{ py: 8, pt: 35, opacity: fontsReady ? 1 : 0, transition: 'opacity 200ms ease' }}>
+    <Box className="nosotros-mobile" sx={{ pt: 35, pb: 8, opacity: fontsReady ? 1 : 0, transition: 'opacity 200ms ease' }}>
       <style>
         {`
           @keyframes slowFloat {
@@ -70,6 +70,7 @@ const Nosotros = () => {
       </style>
       <Container maxWidth="lg">
         <Typography
+          className="nosotros-title-mobile"
           variant="h2"
           sx={{
             textAlign: 'center',

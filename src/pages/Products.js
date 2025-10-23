@@ -55,7 +55,7 @@ const Products = () => {
         </Box>
 
         {/* Grid de productos */}
-        <Grid container spacing={3} justifyContent="center">
+        <Grid container spacing={3} justifyContent="center" className="products-grid-mobile">
           {productsLoading ? (
             // Skeleton loading mientras cargan los productos
             Array.from({ length: 8 }).map((_, index) => (
@@ -83,6 +83,7 @@ const Products = () => {
                 whileHover={{ y: -10 }}
               >
                 <Card
+                  className="product-card-mobile"
                   onClick={() => { 
                     console.log('Producto clickeado:', product);
                     setSelected(product); 
