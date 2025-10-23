@@ -131,7 +131,7 @@ const Contacto = () => {
           </Alert>
         )}
 
-        <Box component="form" onSubmit={handleSubmit} noValidate>
+        <Box className="contacto-form-mobile" component="form" onSubmit={handleSubmit} noValidate>
           <Grid container spacing={2}>
             <Grid item xs={12} md={6}>
               <TextField

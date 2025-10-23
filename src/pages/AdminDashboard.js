@@ -545,7 +545,7 @@ const AdminDashboard = () => {
   // (hook duplicado eliminado; ya existe arriba antes de los returns)
 
   return (
-    <Box sx={{ py: 4, backgroundColor: '#f5f5f5', minHeight: '100vh' }}>
+    <Box className="admin-dashboard-mobile" sx={{ py: 4, backgroundColor: '#f5f5f5', minHeight: '100vh' }}>
       <Container maxWidth="xl">
         {/* Header */}
         <motion.div
@@ -617,7 +617,7 @@ const AdminDashboard = () => {
                 const color = colors[index];
                 
                 return (
-                  <Grid item xs={3} key={index}>
+                  <Grid item xs={6} sm={3} key={index}>
                     <motion.div
                       initial={{ opacity: 0, scale: 0.8 }}
                       animate={{ opacity: 1, scale: 1 }}

@@ -185,6 +185,7 @@ const FontManager = ({ open, onClose, onFontSelect }) => {
       onClose={onClose}
       maxWidth="lg"
       fullWidth
+      className="font-manager-mobile"
       sx={{
         '& .MuiDialog-paper': {
           borderRadius: '20px',

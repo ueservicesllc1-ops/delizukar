@@ -125,6 +125,7 @@ const InventoryManager = ({ open, onClose }) => {
       onClose={onClose}
       maxWidth="xl"
       fullWidth
+      className="inventory-manager-mobile"
       sx={{
         '& .MuiDialog-paper': {
           borderRadius: '20px',

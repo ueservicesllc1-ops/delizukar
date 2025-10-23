@@ -765,10 +765,17 @@ app.get('/', (req, res) => {
 });
 
 // ==================== CATCH ALL HANDLER ====================
-
-// Catch all handler: send back React's index.html file for any non-API routes
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'build', 'index.html'));
+// Handle all non-API GET routes (React SPA fallback)
+app.use((req, res, next) => {
+  if (
+    req.method === 'GET' &&
+    !req.path.startsWith('/api') &&
+    !req.path.startsWith('/health')
+  ) {
+    res.sendFile(path.join(__dirname, 'build', 'index.html'));
+  } else {
+    next();
+  }
 });
 
 // ==================== ERROR HANDLING ====================

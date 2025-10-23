@@ -181,6 +181,7 @@ const BannerPhotoManager = ({ open, onClose }) => {
         onClose={onClose}
         maxWidth="lg"
         fullWidth
+        className="banner-photo-manager-mobile"
         sx={{
           '& .MuiDialog-paper': {
             borderRadius: '20px',

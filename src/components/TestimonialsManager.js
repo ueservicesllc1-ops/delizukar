@@ -362,6 +362,7 @@ const TestimonialsManager = ({ open, onClose }) => {
       onClose={onClose}
       maxWidth="xl"
       fullWidth
+      className="testimonials-manager-mobile"
       sx={{
         '& .MuiDialog-paper': {
           borderRadius: '20px',

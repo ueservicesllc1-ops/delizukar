@@ -363,6 +363,7 @@ const ProductsManager = ({ open, onClose }) => {
       onClose={handleClose}
       maxWidth="lg"
       fullWidth
+      className="products-manager-mobile"
       PaperProps={{
         sx: {
           borderRadius: '20px',
