@@ -143,7 +143,7 @@ const ShippingCalculator = ({
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           <LocalShipping />
           <Typography variant="h6" sx={{ fontWeight: 600 }}>
-            Opciones de Envío
+            Shipping Options
           </Typography>
         </Box>
         <Button
@@ -181,7 +181,7 @@ const ShippingCalculator = ({
         {rates.length > 0 && (
           <>
             <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
-              Selecciona una opción de envío:
+              Select a shipping option:
             </Typography>
 
             <Grid container spacing={2}>
@@ -223,7 +223,7 @@ const ShippingCalculator = ({
 
                       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                         <Typography variant="body2" color="text.secondary">
-                          Entrega: {formatETA(rate.eta)}
+                          Delivery: {formatETA(rate.eta)}
                         </Typography>
                         
                         {selectedRate?.object_id === rate.object_id && (
@@ -251,7 +251,7 @@ const ShippingCalculator = ({
                   }
                 }}
               >
-                Cancelar
+                Cancel
               </Button>
               
               <Button
@@ -265,7 +265,7 @@ const ShippingCalculator = ({
                   }
                 }}
               >
-                Confirmar Envío
+                Confirm Shipping
               </Button>
             </Box>
           </>

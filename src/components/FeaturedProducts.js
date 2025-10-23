@@ -253,7 +253,7 @@ const FeaturedProducts = () => {
                           transition: 'all 0.3s ease'
                         }}
                       >
-                        Agregar al Carrito
+                        Add to Cart
                       </Button>
                     </CardActions>
                   </Card>

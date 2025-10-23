@@ -134,9 +134,9 @@ const Home = () => {
                             />
                             {/* Chips en la esquina superior izquierda */}
                             <Box sx={{ position: 'absolute', top: 8, left: 8, display: 'flex', flexDirection: 'column', gap: 0.5 }}>
-                              {product.featured && <Chip label="Destacado" size="small" color="primary" sx={{ fontSize: '0.7rem', height: '24px' }} />}
-                              {product.bestSeller && <Chip label="Más Vendido" size="small" color="success" sx={{ fontSize: '0.7rem', height: '24px' }} />}
-                              {product.isNew && <Chip label="Nuevo" size="small" color="warning" sx={{ fontSize: '0.7rem', height: '24px' }} />}
+                              {product.featured && <Chip label="Featured" size="small" color="primary" sx={{ fontSize: '0.7rem', height: '24px' }} />}
+                              {product.bestSeller && <Chip label="Best Seller" size="small" color="success" sx={{ fontSize: '0.7rem', height: '24px' }} />}
+                              {product.isNew && <Chip label="New" size="small" color="warning" sx={{ fontSize: '0.7rem', height: '24px' }} />}
                             </Box>
                           </Box>
                           <Typography
@@ -193,7 +193,7 @@ const Home = () => {
                               minHeight: '32px'
                             }}
                           >
-                            Ver Detalles
+                            View Details
                           </Button>
                         </CardContent>
                       </Card>
@@ -234,7 +234,7 @@ const Home = () => {
                     transition: 'all 0.3s ease'
                   }}
                 >
-                  Ver Todas las Galletas
+                  View All Cookies
                 </Button>
               </motion.div>
             </Box>
@@ -351,9 +351,9 @@ const Home = () => {
                   )}
                   
                   <Box sx={{ display: 'flex', gap: 1, mb: 3 }}>
-                    {selectedProduct.featured && <Chip label="Destacado" color="primary" />}
-                    {selectedProduct.bestSeller && <Chip label="Más Vendido" color="success" />}
-                    {selectedProduct.isNew && <Chip label="Nuevo" color="warning" />}
+                    {selectedProduct.featured && <Chip label="Featured" color="primary" />}
+                    {selectedProduct.bestSeller && <Chip label="Best Seller" color="success" />}
+                    {selectedProduct.isNew && <Chip label="New" color="warning" />}
                   </Box>
                   
                   {selectedProduct.rating && (
@@ -374,13 +374,13 @@ const Home = () => {
                   {selectedProduct.inventory !== undefined && (
                     <Box sx={{ mb: 3 }}>
                       <Typography variant="body2" sx={{ color: '#666', mb: 1 }}>
-                        Stock disponible: {selectedProduct.inventory} unidades
+                        Stock available: {selectedProduct.inventory} units
                       </Typography>
                       <Chip
                         label={
-                          selectedProduct.inventory === 0 ? 'Sin Stock' :
-                          selectedProduct.inventory < 10 ? 'Bajo Stock' :
-                          selectedProduct.inventory < 50 ? 'Stock Medio' : 'En Stock'
+                          selectedProduct.inventory === 0 ? 'Out of Stock' :
+                          selectedProduct.inventory < 10 ? 'Low Stock' :
+                          selectedProduct.inventory < 50 ? 'Medium Stock' : 'In Stock'
                         }
                         color={
                           selectedProduct.inventory === 0 ? 'error' :
@@ -399,7 +399,7 @@ const Home = () => {
                 onClick={() => setProductDetailOpen(false)}
                 sx={{ color: '#c8626d' }}
               >
-                Cerrar
+                Close
               </Button>
               <Button
                 variant="contained"
@@ -419,7 +419,7 @@ const Home = () => {
                   fontWeight: 600
                 }}
               >
-                Agregar al Carrito
+                Add to Cart
               </Button>
             </DialogActions>
           </>

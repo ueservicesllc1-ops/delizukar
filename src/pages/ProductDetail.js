@@ -97,7 +97,7 @@ const ProductDetail = () => {
                 <Box sx={{ display: 'flex', gap: 1, mb: 2 }}>
                   {product.isNew && (
                     <Chip
-                      label="Nuevo"
+                      label="New"
                       sx={{
                         backgroundColor: '#4CAF50',
                         color: 'white',
@@ -300,7 +300,7 @@ const ProductDetail = () => {
                       transition: 'all 0.3s ease'
                     }}
                   >
-                    Agregar al Carrito
+                    Add to Cart
                   </Button>
                   
                   <IconButton

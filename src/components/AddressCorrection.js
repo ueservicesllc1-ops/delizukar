@@ -76,7 +76,7 @@ const AddressCorrection = ({
   const getStatusText = () => {
     if (loading) return 'Validando dirección...';
     if (correctionResult?.needsCorrection) return 'Dirección necesita corrección';
-    return 'Dirección válida';
+    return 'Valid Address';
   };
 
   const getStatusColor = () => {
@@ -103,7 +103,7 @@ const AddressCorrection = ({
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           <LocationOn />
           <Typography variant="h6" sx={{ fontWeight: 600 }}>
-            Validación de Dirección
+            Address Validation
           </Typography>
         </Box>
       </DialogTitle>
@@ -131,7 +131,7 @@ const AddressCorrection = ({
             <Card sx={{ mb: 2, border: '1px solid #e0e0e0' }}>
               <CardContent>
                 <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1 }}>
-                  Dirección Ingresada:
+                  Entered Address:
                 </Typography>
                 <Typography variant="body2" sx={{ color: '#666' }}>
                   {originalAddress.name}<br />
@@ -201,7 +201,7 @@ const AddressCorrection = ({
                   }
                 }}
               >
-                Usar Original
+                Use Original
               </Button>
               
               {correctionResult.needsCorrection && (
@@ -231,7 +231,7 @@ const AddressCorrection = ({
                     }
                   }}
                 >
-                  Continuar
+                  Continue
                 </Button>
               )}
             </Box>

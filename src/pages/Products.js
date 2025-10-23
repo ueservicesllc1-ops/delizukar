@@ -125,7 +125,7 @@ const Products = () => {
                     <Box sx={{ position: 'absolute', top: 12, left: 12, display: 'flex', flexDirection: 'column', gap: 1 }}>
                       {product.isNew && (
                         <Chip
-                          label="Nuevo"
+                          label="New"
                           size="small"
                           sx={{
                             backgroundColor: '#4CAF50',
@@ -137,7 +137,7 @@ const Products = () => {
                       )}
                       {product.isBestSeller && (
                         <Chip
-                          label="Más Vendido"
+                          label="Best Seller"
                           size="small"
                           sx={{
                             backgroundColor: '#FF6B35',
@@ -233,7 +233,7 @@ const Products = () => {
                           fontWeight: 500
                         }}
                       >
-                        Stock: {product.inventory || 0} unidades
+                        Stock: {product.inventory || 0} units
                       </Typography>
                       <Chip
                         label={
@@ -283,7 +283,7 @@ const Products = () => {
                         addToCart(product);
                       }}
                     >
-                      Agregar al Carrito
+                      Add to Cart
                     </Button>
                   </CardActions>
                 </Card>
@@ -407,7 +407,7 @@ const Products = () => {
                         setOpen(false);
                       }}
                     >
-                      Agregar al Carrito
+                      Add to Cart
                     </Button>
                 </Box>
               </Box>

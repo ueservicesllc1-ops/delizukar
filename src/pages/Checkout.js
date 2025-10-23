@@ -189,7 +189,7 @@ const Checkout = () => {
     e.preventDefault();
     
     if (!shippingInfo) {
-      setShippingError('Por favor completa el proceso de envío antes de proceder con el pago');
+      setShippingError('Please complete the shipping process before proceeding with payment');
       return;
     }
     
@@ -221,7 +221,7 @@ const Checkout = () => {
                 fontSize: '0.9rem'
               }}
             >
-              Volver al Carrito
+              Back to Cart
             </Button>
           </Box>
 
@@ -235,7 +235,7 @@ const Checkout = () => {
               fontFamily: 'Playfair Display, serif'
             }}
           >
-            Finalizar Compra
+            Complete Purchase
           </Typography>
           
           <Typography
@@ -246,7 +246,7 @@ const Checkout = () => {
               fontSize: '0.9rem'
             }}
           >
-            Completa tu información para procesar el pedido
+            Complete your information to process the order
           </Typography>
         </motion.div>
 
@@ -271,14 +271,14 @@ const Checkout = () => {
                         fontSize: '1.1rem'
                       }}
                     >
-                      Información de Contacto
+                      Contact Information
                     </Typography>
                     
                     <Grid container spacing={2}>
                       <Grid size={{ xs: 12, md: 6 }}>
                         <TextField
                           fullWidth
-                          label="Nombre"
+                          label="First Name"
                           name="firstName"
                           value={formData.firstName}
                           onChange={handleInputChange}
@@ -295,7 +295,7 @@ const Checkout = () => {
                       <Grid size={{ xs: 12, md: 6 }}>
                         <TextField
                           fullWidth
-                          label="Apellido"
+                          label="Last Name"
                           name="lastName"
                           value={formData.lastName}
                           onChange={handleInputChange}
@@ -311,7 +311,7 @@ const Checkout = () => {
                       <Grid size={{ xs: 12, md: 6 }}>
                         <TextField
                           fullWidth
-                          label="Correo electrónico"
+                          label="Email"
                           name="email"
                           type="email"
                           value={formData.email}
@@ -328,7 +328,7 @@ const Checkout = () => {
                       <Grid size={{ xs: 12, md: 6 }}>
                         <TextField
                           fullWidth
-                          label="Teléfono"
+                          label="Phone"
                           name="phone"
                           value={formData.phone}
                           onChange={handleInputChange}
@@ -358,7 +358,7 @@ const Checkout = () => {
                           fontSize: '1.1rem'
                         }}
                       >
-                        Dirección de Envío
+                        Shipping Address
                       </Typography>
                     </Box>
                     
@@ -366,7 +366,7 @@ const Checkout = () => {
                       <Grid size={12}>
                         <TextField
                           fullWidth
-                          label="Dirección"
+                          label="Address"
                           name="address"
                           value={formData.address}
                           onChange={handleInputChange}
@@ -382,7 +382,7 @@ const Checkout = () => {
                       <Grid size={{ xs: 12, sm: 6 }}>
                         <TextField
                           fullWidth
-                          label="Ciudad"
+                          label="City"
                           name="city"
                           value={formData.city}
                           onChange={handleInputChange}
@@ -398,7 +398,7 @@ const Checkout = () => {
                       <Grid size={{ xs: 12, sm: 6 }}>
                         <TextField
                           fullWidth
-                          label="Código Postal"
+                          label="ZIP Code"
                           name="zipCode"
                           value={formData.zipCode}
                           onChange={handleInputChange}
@@ -442,13 +442,13 @@ const Checkout = () => {
                         fontSize: '1.1rem'
                       }}
                     >
-                      Resumen del Pedido
+                      Order Summary
                     </Typography>
 
                     <Box sx={{ mb: 2 }}>
                       <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
                         <Typography variant="body2" sx={{ color: '#666', fontSize: '0.9rem' }}>
-                          Subtotal ({cartItemsCount} {cartItemsCount === 1 ? 'artículo' : 'artículos'})
+                          Subtotal ({cartItemsCount} {cartItemsCount === 1 ? 'item' : 'items'})
                         </Typography>
                         <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '0.9rem' }}>
                           ${cartTotal.toFixed(2)}
@@ -457,10 +457,10 @@ const Checkout = () => {
                       
                       <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
                         <Typography variant="body2" sx={{ color: '#666', fontSize: '0.9rem' }}>
-                          Envío
+                          Shipping
                         </Typography>
                         <Typography variant="body2" sx={{ fontWeight: 600, color: shippingInfo ? '#4CAF50' : '#666', fontSize: '0.9rem' }}>
-                          {shippingInfo ? `$${parseFloat(shippingInfo.cost || 0).toFixed(2)}` : 'Por definir'}
+                          {shippingInfo ? `$${parseFloat(shippingInfo.cost || 0).toFixed(2)}` : 'To be determined'}
                         </Typography>
                       </Box>
                       
@@ -492,7 +492,7 @@ const Checkout = () => {
                             return (
                               <Box sx={{ mt: 1 }}>
                                 <Typography variant="body2" sx={{ color: '#666', fontSize: '0.85rem' }}>
-                                  📦 Cálculo de fecha de entrega en proceso...
+                                  📦 Calculating delivery date...
                                 </Typography>
                               </Box>
                             );
@@ -501,17 +501,17 @@ const Checkout = () => {
                           return (
                             <Box sx={{ mt: 1 }}>
                               <Typography variant="body2" sx={{ color: '#666', fontSize: '0.85rem', mb: 0.5 }}>
-                                📦 Su pedido se enviará el {deliveryInfo.shippingDate.toLocaleDateString('es-ES', { 
+                                📦 Your order will be shipped on {deliveryInfo.shippingDate.toLocaleDateString('en-US', { 
                                   weekday: 'long', 
                                   day: 'numeric', 
                                   month: 'long' 
                                 })}
                               </Typography>
                               <Typography variant="body2" sx={{ color: '#666', fontSize: '0.85rem', mb: 0.5 }}>
-                                🚚 Tránsito estimado: {deliveryInfo.transitDays} días
+                                🚚 Estimated transit: {deliveryInfo.transitDays} days
                               </Typography>
                               <Typography variant="body2" sx={{ color: '#c8626d', fontWeight: 600, fontSize: '0.85rem' }}>
-                                📅 Entrega estimada: {deliveryInfo.deliveryDate.toLocaleDateString('es-ES', { 
+                                📅 Estimated delivery: {deliveryInfo.deliveryDate.toLocaleDateString('en-US', { 
                                   weekday: 'long', 
                                   day: 'numeric', 
                                   month: 'long' 
@@ -546,7 +546,7 @@ const Checkout = () => {
                     <Box sx={{ display: 'flex', alignItems: 'center', mb: 1.5 }}>
                       <Security sx={{ color: '#4CAF50', mr: 1, fontSize: '1rem' }} />
                       <Typography variant="body2" sx={{ color: '#666', fontSize: '0.8rem' }}>
-                        Pago seguro con encriptación SSL
+                        Secure payment with SSL encryption
                       </Typography>
                     </Box>
 
@@ -567,7 +567,7 @@ const Checkout = () => {
                           fontSize: '1.1rem'
                         }}
                       >
-                        Información de Pago
+                        Payment Information
                       </Typography>
                     </Box>
                     
@@ -611,11 +611,11 @@ const Checkout = () => {
                     ) : (
                       <Box sx={{ textAlign: 'center', py: 3 }}>
                         <Typography variant="body1" sx={{ color: '#666', mb: 2 }}>
-                          Completa la información de contacto para continuar con el pago
+                          Complete contact information to continue with payment
                         </Typography>
                         <Box sx={{ textAlign: 'left', maxWidth: '300px', mx: 'auto' }}>
                           <Typography variant="body2" sx={{ color: '#999', fontSize: '0.9rem', mb: 1 }}>
-                            Campos requeridos:
+                            Required fields:
                           </Typography>
                           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
                             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -627,31 +627,31 @@ const Checkout = () => {
                             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                               <Box sx={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: formData.firstName ? '#4CAF50' : '#ff9800' }} />
                               <Typography variant="body2" sx={{ fontSize: '0.8rem', color: formData.firstName ? '#4CAF50' : '#666' }}>
-                                Nombre {formData.firstName ? '✓' : ''}
+                                First Name {formData.firstName ? '✓' : ''}
                               </Typography>
                             </Box>
                             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                               <Box sx={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: formData.lastName ? '#4CAF50' : '#ff9800' }} />
                               <Typography variant="body2" sx={{ fontSize: '0.8rem', color: formData.lastName ? '#4CAF50' : '#666' }}>
-                                Apellido {formData.lastName ? '✓' : ''}
+                                Last Name {formData.lastName ? '✓' : ''}
                               </Typography>
                             </Box>
                             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                               <Box sx={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: formData.address ? '#4CAF50' : '#ff9800' }} />
                               <Typography variant="body2" sx={{ fontSize: '0.8rem', color: formData.address ? '#4CAF50' : '#666' }}>
-                                Dirección {formData.address ? '✓' : ''}
+                                Address {formData.address ? '✓' : ''}
                               </Typography>
                             </Box>
                             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                               <Box sx={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: formData.city ? '#4CAF50' : '#ff9800' }} />
                               <Typography variant="body2" sx={{ fontSize: '0.8rem', color: formData.city ? '#4CAF50' : '#666' }}>
-                                Ciudad {formData.city ? '✓' : ''}
+                                City {formData.city ? '✓' : ''}
                               </Typography>
                             </Box>
                             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                               <Box sx={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: formData.zipCode ? '#4CAF50' : '#ff9800' }} />
                               <Typography variant="body2" sx={{ fontSize: '0.8rem', color: formData.zipCode ? '#4CAF50' : '#666' }}>
-                                Código Postal {formData.zipCode ? '✓' : ''}
+                                ZIP Code {formData.zipCode ? '✓' : ''}
                               </Typography>
                             </Box>
                           </Box>

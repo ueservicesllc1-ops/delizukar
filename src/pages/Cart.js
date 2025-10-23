@@ -70,7 +70,7 @@ const Cart = () => {
                 fontWeight: 600
               }}
             >
-              Continuar Comprando
+              Continue Shopping
             </Button>
           </Box>
 
@@ -100,7 +100,7 @@ const Cart = () => {
                   mb: 2
                 }}
               >
-                Tu carrito está vacío
+                Your cart is empty
               </Typography>
               <Typography
                 variant="body1"
@@ -172,7 +172,7 @@ const Cart = () => {
                                     fontWeight: 600
                                   }}
                                 >
-                                  Más Vendido
+                                  Best Seller
                                 </Box>
                               )}
                             </Box>
@@ -316,13 +316,13 @@ const Cart = () => {
                         fontSize: '1.1rem'
                       }}
                     >
-                      Resumen del Pedido
+                      Order Summary
                     </Typography>
 
                     <Box sx={{ mb: 2 }}>
                       <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
                         <Typography variant="body2" sx={{ color: '#666', fontSize: '0.9rem' }}>
-                          Subtotal ({calculateTotalItems()} {calculateTotalItems() === 1 ? 'artículo' : 'artículos'})
+                          Subtotal ({calculateTotalItems()} {calculateTotalItems() === 1 ? 'item' : 'items'})
                         </Typography>
                         <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '0.9rem' }}>
                           ${calculateSubtotal().toFixed(2)}
@@ -331,10 +331,10 @@ const Cart = () => {
                       
                       <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
                         <Typography variant="body2" sx={{ color: '#666', fontSize: '0.9rem' }}>
-                          Envío
+                          Shipping
                         </Typography>
                         <Typography variant="body2" sx={{ fontWeight: 600, color: '#666', fontSize: '0.9rem' }}>
-                          Por definir
+                          To be determined
                         </Typography>
                       </Box>
                       
@@ -372,7 +372,7 @@ const Cart = () => {
                       }
                       label={
                         <Typography variant="body2" sx={{ color: '#666', fontSize: '0.8rem' }}>
-                          Acepto la{' '}
+                          I accept the{' '}
                           <Button
                             variant="text"
                             sx={{
@@ -389,7 +389,7 @@ const Cart = () => {
                             }}
                             onClick={() => navigate('/shipping')}
                           >
-                            Política de Envío
+                            Shipping Policy
                           </Button>
                         </Typography>
                       }
@@ -419,11 +419,11 @@ const Cart = () => {
                         transition: 'all 0.3s ease'
                       }}
                     >
-                      {canProceedToCheckout() ? 'Proceder al Pago' : 
+                      {canProceedToCheckout() ? 'Proceed to Payment' : 
                         calculateTotalItems() < minProducts ? 
-                          `Mínimo ${minProducts} producto${minProducts > 1 ? 's' : ''} requerido${minProducts > 1 ? 's' : ''}` :
-                          !acceptShippingPolicy ? 'Debe aceptar la Política de Envío' :
-                          'No se puede proceder'
+                          `Minimum ${minProducts} product${minProducts > 1 ? 's' : ''} required` :
+                          !acceptShippingPolicy ? 'You must accept the Shipping Policy' :
+                          'Cannot proceed'
                       }
                     </Button>
 
@@ -446,7 +446,7 @@ const Cart = () => {
                         }
                       }}
                     >
-                      Continuar Comprando
+                      Continue Shopping
                     </Button>
                   </CardContent>
                 </Card>

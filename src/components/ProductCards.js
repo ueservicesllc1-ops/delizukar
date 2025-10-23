@@ -70,7 +70,7 @@ const ProductCards = ({ products: propProducts, showAll = false }) => {
                   <Box sx={{ position: 'absolute', top: 12, left: 12, display: 'flex', flexDirection: 'column', gap: 1 }}>
                     {product.isNew && (
                       <Chip
-                        label="Nuevo"
+                        label="New"
                         size="small"
                         sx={{
                           backgroundColor: '#4CAF50',
@@ -82,7 +82,7 @@ const ProductCards = ({ products: propProducts, showAll = false }) => {
                     )}
                     {product.isBestSeller && (
                       <Chip
-                        label="Más Vendido"
+                        label="Best Seller"
                         size="small"
                         sx={{
                           backgroundColor: '#FF6B35',
@@ -196,7 +196,7 @@ const ProductCards = ({ products: propProducts, showAll = false }) => {
                         addToCart(product);
                       }}
                   >
-                    Agregar al Carrito
+                    Add to Cart
                   </Button>
                 </CardActions>
               </Card>
@@ -270,7 +270,7 @@ const ProductCards = ({ products: propProducts, showAll = false }) => {
                       setOpen(false);
                     }}
                   >
-                    Agregar al Carrito
+                    Add to Cart
                   </Button>
                 </Box>
               </Grid>

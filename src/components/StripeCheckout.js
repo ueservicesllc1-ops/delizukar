@@ -167,7 +167,7 @@ const CheckoutForm = ({ cartItems, total, customerInfo, onSuccess, onError }) =>
         <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
           <CreditCard sx={{ mr: 1, color: '#c8626d' }} />
           <Typography variant="h5" sx={{ fontWeight: 700, color: '#c8626d' }}>
-            Información de Pago
+            Payment Information
           </Typography>
         </Box>
 
@@ -217,7 +217,7 @@ const CheckoutForm = ({ cartItems, total, customerInfo, onSuccess, onError }) =>
           <form>
             <Box sx={{ mb: 3 }}>
               <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
-                Información de la Tarjeta
+                Card Information
               </Typography>
               <PaymentElement 
                 options={{
@@ -256,7 +256,7 @@ const CheckoutForm = ({ cartItems, total, customerInfo, onSuccess, onError }) =>
               ) : (
                 <>
                   <CreditCard sx={{ mr: 1 }} />
-                  Pagar ${total.toFixed(2)}
+                  Pay ${total.toFixed(2)}
                 </>
               )}
             </Button>
@@ -269,12 +269,12 @@ const CheckoutForm = ({ cartItems, total, customerInfo, onSuccess, onError }) =>
         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', mb: 2 }}>
           <Security sx={{ mr: 1, color: '#4CAF50', fontSize: '1rem' }} />
           <Typography variant="caption" sx={{ color: '#666' }}>
-            Pago seguro procesado por Stripe • SSL encriptado
+            Secure payment processed by Stripe • SSL encrypted
           </Typography>
         </Box>
 
         <Box sx={{ display: 'flex', justifyContent: 'center', gap: 1, flexWrap: 'wrap' }}>
-          <Chip icon={<CreditCard />} label="Tarjetas" size="small" />
+          <Chip icon={<CreditCard />} label="Cards" size="small" />
           <Chip icon={<Apple />} label="Apple Pay" size="small" />
           <Chip icon={<Google />} label="Google Pay" size="small" />
           <Chip icon={<AccountBalance />} label="Bancos" size="small" />

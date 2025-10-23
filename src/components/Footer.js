@@ -257,8 +257,10 @@ const Footer = () => {
                 fontSize: '0.9rem'
               }}
             >
-              © {currentYear} Delizukar. Todos los derechos reservados. 
-              Hecho con ❤️ en Nueva York.
+              © {currentYear} Delizukar. All rights reserved. 
+              Made with ❤️
+              <br />
+              Powered by Freedom Labs.
             </Typography>
           </motion.div>
         </Box>

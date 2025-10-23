@@ -334,7 +334,7 @@ const Header = () => {
                         }
                       }}
                     >
-                      Iniciar
+                      Login
                     </Button>
                     <Button
                       size="small"
@@ -572,10 +572,10 @@ const Header = () => {
         transformOrigin={{ horizontal: 'right', vertical: 'top' }}
         anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
       >
-        <MenuItem onClick={handleProfileMenuClose}>Mi Perfil</MenuItem>
-        <MenuItem onClick={handleProfileMenuClose}>Mis Pedidos</MenuItem>
-        <MenuItem onClick={handleProfileMenuClose}>Configuración</MenuItem>
-        <MenuItem onClick={handleProfileMenuClose}>Cerrar Sesión</MenuItem>
+        <MenuItem onClick={handleProfileMenuClose}>My Profile</MenuItem>
+        <MenuItem onClick={handleProfileMenuClose}>My Orders</MenuItem>
+        <MenuItem onClick={handleProfileMenuClose}>Settings</MenuItem>
+        <MenuItem onClick={handleProfileMenuClose}>Logout</MenuItem>
       </Menu>
     </>
   );

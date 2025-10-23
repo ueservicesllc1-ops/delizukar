@@ -172,7 +172,7 @@ const CheckoutSuccess = () => {
               color: '#c8626d', 
               mb: 1 
             }}>
-              ¡Pago Exitoso!
+              Payment Successful!
             </Typography>
 
             <Typography variant="body2" sx={{ 
@@ -181,7 +181,7 @@ const CheckoutSuccess = () => {
               lineHeight: 1.4,
               fontSize: '0.9rem'
             }}>
-              ¡Gracias por tu compra! Tu pago ha sido procesado exitosamente.
+              Thank you for your purchase! Your payment has been processed successfully.
             </Typography>
 
             <Box sx={{ 
@@ -192,7 +192,7 @@ const CheckoutSuccess = () => {
               border: '1px solid #4CAF50'
             }}>
               <Typography variant="body2" sx={{ fontWeight: 600, color: '#2E7D32', mb: 0.5, fontSize: '0.9rem' }}>
-                📧 Email de confirmación enviado
+                📧 Confirmation email sent
               </Typography>
             </Box>
 
@@ -204,7 +204,7 @@ const CheckoutSuccess = () => {
                 mb: 2 
               }}>
                 <Typography variant="body2" sx={{ fontWeight: 600, mb: 1, fontSize: '0.9rem', color: '#c8626d' }}>
-                  📋 Resumen del Pago
+                  📋 Payment Summary
                 </Typography>
                 
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
@@ -228,7 +228,7 @@ const CheckoutSuccess = () => {
                 <Box sx={{ borderTop: '1px solid #ddd', pt: 0.5, mt: 0.5 }}>
                   <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
                     <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '0.9rem' }}>
-                      Total Pagado:
+                      Total Paid:
                     </Typography>
                     <Typography variant="h6" sx={{ fontWeight: 700, color: '#c8626d', fontSize: '1rem' }}>
                       ${orderDetails.amount} {orderDetails.currency?.toUpperCase()}
@@ -248,7 +248,7 @@ const CheckoutSuccess = () => {
                 border: '1px solid #4caf50'
               }}>
                 <Typography variant="h6" sx={{ fontWeight: 600, color: '#2e7d32', mb: 1.5, fontSize: '1rem' }}>
-                  ✓ Envío Configurado
+                  ✓ Shipping Configured
                 </Typography>
                 
                 {shippingInfo.shippingDate && (
@@ -323,7 +323,7 @@ const CheckoutSuccess = () => {
                   minWidth: '120px'
                 }}
               >
-                Seguir Comprando
+                Continue Shopping
               </Button>
 
               <Button
@@ -348,7 +348,7 @@ const CheckoutSuccess = () => {
                   }
                 }}
               >
-                Ir al Inicio
+                Go to Home
               </Button>
             </Box>
           </CardContent>

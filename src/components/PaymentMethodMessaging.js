@@ -28,7 +28,7 @@ const PaymentMethodMessaging = ({ amount, currency = 'USD', countryCode = 'US' }
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
         <Payment sx={{ color: '#00A8E8', fontSize: '1.2rem' }} />
         <Typography variant="body2" sx={{ fontWeight: 600, color: '#333' }}>
-          Opciones de pago flexibles disponibles
+          Flexible payment options available
         </Typography>
       </Box>
       
@@ -60,7 +60,7 @@ const PaymentMethodMessaging = ({ amount, currency = 'USD', countryCode = 'US' }
       </Elements>
       
       <Typography variant="caption" sx={{ color: '#666', display: 'block', mt: 1 }}>
-        Financiamiento disponible • Aprobación instantánea • Sin intereses
+        Financing available • Instant approval • No interest
       </Typography>
     </Box>
   );

@@ -36,10 +36,10 @@ const SimpleCheckout = () => {
       // Simular procesamiento de pago
       await new Promise(resolve => setTimeout(resolve, 2000));
       
-      toast.success('Pago procesado exitosamente');
+      toast.success('Payment processed successfully');
       // Aquí irías a la página de éxito
     } catch (error) {
-      toast.error('Error al procesar el pago');
+      toast.error('Error processing payment');
     } finally {
       setLoading(false);
     }

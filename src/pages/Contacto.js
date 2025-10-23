@@ -107,7 +107,7 @@ const Contacto = () => {
   };
 
   return (
-    <Box className="contacto-mobile" sx={{ py: 8, pt: 35, opacity: fontsReady ? 1 : 0, transition: 'opacity 200ms ease' }}>
+    <Box className="contacto-mobile" sx={{ py: 8, pt: 25, opacity: fontsReady ? 1 : 0, transition: 'opacity 200ms ease' }}>
       <Container maxWidth="lg">
         <Typography
           className="contacto-title-mobile"
@@ -116,7 +116,7 @@ const Contacto = () => {
             textAlign: 'center',
             fontWeight: 800,
             color: '#EC8C8D',
-            mb: 3,
+            mb: 4,
             fontSize: { xs: '2rem', md: '3rem' },
             fontFamily: pageData.titleFont ? `"${pageData.titleFont}", serif` : 'Playfair Display, serif'
           }}
@@ -131,8 +131,8 @@ const Contacto = () => {
           </Alert>
         )}
 
-        <Box className="contacto-form-mobile" component="form" onSubmit={handleSubmit} noValidate>
-          <Grid container spacing={2}>
+        <Box className="contacto-form-mobile" component="form" onSubmit={handleSubmit} noValidate sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', maxWidth: '600px', mx: 'auto' }}>
+          <Grid container spacing={2} sx={{ width: '100%', ml: '80px' }}>
             <Grid item xs={12} md={6}>
               <TextField
                 fullWidth
@@ -154,19 +154,35 @@ const Contacto = () => {
                 required
               />
             </Grid>
-            <Grid item xs={12}>
-              <TextField
-                fullWidth
-                label="Message"
-                name="mensaje"
-                value={form.mensaje}
-                onChange={handleChange}
-                multiline
-                rows={6}
-                required
-              />
-            </Grid>
           </Grid>
+          
+          <Box sx={{ mt: 2, width: '100%', display: 'flex', justifyContent: 'center' }}>
+            <TextField
+              label="Message"
+              name="mensaje"
+              value={form.mensaje}
+              onChange={handleChange}
+              multiline
+              rows={4}
+              required
+              sx={{ 
+                width: '90%',
+                '& .MuiOutlinedInput-root': {
+                  fontSize: '1.4rem',
+                  padding: '20px',
+                  minHeight: '100px'
+                },
+                '& .MuiInputBase-input': {
+                  fontSize: '1.2rem',
+                  lineHeight: 1.8,
+                  padding: '12px !important'
+                },
+                '& .MuiInputLabel-root': {
+                  fontSize: '1.1rem'
+                }
+              }}
+            />
+          </Box>
 
           <Box sx={{ mt: 3, display: 'flex', justifyContent: 'center' }}>
             <Button

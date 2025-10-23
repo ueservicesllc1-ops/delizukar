@@ -340,7 +340,7 @@ const AdminProducts = () => {
                     <Box sx={{ position: 'absolute', top: 12, left: 12, display: 'flex', flexDirection: 'column', gap: 1 }}>
                       {product.isNew && (
                         <Chip
-                          label="Nuevo"
+                          label="New"
                           size="small"
                           sx={{
                             backgroundColor: '#4CAF50',
@@ -460,7 +460,7 @@ const AdminProducts = () => {
                             fontSize: '0.9rem'
                           }}
                         >
-                          {product.stock} unidades
+                          {product.stock} units
                         </Typography>
                       </Box>
                       <Box>

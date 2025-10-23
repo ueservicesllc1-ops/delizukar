@@ -836,7 +836,7 @@ const ProductsManager = ({ open, onClose }) => {
                           size="small" 
                           color={product.active ? 'success' : 'error'} 
                         />
-                        {product.isNew && <Chip label="Nuevo" size="small" color="info" />}
+                        {product.isNew && <Chip label="New" size="small" color="info" />}
                         {product.isBestSeller && <Chip label="Más Vendido" size="small" color="warning" />}
                         {product.featured && <Chip label="Destacado" size="small" color="secondary" />}
                       </Box>
