@@ -107,9 +107,10 @@ const Contacto = () => {
   };
 
   return (
-    <Box sx={{ py: 8, pt: 35, opacity: fontsReady ? 1 : 0, transition: 'opacity 200ms ease' }}>
-      <Container maxWidth="md">
+    <Box className="contacto-mobile" sx={{ py: 8, pt: 35, opacity: fontsReady ? 1 : 0, transition: 'opacity 200ms ease' }}>
+      <Container maxWidth="lg">
         <Typography
+          className="contacto-title-mobile"
           variant="h2"
           sx={{
             textAlign: 'center',
@@ -123,9 +124,6 @@ const Contacto = () => {
           {pageData.title}
         </Typography>
 
-        <Typography sx={{ textAlign: 'center', color: '#666', mb: 4, whiteSpace: 'pre-line', fontFamily: pageData.contentFont ? `"${pageData.contentFont}", sans-serif` : 'Roboto, sans-serif' }}>
-          {pageData.content}
-        </Typography>
 
         {sent && (
           <Alert severity="success" sx={{ mb: 3 }}>

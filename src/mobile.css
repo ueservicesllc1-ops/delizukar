@@ -155,7 +155,7 @@
   
   /* Nosotros Mobile */
   .nosotros-mobile {
-    padding-top: 35px !important;
+    padding-top: 150px !important;
   }
   
   .nosotros-title-mobile {
@@ -163,6 +163,15 @@
     display: block !important;
     visibility: visible !important;
     opacity: 1 !important;
+  }
+  
+  /* Contacto Mobile */
+  .contacto-mobile {
+    padding-top: 160px !important;
+  }
+  
+  .contacto-title-mobile {
+    margin-bottom: 40px !important;
   }
   
   /* Forms Mobile */
