@@ -88,6 +88,8 @@ app.get('/api/health', (req, res) => {
 app.post('/api/shippo/create-address', async (req, res) => {
   try {
     console.log('🔍 DEBUG: Creating address in Shippo');
+    console.log('🔍 DEBUG: SHIPPO_API_TOKEN exists:', !!process.env.SHIPPO_API_TOKEN);
+    console.log('🔍 DEBUG: SHIPPO_API_TOKEN value:', process.env.SHIPPO_API_TOKEN ? process.env.SHIPPO_API_TOKEN.substring(0, 20) + '...' : 'undefined');
     
     const response = await fetch('https://api.goshippo.com/addresses/', {
       method: 'POST',
