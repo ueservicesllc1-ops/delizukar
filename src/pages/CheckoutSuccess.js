@@ -226,18 +226,46 @@ const CheckoutSuccess = () => {
 
             {/* Shipping Information */}
             <Box sx={{ 
-              backgroundColor: '#fff3e0', 
-              p: 1.5, 
+              backgroundColor: '#e8f5e8', 
+              p: 2, 
               borderRadius: 1, 
               mb: 2,
-              border: '1px solid #ff9800'
+              border: '1px solid #4caf50'
             }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <Typography variant="body2" sx={{ fontWeight: 600, color: '#e65100', fontSize: '0.85rem' }}>
-                  🚚 Envío en 24-48h
+              <Typography variant="h6" sx={{ fontWeight: 600, color: '#2e7d32', mb: 1.5, fontSize: '1rem' }}>
+                ✓ Envío Configurado
+              </Typography>
+              
+              <Box sx={{ mb: 1 }}>
+                <Typography variant="body2" sx={{ fontWeight: 600, color: '#388e3c', fontSize: '0.9rem' }}>
+                  📦 Su pedido se enviará el lunes, 27 de octubre
+                </Typography>
+              </Box>
+              
+              <Box sx={{ mb: 1 }}>
+                <Typography variant="body2" sx={{ color: '#2e7d32', fontSize: '0.85rem' }}>
+                  🚚 Tránsito estimado: 2-3 días
+                </Typography>
+              </Box>
+              
+              <Box sx={{ mb: 1 }}>
+                <Typography variant="body2" sx={{ color: '#2e7d32', fontSize: '0.85rem' }}>
+                  📅 Entrega estimada: jueves, 30 de octubre
+                </Typography>
+              </Box>
+              
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 1.5 }}>
+                <Typography variant="body2" sx={{ color: '#666', fontSize: '0.8rem' }}>
+                  Tracking: PENDING
                 </Typography>
                 <Typography variant="body2" sx={{ color: '#666', fontSize: '0.8rem' }}>
-                  3-5 días hábiles
+                  Carrier: usps - USPS Ground
+                </Typography>
+              </Box>
+              
+              <Box sx={{ mt: 1 }}>
+                <Typography variant="body2" sx={{ color: '#666', fontSize: '0.75rem', fontStyle: 'italic' }}>
+                  ETA: 2025-10-28T03:54:16.801Z
                 </Typography>
               </Box>
             </Box>
