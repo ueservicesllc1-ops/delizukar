@@ -65,16 +65,9 @@ const Home = () => {
   }, [popupOpen]);
 
   return (
-    <Box className="home-mobile" sx={{ display: 'flex', flexDirection: 'column' }}>
+    <Box>
       {/* Hero Banner */}
-      <Box sx={{ 
-        display: 'flex', 
-        flexDirection: 'column',
-        marginTop: { xs: '-1500px', md: '0px' },
-        transform: { xs: 'translateY(-1500px)', md: 'translateY(0px)' }
-      }}>
-        <HeroBanner />
-      </Box>
+      <HeroBanner />
 
 
       {/* Featured Products */}

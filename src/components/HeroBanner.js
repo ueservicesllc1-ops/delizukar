@@ -96,9 +96,7 @@ const HeroBanner = () => {
           overflow: 'hidden',
           display: 'flex',
           alignItems: 'center',
-          justifyContent: 'center',
-          marginTop: { xs: '-1500px', md: '0px' },
-          transform: { xs: 'translateY(-1500px)', md: 'translateY(0px)' }
+          justifyContent: 'center'
         }}
       >
       <Swiper

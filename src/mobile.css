@@ -33,19 +33,11 @@
     height: 28px !important;
   }
   
-  /* Home Mobile Container */
-  .home-mobile {
-    overflow: visible !important;
-  }
-  
   /* Hero Banner Mobile */
   .hero-mobile {
     padding: 0 !important;
-    margin-top: -1500px !important;
+    margin-top: -500px !important;
     text-align: center !important;
-    position: relative !important;
-    top: -1500px !important;
-    transform: translateY(-1500px) !important;
   }
   
   /* Banner2 Mobile */
@@ -510,7 +502,7 @@
   /* Hero Banner Tablet */
   .hero-mobile {
     padding: 0 !important;
-    margin-top: -200px !important;
+    margin-top: -600px !important;
   }
   
   /* Banner2 Tablet */
@@ -549,7 +541,7 @@
   
   /* Nosotros Tablet */
   .nosotros-mobile {
-    padding-top: 100px !important;
+    padding-top: 220px !important;
   }
   
   .nosotros-title-mobile {
@@ -653,32 +645,5 @@
   
   .desktop-only {
     display: block !important;
-  }
-  
-  /* Reset all mobile/tablet styles for desktop */
-  .header-mobile,
-  .hero-mobile,
-  .banner2-mobile,
-  .testimonials-mobile,
-  .footer-mobile,
-  .products-grid-mobile,
-  .product-card-mobile,
-  .nosotros-mobile,
-  .nosotros-title-mobile,
-  .contacto-mobile,
-  .contacto-title-mobile,
-  .contacto-form-mobile,
-  .admin-dashboard-mobile,
-  .admin-shield-mobile {
-    all: unset !important;
-  }
-  
-  /* Ensure desktop modals work normally */
-  .MuiDialog-paper,
-  .MuiDialogTitle-root,
-  .MuiDialogContent-root,
-  .MuiDialogActions-root,
-  .MuiDialogActions-root .MuiButton-root {
-    all: unset !important;
   }
 }
