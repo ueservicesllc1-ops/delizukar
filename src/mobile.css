@@ -427,6 +427,11 @@
     margin: 0 !important;
   }
 
+  /* Hide Admin Shield on Mobile */
+  .admin-shield-mobile {
+    display: none !important;
+  }
+
   /* Forms Mobile */
   .form-mobile {
     padding: 16px !important;
