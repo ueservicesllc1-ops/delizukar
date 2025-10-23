@@ -137,8 +137,10 @@ class ShippoService {
       console.error('Error getting shipping rates:', error);
       
       // Si hay error, devolver tarifas de ejemplo para desarrollo
-      if (error.message.includes('401') || error.message.includes('403')) {
-        console.log('Using mock rates for development');
+      if (error.message.includes('401') || error.message.includes('403') || 
+          error.message.includes('Token does not exist') || 
+          (error.detail && error.detail.includes('Token does not exist'))) {
+        console.log('Using mock rates for development - Shippo token not configured');
         return this.getMockRates();
       }
       
@@ -210,6 +212,20 @@ class ShippoService {
       return account;
     } catch (error) {
       console.error('Error getting account info:', error);
+      
+      // Si el token no existe, devolver info mock
+      if (error.message.includes('Token does not exist') || 
+          (error.detail && error.detail.includes('Token does not exist'))) {
+        console.log('Using mock account info - Shippo token not configured');
+        return {
+          object_id: 'mock_account',
+          username: 'delizukar_test',
+          email: 'test@delizukar.com',
+          first_name: 'Delizukar',
+          last_name: 'Test'
+        };
+      }
+      
       throw error;
     }
   }
