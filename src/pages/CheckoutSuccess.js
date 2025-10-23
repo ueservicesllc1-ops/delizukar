@@ -17,6 +17,7 @@ const CheckoutSuccess = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [orderDetails, setOrderDetails] = useState(null);
+  const [shippingInfo, setShippingInfo] = useState(null);
   const [error, setError] = useState(null);
 
   useEffect(() => {
@@ -33,6 +34,19 @@ const CheckoutSuccess = () => {
         
         if (paymentIntentId) {
           console.log('🔍 Fetching payment data from backend...');
+          
+          // Cargar información de envío del localStorage
+          const savedShippingInfo = localStorage.getItem('lastShippingInfo');
+          if (savedShippingInfo) {
+            try {
+              const parsedShippingInfo = JSON.parse(savedShippingInfo);
+              setShippingInfo(parsedShippingInfo);
+              console.log('📦 Shipping info loaded:', parsedShippingInfo);
+            } catch (error) {
+              console.error('❌ Error parsing shipping info:', error);
+            }
+          }
+          
           // Consultar datos reales desde el backend
           const baseUrl = process.env.NODE_ENV === 'production' 
             ? window.location.origin 
@@ -225,50 +239,70 @@ const CheckoutSuccess = () => {
             )}
 
             {/* Shipping Information */}
-            <Box sx={{ 
-              backgroundColor: '#e8f5e8', 
-              p: 2, 
-              borderRadius: 1, 
-              mb: 2,
-              border: '1px solid #4caf50'
-            }}>
-              <Typography variant="h6" sx={{ fontWeight: 600, color: '#2e7d32', mb: 1.5, fontSize: '1rem' }}>
-                ✓ Envío Configurado
-              </Typography>
-              
-              <Box sx={{ mb: 1 }}>
-                <Typography variant="body2" sx={{ fontWeight: 600, color: '#388e3c', fontSize: '0.9rem' }}>
-                  📦 Su pedido se enviará el lunes, 27 de octubre
+            {shippingInfo && (
+              <Box sx={{ 
+                backgroundColor: '#e8f5e8', 
+                p: 2, 
+                borderRadius: 1, 
+                mb: 2,
+                border: '1px solid #4caf50'
+              }}>
+                <Typography variant="h6" sx={{ fontWeight: 600, color: '#2e7d32', mb: 1.5, fontSize: '1rem' }}>
+                  ✓ Envío Configurado
                 </Typography>
+                
+                {shippingInfo.shippingDate && (
+                  <Box sx={{ mb: 1 }}>
+                    <Typography variant="body2" sx={{ fontWeight: 600, color: '#388e3c', fontSize: '0.9rem' }}>
+                      📦 Su pedido se enviará el {shippingInfo.shippingDate.toLocaleDateString('es-ES', { 
+                        weekday: 'long', 
+                        year: 'numeric', 
+                        month: 'long', 
+                        day: 'numeric' 
+                      })}
+                    </Typography>
+                  </Box>
+                )}
+                
+                {shippingInfo.transitDays && (
+                  <Box sx={{ mb: 1 }}>
+                    <Typography variant="body2" sx={{ color: '#2e7d32', fontSize: '0.85rem' }}>
+                      🚚 Tránsito estimado: {shippingInfo.transitDays} días
+                    </Typography>
+                  </Box>
+                )}
+                
+                {shippingInfo.deliveryDate && (
+                  <Box sx={{ mb: 1 }}>
+                    <Typography variant="body2" sx={{ color: '#2e7d32', fontSize: '0.85rem' }}>
+                      📅 Entrega estimada: {shippingInfo.deliveryDate.toLocaleDateString('es-ES', { 
+                        weekday: 'long', 
+                        year: 'numeric', 
+                        month: 'long', 
+                        day: 'numeric' 
+                      })}
+                    </Typography>
+                  </Box>
+                )}
+                
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 1.5 }}>
+                  <Typography variant="body2" sx={{ color: '#666', fontSize: '0.8rem' }}>
+                    Tracking: {shippingInfo.trackingNumber || 'PENDING'}
+                  </Typography>
+                  <Typography variant="body2" sx={{ color: '#666', fontSize: '0.8rem' }}>
+                    Carrier: {shippingInfo.carrier} - {shippingInfo.serviceLevel}
+                  </Typography>
+                </Box>
+                
+                {shippingInfo.eta && (
+                  <Box sx={{ mt: 1 }}>
+                    <Typography variant="body2" sx={{ color: '#666', fontSize: '0.75rem', fontStyle: 'italic' }}>
+                      ETA: {shippingInfo.eta}
+                    </Typography>
+                  </Box>
+                )}
               </Box>
-              
-              <Box sx={{ mb: 1 }}>
-                <Typography variant="body2" sx={{ color: '#2e7d32', fontSize: '0.85rem' }}>
-                  🚚 Tránsito estimado: 2-3 días
-                </Typography>
-              </Box>
-              
-              <Box sx={{ mb: 1 }}>
-                <Typography variant="body2" sx={{ color: '#2e7d32', fontSize: '0.85rem' }}>
-                  📅 Entrega estimada: jueves, 30 de octubre
-                </Typography>
-              </Box>
-              
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 1.5 }}>
-                <Typography variant="body2" sx={{ color: '#666', fontSize: '0.8rem' }}>
-                  Tracking: PENDING
-                </Typography>
-                <Typography variant="body2" sx={{ color: '#666', fontSize: '0.8rem' }}>
-                  Carrier: usps - USPS Ground
-                </Typography>
-              </Box>
-              
-              <Box sx={{ mt: 1 }}>
-                <Typography variant="body2" sx={{ color: '#666', fontSize: '0.75rem', fontStyle: 'italic' }}>
-                  ETA: 2025-10-28T03:54:16.801Z
-                </Typography>
-              </Box>
-            </Box>
+            )}
 
 
             <Box sx={{ display: 'flex', gap: 1, justifyContent: 'center', flexWrap: 'wrap' }}>

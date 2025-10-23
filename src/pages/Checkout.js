@@ -593,6 +593,13 @@ const Checkout = () => {
                         onSuccess={(paymentIntent) => {
                           console.log('✅ Payment successful, clearing cart and navigating');
                           clearCart();
+                          
+                          // Guardar información de envío en localStorage
+                          if (shippingInfo) {
+                            localStorage.setItem('lastShippingInfo', JSON.stringify(shippingInfo));
+                            console.log('📦 Shipping info saved:', shippingInfo);
+                          }
+                          
                           // Pasar el payment intent ID en la URL
                           navigate(`/checkout/success?payment_intent=${paymentIntent.id}`);
                         }}
