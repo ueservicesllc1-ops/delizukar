@@ -13,7 +13,7 @@ class ShippoService {
     // Mapear endpoints de Shippo a endpoints del backend
     const backendEndpoint = this.mapToBackendEndpoint(endpoint);
     const baseUrl = process.env.NODE_ENV === 'production' 
-      ? 'https://delizukar-production.up.railway.app'
+      ? (window.location.origin || 'https://delizukar.com')
       : 'http://localhost:5000';
     const url = `${baseUrl}/api/shippo${backendEndpoint}`;
     
