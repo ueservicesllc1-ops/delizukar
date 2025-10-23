@@ -243,7 +243,7 @@ const Footer = () => {
         </Grid>
 
         {/* Copyright */}
-        <Box sx={{ textAlign: 'center', mt: 4 }}>
+        <Box className="footer-copyright-mobile" sx={{ textAlign: 'center', mt: 4 }}>
           <motion.div
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
@@ -266,6 +266,7 @@ const Footer = () => {
 
       {/* Logo en esquina superior derecha */}
       <motion.div
+        className="footer-logo-mobile"
         initial={{ opacity: 0, scale: 0.8 }}
         whileInView={{ opacity: 1, scale: 1 }}
         viewport={{ once: true }}

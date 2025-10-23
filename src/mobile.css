@@ -131,6 +131,16 @@
     padding: 4px 0 !important;
   }
   
+  /* Footer Logo Mobile - Move below email bar */
+  .footer-mobile .footer-logo-mobile {
+    position: static !important;
+    top: auto !important;
+    right: auto !important;
+    margin: 20px auto 0 auto !important;
+    display: block !important;
+    text-align: center !important;
+  }
+  
   /* Forms Mobile */
   .form-mobile {
     padding: 16px !important;
