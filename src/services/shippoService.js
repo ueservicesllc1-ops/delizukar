@@ -169,11 +169,51 @@ class ShippoService {
       },
       {
         object_id: 'rate_3',
+        provider: 'fedex',
+        servicelevel: { name: 'FedEx 2Day' },
+        amount: '22.50',
+        currency: 'USD',
+        eta: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString()
+      },
+      {
+        object_id: 'rate_4',
+        provider: 'fedex',
+        servicelevel: { name: 'FedEx Overnight' },
+        amount: '35.99',
+        currency: 'USD',
+        eta: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000).toISOString()
+      },
+      {
+        object_id: 'rate_5',
+        provider: 'dhl',
+        servicelevel: { name: 'DHL Express' },
+        amount: '28.75',
+        currency: 'USD',
+        eta: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString()
+      },
+      {
+        object_id: 'rate_6',
+        provider: 'dhl',
+        servicelevel: { name: 'DHL Ground' },
+        amount: '18.25',
+        currency: 'USD',
+        eta: new Date(Date.now() + 4 * 24 * 60 * 60 * 1000).toISOString()
+      },
+      {
+        object_id: 'rate_7',
         provider: 'ups',
         servicelevel: { name: 'UPS Ground' },
         amount: '14.25',
         currency: 'USD',
         eta: new Date(Date.now() + 4 * 24 * 60 * 60 * 1000).toISOString()
+      },
+      {
+        object_id: 'rate_8',
+        provider: 'ups',
+        servicelevel: { name: 'UPS 2nd Day Air' },
+        amount: '24.99',
+        currency: 'USD',
+        eta: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString()
       }
     ];
   }
