@@ -732,12 +732,14 @@ async function handleInvoicePaymentSucceeded(invoice) {
   }
 }
 
-// ==================== STATIC FILES ====================
-
-// Serve static files from the React app build directory
-app.use(express.static(path.join(__dirname, 'build')));
-
 // ==================== HEALTH CHECK ====================
+// MUST BE BEFORE STATIC FILES AND CATCH-ALL
+
+// Health check for Railway - must be very simple and fast
+app.get('/health', (req, res) => {
+  console.log('✅ Railway health check responded OK');
+  res.status(200).send('OK');
+});
 
 app.get('/api/health', (req, res) => {
   console.log('🔍 Health check requested');
@@ -752,11 +754,10 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-// Health check for Railway - must be very simple and fast
-app.get('/health', (req, res) => {
-  console.log('🔍 Health check requested from:', req.get('host'));
-  res.status(200).send('OK');
-});
+// ==================== STATIC FILES ====================
+
+// Serve static files from the React app build directory
+app.use(express.static(path.join(__dirname, 'build')));
 
 // Root endpoint for Railway healthcheck
 app.get('/', (req, res) => {
