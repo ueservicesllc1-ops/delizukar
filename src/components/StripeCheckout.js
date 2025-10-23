@@ -391,11 +391,7 @@ const StripeCheckout = ({ cartItems, total, customerInfo, onSuccess, onError }) 
       }
     },
     loader: 'auto',
-    locale: 'es',
-    paymentMethodTypes: ['card'],
-    paymentMethodConfiguration: {
-      paymentMethodTypes: ['card']
-    }
+    locale: 'es'
   };
 
   if (loading) {
@@ -457,6 +453,23 @@ const StripeCheckout = ({ cartItems, total, customerInfo, onSuccess, onError }) 
 
   console.log('🔍 Rendering Elements with clientSecret:', clientSecret ? 'Present' : 'Missing');
   console.log('🔍 Stripe options:', options);
+  
+  // Verificar que clientSecret esté presente
+  if (!clientSecret) {
+    return (
+      <Card sx={{ maxWidth: 600, mx: 'auto', mt: 2 }}>
+        <CardContent>
+          <Box sx={{ textAlign: 'center', py: 4 }}>
+            <CircularProgress />
+            <Typography sx={{ mt: 2 }}>Configurando el pago...</Typography>
+            <Typography variant="body2" sx={{ mt: 2, color: '#666' }}>
+              Debug: clientSecret = Missing
+            </Typography>
+          </Box>
+        </CardContent>
+      </Card>
+    );
+  }
   
   return (
     <Elements 
