@@ -12,7 +12,10 @@ class ShippoService {
   async makeRequest(endpoint, method = 'GET', data = null) {
     // Mapear endpoints de Shippo a endpoints del backend
     const backendEndpoint = this.mapToBackendEndpoint(endpoint);
-    const url = `http://localhost:5000/api/shippo${backendEndpoint}`;
+    const baseUrl = process.env.NODE_ENV === 'production' 
+      ? 'https://delizukar-production.up.railway.app'
+      : 'http://localhost:5000';
+    const url = `${baseUrl}/api/shippo${backendEndpoint}`;
     
     const options = {
       method,
