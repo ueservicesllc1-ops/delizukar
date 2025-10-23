@@ -137,6 +137,7 @@ const TestimonialsSection = () => {
                   transition={{ duration: 0.6, delay: index * 0.1 }}
                 >
                   <Card
+                    className="testimonial-card-mobile"
                     sx={{
                       p: 2,
                       width: '350px',
@@ -153,7 +154,7 @@ const TestimonialsSection = () => {
                       }
                     }}
                   >
-                    <CardContent sx={{ 
+                    <CardContent className="testimonial-content-mobile" sx={{ 
                       display: 'flex', 
                       flexDirection: 'column', 
                       height: '100%',
@@ -177,6 +178,7 @@ const TestimonialsSection = () => {
                         <Box>
                           <Typography
                             variant="h6"
+                            className="testimonial-name-mobile"
                             sx={{
                               fontWeight: 600,
                               color: '#EC8C8D',
@@ -205,6 +207,7 @@ const TestimonialsSection = () => {
 
                       <Typography
                         variant="body1"
+                        className="testimonial-text-mobile"
                         sx={{
                           color: '#666',
                           lineHeight: 1.6,

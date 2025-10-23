@@ -22,6 +22,7 @@ const Footer = () => {
   return (
     <Box
       component="footer"
+      className="footer-mobile"
       sx={{
         backgroundColor: '#C8626D',
         color: 'white',
@@ -31,9 +32,9 @@ const Footer = () => {
       }}
     >
       <Container maxWidth="lg">
-        <Grid container spacing={4}>
+        <Grid container spacing={4} className="footer-content-mobile">
           {/* Quick links */}
-          <Grid item xs={12} md={3}>
+          <Grid item xs={12} md={3} className="footer-section-mobile">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -42,6 +43,7 @@ const Footer = () => {
             >
               <Typography
                 variant="h6"
+                className="footer-title-mobile"
                 sx={{
                   fontWeight: 600,
                   color: 'white',
@@ -53,7 +55,7 @@ const Footer = () => {
               </Typography>
               
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                <Link href="/terms" sx={{ color: 'white', textDecoration: 'none', fontSize: '0.95rem', '&:hover': { color: '#eb8b8b' } }}>
+                <Link href="/terms" className="footer-link-mobile" sx={{ color: 'white', textDecoration: 'none', fontSize: '0.95rem', '&:hover': { color: '#eb8b8b' } }}>
                   Terms and Conditions
                 </Link>
                 <Link href="/terms-service" sx={{ color: 'white', textDecoration: 'none', fontSize: '0.95rem', '&:hover': { color: '#eb8b8b' } }}>

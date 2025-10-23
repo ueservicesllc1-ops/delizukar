@@ -200,8 +200,8 @@ const Checkout = () => {
   };
 
   return (
-    <Box sx={{ py: 2, pt: 4, backgroundColor: '#fafafa', minHeight: '100vh' }}>
-      <Container maxWidth="lg">
+    <Box sx={{ py: 2, pt: 4, backgroundColor: '#fafafa', minHeight: '100vh' }} className="form-mobile">
+      <Container maxWidth="lg" className="container-mobile">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -212,6 +212,7 @@ const Checkout = () => {
             <Button
               startIcon={<ArrowBack />}
               onClick={() => navigate('/carrito')}
+              className="button-mobile"
               sx={{
                 color: '#8B4513',
                 mr: 2,
@@ -283,6 +284,7 @@ const Checkout = () => {
                           onChange={handleInputChange}
                           required
                           size="small"
+                          className="form-input-mobile form-field-mobile"
                           sx={{
                             '& .MuiOutlinedInput-root': {
                               borderRadius: '8px'

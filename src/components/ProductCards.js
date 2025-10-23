@@ -34,6 +34,7 @@ const ProductCards = ({ products: propProducts, showAll = false }) => {
               whileHover={{ y: -10 }}
             >
               <Card
+                className="product-card-mobile"
                 onClick={() => { setSelected(product); setOpen(true); }}
                 sx={{
                   height: '360px',
@@ -109,9 +110,10 @@ const ProductCards = ({ products: propProducts, showAll = false }) => {
                   </IconButton>
                 </Box>
 
-                <CardContent sx={{ flexGrow: 0, p: 1.5, transform: 'translateY(-10px)' }}>
+                <CardContent className="product-card-content-mobile" sx={{ flexGrow: 0, p: 1.5, transform: 'translateY(-10px)' }}>
                     <Typography
                       variant="h6"
+                      className="product-title-mobile"
                       sx={{
                         fontWeight: 600,
                         mb: 0.5,
@@ -128,6 +130,7 @@ const ProductCards = ({ products: propProducts, showAll = false }) => {
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                         <Typography
                           variant="h6"
+                          className="product-price-mobile"
                           sx={{
                             fontWeight: 700,
                             color: '#8B4513',

@@ -232,6 +232,7 @@ const Header = () => {
       >
         <AppBar
           position="fixed"
+          className="header-mobile"
           sx={{
             backgroundColor: 'white',
             boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
@@ -263,6 +264,7 @@ const Header = () => {
                   <Avatar
                     src={user.photoURL}
                     alt={user.displayName}
+                    className="header-user-avatar"
                     sx={{ width: 24, height: 24 }}
                   />
                   <Typography 
@@ -311,12 +313,13 @@ const Header = () => {
                   right: 16, 
                   zIndex: 10 
                 }}>
-                  <Box sx={{ display: 'flex', gap: 0.5 }}>
+                  <Box sx={{ display: 'flex', gap: 0.5 }} className="header-auth-buttons">
                     <Button
                       size="small"
                       variant="outlined"
                       startIcon={<Login />}
                       onClick={handleGoogleAuth}
+                      className="header-auth-buttons"
                       sx={{
                         borderColor: '#c8626d',
                         color: '#c8626d',
@@ -338,6 +341,7 @@ const Header = () => {
                       variant="contained"
                       startIcon={<PersonAdd />}
                       onClick={handleGoogleAuth}
+                      className="header-auth-buttons"
                       sx={{
                         backgroundColor: '#8B4513',
                         fontSize: '0.7rem',
@@ -421,6 +425,7 @@ const Header = () => {
                   >
                     <IconButton
                       onClick={handleCartClick}
+                      className="header-cart-icon"
                       sx={{
                         color: '#be8782',
                         '&:hover': {

@@ -89,6 +89,7 @@ const HeroBanner = () => {
   return (
     <>
       <Box
+        className="hero-mobile"
         sx={{
           position: 'relative',
           height: '80vh',
