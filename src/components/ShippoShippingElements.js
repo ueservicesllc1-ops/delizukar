@@ -24,13 +24,13 @@ const ShippoShippingElements = ({
     style: 'modern',
     height: '600px',
     width: '100%',
-    primaryColor: '#8B4513',
+    primaryColor: '#c8626d',
     container: {
       backgroundColor: '#ffffff'
     },
     header: {
-      backgroundColor: '#8B4513',
-      borderColor: '#8B4513',
+      backgroundColor: '#c8626d',
+      borderColor: '#c8626d',
       color: '#ffffff',
       hasBoxShadow: true,
       textAlign: 'center'
@@ -42,22 +42,22 @@ const ShippoShippingElements = ({
     },
     button: {
       primary: {
-        backgroundColor: '#8B4513',
-        activeBackgroundColor: '#A0522D',
-        hoverColor: '#A0522D',
+        backgroundColor: '#c8626d',
+        activeBackgroundColor: '#b5555a',
+        hoverColor: '#b5555a',
         color: '#ffffff',
         borderRadius: '8px',
-        borderColor: '#8B4513',
-        activeBorderColor: '#A0522D',
+        borderColor: '#c8626d',
+        activeBorderColor: '#b5555a',
         textTransform: 'uppercase'
       },
       secondary: {
         backgroundColor: 'transparent',
         activeBackgroundColor: '#f8f9fa',
-        color: '#8B4513',
+        color: '#c8626d',
         borderRadius: '8px',
-        borderColor: '#8B4513',
-        activeBorderColor: '#A0522D',
+        borderColor: '#c8626d',
+        activeBorderColor: '#b5555a',
         textTransform: 'uppercase'
       }
     },
@@ -72,12 +72,12 @@ const ShippoShippingElements = ({
     },
     inputs: {
       borderColor: '#ced4da',
-      borderActive: '#8B4513',
-      hoverColor: '#8B4513'
+      borderActive: '#c8626d',
+      hoverColor: '#c8626d'
     },
     menu: {
       titleBackgroundColor: '#f8f9fa',
-      hoverColor: '#8B4513',
+      hoverColor: '#c8626d',
       hoverBackgroundColor: '#f8f9fa'
     }
   };
@@ -248,7 +248,7 @@ const ShippoShippingElements = ({
         {/* Header personalizado */}
         <Box
           sx={{
-            backgroundColor: '#8B4513',
+            backgroundColor: '#c8626d',
             color: 'white',
             p: 2,
             display: 'flex',
@@ -288,7 +288,7 @@ const ShippoShippingElements = ({
                 gap: 2
               }}
             >
-              <CircularProgress sx={{ color: '#8B4513' }} />
+              <CircularProgress sx={{ color: '#c8626d' }} />
               <Typography variant="body1" color="text.secondary">
                 Configurando envío...
               </Typography>

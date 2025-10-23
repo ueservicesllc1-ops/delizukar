@@ -155,7 +155,7 @@ const Home = () => {
                               variant="h5"
                               sx={{
                                 fontWeight: 800,
-                                color: '#8B4513'
+                                color: '#c8626d'
                               }}
                             >
                               ${product.price}
@@ -216,8 +216,8 @@ const Home = () => {
                   size="large"
                   href="/productos"
                   sx={{
-                    borderColor: '#8B4513',
-                    color: '#8B4513',
+                    borderColor: '#c8626d',
+                    color: '#c8626d',
                     px: 4,
                     py: 1.5,
                     borderRadius: '25px',
@@ -225,9 +225,9 @@ const Home = () => {
                     fontWeight: 600,
                     fontSize: '1.1rem',
                     '&:hover': {
-                      backgroundColor: '#8B4513',
+                      backgroundColor: '#c8626d',
                       color: 'white',
-                      borderColor: '#8B4513',
+                      borderColor: '#c8626d',
                       transform: 'translateY(-2px)',
                       boxShadow: '0 8px 25px rgba(139, 69, 19, 0.3)'
                     },
@@ -265,12 +265,12 @@ const Home = () => {
           <>
             <DialogTitle>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <Typography variant="h5" sx={{ fontWeight: 700, color: '#8B4513' }}>
+                <Typography variant="h5" sx={{ fontWeight: 700, color: '#c8626d' }}>
                   {selectedProduct.name}
                 </Typography>
                 <Button
                   onClick={() => setProductDetailOpen(false)}
-                  sx={{ color: '#8B4513' }}
+                  sx={{ color: '#c8626d' }}
                 >
                   ✕
                 </Button>
@@ -341,7 +341,7 @@ const Home = () => {
                 
                 {/* Lado Derecho - Información */}
                 <Box sx={{ flex: 1, p: 3, display: 'flex', flexDirection: 'column' }}>
-                  <Typography variant="h4" sx={{ fontWeight: 800, color: '#8B4513', mb: 2 }}>
+                  <Typography variant="h4" sx={{ fontWeight: 800, color: '#c8626d', mb: 2 }}>
                     ${selectedProduct.price}
                   </Typography>
                   
@@ -397,7 +397,7 @@ const Home = () => {
             <DialogActions sx={{ p: 3 }}>
               <Button
                 onClick={() => setProductDetailOpen(false)}
-                sx={{ color: '#8B4513' }}
+                sx={{ color: '#c8626d' }}
               >
                 Cerrar
               </Button>

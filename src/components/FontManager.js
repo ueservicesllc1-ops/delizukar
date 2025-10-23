@@ -201,7 +201,7 @@ const FontManager = ({ open, onClose, onFontSelect }) => {
         pb: 2
       }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <FontDownload sx={{ color: '#8B4513' }} />
+          <FontDownload sx={{ color: '#c8626d' }} />
               <Typography variant="h5" sx={{ fontWeight: 700, color: '#eb8b8b' }}>
                 Gestión de Fuentes
               </Typography>
@@ -234,7 +234,7 @@ const FontManager = ({ open, onClose, onFontSelect }) => {
             <Typography
               variant="h4"
               sx={{
-                color: '#8B4513',
+                color: '#c8626d',
                 fontWeight: 600,
                 fontFamily: selectedFont ? fontUploader.availableFonts.find(f => f.id === selectedFont)?.name : 'inherit'
               }}
@@ -261,7 +261,7 @@ const FontManager = ({ open, onClose, onFontSelect }) => {
                   <Card
                     sx={{
                       cursor: 'pointer',
-                      border: selectedFont === font.id ? '2px solid #8B4513' : '2px solid transparent',
+                      border: selectedFont === font.id ? '2px solid #c8626d' : '2px solid transparent',
                       borderRadius: '15px',
                       '&:hover': {
                         boxShadow: '0 4px 15px rgba(0,0,0,0.1)'
@@ -285,14 +285,14 @@ const FontManager = ({ open, onClose, onFontSelect }) => {
                         label={font.category}
                         size="small"
                         sx={{
-                          backgroundColor: '#8B451320',
-                          color: '#8B4513',
+                          backgroundColor: '#c8626d20',
+                          color: '#c8626d',
                           fontWeight: 500
                         }}
                       />
                       {selectedFont === font.id && (
                         <Box sx={{ display: 'flex', justifyContent: 'center', mt: 1 }}>
-                          <Check sx={{ color: '#8B4513', fontSize: '1.2rem' }} />
+                          <Check sx={{ color: '#c8626d', fontSize: '1.2rem' }} />
                         </Box>
                       )}
                     </CardContent>
@@ -316,13 +316,13 @@ const FontManager = ({ open, onClose, onFontSelect }) => {
               component="label"
               startIcon={<Upload />}
               sx={{
-                borderColor: '#8B4513',
-                color: '#8B4513',
+                borderColor: '#c8626d',
+                color: '#c8626d',
                 textTransform: 'none',
                 fontWeight: 600,
                 '&:hover': {
-                  backgroundColor: '#8B451320',
-                  borderColor: '#8B4513'
+                  backgroundColor: '#c8626d20',
+                  borderColor: '#c8626d'
                 }
               }}
             >
@@ -351,7 +351,7 @@ const FontManager = ({ open, onClose, onFontSelect }) => {
                   console.log('Estado actual de uploadedFonts:', uploadedFonts);
                   setUploadedFonts([...uploadedFonts]); // Forzar re-render
                 }}
-                sx={{ color: '#8B4513', textTransform: 'none' }}
+                sx={{ color: '#c8626d', textTransform: 'none' }}
               >
                 Refrescar
               </Button>
@@ -366,7 +366,7 @@ const FontManager = ({ open, onClose, onFontSelect }) => {
                     <Card
                       sx={{
                         cursor: 'pointer',
-                        border: customFont?.name === font.name ? '2px solid #8B4513' : '2px solid transparent',
+                        border: customFont?.name === font.name ? '2px solid #c8626d' : '2px solid transparent',
                         borderRadius: '15px',
                         '&:hover': {
                           boxShadow: '0 4px 15px rgba(0,0,0,0.1)'
@@ -397,7 +397,7 @@ const FontManager = ({ open, onClose, onFontSelect }) => {
                         />
                         {customFont?.name === font.name && (
                           <Box sx={{ display: 'flex', justifyContent: 'center', mt: 1 }}>
-                            <Check sx={{ color: '#8B4513', fontSize: '1.2rem' }} />
+                            <Check sx={{ color: '#c8626d', fontSize: '1.2rem' }} />
                           </Box>
                         )}
                       </CardContent>
@@ -438,12 +438,12 @@ const FontManager = ({ open, onClose, onFontSelect }) => {
           }}
           variant="contained"
           sx={{
-            backgroundColor: '#8B4513',
+            backgroundColor: '#c8626d',
             textTransform: 'none',
             fontWeight: 600,
             px: 3,
             '&:hover': {
-              backgroundColor: '#A0522D'
+              backgroundColor: '#b5555a'
             }
           }}
         >

@@ -56,7 +56,7 @@ const UserDashboard = () => {
                       height: 100,
                       mx: 'auto',
                       mb: 3,
-                      border: '4px solid #8B4513'
+                      border: '4px solid #c8626d'
                     }}
                   />
                   
@@ -84,8 +84,8 @@ const UserDashboard = () => {
                   <Chip
                     label={user.memberSince ? `Miembro desde ${user.memberSince}` : "Miembro"}
                     sx={{
-                      backgroundColor: '#8B451320',
-                      color: '#8B4513',
+                      backgroundColor: '#c8626d20',
+                      color: '#c8626d',
                       fontWeight: 600
                     }}
                   />
@@ -110,7 +110,7 @@ const UserDashboard = () => {
                       textTransform: 'none',
                       fontWeight: 600,
                       '&:hover': {
-                        backgroundColor: '#8B451320'
+                        backgroundColor: '#c8626d20'
                       }
                     }}
                   >
@@ -127,7 +127,7 @@ const UserDashboard = () => {
                       textTransform: 'none',
                       fontWeight: 600,
                       '&:hover': {
-                        backgroundColor: '#8B451320'
+                        backgroundColor: '#c8626d20'
                       }
                     }}
                   >
@@ -144,7 +144,7 @@ const UserDashboard = () => {
                       textTransform: 'none',
                       fontWeight: 600,
                       '&:hover': {
-                        backgroundColor: '#8B451320'
+                        backgroundColor: '#c8626d20'
                       }
                     }}
                   >
@@ -161,7 +161,7 @@ const UserDashboard = () => {
                       textTransform: 'none',
                       fontWeight: 600,
                       '&:hover': {
-                        backgroundColor: '#8B451320'
+                        backgroundColor: '#c8626d20'
                       }
                     }}
                   >
@@ -208,7 +208,7 @@ const UserDashboard = () => {
               >
                 <CardContent sx={{ p: 2 }}>
                   <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
-                    <LocalShipping sx={{ color: '#8B4513', mr: 1 }} />
+                    <LocalShipping sx={{ color: '#c8626d', mr: 1 }} />
                     <Typography
                       variant="h5"
                       sx={{
@@ -256,7 +256,7 @@ const UserDashboard = () => {
                               {order.date} • {order.items} {order.items === 1 ? 'artículo' : 'artículos'}
                             </Typography>
                           </Box>
-                          <Typography variant="h6" sx={{ fontWeight: 700, color: '#8B4513' }}>
+                          <Typography variant="h6" sx={{ fontWeight: 700, color: '#c8626d' }}>
                             ${order.total}
                           </Typography>
                         </Box>
@@ -274,15 +274,15 @@ const UserDashboard = () => {
                     variant="outlined"
                     fullWidth
                     sx={{
-                      borderColor: '#8B4513',
-                      color: '#8B4513',
+                      borderColor: '#c8626d',
+                      color: '#c8626d',
                       py: 1.5,
                       borderRadius: '25px',
                       textTransform: 'none',
                       fontWeight: 600,
                       '&:hover': {
-                        backgroundColor: '#8B451320',
-                        borderColor: '#8B4513'
+                        backgroundColor: '#c8626d20',
+                        borderColor: '#c8626d'
                       }
                     }}
                   >
@@ -300,7 +300,7 @@ const UserDashboard = () => {
               >
                 <CardContent sx={{ p: 2 }}>
                   <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
-                    <Favorite sx={{ color: '#8B4513', mr: 1 }} />
+                    <Favorite sx={{ color: '#c8626d', mr: 1 }} />
                     <Typography
                       variant="h5"
                       sx={{
@@ -366,7 +366,7 @@ const UserDashboard = () => {
                                 variant="h6"
                                 sx={{
                                   fontWeight: 700,
-                                  color: '#8B4513'
+                                  color: '#c8626d'
                                 }}
                               >
                                 ${product.price}
@@ -382,16 +382,16 @@ const UserDashboard = () => {
                     variant="outlined"
                     fullWidth
                     sx={{
-                      borderColor: '#8B4513',
-                      color: '#8B4513',
+                      borderColor: '#c8626d',
+                      color: '#c8626d',
                       py: 1.5,
                       borderRadius: '25px',
                       textTransform: 'none',
                       fontWeight: 600,
                       mt: 3,
                       '&:hover': {
-                        backgroundColor: '#8B451320',
-                        borderColor: '#8B4513'
+                        backgroundColor: '#c8626d20',
+                        borderColor: '#c8626d'
                       }
                     }}
                   >

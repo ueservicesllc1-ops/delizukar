@@ -29,7 +29,7 @@ const Banner2 = () => {
             title: "Banner 2",
             description: "Banner de una sola foto",
             imageUrl: "https://images.unsplash.com/photo-1558961363-fa8fdf82db35?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80",
-            color: "#8B4513"
+            color: "#c8626d"
           }
         ]);
       } finally {
@@ -104,7 +104,7 @@ const Banner2 = () => {
         }}
       >
       {/* Overlay opcional si se especifica un color */}
-      {currentPhoto.color && currentPhoto.color !== '#8B4513' && (
+      {currentPhoto.color && currentPhoto.color !== '#c8626d' && (
         <Box
           sx={{
             position: 'absolute',

@@ -47,11 +47,11 @@ const SimpleCheckout = () => {
 
   return (
     <Card sx={{ p: 1.5, maxWidth: 'none' }}>
-      <Typography variant="h6" sx={{ mb: 1, color: '#8B4513', fontWeight: 600 }}>
+      <Typography variant="h6" sx={{ mb: 1, color: '#c8626d', fontWeight: 600 }}>
         Información de Pago
       </Typography>
       
-      <Typography variant="h6" sx={{ mb: 2, color: '#8B4513', fontWeight: 600 }}>
+      <Typography variant="h6" sx={{ mb: 2, color: '#c8626d', fontWeight: 600 }}>
         Total: ${getCartTotal().toFixed(2)}
       </Typography>
 
@@ -111,7 +111,7 @@ const SimpleCheckout = () => {
             backgroundColor: '#C8626D',
             color: 'white',
             '&:hover': {
-              backgroundColor: '#8B4513'
+              backgroundColor: '#c8626d'
             }
           }}
         >

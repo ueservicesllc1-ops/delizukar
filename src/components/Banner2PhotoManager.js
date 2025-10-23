@@ -35,7 +35,7 @@ const Banner2PhotoManager = ({ open, onClose }) => {
   const [newPhotoData, setNewPhotoData] = useState({
     title: '',
     description: '',
-    color: '#8B4513',
+    color: '#c8626d',
     order: 0,
     isActive: true,
   });
@@ -120,7 +120,7 @@ const Banner2PhotoManager = ({ open, onClose }) => {
         await addDoc(banner2PhotosCollectionRef, photoToSave);
         alert('Imagen subida y datos guardados en Firestore.');
         setFile(null);
-        setNewPhotoData({ title: '', description: '', color: '#8B4513', order: 0, isActive: true });
+        setNewPhotoData({ title: '', description: '', color: '#c8626d', order: 0, isActive: true });
         setIsUploading(false);
         setUploadProgress(0);
         loadBanner2Photos();
@@ -163,7 +163,7 @@ const Banner2PhotoManager = ({ open, onClose }) => {
       await updateDoc(photoRef, newPhotoData);
       alert('Datos de la foto actualizados correctamente.');
       setEditingPhoto(null);
-      setNewPhotoData({ title: '', description: '', color: '#8B4513', order: 0, isActive: true });
+      setNewPhotoData({ title: '', description: '', color: '#c8626d', order: 0, isActive: true });
       loadBanner2Photos();
     } catch (error) {
       console.error('Error al actualizar la foto:', error);
@@ -192,8 +192,8 @@ const Banner2PhotoManager = ({ open, onClose }) => {
         pb: 2
       }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <PhotoCamera sx={{ color: '#8B4513' }} />
-          <Typography variant="h5" sx={{ fontWeight: 700, color: '#8B4513' }}>
+          <PhotoCamera sx={{ color: '#c8626d' }} />
+          <Typography variant="h5" sx={{ fontWeight: 700, color: '#c8626d' }}>
             Gestión de Fotos del Banner 2
           </Typography>
         </Box>
@@ -226,11 +226,11 @@ const Banner2PhotoManager = ({ open, onClose }) => {
                     flexDirection: 'column',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    '&:hover': { borderColor: '#8B4513' }
+                    '&:hover': { borderColor: '#c8626d' }
                   }}
                 >
                   <input {...getInputProps()} />
-                  <AddPhotoAlternate sx={{ fontSize: '3rem', color: '#8B4513', mb: 1 }} />
+                  <AddPhotoAlternate sx={{ fontSize: '3rem', color: '#c8626d', mb: 1 }} />
                   <Typography variant="body1" sx={{ color: '#333', fontWeight: 600 }}>
                     Arrastra y suelta una imagen aquí, o haz click para seleccionar
                   </Typography>
@@ -299,13 +299,13 @@ const Banner2PhotoManager = ({ open, onClose }) => {
                   onClick={handleUpload}
                   disabled={isUploading || !file}
                   sx={{
-                    backgroundColor: '#8B4513',
+                    backgroundColor: '#c8626d',
                     textTransform: 'none',
                     fontWeight: 600,
                     px: 4,
                     py: 1.5,
                     borderRadius: '25px',
-                    '&:hover': { backgroundColor: '#A0522D' },
+                    '&:hover': { backgroundColor: '#b5555a' },
                     mt: 2
                   }}
                 >
@@ -361,13 +361,13 @@ const Banner2PhotoManager = ({ open, onClose }) => {
                   variant="contained"
                   onClick={handleUpdatePhoto}
                   sx={{
-                    backgroundColor: '#8B4513',
+                    backgroundColor: '#c8626d',
                     textTransform: 'none',
                     fontWeight: 600,
                     px: 4,
                     py: 1.5,
                     borderRadius: '25px',
-                    '&:hover': { backgroundColor: '#A0522D' },
+                    '&:hover': { backgroundColor: '#b5555a' },
                     mt: 2
                   }}
                 >
@@ -377,14 +377,14 @@ const Banner2PhotoManager = ({ open, onClose }) => {
                   variant="outlined"
                   onClick={() => setEditingPhoto(null)}
                   sx={{
-                    borderColor: '#8B4513',
-                    color: '#8B4513',
+                    borderColor: '#c8626d',
+                    color: '#c8626d',
                     textTransform: 'none',
                     fontWeight: 600,
                     px: 4,
                     py: 1.5,
                     borderRadius: '25px',
-                    '&:hover': { backgroundColor: '#8B451320' },
+                    '&:hover': { backgroundColor: '#c8626d20' },
                     mt: 2,
                     ml: 2
                   }}
@@ -441,7 +441,7 @@ const Banner2PhotoManager = ({ open, onClose }) => {
                           label={`Orden: ${photo.order}`}
                           size="small"
                           sx={{
-                            backgroundColor: '#8B4513',
+                            backgroundColor: '#c8626d',
                             color: 'white',
                             fontWeight: 600
                           }}

@@ -174,11 +174,11 @@ const Contacto = () => {
               variant="contained"
               disabled={sending}
               sx={{
-                backgroundColor: '#8B4513',
+                backgroundColor: '#c8626d',
                 textTransform: 'none',
                 fontWeight: 600,
                 px: 4,
-                '&:hover': { backgroundColor: '#A0522D' }
+                '&:hover': { backgroundColor: '#b5555a' }
               }}
             >
               {sending ? 'Sending...' : 'Send Message'}

@@ -214,7 +214,7 @@ const Checkout = () => {
               onClick={() => navigate('/carrito')}
               className="button-mobile"
               sx={{
-                color: '#8B4513',
+                color: '#c8626d',
                 mr: 2,
                 textTransform: 'none',
                 fontWeight: 600,
@@ -229,7 +229,7 @@ const Checkout = () => {
             variant="h3"
             sx={{
               fontWeight: 800,
-              color: '#8B4513',
+              color: '#c8626d',
               mb: 1,
               fontSize: { xs: '1.5rem', md: '2rem' },
               fontFamily: 'Playfair Display, serif'
@@ -349,7 +349,7 @@ const Checkout = () => {
                 <Card sx={{ mb: 2, borderRadius: '15px', boxShadow: '0 4px 16px rgba(0,0,0,0.1)' }}>
                   <CardContent sx={{ p: 2.5 }}>
                     <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                      <LocalShipping sx={{ color: '#8B4513', mr: 1, fontSize: '1.2rem' }} />
+                      <LocalShipping sx={{ color: '#c8626d', mr: 1, fontSize: '1.2rem' }} />
                       <Typography
                         variant="h6"
                         sx={{
@@ -470,7 +470,7 @@ const Checkout = () => {
                         <Typography variant="h6" sx={{ fontWeight: 700, color: '#333', fontSize: '1.1rem' }}>
                           Total
                         </Typography>
-                        <Typography variant="h6" sx={{ fontWeight: 700, color: '#8B4513', fontSize: '1.1rem' }}>
+                        <Typography variant="h6" sx={{ fontWeight: 700, color: '#c8626d', fontSize: '1.1rem' }}>
                           ${(cartTotal + (shippingInfo ? parseFloat(shippingInfo.cost || 0) : 0)).toFixed(2)}
                         </Typography>
                       </Box>
@@ -479,7 +479,7 @@ const Checkout = () => {
                     {/* Información de envío */}
                     {shippingInfo && (
                       <Box sx={{ mb: 2, p: 1.5, backgroundColor: '#f8f9fa', borderRadius: '8px' }}>
-                        <Typography variant="body1" sx={{ mb: 0.5, color: '#8B4513', fontWeight: 600, fontSize: '0.9rem' }}>
+                        <Typography variant="body1" sx={{ mb: 0.5, color: '#c8626d', fontWeight: 600, fontSize: '0.9rem' }}>
                           ✓ Envío Configurado
                         </Typography>
                         
@@ -510,7 +510,7 @@ const Checkout = () => {
                               <Typography variant="body2" sx={{ color: '#666', fontSize: '0.85rem', mb: 0.5 }}>
                                 🚚 Tránsito estimado: {deliveryInfo.transitDays} días
                               </Typography>
-                              <Typography variant="body2" sx={{ color: '#8B4513', fontWeight: 600, fontSize: '0.85rem' }}>
+                              <Typography variant="body2" sx={{ color: '#c8626d', fontWeight: 600, fontSize: '0.85rem' }}>
                                 📅 Entrega estimada: {deliveryInfo.deliveryDate.toLocaleDateString('es-ES', { 
                                   weekday: 'long', 
                                   day: 'numeric', 
@@ -558,7 +558,7 @@ const Checkout = () => {
                 <Card sx={{ mb: 2, borderRadius: '15px', boxShadow: '0 4px 16px rgba(0,0,0,0.1)' }}>
                   <CardContent sx={{ p: 2.5 }}>
                     <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                      <CreditCard sx={{ color: '#8B4513', mr: 1, fontSize: '1.2rem' }} />
+                      <CreditCard sx={{ color: '#c8626d', mr: 1, fontSize: '1.2rem' }} />
                       <Typography
                         variant="h6"
                         sx={{

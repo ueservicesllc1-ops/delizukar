@@ -270,7 +270,7 @@ const Header = () => {
                   <Typography 
                     variant="caption" 
                     sx={{ 
-                      color: '#8B4513', 
+                      color: '#c8626d', 
                       fontWeight: 600,
                       fontSize: '0.7rem',
                       maxWidth: '100px',
@@ -343,13 +343,13 @@ const Header = () => {
                       onClick={handleGoogleAuth}
                       className="header-auth-buttons"
                       sx={{
-                        backgroundColor: '#8B4513',
+                        backgroundColor: '#c8626d',
                         fontSize: '0.7rem',
                         py: 0.5,
                         px: 1,
                         minWidth: 'auto',
                         '&:hover': {
-                          backgroundColor: '#A0522D'
+                          backgroundColor: '#b5555a'
                         }
                       }}
                     >
@@ -447,10 +447,10 @@ const Header = () => {
                       component="a"
                       href="/admin"
                       sx={{
-                        color: '#8B4513',
+                        color: '#c8626d',
                         fontSize: '1.5rem',
                         '&:hover': {
-                          backgroundColor: '#8B451320',
+                          backgroundColor: '#c8626d20',
                           color: '#be8782'
                         }
                       }}
@@ -463,10 +463,10 @@ const Header = () => {
                   <IconButton
                     onClick={handleProfileMenuOpen}
                     sx={{
-                      color: '#8B4513',
+                      color: '#c8626d',
                       fontSize: '1.5rem',
                       '&:hover': {
-                        backgroundColor: '#8B451320'
+                        backgroundColor: '#c8626d20'
                       }
                     }}
                   >
@@ -523,7 +523,7 @@ const Header = () => {
                             borderRadius: '25px',
                             transition: 'all 0.3s ease',
                             '&:hover': {
-                              backgroundColor: '#8B451320',
+                              backgroundColor: '#c8626d20',
                               transform: 'translateY(-2px)'
                             }
                           }}

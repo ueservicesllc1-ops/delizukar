@@ -41,7 +41,7 @@ const BannerPhotoManager = ({ open, onClose }) => {
   const [photoData, setPhotoData] = useState({
     title: '',
     description: '',
-    color: '#8B4513',
+    color: '#c8626d',
     order: 1
   });
   const [editingPhoto, setEditingPhoto] = useState(null);
@@ -87,7 +87,7 @@ const BannerPhotoManager = ({ open, onClose }) => {
       setPhotoData({
         title: '',
         description: '',
-        color: '#8B4513',
+        color: '#c8626d',
         order: bannerPhotos.length + 1
       });
     }
@@ -135,7 +135,7 @@ const BannerPhotoManager = ({ open, onClose }) => {
       
       showSnackbar('Foto subida exitosamente', 'success');
       setSelectedFile(null);
-      setPhotoData({ title: '', description: '', color: '#8B4513', order: 1 });
+      setPhotoData({ title: '', description: '', color: '#c8626d', order: 1 });
       loadBannerPhotos();
       
     } catch (error) {
@@ -197,7 +197,7 @@ const BannerPhotoManager = ({ open, onClose }) => {
           pb: 2
         }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <PhotoCamera sx={{ color: '#8B4513' }} />
+            <PhotoCamera sx={{ color: '#c8626d' }} />
               <Typography variant="h5" sx={{ fontWeight: 700, color: '#eb8b8b' }}>
                 Gestión de Fotos del Banner
               </Typography>
@@ -220,13 +220,13 @@ const BannerPhotoManager = ({ open, onClose }) => {
                 component="label"
                 startIcon={<Upload />}
                 sx={{
-                  borderColor: '#8B4513',
-                  color: '#8B4513',
+                  borderColor: '#c8626d',
+                  color: '#c8626d',
                   textTransform: 'none',
                   fontWeight: 600,
                   '&:hover': {
-                    backgroundColor: '#8B451320',
-                    borderColor: '#8B4513'
+                    backgroundColor: '#c8626d20',
+                    borderColor: '#c8626d'
                   }
                 }}
               >
@@ -300,11 +300,11 @@ const BannerPhotoManager = ({ open, onClose }) => {
                       disabled={uploading}
                       startIcon={<CloudUpload />}
                       sx={{
-                        backgroundColor: '#8B4513',
+                        backgroundColor: '#c8626d',
                         textTransform: 'none',
                         fontWeight: 600,
                         '&:hover': {
-                          backgroundColor: '#A0522D'
+                          backgroundColor: '#b5555a'
                         }
                       }}
                     >
@@ -375,7 +375,7 @@ const BannerPhotoManager = ({ open, onClose }) => {
                             <Chip
                               label={`Orden: ${photo.order}`}
                               size="small"
-                              sx={{ backgroundColor: '#8B451320', color: '#8B4513' }}
+                              sx={{ backgroundColor: '#c8626d20', color: '#c8626d' }}
                             />
                             <Chip
                               label={photo.isActive ? 'Activa' : 'Inactiva'}
@@ -390,7 +390,7 @@ const BannerPhotoManager = ({ open, onClose }) => {
                             <IconButton
                               size="small"
                               onClick={() => window.open(photo.imageUrl, '_blank')}
-                              sx={{ color: '#8B4513' }}
+                              sx={{ color: '#c8626d' }}
                             >
                               <Visibility />
                             </IconButton>

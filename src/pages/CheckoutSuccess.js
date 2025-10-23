@@ -34,7 +34,10 @@ const CheckoutSuccess = () => {
         if (paymentIntentId) {
           console.log('🔍 Fetching payment data from backend...');
           // Consultar datos reales desde el backend
-          const response = await fetch(`http://localhost:5000/api/payment-intent/${paymentIntentId}`);
+          const baseUrl = process.env.NODE_ENV === 'production' 
+            ? window.location.origin 
+            : 'http://localhost:5000';
+          const response = await fetch(`${baseUrl}/api/payment-intent/${paymentIntentId}`);
           console.log('🔍 Backend response status:', response.status);
           
           if (response.ok) {
@@ -81,7 +84,7 @@ const CheckoutSuccess = () => {
         alignItems: 'center', 
         minHeight: '50vh' 
       }}>
-        <CircularProgress size={60} sx={{ color: '#8B4513' }} />
+        <CircularProgress size={60} sx={{ color: '#c8626d' }} />
       </Box>
     );
   }
@@ -96,7 +99,7 @@ const CheckoutSuccess = () => {
           variant="contained"
           onClick={() => navigate('/')}
           sx={{
-            backgroundColor: '#8B4513',
+            backgroundColor: '#c8626d',
             '&:hover': { backgroundColor: '#6B3410' }
           }}
         >
@@ -116,7 +119,7 @@ const CheckoutSuccess = () => {
           variant="contained"
           onClick={() => navigate('/')}
           sx={{
-            backgroundColor: '#8B4513',
+            backgroundColor: '#c8626d',
             '&:hover': { backgroundColor: '#6B3410' }
           }}
         >
@@ -152,7 +155,7 @@ const CheckoutSuccess = () => {
 
             <Typography variant="h5" sx={{ 
               fontWeight: 700, 
-              color: '#8B4513', 
+              color: '#c8626d', 
               mb: 1 
             }}>
               ¡Pago Exitoso!
@@ -186,7 +189,7 @@ const CheckoutSuccess = () => {
                 borderRadius: 1, 
                 mb: 2 
               }}>
-                <Typography variant="body2" sx={{ fontWeight: 600, mb: 1, fontSize: '0.9rem', color: '#8B4513' }}>
+                <Typography variant="body2" sx={{ fontWeight: 600, mb: 1, fontSize: '0.9rem', color: '#c8626d' }}>
                   📋 Resumen del Pago
                 </Typography>
                 
@@ -213,7 +216,7 @@ const CheckoutSuccess = () => {
                     <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '0.9rem' }}>
                       Total Pagado:
                     </Typography>
-                    <Typography variant="h6" sx={{ fontWeight: 700, color: '#8B4513', fontSize: '1rem' }}>
+                    <Typography variant="h6" sx={{ fontWeight: 700, color: '#c8626d', fontSize: '1rem' }}>
                       ${orderDetails.amount} {orderDetails.currency?.toUpperCase()}
                     </Typography>
                   </Box>
@@ -247,7 +250,7 @@ const CheckoutSuccess = () => {
                 onClick={() => navigate('/productos')}
                 size="small"
                 sx={{
-                  backgroundColor: '#8B4513',
+                  backgroundColor: '#c8626d',
                   '&:hover': { backgroundColor: '#6B3410' },
                   px: 2,
                   py: 0.5,
@@ -267,8 +270,8 @@ const CheckoutSuccess = () => {
                 onClick={() => navigate('/')}
                 size="small"
                 sx={{
-                  borderColor: '#8B4513',
-                  color: '#8B4513',
+                  borderColor: '#c8626d',
+                  color: '#c8626d',
                   px: 2,
                   py: 0.5,
                   borderRadius: '15px',
@@ -277,9 +280,9 @@ const CheckoutSuccess = () => {
                   fontSize: '0.8rem',
                   minWidth: '120px',
                   '&:hover': {
-                    backgroundColor: '#8B4513',
+                    backgroundColor: '#c8626d',
                     color: 'white',
-                    borderColor: '#8B4513'
+                    borderColor: '#c8626d'
                   }
                 }}
               >

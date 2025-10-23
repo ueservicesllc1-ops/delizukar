@@ -391,7 +391,7 @@ const PopupHeroManager = ({ open, onClose }) => {
                           startIcon={<Save />}
                           sx={{
                             backgroundColor: '#C8626D',
-                            '&:hover': { backgroundColor: '#A0522D' }
+                            '&:hover': { backgroundColor: '#b5555a' }
                           }}
                         >
                           {saving ? 'Guardando...' : 'Guardar Configuración'}
@@ -479,7 +479,7 @@ const PopupHeroManager = ({ open, onClose }) => {
                         size="small"
                         sx={{
                           backgroundColor: '#C8626D',
-                          '&:hover': { backgroundColor: '#A0522D' }
+                          '&:hover': { backgroundColor: '#b5555a' }
                         }}
                       >
                         Nueva Oferta
@@ -1198,7 +1198,7 @@ const PopupHeroManager = ({ open, onClose }) => {
           disabled={saving}
           sx={{
             backgroundColor: '#C8626D',
-            '&:hover': { backgroundColor: '#A0522D' },
+            '&:hover': { backgroundColor: '#b5555a' },
             mr: 2
           }}
         >

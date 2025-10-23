@@ -101,8 +101,8 @@ const PaymentForm = ({ amount, onSuccess, onError, orderDetails }) => {
     <Card sx={{ maxWidth: 500, mx: 'auto', mt: 2 }}>
       <CardContent>
         <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-          <Lock sx={{ mr: 1, color: '#8B4513' }} />
-          <Typography variant="h6" sx={{ fontWeight: 600, color: '#8B4513' }}>
+          <Lock sx={{ mr: 1, color: '#c8626d' }} />
+          <Typography variant="h6" sx={{ fontWeight: 600, color: '#c8626d' }}>
             Pago Seguro
           </Typography>
         </Box>
@@ -141,7 +141,7 @@ const PaymentForm = ({ amount, onSuccess, onError, orderDetails }) => {
             variant="contained"
             size="large"
             sx={{
-              backgroundColor: '#8B4513',
+              backgroundColor: '#c8626d',
               '&:hover': { backgroundColor: '#6B3410' },
               py: 1.5,
               borderRadius: '25px',

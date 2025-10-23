@@ -125,7 +125,7 @@ const MinProductsManager = ({ open, onClose }) => {
           variant="h5"
           sx={{
             fontWeight: 700,
-            color: '#8B4513',
+            color: '#c8626d',
             fontFamily: 'Playfair Display, serif'
           }}
         >
@@ -136,7 +136,7 @@ const MinProductsManager = ({ open, onClose }) => {
       <DialogContent sx={{ px: 3, pb: 2 }}>
         {loading ? (
           <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
-            <CircularProgress sx={{ color: '#8B4513' }} />
+            <CircularProgress sx={{ color: '#c8626d' }} />
           </Box>
         ) : (
           <Box sx={{ py: 2 }}>
@@ -164,10 +164,10 @@ const MinProductsManager = ({ open, onClose }) => {
                   borderRadius: '12px'
                 },
                 '& .MuiInputLabel-root.Mui-focused': {
-                  color: '#8B4513'
+                  color: '#c8626d'
                 },
                 '& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                  borderColor: '#8B4513'
+                  borderColor: '#c8626d'
                 }
               }}
             />
@@ -192,15 +192,15 @@ const MinProductsManager = ({ open, onClose }) => {
           onClick={handleClose}
           variant="outlined"
           sx={{
-            borderColor: '#8B4513',
-            color: '#8B4513',
+            borderColor: '#c8626d',
+            color: '#c8626d',
             borderRadius: '25px',
             textTransform: 'none',
             fontWeight: 600,
             px: 3,
             '&:hover': {
-              backgroundColor: '#8B451320',
-              borderColor: '#8B4513'
+              backgroundColor: '#c8626d20',
+              borderColor: '#c8626d'
             }
           }}
         >
@@ -212,14 +212,14 @@ const MinProductsManager = ({ open, onClose }) => {
           variant="contained"
           disabled={saving || loading}
           sx={{
-            backgroundColor: '#8B4513',
+            backgroundColor: '#c8626d',
             color: 'white',
             borderRadius: '25px',
             textTransform: 'none',
             fontWeight: 600,
             px: 3,
             '&:hover': {
-              backgroundColor: '#A0522D'
+              backgroundColor: '#b5555a'
             }
           }}
         >

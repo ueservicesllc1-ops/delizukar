@@ -379,7 +379,7 @@ const TestimonialsManager = ({ open, onClose }) => {
               variant="h5" 
               sx={{ 
                 fontWeight: 700, 
-                color: '#8B4513',
+                color: '#c8626d',
                 fontFamily: `"${titleConfig.font}", sans-serif`
               }}
             >
@@ -392,8 +392,8 @@ const TestimonialsManager = ({ open, onClose }) => {
               startIcon={<Add />}
               onClick={openNewDialog}
               sx={{
-                backgroundColor: '#8B4513',
-                '&:hover': { backgroundColor: '#A0522D' }
+                backgroundColor: '#c8626d',
+                '&:hover': { backgroundColor: '#b5555a' }
               }}
             >
               Nuevo Testimonio
@@ -406,9 +406,9 @@ const TestimonialsManager = ({ open, onClose }) => {
                 setTitleConfigDialog(true);
               }}
               sx={{
-                borderColor: '#8B4513',
-                color: '#8B4513',
-                '&:hover': { backgroundColor: '#8B451320' }
+                borderColor: '#c8626d',
+                color: '#c8626d',
+                '&:hover': { backgroundColor: '#c8626d20' }
               }}
             >
               Configurar Título
@@ -417,9 +417,9 @@ const TestimonialsManager = ({ open, onClose }) => {
               variant="outlined"
               onClick={loadTestimonials}
               sx={{
-                borderColor: '#8B4513',
-                color: '#8B4513',
-                '&:hover': { backgroundColor: '#8B451320' }
+                borderColor: '#c8626d',
+                color: '#c8626d',
+                '&:hover': { backgroundColor: '#c8626d20' }
               }}
             >
               Refrescar
@@ -477,7 +477,7 @@ const TestimonialsManager = ({ open, onClose }) => {
             </Button>
             <Button
               onClick={onClose}
-              sx={{ color: '#8B4513' }}
+              sx={{ color: '#c8626d' }}
             >
               ✕
             </Button>
@@ -509,8 +509,8 @@ const TestimonialsManager = ({ open, onClose }) => {
                   startIcon={<Add />}
                   onClick={openNewDialog}
                   sx={{
-                    backgroundColor: '#8B4513',
-                    '&:hover': { backgroundColor: '#A0522D' }
+                    backgroundColor: '#c8626d',
+                    '&:hover': { backgroundColor: '#b5555a' }
                   }}
                 >
                   Crear Primer Testimonio
@@ -603,8 +603,8 @@ const TestimonialsManager = ({ open, onClose }) => {
                         <IconButton
                           onClick={() => openEditDialog(testimonial)}
                           sx={{
-                            color: '#8B4513',
-                            '&:hover': { backgroundColor: '#8B451320' }
+                            color: '#c8626d',
+                            '&:hover': { backgroundColor: '#c8626d20' }
                           }}
                         >
                           <Edit />
@@ -752,7 +752,7 @@ const TestimonialsManager = ({ open, onClose }) => {
                         component="span"
                         startIcon={<PhotoCamera />}
                         disabled={uploading}
-                        sx={{ borderColor: '#8B4513', color: '#8B4513' }}
+                        sx={{ borderColor: '#c8626d', color: '#c8626d' }}
                       >
                         {uploading ? 'Subiendo...' : 'Subir Foto'}
                       </Button>
@@ -792,8 +792,8 @@ const TestimonialsManager = ({ open, onClose }) => {
                 variant="contained"
                 startIcon={<Save />}
                 sx={{
-                  backgroundColor: '#8B4513',
-                  '&:hover': { backgroundColor: '#A0522D' }
+                  backgroundColor: '#c8626d',
+                  '&:hover': { backgroundColor: '#b5555a' }
                 }}
               >
                 {editingTestimonial ? 'Actualizar' : 'Crear'}
@@ -884,7 +884,7 @@ const TestimonialsManager = ({ open, onClose }) => {
                       id="title-preview"
                       style={{
                         fontFamily: `"${localTitleConfig.font}", sans-serif`,
-                        color: '#8B4513',
+                        color: '#c8626d',
                         fontWeight: 700,
                         fontSize: '1.5rem',
                         margin: 0,
@@ -929,8 +929,8 @@ const TestimonialsManager = ({ open, onClose }) => {
                 variant="contained"
                 startIcon={<Save />}
                 sx={{
-                  backgroundColor: '#8B4513',
-                  '&:hover': { backgroundColor: '#A0522D' }
+                  backgroundColor: '#c8626d',
+                  '&:hover': { backgroundColor: '#b5555a' }
                 }}
               >
                 Guardar

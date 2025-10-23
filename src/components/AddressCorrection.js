@@ -96,7 +96,7 @@ const AddressCorrection = ({
       }}
     >
       <DialogTitle sx={{ 
-        backgroundColor: '#8B4513', 
+        backgroundColor: '#c8626d', 
         color: 'white',
         borderRadius: '16px 16px 0 0'
       }}>
@@ -193,11 +193,11 @@ const AddressCorrection = ({
                 variant="outlined"
                 onClick={handleUseOriginal}
                 sx={{
-                  borderColor: '#8B4513',
-                  color: '#8B4513',
+                  borderColor: '#c8626d',
+                  color: '#c8626d',
                   '&:hover': {
-                    borderColor: '#A0522D',
-                    backgroundColor: '#8B451310'
+                    borderColor: '#b5555a',
+                    backgroundColor: '#c8626d10'
                   }
                 }}
               >
@@ -225,9 +225,9 @@ const AddressCorrection = ({
                   variant="contained"
                   onClick={handleUseOriginal}
                   sx={{
-                    backgroundColor: '#8B4513',
+                    backgroundColor: '#c8626d',
                     '&:hover': {
-                      backgroundColor: '#A0522D'
+                      backgroundColor: '#b5555a'
                     }
                   }}
                 >

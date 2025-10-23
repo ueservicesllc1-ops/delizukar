@@ -21,7 +21,10 @@ const SimpleStripeCheckout = ({ cartItems, total, customerInfo, onSuccess, onErr
       console.log('👤 Cliente:', customerInfo.email);
 
       // 1. Crear sesión de pago en el backend
-      const response = await fetch('http://localhost:5000/api/create-checkout-session', {
+      const baseUrl = process.env.NODE_ENV === 'production' 
+        ? window.location.origin 
+        : 'http://localhost:5000';
+      const response = await fetch(`${baseUrl}/api/create-checkout-session`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ cartItems, total, customerInfo }),
@@ -58,8 +61,8 @@ const SimpleStripeCheckout = ({ cartItems, total, customerInfo, onSuccess, onErr
     <Card sx={{ maxWidth: 600, mx: 'auto', mt: 2 }}>
       <CardContent>
         <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
-          <ShoppingCart sx={{ mr: 1, color: '#8B4513' }} />
-          <Typography variant="h5" sx={{ fontWeight: 700, color: '#8B4513' }}>
+          <ShoppingCart sx={{ mr: 1, color: '#c8626d' }} />
+          <Typography variant="h5" sx={{ fontWeight: 700, color: '#c8626d' }}>
             Resumen del Pedido
           </Typography>
         </Box>
@@ -79,7 +82,7 @@ const SimpleStripeCheckout = ({ cartItems, total, customerInfo, onSuccess, onErr
             <Typography variant="h6" sx={{ fontWeight: 700 }}>
               Total:
             </Typography>
-            <Typography variant="h5" sx={{ fontWeight: 700, color: '#8B4513' }}>
+            <Typography variant="h5" sx={{ fontWeight: 700, color: '#c8626d' }}>
               ${total.toFixed(2)}
             </Typography>
           </Box>
@@ -97,7 +100,7 @@ const SimpleStripeCheckout = ({ cartItems, total, customerInfo, onSuccess, onErr
             variant="contained"
             size="large"
             sx={{
-              backgroundColor: '#8B4513',
+              backgroundColor: '#c8626d',
               '&:hover': { backgroundColor: '#6B3410' },
               py: 2,
               borderRadius: '25px',

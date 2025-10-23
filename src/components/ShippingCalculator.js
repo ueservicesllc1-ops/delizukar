@@ -109,7 +109,7 @@ const ShippingCalculator = ({
       'usps': '#004B87',
       'dhl': '#D40511'
     };
-    return colors[carrier] || '#8B4513';
+    return colors[carrier] || '#c8626d';
   };
 
   const getCarrierName = (carrier) => {
@@ -133,7 +133,7 @@ const ShippingCalculator = ({
       }}
     >
       <DialogTitle sx={{ 
-        backgroundColor: '#8B4513', 
+        backgroundColor: '#c8626d', 
         color: 'white',
         borderRadius: '16px 16px 0 0',
         display: 'flex',
@@ -171,7 +171,7 @@ const ShippingCalculator = ({
 
         {loading && (
           <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', py: 4 }}>
-            <CircularProgress sx={{ color: '#8B4513', mb: 2 }} />
+            <CircularProgress sx={{ color: '#c8626d', mb: 2 }} />
             <Typography variant="body1" color="text.secondary">
               Calculando opciones de envío...
             </Typography>
@@ -190,10 +190,10 @@ const ShippingCalculator = ({
                   <Card
                     sx={{
                       cursor: 'pointer',
-                      border: selectedRate?.object_id === rate.object_id ? '2px solid #8B4513' : '1px solid #e0e0e0',
+                      border: selectedRate?.object_id === rate.object_id ? '2px solid #c8626d' : '1px solid #e0e0e0',
                       transition: 'all 0.3s ease',
                       '&:hover': {
-                        borderColor: '#8B4513',
+                        borderColor: '#c8626d',
                         boxShadow: '0 4px 12px rgba(139, 69, 19, 0.15)'
                       }
                     }}
@@ -216,7 +216,7 @@ const ShippingCalculator = ({
                           </Typography>
                         </Box>
                         
-                        <Typography variant="h6" sx={{ color: '#8B4513', fontWeight: 700 }}>
+                        <Typography variant="h6" sx={{ color: '#c8626d', fontWeight: 700 }}>
                           {formatPrice(rate.amount)}
                         </Typography>
                       </Box>
@@ -243,11 +243,11 @@ const ShippingCalculator = ({
                 variant="outlined"
                 onClick={onClose}
                 sx={{
-                  borderColor: '#8B4513',
-                  color: '#8B4513',
+                  borderColor: '#c8626d',
+                  color: '#c8626d',
                   '&:hover': {
-                    borderColor: '#A0522D',
-                    backgroundColor: '#8B451310'
+                    borderColor: '#b5555a',
+                    backgroundColor: '#c8626d10'
                   }
                 }}
               >
@@ -259,9 +259,9 @@ const ShippingCalculator = ({
                 onClick={handleConfirmShipping}
                 disabled={!selectedRate}
                 sx={{
-                  backgroundColor: selectedRate ? '#8B4513' : '#ccc',
+                  backgroundColor: selectedRate ? '#c8626d' : '#ccc',
                   '&:hover': {
-                    backgroundColor: selectedRate ? '#A0522D' : '#ccc'
+                    backgroundColor: selectedRate ? '#b5555a' : '#ccc'
                   }
                 }}
               >

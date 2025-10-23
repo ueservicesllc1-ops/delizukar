@@ -316,7 +316,7 @@ const AdminDashboard = () => {
     reportElement.innerHTML = `
       <div style="text-align: center; margin-bottom: 30px; border-bottom: 3px solid #c8626d; padding-bottom: 20px;">
         <h1 style="color: #c8626d; margin: 0; font-size: 28px; font-weight: bold;">DELIZUKAR</h1>
-        <h2 style="color: #8B4513; margin: 10px 0; font-size: 20px; font-weight: 600;">REPORTE FINANCIERO DE VENTAS</h2>
+        <h2 style="color: #c8626d; margin: 10px 0; font-size: 20px; font-weight: 600;">REPORTE FINANCIERO DE VENTAS</h2>
         <div style="margin-top: 15px;">
           <p style="margin: 5px 0; color: #666; font-size: 14px;"><strong>Empresa:</strong> Delizukar S.A.</p>
           <p style="margin: 5px 0; color: #666; font-size: 14px;"><strong>Dirección:</strong> Av. Principal 123, Ciudad, País</p>
@@ -342,7 +342,7 @@ const AdminDashboard = () => {
             <h4 style="margin: 0 0 6px 0; font-size: 12px; font-weight: 600;">INGRESOS TOTALES</h4>
             <p style="margin: 0; font-size: 18px; font-weight: bold;">$0.00</p>
           </div>
-          <div style="background: #8B4513; color: white; padding: 12px; border-radius: 6px; text-align: center;">
+          <div style="background: #c8626d; color: white; padding: 12px; border-radius: 6px; text-align: center;">
             <h4 style="margin: 0 0 6px 0; font-size: 12px; font-weight: 600;">ÓRDENES TOTALES</h4>
             <p style="margin: 0; font-size: 18px; font-weight: bold;">0</p>
           </div>
@@ -350,7 +350,7 @@ const AdminDashboard = () => {
             <h4 style="margin: 0 0 6px 0; font-size: 12px; font-weight: 600;">PROMEDIO POR ORDEN</h4>
             <p style="margin: 0; font-size: 18px; font-weight: bold;">$0.00</p>
           </div>
-          <div style="background: #A0522D; color: white; padding: 12px; border-radius: 6px; text-align: center;">
+          <div style="background: #b5555a; color: white; padding: 12px; border-radius: 6px; text-align: center;">
             <h4 style="margin: 0 0 6px 0; font-size: 12px; font-weight: 600;">PRODUCTOS VENDIDOS</h4>
             <p style="margin: 0; font-size: 18px; font-weight: bold;">0</p>
           </div>
@@ -371,17 +371,17 @@ const AdminDashboard = () => {
             <tr>
               <td style="padding: 8px; border: 1px solid #ddd; font-weight: 600; font-size: 11px;">Esta Semana</td>
               <td style="padding: 8px; border: 1px solid #ddd; text-align: right; color: #c8626d; font-weight: bold; font-size: 11px;">$0.00</td>
-              <td style="padding: 8px; border: 1px solid #ddd; text-align: right; color: #8B4513; font-weight: bold; font-size: 11px;">0</td>
+              <td style="padding: 8px; border: 1px solid #ddd; text-align: right; color: #c8626d; font-weight: bold; font-size: 11px;">0</td>
             </tr>
             <tr style="background: #f8f9fa;">
               <td style="padding: 8px; border: 1px solid #ddd; font-weight: 600; font-size: 11px;">Este Mes</td>
               <td style="padding: 8px; border: 1px solid #ddd; text-align: right; color: #c8626d; font-weight: bold; font-size: 11px;">$0.00</td>
-              <td style="padding: 8px; border: 1px solid #ddd; text-align: right; color: #8B4513; font-weight: bold; font-size: 11px;">0</td>
+              <td style="padding: 8px; border: 1px solid #ddd; text-align: right; color: #c8626d; font-weight: bold; font-size: 11px;">0</td>
             </tr>
             <tr>
               <td style="padding: 8px; border: 1px solid #ddd; font-weight: 600; font-size: 11px;">Este Año</td>
               <td style="padding: 8px; border: 1px solid #ddd; text-align: right; color: #c8626d; font-weight: bold; font-size: 11px;">$0.00</td>
-              <td style="padding: 8px; border: 1px solid #ddd; text-align: right; color: #8B4513; font-weight: bold; font-size: 11px;">0</td>
+              <td style="padding: 8px; border: 1px solid #ddd; text-align: right; color: #c8626d; font-weight: bold; font-size: 11px;">0</td>
             </tr>
           </tbody>
         </table>
@@ -391,7 +391,7 @@ const AdminDashboard = () => {
         <h3 style="color: #c8626d; border-bottom: 2px solid #c8626d; padding-bottom: 8px; margin-bottom: 15px; font-size: 16px;">🛒 ÓRDENES RECIENTES</h3>
         <table style="width: 100%; border-collapse: collapse; background: white; border: 1px solid #ddd;">
           <thead>
-            <tr style="background: #8B4513; color: white;">
+            <tr style="background: #c8626d; color: white;">
               <th style="padding: 12px; text-align: left; border: 1px solid #ddd;">ID</th>
               <th style="padding: 12px; text-align: left; border: 1px solid #ddd;">Fecha</th>
               <th style="padding: 12px; text-align: left; border: 1px solid #ddd;">Cliente</th>
@@ -582,13 +582,13 @@ const AdminDashboard = () => {
                 onClick={handleSignOut}
                 variant="outlined"
                 sx={{
-                  borderColor: '#8B4513',
-                  color: '#8B4513',
+                  borderColor: '#c8626d',
+                  color: '#c8626d',
                   textTransform: 'none',
                   fontWeight: 600,
                   '&:hover': {
-                    backgroundColor: '#8B451320',
-                    borderColor: '#8B4513'
+                    backgroundColor: '#c8626d20',
+                    borderColor: '#c8626d'
                   }
                 }}
               >
@@ -609,8 +609,8 @@ const AdminDashboard = () => {
             <Grid container spacing={0} sx={{ maxWidth: '1000px', mx: 'auto' }}>
               {Array.from({ length: 16 }, (_, index) => {
                 const colors = [
-                  '#8B4513', '#be8782', '#A0522D', '#D2B48C',
-                  '#CD853F', '#DEB887', '#F4A460', '#D2691E',
+                  '#c8626d', '#be8782', '#b5555a', '#c8626d',
+                  '#c8626d', '#c8626d', '#c8626d', '#c8626d',
                   '#BC8F8F', '#F5DEB3', '#DDA0DD', '#98FB98',
                   '#F0E68C', '#FFB6C1', '#87CEEB', '#FFA07A'
                 ];
@@ -1088,10 +1088,10 @@ const AdminDashboard = () => {
                     size="small"
                     onClick={generatePDFReport}
                     sx={{
-                      borderColor: '#8B4513',
-                      color: '#8B4513',
+                      borderColor: '#c8626d',
+                      color: '#c8626d',
                       '&:hover': { 
-                        backgroundColor: '#8B4513',
+                        backgroundColor: '#c8626d',
                         color: 'white'
                       },
                       width: '100%'
@@ -1150,7 +1150,7 @@ const AdminDashboard = () => {
                   <Grid item xs={6} sm={3}>
                     <Card sx={{ 
                       p: 2, 
-                      backgroundColor: '#A0522D', 
+                      backgroundColor: '#b5555a', 
                       color: 'white',
                       textAlign: 'center',
                       borderRadius: '8px'
@@ -1166,7 +1166,7 @@ const AdminDashboard = () => {
                   <Grid item xs={6} sm={3}>
                     <Card sx={{ 
                       p: 2, 
-                      backgroundColor: '#D2B48C', 
+                      backgroundColor: '#c8626d', 
                       color: 'white',
                       textAlign: 'center',
                       borderRadius: '8px'
@@ -1272,7 +1272,7 @@ const AdminDashboard = () => {
                   <Grid item xs={4}>
                     <Card sx={{ 
                       p: 2, 
-                      backgroundColor: '#A0522D', 
+                      backgroundColor: '#b5555a', 
                       color: 'white',
                       textAlign: 'center',
                       borderRadius: '8px'

@@ -38,7 +38,7 @@ const PaymentMethodMessaging = ({ amount, currency = 'USD', countryCode = 'US' }
           appearance: {
             theme: 'stripe',
             variables: {
-              colorPrimary: '#8B4513',
+              colorPrimary: '#c8626d',
               colorBackground: '#ffffff',
               colorText: '#30313d',
               fontFamily: 'Ideal Sans, system-ui, sans-serif',

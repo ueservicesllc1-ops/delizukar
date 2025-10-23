@@ -38,7 +38,7 @@ const HeroBanner = () => {
             subtitle: "Estilo Nueva York",
             description: "Descubre el sabor auténtico de las mejores galletas artesanales, horneadas con ingredientes premium y el amor de siempre.",
             imageUrl: "https://images.unsplash.com/photo-1558961363-fa8fdf82db35?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80",
-            color: "#8B4513"
+            color: "#c8626d"
           },
           {
             id: 'default2',
@@ -46,7 +46,7 @@ const HeroBanner = () => {
             subtitle: "Irresistible Tentación",
             description: "Nuestras galletas de chocolate están hechas con cacao belga de la más alta calidad. Una experiencia única para tu paladar.",
             imageUrl: "https://images.unsplash.com/photo-1578985545062-69928b1d9587?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80",
-            color: "#D2691E"
+            color: "#c8626d"
           },
           {
             id: 'default3',

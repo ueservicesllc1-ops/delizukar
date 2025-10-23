@@ -27,7 +27,10 @@ const StripeBalance = ({ open, onClose }) => {
       setLoading(true);
       setError(null);
       
-      const response = await fetch('http://localhost:5000/api/balance');
+      const baseUrl = process.env.NODE_ENV === 'production' 
+        ? window.location.origin 
+        : 'http://localhost:5000';
+      const response = await fetch(`${baseUrl}/api/balance`);
       const data = await response.json();
       
       if (data.balance) {
@@ -85,8 +88,8 @@ const StripeBalance = ({ open, onClose }) => {
     <Dialog open={open} onClose={onClose} maxWidth="lg" fullWidth>
       <DialogTitle sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
-          <AccountBalance sx={{ color: '#8B4513', mr: 1, fontSize: '1.5rem' }} />
-          <Typography variant="h5" sx={{ fontWeight: 700, color: '#8B4513' }}>
+          <AccountBalance sx={{ color: '#c8626d', mr: 1, fontSize: '1.5rem' }} />
+          <Typography variant="h5" sx={{ fontWeight: 700, color: '#c8626d' }}>
             Balance de Stripe
           </Typography>
         </Box>
@@ -212,7 +215,7 @@ const StripeBalance = ({ open, onClose }) => {
             <Typography variant="body1" sx={{ fontWeight: 600 }}>
               Balance Total:
             </Typography>
-            <Typography variant="h6" sx={{ fontWeight: 700, color: '#8B4513' }}>
+            <Typography variant="h6" sx={{ fontWeight: 700, color: '#c8626d' }}>
               {(
                 balance.available.reduce((sum, item) => sum + item.amount, 0) +
                 balance.pending.reduce((sum, item) => sum + item.amount, 0)

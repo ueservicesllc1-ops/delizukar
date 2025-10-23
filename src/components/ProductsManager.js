@@ -378,7 +378,7 @@ const ProductsManager = ({ open, onClose }) => {
           variant="h5"
           sx={{
             fontWeight: 700,
-            color: '#8B4513',
+            color: '#c8626d',
             fontFamily: 'Playfair Display, serif'
           }}
         >
@@ -406,13 +406,13 @@ const ProductsManager = ({ open, onClose }) => {
             startIcon={<Add />}
             onClick={() => setShowForm(true)}
             sx={{
-              backgroundColor: '#8B4513',
+              backgroundColor: '#c8626d',
               borderRadius: '25px',
               textTransform: 'none',
               fontWeight: 600,
               px: 3,
               '&:hover': {
-                backgroundColor: '#A0522D'
+                backgroundColor: '#b5555a'
               }
             }}
           >
@@ -424,7 +424,7 @@ const ProductsManager = ({ open, onClose }) => {
         {showForm && (
           <Card sx={{ mb: 3, borderRadius: '15px', boxShadow: '0 4px 15px rgba(0,0,0,0.1)' }}>
             <CardContent sx={{ p: 3 }}>
-              <Typography variant="h6" sx={{ mb: 3, color: '#8B4513', fontWeight: 600 }}>
+              <Typography variant="h6" sx={{ mb: 3, color: '#c8626d', fontWeight: 600 }}>
                 {editingProduct ? 'Editar Producto' : 'Nuevo Producto'}
               </Typography>
               
@@ -501,7 +501,7 @@ const ProductsManager = ({ open, onClose }) => {
                               maxHeight: '150px',
                               objectFit: 'cover',
                               borderRadius: '8px',
-                              border: '2px solid #8B4513'
+                              border: '2px solid #c8626d'
                             }}
                           />
                           <Button
@@ -544,13 +544,13 @@ const ProductsManager = ({ open, onClose }) => {
                             }}
                             sx={{
                               mt: 1,
-                              borderColor: '#8B4513',
-                              color: '#8B4513',
+                              borderColor: '#c8626d',
+                              color: '#c8626d',
                               textTransform: 'none',
                               fontSize: '0.75rem',
                               '&:hover': {
-                                borderColor: '#A0522D',
-                                backgroundColor: '#8B451320'
+                                borderColor: '#b5555a',
+                                backgroundColor: '#c8626d20'
                               }
                             }}
                           >
@@ -566,7 +566,7 @@ const ProductsManager = ({ open, onClose }) => {
                             maxHeight: '150px',
                             width: '150px',
                             height: '150px',
-                            border: '2px dashed #8B4513',
+                            border: '2px dashed #c8626d',
                             borderRadius: '8px',
                             display: 'flex',
                             alignItems: 'center',
@@ -582,7 +582,7 @@ const ProductsManager = ({ open, onClose }) => {
                           <Typography
                             sx={{
                               fontSize: '2rem',
-                              color: '#8B4513',
+                              color: '#c8626d',
                               fontWeight: 'bold'
                             }}
                           >
@@ -610,12 +610,12 @@ const ProductsManager = ({ open, onClose }) => {
                         component="span"
                         startIcon={<PhotoCamera />}
                         sx={{
-                          borderColor: '#8B4513',
-                          color: '#8B4513',
+                          borderColor: '#c8626d',
+                          color: '#c8626d',
                           textTransform: 'none',
                           '&:hover': {
-                            borderColor: '#A0522D',
-                            backgroundColor: '#8B451320'
+                            borderColor: '#b5555a',
+                            backgroundColor: '#c8626d20'
                           }
                         }}
                       >
@@ -625,7 +625,7 @@ const ProductsManager = ({ open, onClose }) => {
                     
                     {uploadingImage && (
                       <Box sx={{ display: 'flex', alignItems: 'center', mt: 1 }}>
-                        <CircularProgress size={20} sx={{ color: '#8B4513', mr: 1 }} />
+                        <CircularProgress size={20} sx={{ color: '#c8626d', mr: 1 }} />
                         <Typography variant="body2" sx={{ color: '#666' }}>
                           Subiendo imagen...
                         </Typography>
@@ -728,8 +728,8 @@ const ProductsManager = ({ open, onClose }) => {
                   variant="outlined"
                   startIcon={<Cancel />}
                   sx={{
-                    borderColor: '#8B4513',
-                    color: '#8B4513',
+                    borderColor: '#c8626d',
+                    color: '#c8626d',
                     borderRadius: '25px',
                     textTransform: 'none',
                     fontWeight: 600
@@ -744,12 +744,12 @@ const ProductsManager = ({ open, onClose }) => {
                   startIcon={<Save />}
                   disabled={saving}
                   sx={{
-                    backgroundColor: '#8B4513',
+                    backgroundColor: '#c8626d',
                     borderRadius: '25px',
                     textTransform: 'none',
                     fontWeight: 600,
                     '&:hover': {
-                      backgroundColor: '#A0522D'
+                      backgroundColor: '#b5555a'
                     }
                   }}
                 >
@@ -772,7 +772,7 @@ const ProductsManager = ({ open, onClose }) => {
         {/* Lista de productos en tabla */}
         {loading ? (
           <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
-            <CircularProgress sx={{ color: '#8B4513' }} />
+            <CircularProgress sx={{ color: '#c8626d' }} />
           </Box>
         ) : (
           <Box sx={{ overflow: 'auto' }}>
@@ -817,7 +817,7 @@ const ProductsManager = ({ open, onClose }) => {
                       <Chip label={product.category} size="small" color="primary" />
                     </td>
                     <td style={{ padding: '12px' }}>
-                      <Typography variant="subtitle2" sx={{ fontWeight: 600, color: '#8B4513' }}>
+                      <Typography variant="subtitle2" sx={{ fontWeight: 600, color: '#c8626d' }}>
                         ${product.price}
                       </Typography>
                     </td>
@@ -846,7 +846,7 @@ const ProductsManager = ({ open, onClose }) => {
                         <IconButton
                           size="small"
                           onClick={() => handleEdit(product)}
-                          sx={{ color: '#8B4513' }}
+                          sx={{ color: '#c8626d' }}
                         >
                           <Edit />
                         </IconButton>
@@ -872,8 +872,8 @@ const ProductsManager = ({ open, onClose }) => {
           onClick={handleClose}
           variant="outlined"
           sx={{
-            borderColor: '#8B4513',
-            color: '#8B4513',
+            borderColor: '#c8626d',
+            color: '#c8626d',
             borderRadius: '25px',
             textTransform: 'none',
             fontWeight: 600,

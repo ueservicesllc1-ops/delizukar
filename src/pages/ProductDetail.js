@@ -47,7 +47,7 @@ const ProductDetail = () => {
             startIcon={<ArrowBack />}
             onClick={() => navigate('/productos')}
             sx={{
-              color: '#8B4513',
+              color: '#c8626d',
               mb: 4,
               textTransform: 'none',
               fontWeight: 600
@@ -121,7 +121,7 @@ const ProductDetail = () => {
                   variant="h3"
                   sx={{
                     fontWeight: 800,
-                    color: '#8B4513',
+                    color: '#c8626d',
                     mb: 2,
                     fontFamily: 'Playfair Display, serif'
                   }}
@@ -161,7 +161,7 @@ const ProductDetail = () => {
                     variant="h3"
                     sx={{
                       fontWeight: 800,
-                      color: '#8B4513',
+                      color: '#c8626d',
                       fontSize: '2.5rem'
                     }}
                   >
@@ -212,8 +212,8 @@ const ProductDetail = () => {
                         label={ingredient}
                         variant="outlined"
                         sx={{
-                          borderColor: '#8B4513',
-                          color: '#8B4513'
+                          borderColor: '#c8626d',
+                          color: '#c8626d'
                         }}
                       />
                     ))}
@@ -235,7 +235,7 @@ const ProductDetail = () => {
                   <Grid container spacing={2}>
                     <Grid item xs={3}>
                       <Box sx={{ textAlign: 'center', p: 2, backgroundColor: '#f5f5f5', borderRadius: '10px' }}>
-                        <Typography variant="h6" sx={{ fontWeight: 700, color: '#8B4513' }}>
+                        <Typography variant="h6" sx={{ fontWeight: 700, color: '#c8626d' }}>
                           {product.nutrition.calories}
                         </Typography>
                         <Typography variant="body2" sx={{ color: '#666' }}>
@@ -245,7 +245,7 @@ const ProductDetail = () => {
                     </Grid>
                     <Grid item xs={3}>
                       <Box sx={{ textAlign: 'center', p: 2, backgroundColor: '#f5f5f5', borderRadius: '10px' }}>
-                        <Typography variant="h6" sx={{ fontWeight: 700, color: '#8B4513' }}>
+                        <Typography variant="h6" sx={{ fontWeight: 700, color: '#c8626d' }}>
                           {product.nutrition.fat}g
                         </Typography>
                         <Typography variant="body2" sx={{ color: '#666' }}>
@@ -255,7 +255,7 @@ const ProductDetail = () => {
                     </Grid>
                     <Grid item xs={3}>
                       <Box sx={{ textAlign: 'center', p: 2, backgroundColor: '#f5f5f5', borderRadius: '10px' }}>
-                        <Typography variant="h6" sx={{ fontWeight: 700, color: '#8B4513' }}>
+                        <Typography variant="h6" sx={{ fontWeight: 700, color: '#c8626d' }}>
                           {product.nutrition.carbs}g
                         </Typography>
                         <Typography variant="body2" sx={{ color: '#666' }}>
@@ -265,7 +265,7 @@ const ProductDetail = () => {
                     </Grid>
                     <Grid item xs={3}>
                       <Box sx={{ textAlign: 'center', p: 2, backgroundColor: '#f5f5f5', borderRadius: '10px' }}>
-                        <Typography variant="h6" sx={{ fontWeight: 700, color: '#8B4513' }}>
+                        <Typography variant="h6" sx={{ fontWeight: 700, color: '#c8626d' }}>
                           {product.nutrition.protein}g
                         </Typography>
                         <Typography variant="body2" sx={{ color: '#666' }}>
@@ -306,9 +306,9 @@ const ProductDetail = () => {
                   <IconButton
                     sx={{
                       backgroundColor: '#f5f5f5',
-                      color: '#8B4513',
+                      color: '#c8626d',
                       '&:hover': {
-                        backgroundColor: '#8B451320'
+                        backgroundColor: '#c8626d20'
                       }
                     }}
                   >
@@ -318,9 +318,9 @@ const ProductDetail = () => {
                   <IconButton
                     sx={{
                       backgroundColor: '#f5f5f5',
-                      color: '#8B4513',
+                      color: '#c8626d',
                       '&:hover': {
-                        backgroundColor: '#8B451320'
+                        backgroundColor: '#c8626d20'
                       }
                     }}
                   >

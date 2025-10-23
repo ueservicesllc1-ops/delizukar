@@ -114,7 +114,10 @@ const CheckoutForm = ({ cartItems, total, customerInfo, onSuccess, onError }) =>
             updatedAt: new Date().toISOString()
           };
           
-          const response = await fetch('http://localhost:5000/api/create-order', {
+          const baseUrl = process.env.NODE_ENV === 'production' 
+            ? window.location.origin 
+            : 'http://localhost:5000';
+          const response = await fetch(`${baseUrl}/api/create-order`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -162,8 +165,8 @@ const CheckoutForm = ({ cartItems, total, customerInfo, onSuccess, onError }) =>
     <Card sx={{ maxWidth: 600, mx: 'auto', mt: 2 }}>
       <CardContent>
         <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
-          <CreditCard sx={{ mr: 1, color: '#8B4513' }} />
-          <Typography variant="h5" sx={{ fontWeight: 700, color: '#8B4513' }}>
+          <CreditCard sx={{ mr: 1, color: '#c8626d' }} />
+          <Typography variant="h5" sx={{ fontWeight: 700, color: '#c8626d' }}>
             Información de Pago
           </Typography>
         </Box>
@@ -174,7 +177,7 @@ const CheckoutForm = ({ cartItems, total, customerInfo, onSuccess, onError }) =>
           <Typography variant="h6" sx={{ fontWeight: 700 }}>
             Total:
           </Typography>
-          <Typography variant="h5" sx={{ fontWeight: 700, color: '#8B4513' }}>
+          <Typography variant="h5" sx={{ fontWeight: 700, color: '#c8626d' }}>
             ${total.toFixed(2)}
           </Typography>
         </Box>
@@ -234,7 +237,7 @@ const CheckoutForm = ({ cartItems, total, customerInfo, onSuccess, onError }) =>
               variant="contained"
               size="large"
               sx={{
-                backgroundColor: '#8B4513',
+                backgroundColor: '#c8626d',
                 '&:hover': { backgroundColor: '#6B3410' },
                 py: 2,
                 borderRadius: '25px',
@@ -302,7 +305,10 @@ const StripeCheckout = ({ cartItems, total, customerInfo, onSuccess, onError }) 
         setError(null);
         
         // Enhanced request with better error handling
-        const response = await fetch('http://localhost:5000/api/create-payment-intent', {
+        const baseUrl = process.env.NODE_ENV === 'production' 
+          ? window.location.origin 
+          : 'http://localhost:5000';
+        const response = await fetch(`${baseUrl}/api/create-payment-intent`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -359,7 +365,7 @@ const StripeCheckout = ({ cartItems, total, customerInfo, onSuccess, onError }) 
     appearance: {
       theme: 'stripe',
       variables: {
-        colorPrimary: '#8B4513',
+        colorPrimary: '#c8626d',
         colorBackground: '#ffffff',
         colorText: '#30313d',
         colorDanger: '#df1b41',
@@ -374,7 +380,7 @@ const StripeCheckout = ({ cartItems, total, customerInfo, onSuccess, onError }) 
           padding: '12px',
         },
         '.Input:focus': {
-          border: '2px solid #8B4513',
+          border: '2px solid #c8626d',
           boxShadow: '0 0 0 3px rgba(139, 69, 19, 0.1)',
         }
       }
@@ -408,7 +414,7 @@ const StripeCheckout = ({ cartItems, total, customerInfo, onSuccess, onError }) 
               variant="contained" 
               onClick={handleRetry}
               disabled={retryCount >= 3}
-              sx={{ backgroundColor: '#8B4513', '&:hover': { backgroundColor: '#6B3410' } }}
+              sx={{ backgroundColor: '#c8626d', '&:hover': { backgroundColor: '#6B3410' } }}
             >
               Reintentar
             </Button>

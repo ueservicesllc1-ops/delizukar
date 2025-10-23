@@ -210,7 +210,7 @@ const FeaturedProducts = () => {
                           variant="h6"
                           sx={{
                             fontWeight: 700,
-                            color: '#8B4513',
+                            color: '#c8626d',
                             fontSize: '1.3rem'
                           }}
                         >
@@ -273,8 +273,8 @@ const FeaturedProducts = () => {
                 size="large"
                 href="/productos"
                 sx={{
-                  borderColor: '#8B4513',
-                  color: '#8B4513',
+                  borderColor: '#c8626d',
+                  color: '#c8626d',
                   px: 4,
                   py: 1.5,
                   borderRadius: '25px',
@@ -282,9 +282,9 @@ const FeaturedProducts = () => {
                   fontWeight: 600,
                   fontSize: '1.1rem',
                   '&:hover': {
-                    backgroundColor: '#8B4513',
+                    backgroundColor: '#c8626d',
                     color: 'white',
-                    borderColor: '#8B4513',
+                    borderColor: '#c8626d',
                     transform: 'translateY(-2px)',
                     boxShadow: '0 8px 25px rgba(139, 69, 19, 0.3)'
                   },

@@ -52,7 +52,7 @@ const StripeSimple = ({ cartItems, total, customerInfo, onSuccess, onError }) =>
         <Box sx={{ borderTop: '1px solid #eee', pt: 2, mt: 2 }}>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 3 }}>
             <Typography variant="h6">Total:</Typography>
-            <Typography variant="h5" sx={{ fontWeight: 700, color: '#8B4513' }}>
+            <Typography variant="h5" sx={{ fontWeight: 700, color: '#c8626d' }}>
               ${total.toFixed(2)}
             </Typography>
           </Box>
@@ -66,7 +66,7 @@ const StripeSimple = ({ cartItems, total, customerInfo, onSuccess, onError }) =>
             variant="contained"
             size="large"
             sx={{
-              backgroundColor: '#8B4513',
+              backgroundColor: '#c8626d',
               '&:hover': { backgroundColor: '#6B3410' },
               py: 2,
               borderRadius: '25px',

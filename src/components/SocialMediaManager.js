@@ -118,7 +118,7 @@ const SocialMediaManager = ({ open, onClose }) => {
           alignItems: 'center', 
           justifyContent: 'space-between',
           pb: 2,
-          background: 'linear-gradient(135deg, #8B4513 0%, #be8782 100%)',
+          background: 'linear-gradient(135deg, #c8626d 0%, #be8782 100%)',
           color: 'white'
         }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
@@ -201,8 +201,8 @@ const SocialMediaManager = ({ open, onClose }) => {
             onClick={onClose}
             variant="outlined"
             sx={{
-              borderColor: '#8B4513',
-              color: '#8B4513',
+              borderColor: '#c8626d',
+              color: '#c8626d',
               '&:hover': {
                 borderColor: '#be8782',
                 backgroundColor: '#be878210'
@@ -222,14 +222,14 @@ const SocialMediaManager = ({ open, onClose }) => {
               variant="contained"
               startIcon={<Save />}
               sx={{
-                background: 'linear-gradient(135deg, #8B4513 0%, #be8782 100%)',
+                background: 'linear-gradient(135deg, #c8626d 0%, #be8782 100%)',
                 color: 'white',
                 px: 4,
                 py: 1.5,
                 borderRadius: '25px',
                 fontWeight: 700,
                 '&:hover': {
-                  background: 'linear-gradient(135deg, #be8782 0%, #8B4513 100%)',
+                  background: 'linear-gradient(135deg, #be8782 0%, #c8626d 100%)',
                   transform: 'translateY(-2px)',
                   boxShadow: '0 8px 25px rgba(139,69,19,0.3)'
                 },

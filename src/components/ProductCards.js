@@ -133,7 +133,7 @@ const ProductCards = ({ products: propProducts, showAll = false }) => {
                           className="product-price-mobile"
                           sx={{
                             fontWeight: 700,
-                            color: '#8B4513',
+                            color: '#c8626d',
                             fontSize: '1.3rem'
                           }}
                         >
@@ -248,7 +248,7 @@ const ProductCards = ({ products: propProducts, showAll = false }) => {
                     <Rating value={selected.rating} precision={0.1} readOnly size="small" sx={{ color: '#FFD700' }} />
                     <Box component="span" sx={{ ml: 1, color: '#666' }}>({selected.reviews})</Box>
                   </Box>
-                  <Box component="h6" sx={{ fontWeight: 700, color: '#8B4513', mb: 2 }}>
+                  <Box component="h6" sx={{ fontWeight: 700, color: '#c8626d', mb: 2 }}>
                     ${selected.price}
                   </Box>
                   <Box component="p" sx={{ color: '#666', lineHeight: 1.6, mb: 3 }}>

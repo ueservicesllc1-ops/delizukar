@@ -38,8 +38,8 @@ import Contacto from './pages/Contacto';
 const theme = createTheme({
   palette: {
     primary: {
-      main: '#8B4513',
-      light: '#A0522D',
+      main: '#c8626d',
+      light: '#b5555a',
       dark: '#654321',
       contrastText: '#fff'
     },

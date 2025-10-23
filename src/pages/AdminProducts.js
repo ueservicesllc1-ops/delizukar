@@ -126,7 +126,7 @@ const AdminProducts = () => {
               startIcon={<Add />}
               onClick={() => setOpenDialog(true)}
               sx={{
-                backgroundColor: '#8B4513',
+                backgroundColor: '#c8626d',
                 color: 'white',
                 px: 4,
                 py: 2,
@@ -135,7 +135,7 @@ const AdminProducts = () => {
                 borderRadius: '25px',
                 textTransform: 'none',
                 '&:hover': {
-                  backgroundColor: '#A0522D',
+                  backgroundColor: '#b5555a',
                   transform: 'translateY(-2px)',
                   boxShadow: '0 8px 25px rgba(139, 69, 19, 0.3)'
                 },
@@ -169,7 +169,7 @@ const AdminProducts = () => {
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     InputProps={{
-                      startAdornment: <Search sx={{ color: '#8B4513', mr: 1 }} />
+                      startAdornment: <Search sx={{ color: '#c8626d', mr: 1 }} />
                     }}
                     sx={{
                       '& .MuiOutlinedInput-root': {
@@ -178,10 +178,10 @@ const AdminProducts = () => {
                           borderColor: '#ddd',
                         },
                         '&:hover fieldset': {
-                          borderColor: '#8B4513',
+                          borderColor: '#c8626d',
                         },
                         '&.Mui-focused fieldset': {
-                          borderColor: '#8B4513',
+                          borderColor: '#c8626d',
                         },
                       }
                     }}
@@ -227,14 +227,14 @@ const AdminProducts = () => {
                     startIcon={<FilterList />}
                     fullWidth
                     sx={{
-                      borderColor: '#8B4513',
-                      color: '#8B4513',
+                      borderColor: '#c8626d',
+                      color: '#c8626d',
                       borderRadius: '25px',
                       textTransform: 'none',
                       fontWeight: 600,
                       '&:hover': {
-                        backgroundColor: '#8B451320',
-                        borderColor: '#8B4513'
+                        backgroundColor: '#c8626d20',
+                        borderColor: '#c8626d'
                       }
                     }}
                   >
@@ -267,7 +267,7 @@ const AdminProducts = () => {
                     variant="h4"
                     sx={{
                       fontWeight: 700,
-                      color: '#8B4513',
+                      color: '#c8626d',
                       mb: 2
                     }}
                   >
@@ -283,14 +283,14 @@ const AdminProducts = () => {
                     variant="contained"
                     startIcon={<Add />}
                     sx={{
-                      backgroundColor: '#8B4513',
+                      backgroundColor: '#c8626d',
                       textTransform: 'none',
                       fontWeight: 600,
                       px: 4,
                       py: 1.5,
                       borderRadius: '25px',
                       '&:hover': {
-                        backgroundColor: '#A0522D'
+                        backgroundColor: '#b5555a'
                       }
                     }}
                   >
@@ -426,7 +426,7 @@ const AdminProducts = () => {
                         variant="h6"
                         sx={{
                           fontWeight: 700,
-                          color: '#8B4513',
+                          color: '#c8626d',
                           fontSize: '1.3rem'
                         }}
                       >
@@ -471,7 +471,7 @@ const AdminProducts = () => {
                           variant="body2"
                           sx={{
                             fontWeight: 600,
-                            color: '#8B4513',
+                            color: '#c8626d',
                             fontSize: '0.9rem'
                           }}
                         >
@@ -510,10 +510,10 @@ const AdminProducts = () => {
                       <IconButton
                         onClick={() => handleEditProduct(product)}
                         sx={{
-                          backgroundColor: '#8B451320',
-                          color: '#8B4513',
+                          backgroundColor: '#c8626d20',
+                          color: '#c8626d',
                           '&:hover': {
-                            backgroundColor: '#8B4513',
+                            backgroundColor: '#c8626d',
                             color: 'white'
                           }
                         }}
@@ -568,7 +568,7 @@ const AdminProducts = () => {
             }
           }}
         >
-          <DialogTitle sx={{ fontSize: '1.5rem', fontWeight: 700, color: '#8B4513' }}>
+          <DialogTitle sx={{ fontSize: '1.5rem', fontWeight: 700, color: '#c8626d' }}>
             {editingProduct ? 'Editar Producto' : 'Nuevo Producto'}
           </DialogTitle>
           <DialogContent>
@@ -668,7 +668,7 @@ const AdminProducts = () => {
               variant="contained"
               onClick={handleCloseDialog}
               sx={{
-                backgroundColor: '#8B4513',
+                backgroundColor: '#c8626d',
                 color: 'white',
                 px: 4,
                 py: 1.5,
@@ -676,7 +676,7 @@ const AdminProducts = () => {
                 textTransform: 'none',
                 fontWeight: 600,
                 '&:hover': {
-                  backgroundColor: '#A0522D'
+                  backgroundColor: '#b5555a'
                 }
               }}
             >

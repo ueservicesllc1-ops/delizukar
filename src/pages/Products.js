@@ -29,7 +29,7 @@ const Products = () => {
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
-                    <Search sx={{ color: '#8B4513' }} />
+                    <Search sx={{ color: '#c8626d' }} />
                   </InputAdornment>
                 ),
               }}
@@ -41,10 +41,10 @@ const Products = () => {
                     borderColor: '#ddd',
                   },
                   '&:hover fieldset': {
-                    borderColor: '#8B4513',
+                    borderColor: '#c8626d',
                   },
                   '&.Mui-focused fieldset': {
-                    borderColor: '#8B4513',
+                    borderColor: '#c8626d',
                   },
                 }
               }}
@@ -186,7 +186,7 @@ const Products = () => {
                           variant="h6"
                           sx={{
                             fontWeight: 700,
-                            color: '#8B4513',
+                            color: '#c8626d',
                             fontSize: '1.3rem'
                           }}
                         >
@@ -345,7 +345,7 @@ const Products = () => {
                       <Rating value={selected.rating} precision={0.1} readOnly size="small" sx={{ color: '#FFD700' }} />
                       <Typography variant="body2" sx={{ ml: 1, color: '#666' }}>({selected.reviews})</Typography>
                     </Box>
-                    <Typography variant="h6" sx={{ fontWeight: 700, color: '#8B4513', mb: 2 }}>
+                    <Typography variant="h6" sx={{ fontWeight: 700, color: '#c8626d', mb: 2 }}>
                       ${selected.price}
                     </Typography>
                     

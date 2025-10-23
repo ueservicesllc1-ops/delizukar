@@ -137,13 +137,13 @@ const InventoryManager = ({ open, onClose }) => {
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
             <Inventory />
-            <Typography variant="h5" sx={{ fontWeight: 700, color: '#8B4513' }}>
+            <Typography variant="h5" sx={{ fontWeight: 700, color: '#c8626d' }}>
               Gestión de Inventario
             </Typography>
           </Box>
           <Button
             onClick={onClose}
-            sx={{ color: '#8B4513' }}
+            sx={{ color: '#c8626d' }}
           >
             ✕
           </Button>
@@ -159,7 +159,7 @@ const InventoryManager = ({ open, onClose }) => {
       <Grid container spacing={3} sx={{ mb: 4 }}>
         <Grid item xs={12} sm={6} md={3}>
           <Card sx={{ textAlign: 'center', p: 2 }}>
-            <Typography variant="h4" sx={{ color: '#8B4513', fontWeight: 700 }}>
+            <Typography variant="h4" sx={{ color: '#c8626d', fontWeight: 700 }}>
               {products.reduce((total, product) => total + (product.inventory || 0), 0)}
             </Typography>
             <Typography variant="body2" sx={{ color: '#666' }}>
@@ -242,7 +242,7 @@ const InventoryManager = ({ open, onClose }) => {
                         <Chip
                           label={product.category || 'Sin categoría'}
                           size="small"
-                          sx={{ backgroundColor: '#8B451320', color: '#8B4513' }}
+                          sx={{ backgroundColor: '#c8626d20', color: '#c8626d' }}
                         />
                       </TableCell>
                       <TableCell>
@@ -278,8 +278,8 @@ const InventoryManager = ({ open, onClose }) => {
                         <IconButton
                           onClick={() => openInventoryDialog(product)}
                           sx={{
-                            color: '#8B4513',
-                            '&:hover': { backgroundColor: '#8B451320' }
+                            color: '#c8626d',
+                            '&:hover': { backgroundColor: '#c8626d20' }
                           }}
                         >
                           <Edit />
@@ -353,8 +353,8 @@ const InventoryManager = ({ open, onClose }) => {
             variant="contained"
             startIcon={<Save />}
             sx={{
-              backgroundColor: '#8B4513',
-              '&:hover': { backgroundColor: '#A0522D' }
+              backgroundColor: '#c8626d',
+              '&:hover': { backgroundColor: '#b5555a' }
             }}
           >
             Actualizar

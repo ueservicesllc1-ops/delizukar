@@ -64,7 +64,7 @@ const Cart = () => {
               startIcon={<ArrowBack />}
               onClick={() => navigate('/')}
               sx={{
-                color: '#8B4513',
+                color: '#c8626d',
                 mr: 2,
                 textTransform: 'none',
                 fontWeight: 600
@@ -204,7 +204,7 @@ const Cart = () => {
                                 variant="h6"
                                 sx={{
                                   fontWeight: 700,
-                                  color: '#8B4513'
+                                  color: '#c8626d'
                                 }}
                               >
                                 ${item.price}
@@ -229,9 +229,9 @@ const Cart = () => {
                               onClick={() => handleUpdateQuantity(item.id, item.quantity - 1)}
                               sx={{
                                 backgroundColor: '#f5f5f5',
-                                color: '#8B4513',
+                                color: '#c8626d',
                                 '&:hover': {
-                                  backgroundColor: '#8B451320'
+                                  backgroundColor: '#c8626d20'
                                 }
                               }}
                             >
@@ -261,9 +261,9 @@ const Cart = () => {
                               onClick={() => handleUpdateQuantity(item.id, item.quantity + 1)}
                               sx={{
                                 backgroundColor: '#f5f5f5',
-                                color: '#8B4513',
+                                color: '#c8626d',
                                 '&:hover': {
-                                  backgroundColor: '#8B451320'
+                                  backgroundColor: '#c8626d20'
                                 }
                               }}
                             >
@@ -344,7 +344,7 @@ const Cart = () => {
                         <Typography variant="h6" sx={{ fontWeight: 700, color: '#333', fontSize: '1.1rem' }}>
                           Total
                         </Typography>
-                        <Typography variant="h6" sx={{ fontWeight: 700, color: '#8B4513', fontSize: '1.1rem' }}>
+                        <Typography variant="h6" sx={{ fontWeight: 700, color: '#c8626d', fontSize: '1.1rem' }}>
                           ${calculateTotal().toFixed(2)}
                         </Typography>
                       </Box>
@@ -363,9 +363,9 @@ const Cart = () => {
                           onChange={(e) => setAcceptShippingPolicy(e.target.checked)}
                           size="small"
                           sx={{
-                            color: '#8B4513',
+                            color: '#c8626d',
                             '&.Mui-checked': {
-                              color: '#8B4513'
+                              color: '#c8626d'
                             }
                           }}
                         />
@@ -376,7 +376,7 @@ const Cart = () => {
                           <Button
                             variant="text"
                             sx={{
-                              color: '#8B4513',
+                              color: '#c8626d',
                               textTransform: 'none',
                               p: 0,
                               minWidth: 'auto',
@@ -433,16 +433,16 @@ const Cart = () => {
                       size="small"
                       onClick={() => navigate('/productos')}
                       sx={{
-                        borderColor: '#8B4513',
-                        color: '#8B4513',
+                        borderColor: '#c8626d',
+                        color: '#c8626d',
                         py: 1,
                         borderRadius: '15px',
                         textTransform: 'none',
                         fontWeight: 600,
                         fontSize: '0.9rem',
                         '&:hover': {
-                          backgroundColor: '#8B451320',
-                          borderColor: '#8B4513'
+                          backgroundColor: '#c8626d20',
+                          borderColor: '#c8626d'
                         }
                       }}
                     >

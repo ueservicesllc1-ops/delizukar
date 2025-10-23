@@ -324,9 +324,9 @@ const PagesManager = ({ open, onClose }) => {
                         size="small"
                         onClick={() => handleEdit(page)}
                         sx={{
-                          color: '#8B4513',
+                          color: '#c8626d',
                           '&:hover': {
-                            backgroundColor: '#8B451320'
+                            backgroundColor: '#c8626d20'
                           }
                         }}
                       >
@@ -354,8 +354,8 @@ const PagesManager = ({ open, onClose }) => {
                       label={page.route}
                       size="small"
                       sx={{
-                        backgroundColor: '#8B451320',
-                        color: '#8B4513',
+                        backgroundColor: '#c8626d20',
+                        color: '#c8626d',
                         fontWeight: 500
                       }}
                     />
@@ -524,10 +524,10 @@ const PagesManager = ({ open, onClose }) => {
                   onClick={handleSave}
                   variant="contained"
                   sx={{
-                    backgroundColor: '#8B4513',
+                    backgroundColor: '#c8626d',
                     textTransform: 'none',
                     '&:hover': {
-                      backgroundColor: '#A0522D'
+                      backgroundColor: '#b5555a'
                     }
                   }}
                 >

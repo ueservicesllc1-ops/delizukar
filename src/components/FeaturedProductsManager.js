@@ -367,7 +367,7 @@ const FeaturedProductsManager = ({ open, onClose }) => {
             {/* Productos Seleccionados */}
             {featuredProducts.length > 0 && (
               <Box sx={{ mt: 4 }}>
-                <Typography variant="h6" sx={{ mb: 2, color: '#8B4513', fontWeight: 600 }}>
+                <Typography variant="h6" sx={{ mb: 2, color: '#c8626d', fontWeight: 600 }}>
                   Productos Seleccionados
                 </Typography>
                 <Grid container spacing={2}>
@@ -376,7 +376,7 @@ const FeaturedProductsManager = ({ open, onClose }) => {
                       <Card sx={{ 
                         p: 2, 
                         backgroundColor: replacingProduct?.id === product.id ? '#fff3cd' : '#f8f9fa', 
-                        border: replacingProduct?.id === product.id ? '2px solid #ffc107' : '1px solid #8B4513',
+                        border: replacingProduct?.id === product.id ? '2px solid #ffc107' : '1px solid #c8626d',
                         position: 'relative'
                       }}>
                         <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
@@ -446,10 +446,10 @@ const FeaturedProductsManager = ({ open, onClose }) => {
                               fontSize: '0.7rem',
                               py: 0.5,
                               px: 1,
-                              borderColor: '#8B4513',
-                              color: '#8B4513',
+                              borderColor: '#c8626d',
+                              color: '#c8626d',
                               '&:hover': {
-                                backgroundColor: '#8B4513',
+                                backgroundColor: '#c8626d',
                                 color: 'white'
                               }
                             }}
@@ -471,13 +471,13 @@ const FeaturedProductsManager = ({ open, onClose }) => {
         <Button
           onClick={loadData}
           startIcon={<Refresh />}
-          sx={{ color: '#8B4513' }}
+          sx={{ color: '#c8626d' }}
         >
           Refrescar
         </Button>
         <Button
           onClick={onClose}
-          sx={{ color: '#8B4513' }}
+          sx={{ color: '#c8626d' }}
         >
           Cancelar
         </Button>
@@ -487,8 +487,8 @@ const FeaturedProductsManager = ({ open, onClose }) => {
           startIcon={<Save />}
           disabled={loading}
           sx={{
-            backgroundColor: '#8B4513',
-            '&:hover': { backgroundColor: '#A0522D' }
+            backgroundColor: '#c8626d',
+            '&:hover': { backgroundColor: '#b5555a' }
           }}
         >
           Guardar Configuración

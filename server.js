@@ -35,6 +35,7 @@ app.use(cors({
   origin: [
     'http://localhost:3000',
     'https://delizukar-production.up.railway.app',
+    'https://dia4qsw7.up.railway.app',
     'https://delizukar.com',
     'https://www.delizukar.com',
     process.env.FRONTEND_URL
