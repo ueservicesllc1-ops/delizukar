@@ -224,6 +224,11 @@ const CheckoutForm = ({ cartItems, total, customerInfo, onSuccess, onError }) =>
                   layout: 'tabs',
                   fields: {
                     billingDetails: 'auto'
+                  },
+                  paymentMethodOrder: ['card'],
+                  wallets: {
+                    applePay: 'auto',
+                    googlePay: 'auto'
                   }
                 }}
               />
@@ -386,7 +391,11 @@ const StripeCheckout = ({ cartItems, total, customerInfo, onSuccess, onError }) 
       }
     },
     loader: 'auto',
-    locale: 'es'
+    locale: 'es',
+    paymentMethodTypes: ['card'],
+    paymentMethodConfiguration: {
+      paymentMethodTypes: ['card']
+    }
   };
 
   if (loading) {
