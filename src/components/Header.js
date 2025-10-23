@@ -188,12 +188,12 @@ const Header = () => {
   ];
 
   const drawer = (
-    <Box sx={{ width: 250 }}>
+    <Box sx={{ width: 250, backgroundColor: '#c8626d', height: '100%' }}>
       <Box sx={{ p: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Typography variant="h6" sx={{ fontWeight: 700, color: '#eb8b8b' }}>
+        <Typography variant="h6" sx={{ fontWeight: 700, color: 'white' }}>
           Delizukar
         </Typography>
-        <IconButton onClick={handleDrawerToggle}>
+        <IconButton onClick={handleDrawerToggle} sx={{ color: 'white' }}>
           <Close />
         </IconButton>
       </Box>
@@ -205,13 +205,13 @@ const Header = () => {
               sx={{
                 width: '100%',
                 justifyContent: 'flex-start',
-                color: '#eb8b8b',
+                color: 'white',
                 textTransform: 'none',
                 fontSize: '1rem',
                 fontWeight: 500,
                 '&:hover': {
-                  backgroundColor: '#8B451320',
-                  color: '#8B4513'
+                  backgroundColor: 'rgba(255,255,255,0.2)',
+                  color: 'white'
                 }
               }}
             >
@@ -242,8 +242,8 @@ const Header = () => {
           <Container maxWidth="lg">
             <Toolbar sx={{ 
               flexDirection: 'column', 
-              py: 1, // reduce padding vertical
-              minHeight: '92px', // reduce altura total
+              py: 0.5, // reduce padding vertical aún más
+              minHeight: '70px', // reduce altura total significativamente
               justifyContent: 'center'
             }}>
               {/* User Info - Top Right */}
@@ -369,19 +369,38 @@ const Header = () => {
                 mt: 1,
                 position: 'relative'
               }}>
-                {/* Search Icon - Left */}
-                <IconButton
-                  sx={{
-                    color: '#be8782',
-                    position: 'absolute',
-                    left: 0,
-                    '&:hover': {
-                      backgroundColor: '#be878220'
-                    }
-                  }}
-                >
-                  <Search />
-                </IconButton>
+                {/* Mobile Menu Button - Left */}
+                {isMobile && (
+                  <IconButton
+                    onClick={handleDrawerToggle}
+                    sx={{
+                      color: '#eb8b8b',
+                      position: 'absolute',
+                      left: 0,
+                      '&:hover': {
+                        backgroundColor: '#eb8b8b20'
+                      }
+                    }}
+                  >
+                    <MenuIcon />
+                  </IconButton>
+                )}
+                
+                {/* Search Icon - Left (desktop only) */}
+                {!isMobile && (
+                  <IconButton
+                    sx={{
+                      color: '#be8782',
+                      position: 'absolute',
+                      left: 0,
+                      '&:hover': {
+                        backgroundColor: '#be878220'
+                      }
+                    }}
+                  >
+                    <Search />
+                  </IconButton>
+                )}
 
                 {/* Logo - Center */}
                 <motion.div
@@ -402,7 +421,7 @@ const Header = () => {
                       src="/LOGO.png"
                       alt="Delizukar Logo"
                       sx={{
-                        height: 144, // Reduced by 10% (160 * 0.9 = 144)
+                        height: 100, // Made smaller for mobile
                         width: 'auto',
                         transition: 'all 0.3s ease'
                       }}
@@ -418,27 +437,6 @@ const Header = () => {
                   position: 'absolute',
                   right: 0
                 }}>
-                  {/* Shopping Cart */}
-                  <motion.div
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.9 }}
-                  >
-                    <IconButton
-                      onClick={handleCartClick}
-                      className="header-cart-icon"
-                      sx={{
-                        color: '#be8782',
-                        '&:hover': {
-                          backgroundColor: '#be878220'
-                        }
-                      }}
-                    >
-                      <Badge badgeContent={cartItemsCount} color="error">
-                        <ShoppingBasket />
-                      </Badge>
-                    </IconButton>
-                  </motion.div>
-
                   {/* Admin Panel - Shield Icon */}
                   <motion.div
                     whileHover={{ scale: 1.1 }}
@@ -449,13 +447,14 @@ const Header = () => {
                       href="/admin"
                       sx={{
                         color: '#8B4513',
+                        fontSize: '1.5rem',
                         '&:hover': {
                           backgroundColor: '#8B451320',
                           color: '#be8782'
                         }
                       }}
                     >
-                      <Security />
+                      <Security sx={{ fontSize: '1.5rem' }} />
                     </IconButton>
                   </motion.div>
 
@@ -464,13 +463,36 @@ const Header = () => {
                     onClick={handleProfileMenuOpen}
                     sx={{
                       color: '#8B4513',
+                      fontSize: '1.5rem',
                       '&:hover': {
                         backgroundColor: '#8B451320'
                       }
                     }}
                   >
-                    <Person />
+                    <Person sx={{ fontSize: '1.5rem' }} />
                   </IconButton>
+
+                  {/* Shopping Cart */}
+                  <motion.div
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.9 }}
+                  >
+                    <IconButton
+                      onClick={handleCartClick}
+                      className="header-cart-icon"
+                      sx={{
+                        color: '#be8782',
+                        fontSize: '1.5rem',
+                        '&:hover': {
+                          backgroundColor: '#be878220'
+                        }
+                      }}
+                    >
+                      <Badge badgeContent={cartItemsCount} color="error">
+                        <ShoppingBasket sx={{ fontSize: '1.5rem' }} />
+                      </Badge>
+                    </IconButton>
+                  </motion.div>
                 </Box>
               </Box>
 
@@ -513,20 +535,7 @@ const Header = () => {
 
                 {/* Actions - Hidden on desktop, shown on mobile */}
                 <Box sx={{ display: { xs: 'flex', md: 'none' }, alignItems: 'center', gap: 1 }}>
-
-                {/* Mobile Menu Button */}
-                {isMobile && (
-                  <IconButton
-                    edge="end"
-                    onClick={handleDrawerToggle}
-                    sx={{
-                      color: '#eb8b8b',
-                      ml: 1
-                    }}
-                  >
-                    <MenuIcon />
-                  </IconButton>
-                )}
+                  {/* Mobile actions can go here if needed */}
                 </Box>
               </Box>
             </Toolbar>

@@ -89,6 +89,7 @@ const Banner2 = () => {
 
   return (
       <Box
+        className="banner2-mobile"
         sx={{
           position: 'relative',
           height: '35vh',

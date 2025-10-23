@@ -2,7 +2,8 @@
 @media (max-width: 768px) {
   /* Header Mobile Optimizations */
   .header-mobile {
-    padding: 8px 0 !important;
+    padding: 4px 0 !important;
+    min-height: 60px !important;
   }
   
   .header-logo {
@@ -34,8 +35,19 @@
   
   /* Hero Banner Mobile */
   .hero-mobile {
-    padding: 20px 0 !important;
+    padding: 0 !important;
+    margin-top: -500px !important;
     text-align: center !important;
+  }
+  
+  /* Banner2 Mobile */
+  .banner2-mobile {
+    margin-top: -150px !important;
+  }
+  
+  /* Testimonials Mobile */
+  .testimonials-mobile {
+    margin-top: -200px !important;
   }
   
   .hero-title-mobile {
