@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Box, Container, Typography, Grid, Card, CardMedia, CardContent, Button, Rating, Chip, IconButton } from '@mui/material';
-import { AddShoppingCart, Favorite, Share, ArrowBack, AccountBalanceWallet } from '@mui/icons-material';
+import { AddShoppingCart, Favorite, Share, ArrowBack, AccountBalanceWallet, Handbag } from '@mui/icons-material';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
@@ -283,7 +283,7 @@ const ProductDetail = () => {
                   <Button
                     variant="contained"
                     size="large"
-                    startIcon={<AccountBalanceWallet />}
+                    startIcon={<Handbag />}
                     sx={{
                       backgroundColor: '#c8626d',
                       color: 'white',

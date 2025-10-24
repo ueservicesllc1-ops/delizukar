@@ -23,6 +23,8 @@ import {
   ShoppingBasket,
   Menu as MenuIcon,
   Search,
+  AccountBalanceWallet,
+  Handbag,
   Person,
   Favorite,
   Close,
@@ -508,7 +510,7 @@ const Header = () => {
                       }}
                     >
                       <Badge badgeContent={cartItemsCount} color="error">
-                        <ShoppingBasket sx={{ fontSize: '1.5rem' }} />
+                        <Handbag sx={{ fontSize: '1.5rem' }} />
                       </Badge>
                     </IconButton>
                   </motion.div>
