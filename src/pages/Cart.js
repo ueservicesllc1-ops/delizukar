@@ -197,7 +197,10 @@ const Cart = () => {
                               sx={{
                                 fontWeight: 600,
                                 color: '#333',
-                                mb: 0.5
+                                mb: 0.5,
+                                fontFamily: '"Asap", sans-serif',
+                                textTransform: 'uppercase',
+                                letterSpacing: '0.5px'
                               }}
                             >
                               {item.name}
@@ -206,7 +209,11 @@ const Cart = () => {
                               variant="body2"
                               sx={{
                                 color: '#666',
-                                mb: 1
+                                mb: 1,
+                                fontFamily: '"Asap", sans-serif',
+                                textTransform: 'uppercase',
+                                fontSize: '0.75rem',
+                                letterSpacing: '0.3px'
                               }}
                             >
                               {getCategoryDisplayName(item.category)}
@@ -325,7 +332,10 @@ const Cart = () => {
                         fontWeight: 700,
                         color: '#333',
                         mb: 2,
-                        fontSize: '1.1rem'
+                        fontSize: '1.1rem',
+                        fontFamily: '"Asap", sans-serif',
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.5px'
                       }}
                     >
                       {t('cart.orderSummary', 'Order Summary')}

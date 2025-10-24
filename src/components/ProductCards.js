@@ -121,7 +121,10 @@ const ProductCards = ({ products: propProducts, showAll = false }) => {
                         mb: 0.5,
                         color: '#333',
                         fontSize: '1rem',
-                        transform: 'translateY(5px)'
+                        transform: 'translateY(5px)',
+                        fontFamily: '"Asap", sans-serif',
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.5px'
                       }}
                     >
                       {product.name}
@@ -256,7 +259,14 @@ const ProductCards = ({ products: propProducts, showAll = false }) => {
               </Grid>
               <Grid item xs={12} md={6}>
                 <Box sx={{ p: { xs: 2, md: 3 } }}>
-                  <Box component="h5" sx={{ fontWeight: 700, mb: 1, color: '#333' }}>
+                  <Box component="h5" sx={{ 
+                    fontWeight: 700, 
+                    mb: 1, 
+                    color: '#333',
+                    fontFamily: '"Asap", sans-serif',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.5px'
+                  }}>
                     {selected.name}
                   </Box>
                   <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>

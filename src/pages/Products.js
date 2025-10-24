@@ -175,7 +175,10 @@ const Products = () => {
                         mb: 0.5,
                         color: '#333',
                         fontSize: '1rem',
-                        transform: 'translateY(5px)'
+                        transform: 'translateY(5px)',
+                        fontFamily: '"Asap", sans-serif',
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.5px'
                       }}
                     >
                       {product.name}
@@ -353,7 +356,14 @@ const Products = () => {
                 
                 {/* Lado Derecho - Información */}
                 <Box sx={{ flex: 1, p: { xs: 2, md: 3 }, display: 'flex', flexDirection: 'column' }}>
-                    <Typography variant="h5" sx={{ fontWeight: 700, mb: 1, color: '#333' }}>
+                    <Typography variant="h5" sx={{ 
+                      fontWeight: 700, 
+                      mb: 1, 
+                      color: '#333',
+                      fontFamily: '"Asap", sans-serif',
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.5px'
+                    }}>
                       {selected.name}
                     </Typography>
                     <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>

@@ -147,7 +147,9 @@ const Home = () => {
                               fontWeight: 700,
                               color: '#EC8C8D',
                               mb: 0.25,
-                              fontFamily: 'Playfair Display, serif'
+                              fontFamily: '"Asap", sans-serif',
+                              textTransform: 'uppercase',
+                              letterSpacing: '0.5px'
                             }}
                           >
                             {product.name}
@@ -270,7 +272,13 @@ const Home = () => {
           <>
             <DialogTitle>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <Typography variant="h5" sx={{ fontWeight: 700, color: '#c8626d' }}>
+                <Typography variant="h5" sx={{ 
+                  fontWeight: 700, 
+                  color: '#c8626d',
+                  fontFamily: '"Asap", sans-serif',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.5px'
+                }}>
                   {selectedProduct.name}
                 </Typography>
                 <Button
@@ -380,16 +388,12 @@ const Home = () => {
                     </Box>
                   )}
                   
-                  {selectedProduct.description && (
-                    <Typography variant="body1" sx={{ color: '#666', lineHeight: 1.6, mb: 3, flex: 1 }}>
-                      {selectedProduct.description || 
-                        (selectedProduct.name && selectedProduct.name.toLowerCase().includes('ferrero') 
-                          ? t('product.ferreroDescription', 'NY-style cookie with Ferrero Rocher...')
-                          : t('product.defaultDescription', 'Delicious {name} with premium ingredients...', { name: selectedProduct.name })
-                        )
-                      }
-                    </Typography>
-                  )}
+                  <Typography variant="body1" sx={{ color: '#666', lineHeight: 1.6, mb: 3, flex: 1 }}>
+                    {selectedProduct.name && selectedProduct.name.toLowerCase().includes('ferrero') 
+                      ? t('product.ferreroDescription', 'NY-style cookie with Ferrero Rocher...')
+                      : t('product.defaultDescription', 'Delicious {name} with premium ingredients...', { name: selectedProduct.name })
+                    }
+                  </Typography>
                   
                   {selectedProduct.inventory !== undefined && (
                     <Box sx={{ mb: 3 }}>
