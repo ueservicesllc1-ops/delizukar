@@ -88,6 +88,13 @@ const AdminDashboard = () => {
   const [stripeBalanceOpen, setStripeBalanceOpen] = useState(false);
   const [salesReportOpen, setSalesReportOpen] = useState(false);
   const [userManagementOpen, setUserManagementOpen] = useState(false);
+  const [messagingSystemOpen, setMessagingSystemOpen] = useState(false);
+  const [messageTitle, setMessageTitle] = useState('');
+  const [messageBody, setMessageBody] = useState('');
+  const [messageType, setMessageType] = useState('info');
+  const [sendingMessage, setSendingMessage] = useState(false);
+  const [targetAllUsers, setTargetAllUsers] = useState(true);
+  const [selectedUsers, setSelectedUsers] = useState([]);
   const [registeredUsers, setRegisteredUsers] = useState([]);
   const [loadingUsers, setLoadingUsers] = useState(false);
   const [selectedPeriod, setSelectedPeriod] = useState('current'); // Added period selector
@@ -296,6 +303,51 @@ const AdminDashboard = () => {
       }
     } catch (error) {
       console.error('❌ Error asignando rol de desarrollador:', error);
+    }
+  };
+
+  const sendPushMessage = async () => {
+    if (!messageTitle.trim() || !messageBody.trim()) {
+      alert('Por favor completa el título y el mensaje');
+      return;
+    }
+
+    if (!targetAllUsers && selectedUsers.length === 0) {
+      alert('Por favor selecciona al menos un usuario o marca "Todos los usuarios"');
+      return;
+    }
+
+    setSendingMessage(true);
+    try {
+      // Guardar el mensaje en Firestore para que los usuarios lo reciban
+      const messagesRef = collection(db, 'pushMessages');
+      await addDoc(messagesRef, {
+        title: messageTitle,
+        body: messageBody,
+        type: messageType,
+        createdAt: new Date().toISOString(),
+        sentBy: user.email,
+        status: 'sent',
+        targetUsers: targetAllUsers ? 'all' : selectedUsers,
+        targetUserCount: targetAllUsers ? registeredUsers.length : selectedUsers.length
+      });
+
+      console.log('✅ Mensaje push enviado exitosamente');
+      const targetText = targetAllUsers ? 'todos los usuarios registrados' : `${selectedUsers.length} usuario(s) seleccionado(s)`;
+      alert(`Mensaje enviado a ${targetText}`);
+      
+      // Limpiar formulario
+      setMessageTitle('');
+      setMessageBody('');
+      setMessageType('info');
+      setTargetAllUsers(true);
+      setSelectedUsers([]);
+      
+    } catch (error) {
+      console.error('❌ Error enviando mensaje push:', error);
+      alert('Error al enviar el mensaje');
+    } finally {
+      setSendingMessage(false);
     }
   };
 
@@ -641,6 +693,7 @@ const AdminDashboard = () => {
                               index === 10 ? () => setSalesReportOpen(true) :
                               index === 11 ? () => setUserManagementOpen(true) :
                               index === 12 ? () => setMinProductsManagerOpen(true) :
+                              index === 13 ? () => setMessagingSystemOpen(true) :
                               undefined
                             }
                         sx={{
@@ -850,6 +903,20 @@ const AdminDashboard = () => {
                                   }}
                                 >
                                   Min. Productos
+                                </Typography>
+                              </Box>
+                            ) : index === 13 ? (
+                              <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1 }}>
+                                <Assessment sx={{ color: 'white', fontSize: '2rem' }} />
+                                <Typography
+                                  variant="body2"
+                                  sx={{
+                                    color: 'white',
+                                    fontWeight: 600,
+                                    textShadow: '1px 1px 2px rgba(0,0,0,0.5)'
+                                  }}
+                                >
+                                  Mensajería Push
                                 </Typography>
                               </Box>
                             ) : (
@@ -1471,6 +1538,238 @@ const AdminDashboard = () => {
                   </Box>
                 </Box>
               )}
+            </Box>
+          </DialogContent>
+        </Dialog>
+
+        {/* Sistema de Mensajería Push */}
+        <Dialog
+          open={messagingSystemOpen}
+          onClose={() => setMessagingSystemOpen(false)}
+          maxWidth="lg"
+          fullWidth
+          PaperProps={{
+            sx: {
+              borderRadius: '12px',
+              boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
+              minHeight: '70vh',
+              maxHeight: '80vh',
+              marginTop: '80px'
+            }
+          }}
+        >
+          <DialogTitle sx={{ 
+            backgroundColor: '#c8626d', 
+            color: 'white', 
+            textAlign: 'center',
+            py: 2,
+            position: 'relative'
+          }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1 }}>
+              <Assessment sx={{ fontSize: 24, color: 'white' }} />
+              <Typography variant="h6" sx={{ fontWeight: 600, color: 'white' }}>
+                Sistema de Mensajería Push
+              </Typography>
+            </Box>
+            <IconButton
+              onClick={() => setMessagingSystemOpen(false)}
+              sx={{
+                position: 'absolute',
+                right: 16,
+                top: '50%',
+                transform: 'translateY(-50%)',
+                color: 'white',
+                '&:hover': {
+                  backgroundColor: 'rgba(255,255,255,0.1)'
+                }
+              }}
+            >
+              <Close />
+            </IconButton>
+          </DialogTitle>
+          
+          <DialogContent sx={{ p: 3, backgroundColor: '#fafafa' }}>
+            <Box sx={{ mb: 3, p: 2, backgroundColor: 'white', borderRadius: '8px', border: '1px solid #e0e0e0' }}>
+              <Typography variant="h6" sx={{ mb: 2, color: '#c8626d', fontWeight: 600, textAlign: 'center' }}>
+                📱 Enviar Notificación Push
+              </Typography>
+              <Typography variant="body2" sx={{ mb: 3, color: '#666', textAlign: 'center' }}>
+                Envía mensajes push a todos los usuarios que tengan la web app instalada como PWA
+              </Typography>
+              
+              <Grid container spacing={2}>
+                <Grid item xs={12}>
+                  <TextField
+                    fullWidth
+                    label="Título del Mensaje"
+                    value={messageTitle}
+                    onChange={(e) => setMessageTitle(e.target.value)}
+                    placeholder="Ej: ¡Nuevo producto disponible!"
+                    variant="outlined"
+                    size="small"
+                  />
+                </Grid>
+                
+                <Grid item xs={12}>
+                  <TextField
+                    fullWidth
+                    multiline
+                    rows={5}
+                    label="Contenido del Mensaje"
+                    value={messageBody}
+                    onChange={(e) => setMessageBody(e.target.value)}
+                    placeholder="Ej: Descubre nuestro nuevo pastel de chocolate con ingredientes premium. Hecho con cacao belga de la más alta calidad, crema fresca y un toque de vainilla. ¡Perfecto para ocasiones especiales! Disponible en diferentes tamaños y con entrega a domicilio."
+                    variant="outlined"
+                    size="small"
+                  />
+                </Grid>
+                
+                <Grid item xs={12} sm={6}>
+                  <FormControl fullWidth size="small">
+                    <InputLabel>Tipo de Mensaje</InputLabel>
+                    <Select
+                      value={messageType}
+                      onChange={(e) => setMessageType(e.target.value)}
+                      label="Tipo de Mensaje"
+                    >
+                      <MenuItem value="info">ℹ️ Informativo</MenuItem>
+                      <MenuItem value="promotion">🎉 Promoción</MenuItem>
+                      <MenuItem value="new_product">🆕 Nuevo Producto</MenuItem>
+                      <MenuItem value="reminder">⏰ Recordatorio</MenuItem>
+                      <MenuItem value="urgent">🚨 Urgente</MenuItem>
+                    </Select>
+                  </FormControl>
+                </Grid>
+                
+                <Grid item xs={12}>
+                  <Typography variant="h6" sx={{ color: '#c8626d', fontWeight: 600, mb: 2 }}>
+                    👥 Seleccionar Destinatarios
+                  </Typography>
+                  
+                  <Box sx={{ mb: 2 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+                      <input
+                        type="checkbox"
+                        checked={targetAllUsers}
+                        onChange={(e) => {
+                          setTargetAllUsers(e.target.checked);
+                          if (e.target.checked) {
+                            setSelectedUsers([]);
+                          }
+                        }}
+                        style={{ transform: 'scale(1.2)' }}
+                      />
+                      <Typography variant="body1" sx={{ fontWeight: 600, color: '#c8626d' }}>
+                        Enviar a todos los usuarios registrados ({registeredUsers.length} usuarios)
+                      </Typography>
+                    </Box>
+                    
+                    {!targetAllUsers && (
+                      <Box sx={{ 
+                        border: '1px solid #e0e0e0', 
+                        borderRadius: '8px', 
+                        p: 2, 
+                        backgroundColor: '#f9f9f9',
+                        maxHeight: '200px',
+                        overflowY: 'auto'
+                      }}>
+                        <Typography variant="body2" sx={{ mb: 2, color: '#666' }}>
+                          Selecciona usuarios específicos:
+                        </Typography>
+                        {registeredUsers.map((user) => (
+                          <Box key={user.id} sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                            <input
+                              type="checkbox"
+                              checked={selectedUsers.includes(user.id)}
+                              onChange={(e) => {
+                                if (e.target.checked) {
+                                  setSelectedUsers([...selectedUsers, user.id]);
+                                } else {
+                                  setSelectedUsers(selectedUsers.filter(id => id !== user.id));
+                                }
+                              }}
+                              style={{ transform: 'scale(1.1)' }}
+                            />
+                            <Avatar src={user.photoURL} sx={{ width: 24, height: 24 }} />
+                            <Typography variant="body2" sx={{ color: '#333' }}>
+                              {user.displayName} ({user.email})
+                            </Typography>
+                          </Box>
+                        ))}
+                        {selectedUsers.length > 0 && (
+                          <Typography variant="body2" sx={{ mt: 2, color: '#c8626d', fontWeight: 600 }}>
+                            ✅ {selectedUsers.length} usuario(s) seleccionado(s)
+                          </Typography>
+                        )}
+                      </Box>
+                    )}
+                  </Box>
+                </Grid>
+                
+                <Grid item xs={12}>
+                  <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center' }}>
+                    <Button
+                      variant="contained"
+                      onClick={sendPushMessage}
+                      disabled={sendingMessage || !messageTitle.trim() || !messageBody.trim()}
+                      sx={{
+                        backgroundColor: '#c8626d',
+                        '&:hover': { backgroundColor: '#b8555a' },
+                        minWidth: '150px'
+                      }}
+                    >
+                      {sendingMessage ? (
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                          <CircularProgress size={16} sx={{ color: 'white' }} />
+                          Enviando...
+                        </Box>
+                      ) : (
+                        '📤 Enviar Mensaje'
+                      )}
+                    </Button>
+                    
+                    <Button
+                      variant="outlined"
+                      onClick={() => {
+                        setMessageTitle('');
+                        setMessageBody('');
+                        setMessageType('info');
+                        setTargetAllUsers(true);
+                        setSelectedUsers([]);
+                      }}
+                      sx={{
+                        borderColor: '#c8626d',
+                        color: '#c8626d',
+                        '&:hover': {
+                          backgroundColor: '#c8626d',
+                          color: 'white'
+                        }
+                      }}
+                    >
+                      🗑️ Limpiar
+                    </Button>
+                  </Box>
+                </Grid>
+              </Grid>
+            </Box>
+
+            {/* Información sobre el sistema */}
+            <Box sx={{ p: 2, backgroundColor: '#e8f4fd', borderRadius: '8px', border: '1px solid #b3d9ff' }}>
+              <Typography variant="h6" sx={{ color: '#1976d2', fontWeight: 600, mb: 1 }}>
+                💡 Cómo funciona el sistema
+              </Typography>
+              <Typography variant="body2" sx={{ color: '#666', mb: 1 }}>
+                • Los mensajes se envían a todos los usuarios registrados que tengan la web app instalada
+              </Typography>
+              <Typography variant="body2" sx={{ color: '#666', mb: 1 }}>
+                • Los usuarios recibirán notificaciones push en tiempo real
+              </Typography>
+              <Typography variant="body2" sx={{ color: '#666', mb: 1 }}>
+                • Los mensajes se guardan en la base de datos para historial
+              </Typography>
+              <Typography variant="body2" sx={{ color: '#666' }}>
+                • Ideal para promociones, nuevos productos y comunicaciones importantes
+              </Typography>
             </Box>
           </DialogContent>
         </Dialog>

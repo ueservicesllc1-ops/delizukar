@@ -88,20 +88,20 @@ const HeroBanner = () => {
 
   return (
     <>
-      <Box
-        className="hero-mobile"
-        sx={{
-          position: 'relative',
-          height: { xs: '60vh', sm: '80vh', md: '80vh' },
-          overflow: 'hidden',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          marginBottom: { xs: '-195px', sm: '-152px', md: '-152px' },
-          '@media (min-width: 769px) and (max-width: 1024px) and (orientation: landscape)': {
-            marginBottom: '300px'
-          }
-        }}
+        <Box
+          className="hero-mobile"
+          sx={{
+            position: 'relative',
+            height: { xs: '60vh', sm: '80vh', md: '80vh' },
+            overflow: 'hidden',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            marginBottom: { xs: '-195px', sm: '-152px', md: '-152px' },
+            '@media (min-width: 768px) and (max-width: 1200px) and (orientation: landscape)': {
+              marginBottom: '-152px'
+            }
+          }}
       >
       <Swiper
         modules={[Navigation, Pagination, Autoplay, EffectFade]}
@@ -207,34 +207,6 @@ const HeroBanner = () => {
       </Box>
     </Box>
 
-          {/* Franja de color debajo del banner */}
-          <Box
-            className="hero-color-strip-mobile"
-            sx={{
-              width: '100%',
-              height: '50px',
-              backgroundColor: '#C8626D',
-              position: 'relative',
-              zIndex: 1,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center'
-            }}
-          >
-        <Typography
-          variant="h6"
-          sx={{
-            color: 'white',
-            fontWeight: 600,
-            fontSize: { xs: '0.9rem', md: '1.1rem' },
-            textAlign: 'center',
-            fontFamily: 'Playfair Display, serif',
-            textShadow: '1px 1px 2px rgba(0,0,0,0.3)'
-          }}
-        >
-          DeliZuKar: your heart's Wi-Fi (always keeps you connected to happiness).
-        </Typography>
-          </Box>
     </>
   );
 };

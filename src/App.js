@@ -145,8 +145,8 @@ function App() {
           <div className="App">
             <Box sx={{ 
               paddingTop: { xs: '500px', sm: '70px', md: '70px' },
-              '@media (min-width: 769px) and (max-width: 1024px) and (orientation: landscape)': {
-                paddingTop: '400px'
+              '@media (min-width: 768px) and (max-width: 1200px) and (orientation: landscape)': {
+                paddingTop: '120px'
               }
             }}>
               <Routes>

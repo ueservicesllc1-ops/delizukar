@@ -67,13 +67,63 @@ const Home = () => {
   }, [popupOpen]);
 
   return (
-    <Box className="home-mobile">
+    <Box className="home-mobile" sx={{
+      '@media (min-width: 769px) and (max-width: 1024px) and (orientation: landscape)': {
+        display: 'flex',
+        flexDirection: 'column',
+        paddingTop: '0px'
+      }
+    }}>
       {/* Hero Banner */}
-      <HeroBanner />
+      <Box sx={{
+        '@media (min-width: 769px) and (max-width: 1024px) and (orientation: landscape)': {
+          marginTop: '0px'
+        }
+      }}>
+        <HeroBanner />
+      </Box>
 
+      {/* Franja rosa separada */}
+      <Box
+        className="hero-color-strip-mobile"
+        sx={{
+          width: '100%',
+          height: '50px',
+          backgroundColor: '#C8626D',
+          position: 'relative',
+          zIndex: 1,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          '@media (min-width: 768px) and (max-width: 1200px) and (orientation: landscape)': {
+            marginTop: '0px'
+          }
+        }}
+      >
+        <Typography
+          variant="h6"
+          sx={{
+            color: 'white',
+            fontWeight: 600,
+            fontSize: { xs: '0.9rem', md: '1.1rem' },
+            textAlign: 'center',
+            fontFamily: 'Playfair Display, serif',
+            textShadow: '1px 1px 2px rgba(0,0,0,0.3)'
+          }}
+        >
+          DeliZuKar: your heart's Wi-Fi (always keeps you connected to happiness).
+        </Typography>
+      </Box>
 
       {/* Featured Products */}
-      <Box sx={{ py: 2, pt: 6, backgroundColor: '#fafafa' }}>
+      <Box sx={{ 
+        py: 2, 
+        pt: 6, 
+        backgroundColor: '#fafafa',
+        '@media (min-width: 768px) and (max-width: 1200px) and (orientation: landscape)': {
+          marginTop: '100px'
+        }
+      }}>
         <Container maxWidth="lg">
           <motion.div
             initial={{ opacity: 0, y: 50 }}
