@@ -7,9 +7,12 @@ import { useNavigate } from 'react-router-dom';
 import ShippingCalculator from '../components/ShippingCalculator';
 import AddressCorrection from '../components/AddressCorrection';
 import StripeCheckout from '../components/StripeCheckout';
+import ShippingConfirmationPopup from '../components/ShippingConfirmationPopup';
 import { useShipping } from '../hooks/useShipping';
+import { useTranslation } from 'react-i18next';
 
 const Checkout = () => {
+  const { t } = useTranslation();
   const { getCartTotal, getCartItemsCount, clearCart, cart } = useStore();
   const navigate = useNavigate();
   const { createOrderData } = useShipping();
@@ -39,6 +42,9 @@ const Checkout = () => {
   
   // Estados para Stripe
   const [stripeError, setStripeError] = useState(null);
+  
+  // Estados para popup de confirmación de envío
+  const [shippingConfirmationOpen, setShippingConfirmationOpen] = useState(false);
 
   const cartTotal = getCartTotal();
   const cartItemsCount = getCartItemsCount();
@@ -51,11 +57,19 @@ const Checkout = () => {
     // Calcular días hasta el próximo lunes
     let daysToMonday;
     if (currentDay === 0) { // Domingo
-      daysToMonday = 1;
+      daysToMonday = 8; // Siguiente lunes (no el inmediato)
     } else if (currentDay === 1) { // Lunes
       daysToMonday = 7; // Siguiente lunes
-    } else {
-      daysToMonday = 8 - currentDay; // Martes=6, Miércoles=5, Jueves=4, Viernes=3, Sábado=2
+    } else if (currentDay === 2) { // Martes
+      daysToMonday = 6; // Siguiente lunes
+    } else if (currentDay === 3) { // Miércoles
+      daysToMonday = 5; // Siguiente lunes
+    } else if (currentDay === 4) { // Jueves
+      daysToMonday = 4; // Siguiente lunes
+    } else if (currentDay === 5) { // Viernes
+      daysToMonday = 10; // Lunes de la semana siguiente (no el inmediato)
+    } else if (currentDay === 6) { // Sábado
+      daysToMonday = 9; // Lunes de la semana siguiente (no el inmediato)
     }
     
     // Fecha de envío (próximo lunes)
@@ -153,6 +167,8 @@ const Checkout = () => {
   const handleShippingSelected = (shippingData) => {
     setShippingInfo(shippingData);
     console.log('Shipping selected:', shippingData);
+    // Mostrar popup de confirmación
+    setShippingConfirmationOpen(true);
   };
 
   // Manejar errores de envío
@@ -183,6 +199,12 @@ const Checkout = () => {
     // Cerrar corrección y abrir calculador de envíos
     setAddressCorrectionOpen(false);
     setShippingOpen(true);
+  };
+
+  // Manejar aceptación del envío
+  const handleShippingAccept = () => {
+    setShippingConfirmationOpen(false);
+    console.log('Shipping accepted by user');
   };
 
   const handleSubmit = (e) => {
@@ -221,7 +243,7 @@ const Checkout = () => {
                 fontSize: '0.9rem'
               }}
             >
-              Back to Cart
+              {t('checkout.backToCart', 'Back to Cart')}
             </Button>
           </Box>
 
@@ -235,7 +257,7 @@ const Checkout = () => {
               fontFamily: 'Playfair Display, serif'
             }}
           >
-            Complete Purchase
+            {t('checkout.title', 'Complete Purchase')}
           </Typography>
           
           <Typography
@@ -246,7 +268,7 @@ const Checkout = () => {
               fontSize: '0.9rem'
             }}
           >
-            Complete your information to process the order
+            {t('checkout.subtitle', 'Complete your information to process the order')}
           </Typography>
         </motion.div>
 
@@ -271,14 +293,14 @@ const Checkout = () => {
                         fontSize: '1.1rem'
                       }}
                     >
-                      Contact Information
+                      {t('checkout.contactInfo', 'Contact Information')}
                     </Typography>
                     
                     <Grid container spacing={2}>
                       <Grid size={{ xs: 12, md: 6 }}>
                         <TextField
                           fullWidth
-                          label="First Name"
+                          label={t('checkout.firstName', 'First Name')}
                           name="firstName"
                           value={formData.firstName}
                           onChange={handleInputChange}
@@ -295,7 +317,7 @@ const Checkout = () => {
                       <Grid size={{ xs: 12, md: 6 }}>
                         <TextField
                           fullWidth
-                          label="Last Name"
+                          label={t('checkout.lastName', 'Last Name')}
                           name="lastName"
                           value={formData.lastName}
                           onChange={handleInputChange}
@@ -311,7 +333,7 @@ const Checkout = () => {
                       <Grid size={{ xs: 12, md: 6 }}>
                         <TextField
                           fullWidth
-                          label="Email"
+                          label={t('checkout.email', 'Email')}
                           name="email"
                           type="email"
                           value={formData.email}
@@ -328,7 +350,7 @@ const Checkout = () => {
                       <Grid size={{ xs: 12, md: 6 }}>
                         <TextField
                           fullWidth
-                          label="Phone"
+                          label={t('checkout.phone', 'Phone')}
                           name="phone"
                           value={formData.phone}
                           onChange={handleInputChange}
@@ -358,7 +380,7 @@ const Checkout = () => {
                           fontSize: '1.1rem'
                         }}
                       >
-                        Shipping Address
+                        {t('checkout.shippingAddress', 'Shipping Address')}
                       </Typography>
                     </Box>
                     
@@ -366,7 +388,7 @@ const Checkout = () => {
                       <Grid size={12}>
                         <TextField
                           fullWidth
-                          label="Address"
+                          label={t('checkout.address', 'Address')}
                           name="address"
                           value={formData.address}
                           onChange={handleInputChange}
@@ -382,7 +404,7 @@ const Checkout = () => {
                       <Grid size={{ xs: 12, sm: 6 }}>
                         <TextField
                           fullWidth
-                          label="City"
+                          label={t('checkout.city', 'City')}
                           name="city"
                           value={formData.city}
                           onChange={handleInputChange}
@@ -398,7 +420,7 @@ const Checkout = () => {
                       <Grid size={{ xs: 12, sm: 6 }}>
                         <TextField
                           fullWidth
-                          label="ZIP Code"
+                          label={t('checkout.zipCode', 'ZIP Code')}
                           name="zipCode"
                           value={formData.zipCode}
                           onChange={handleInputChange}
@@ -442,13 +464,13 @@ const Checkout = () => {
                         fontSize: '1.1rem'
                       }}
                     >
-                      Order Summary
+                      {t('checkout.orderSummary', 'Order Summary')}
                     </Typography>
 
                     <Box sx={{ mb: 2 }}>
                       <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
                         <Typography variant="body2" sx={{ color: '#666', fontSize: '0.9rem' }}>
-                          Subtotal ({cartItemsCount} {cartItemsCount === 1 ? 'item' : 'items'})
+                          {t('checkout.subtotal', 'Subtotal')} ({cartItemsCount} {cartItemsCount === 1 ? t('checkout.item', 'item') : t('checkout.items', 'items')})
                         </Typography>
                         <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '0.9rem' }}>
                           ${cartTotal.toFixed(2)}
@@ -457,10 +479,10 @@ const Checkout = () => {
                       
                       <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
                         <Typography variant="body2" sx={{ color: '#666', fontSize: '0.9rem' }}>
-                          Shipping
+                          {t('checkout.shipping', 'Shipping')}
                         </Typography>
                         <Typography variant="body2" sx={{ fontWeight: 600, color: shippingInfo ? '#4CAF50' : '#666', fontSize: '0.9rem' }}>
-                          {shippingInfo ? `$${parseFloat(shippingInfo.cost || 0).toFixed(2)}` : 'To be determined'}
+                          {shippingInfo ? `$${parseFloat(shippingInfo.cost || 0).toFixed(2)}` : t('checkout.toBeDetermined', 'To be determined')}
                         </Typography>
                       </Box>
                       
@@ -468,7 +490,7 @@ const Checkout = () => {
                       
                       <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
                         <Typography variant="h6" sx={{ fontWeight: 700, color: '#333', fontSize: '1.1rem' }}>
-                          Total
+                          {t('checkout.total', 'Total')}
                         </Typography>
                         <Typography variant="h6" sx={{ fontWeight: 700, color: '#c8626d', fontSize: '1.1rem' }}>
                           ${(cartTotal + (shippingInfo ? parseFloat(shippingInfo.cost || 0) : 0)).toFixed(2)}
@@ -685,6 +707,46 @@ const Checkout = () => {
           onClose={() => setShippingOpen(false)}
           orderData={createShippingData()}
           onShippingSelected={handleShippingSelected}
+        />
+
+        {/* Shipping Confirmation Popup */}
+        <ShippingConfirmationPopup
+          open={shippingConfirmationOpen}
+          onClose={() => setShippingConfirmationOpen(false)}
+          onAccept={handleShippingAccept}
+          shippingInfo={shippingInfo}
+          cartItems={cart}
+          total={cartTotal}
+          customerInfo={{
+            email: formData.email,
+            firstName: formData.firstName,
+            lastName: formData.lastName,
+            address: {
+              line1: formData.address,
+              city: formData.city,
+              postal_code: formData.zipCode,
+              state: 'NY',
+              country: 'US'
+            },
+            phone: formData.phone
+          }}
+          onPaymentSuccess={(paymentIntent) => {
+            console.log('✅ Payment successful, clearing cart and navigating');
+            clearCart();
+            
+            // Guardar información de envío en localStorage
+            if (shippingInfo) {
+              localStorage.setItem('lastShippingInfo', JSON.stringify(shippingInfo));
+              console.log('📦 Shipping info saved:', shippingInfo);
+            }
+            
+            // Pasar el payment intent ID en la URL
+            navigate(`/checkout/success?payment_intent=${paymentIntent.id}`);
+          }}
+          onPaymentError={(error) => {
+            console.log('❌ Payment error:', error);
+            setStripeError(error.message);
+          }}
         />
       </Container>
     </Box>

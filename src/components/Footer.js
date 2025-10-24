@@ -103,8 +103,11 @@ const Footer = () => {
                 <Link href="/" sx={{ color: 'white', textDecoration: 'none', fontSize: '0.95rem', '&:hover': { color: '#eb8b8b' } }}>
                   {t('navigation.home', 'Home')}
                 </Link>
+                <Link href="/productos" sx={{ color: 'white', textDecoration: 'none', fontSize: '0.95rem', '&:hover': { color: '#eb8b8b' } }}>
+                  {t('navigation.services', 'Productos')}
+                </Link>
                 <Link href="/order" sx={{ color: 'white', textDecoration: 'none', fontSize: '0.95rem', '&:hover': { color: '#eb8b8b' } }}>
-                  {t('navigation.services', 'Order Here')}
+                  {t('navigation.order', 'Order Here')}
                 </Link>
                 <Link href="/contact" sx={{ color: 'white', textDecoration: 'none', fontSize: '0.95rem', '&:hover': { color: '#eb8b8b' } }}>
                   {t('navigation.contact', 'Contact')}

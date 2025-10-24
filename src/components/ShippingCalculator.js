@@ -15,6 +15,7 @@ import {
   Grid
 } from '@mui/material';
 import { LocalShipping, CheckCircle, Close } from '@mui/icons-material';
+import { useTranslation } from 'react-i18next';
 import shippoService from '../services/shippoService';
 
 const ShippingCalculator = ({ 
@@ -23,6 +24,7 @@ const ShippingCalculator = ({
   orderData, 
   onShippingSelected 
 }) => {
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
   const [rates, setRates] = useState([]);
   const [selectedRate, setSelectedRate] = useState(null);
@@ -91,15 +93,91 @@ const ShippingCalculator = ({
     return `$${parseFloat(amount).toFixed(2)}`;
   };
 
-  const formatETA = (eta) => {
+  // Función para calcular fecha de envío según la nueva lógica
+  const calculateShippingDate = () => {
+    const today = new Date();
+    const currentDay = today.getDay(); // 0 = domingo, 1 = lunes, ..., 6 = sábado
+    
+    // Calcular días hasta el próximo lunes
+    let daysToMonday;
+    if (currentDay === 0) { // Domingo
+      daysToMonday = 8; // Siguiente lunes (no el inmediato)
+    } else if (currentDay === 1) { // Lunes
+      daysToMonday = 7; // Siguiente lunes
+    } else if (currentDay === 2) { // Martes
+      daysToMonday = 6; // Siguiente lunes
+    } else if (currentDay === 3) { // Miércoles
+      daysToMonday = 5; // Siguiente lunes
+    } else if (currentDay === 4) { // Jueves
+      daysToMonday = 4; // Siguiente lunes
+    } else if (currentDay === 5) { // Viernes
+      daysToMonday = 10; // Lunes de la semana siguiente (no el inmediato)
+    } else if (currentDay === 6) { // Sábado
+      daysToMonday = 9; // Lunes de la semana siguiente (no el inmediato)
+    }
+    
+    // Fecha de envío (próximo lunes)
+    return new Date(today.getTime() + (daysToMonday * 24 * 60 * 60 * 1000));
+  };
+
+  const formatETA = (eta, rate) => {
     if (!eta) return 'N/A';
-    const date = new Date(eta);
-    return date.toLocaleDateString('es-ES', {
-      weekday: 'long',
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    });
+    
+    // Calcular fecha de envío según la nueva lógica
+    const shippingDate = calculateShippingDate();
+    
+    // Determinar rango de días de tránsito según el tipo de servicio
+    let minDays = 2;
+    let maxDays = 3;
+    
+    if (rate && rate.provider) {
+      const provider = rate.provider.toLowerCase();
+      const serviceLevel = rate.servicelevel?.name?.toLowerCase() || '';
+      
+      // Asignar rango de días de tránsito según el proveedor y servicio
+      if (provider === 'usps') {
+        if (serviceLevel.includes('ground') || serviceLevel.includes('standard')) {
+          minDays = 2; maxDays = 3; // 2-3 días
+        } else if (serviceLevel.includes('priority')) {
+          minDays = 1; maxDays = 2; // 1-2 días
+        } else if (serviceLevel.includes('express')) {
+          minDays = 1; maxDays = 1; // 1 día
+        }
+      } else if (provider === 'ups') {
+        if (serviceLevel.includes('ground')) {
+          minDays = 1; maxDays = 5; // 1-5 días
+        } else if (serviceLevel.includes('standard')) {
+          minDays = 1; maxDays = 3; // 1-3 días
+        }
+      } else if (provider === 'fedex') {
+        if (serviceLevel.includes('ground')) {
+          minDays = 1; maxDays = 5; // 1-5 días
+        } else if (serviceLevel.includes('standard')) {
+          minDays = 1; maxDays = 3; // 1-3 días
+        }
+      }
+    }
+    
+    // Calcular fechas de entrega: fecha de envío + rango de días
+    const minDeliveryDate = new Date(shippingDate.getTime() + (minDays * 24 * 60 * 60 * 1000));
+    const maxDeliveryDate = new Date(shippingDate.getTime() + (maxDays * 24 * 60 * 60 * 1000));
+    
+    // Formatear fechas
+    const formatDate = (date) => {
+      return date.toLocaleDateString('es-ES', {
+        weekday: 'long',
+        day: 'numeric',
+        month: 'long'
+      });
+    };
+    
+    // Si es el mismo día, mostrar solo una fecha
+    if (minDays === maxDays) {
+      return formatDate(minDeliveryDate);
+    }
+    
+    // Mostrar rango de fechas
+    return `del ${formatDate(minDeliveryDate)} al ${formatDate(maxDeliveryDate)}`;
   };
 
   const getCarrierColor = (carrier) => {
@@ -143,7 +221,7 @@ const ShippingCalculator = ({
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           <LocalShipping />
           <Typography variant="h6" sx={{ fontWeight: 600 }}>
-            Shipping Options
+            {t('shippingOptions.title', 'Shipping Options')}
           </Typography>
         </Box>
         <Button
@@ -173,20 +251,20 @@ const ShippingCalculator = ({
           <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', py: 4 }}>
             <CircularProgress sx={{ color: '#c8626d', mb: 2 }} />
             <Typography variant="body1" color="text.secondary">
-              Calculando opciones de envío...
+              {t('shippingOptions.calculating', 'Calculando opciones de envío...')}
             </Typography>
           </Box>
         )}
 
         {rates.length > 0 && (
           <>
-            <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
-              Select a shipping option:
+            <Typography variant="h6" sx={{ mb: 3, fontWeight: 600, textAlign: 'center' }}>
+              {t('shippingOptions.selectOption', 'Select a shipping option:')}
             </Typography>
 
-            <Grid container spacing={2}>
+            <Grid container spacing={2} justifyContent="center">
               {rates.map((rate, index) => (
-                <Grid item xs={12} key={index}>
+                <Grid item xs={12} sm={6} md={6} lg={6} key={index}>
                   <Card
                     sx={{
                       cursor: 'pointer',
@@ -199,35 +277,38 @@ const ShippingCalculator = ({
                     }}
                     onClick={() => handleSelectRate(rate)}
                   >
-                    <CardContent>
+                    <CardContent sx={{ p: 1.5 }}>
                       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}>
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                           <Chip
                             label={getCarrierName(rate.provider)}
                             size="small"
                             sx={{
                               backgroundColor: getCarrierColor(rate.provider),
                               color: 'white',
-                              fontWeight: 600
+                              fontWeight: 600,
+                              fontSize: '0.7rem',
+                              height: '20px'
                             }}
                           />
-                          <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
-                            {rate.servicelevel?.name || 'Standard'}
-                          </Typography>
                         </Box>
                         
-                        <Typography variant="h6" sx={{ color: '#c8626d', fontWeight: 700 }}>
+                        <Typography variant="h6" sx={{ color: '#c8626d', fontWeight: 700, fontSize: '1rem' }}>
                           {formatPrice(rate.amount)}
                         </Typography>
                       </Box>
 
+                      <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1, fontSize: '0.85rem' }}>
+                        {rate.servicelevel?.name || 'Standard'}
+                      </Typography>
+
                       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <Typography variant="body2" color="text.secondary">
-                          Delivery: {formatETA(rate.eta)}
+                        <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.75rem' }}>
+                          {formatETA(rate.eta, rate)}
                         </Typography>
                         
                         {selectedRate?.object_id === rate.object_id && (
-                          <CheckCircle color="success" />
+                          <CheckCircle color="success" sx={{ fontSize: '1.2rem' }} />
                         )}
                       </Box>
                     </CardContent>
@@ -238,7 +319,7 @@ const ShippingCalculator = ({
 
             <Divider sx={{ my: 3 }} />
 
-            <Box sx={{ display: 'flex', gap: 2, justifyContent: 'flex-end' }}>
+            <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center', mt: 3 }}>
               <Button
                 variant="outlined"
                 onClick={onClose}
@@ -251,7 +332,7 @@ const ShippingCalculator = ({
                   }
                 }}
               >
-                Cancel
+                {t('shippingOptions.cancel', 'Cancel')}
               </Button>
               
               <Button
@@ -265,7 +346,7 @@ const ShippingCalculator = ({
                   }
                 }}
               >
-                Confirm Shipping
+                {t('shippingOptions.confirm', 'Confirm Shipping')}
               </Button>
             </Box>
           </>
