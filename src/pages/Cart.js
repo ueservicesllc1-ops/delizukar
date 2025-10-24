@@ -12,6 +12,16 @@ import { useTranslation } from 'react-i18next';
 const Cart = () => {
   const { t } = useTranslation();
   const { cart, updateCartQuantity, removeFromCart, getCartTotal, getCartItemsCount } = useStore();
+
+  // Función para mapear categorías
+  const getCategoryDisplayName = (category) => {
+    const categoryMap = {
+      'Clásicas NY': 'NY Style Cookies',
+      'clasicas': 'NY Style Cookies',
+      'Clásicas': 'NY Style Cookies'
+    };
+    return categoryMap[category] || category;
+  };
   const navigate = useNavigate();
   const { minProducts } = useMinProducts();
 
@@ -199,7 +209,7 @@ const Cart = () => {
                                 mb: 1
                               }}
                             >
-                              {item.category}
+                              {getCategoryDisplayName(item.category)}
                             </Typography>
                             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                               <Typography
