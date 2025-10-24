@@ -25,6 +25,7 @@ import { fontUploader } from '../utils/fontUploader';
 import { db, storage } from '../firebase/config';
 import { collection, addDoc, getDocs, doc, updateDoc, setDoc } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import RichTextEditor from './RichTextEditor';
 
 const PagesManager = ({ open, onClose }) => {
   const [availableFonts, setAvailableFonts] = useState([
@@ -425,15 +426,17 @@ const PagesManager = ({ open, onClose }) => {
                 </Select>
               </FormControl>
 
-              <TextField
-                fullWidth
-                label="Contenido"
-                value={editContent}
-                onChange={(e) => setEditContent(e.target.value)}
-                multiline
-                rows={6}
-                sx={{ mb: 3 }}
-              />
+              <Box sx={{ mb: 3 }}>
+                <Typography variant="subtitle2" sx={{ mb: 1, color: '#666', fontWeight: 600 }}>
+                  Contenido
+                </Typography>
+                <RichTextEditor
+                  value={editContent}
+                  onChange={setEditContent}
+                  placeholder="Escribe el contenido de la página aquí..."
+                  minHeight={200}
+                />
+              </Box>
 
               {editingPage?.id === 'nosotros' && (
                 <Box sx={{ mb: 3 }}>
@@ -497,17 +500,29 @@ const PagesManager = ({ open, onClose }) => {
                 >
                   {editTitle || 'Título de ejemplo'}
                 </Typography>
-                <Typography
-                  variant="body1"
+                <Box
                   sx={{
                     fontFamily: editContentFont ? `"${editContentFont}", sans-serif` : 'Roboto, sans-serif',
                     color: '#666',
                     lineHeight: 1.5,
-                    whiteSpace: 'pre-line'
+                    '& p': {
+                      margin: '0 0 8px 0',
+                      '&:last-child': {
+                        marginBottom: 0
+                      }
+                    },
+                    '& ul, & ol': {
+                      margin: '8px 0',
+                      paddingLeft: '20px'
+                    },
+                    '& li': {
+                      margin: '4px 0'
+                    }
                   }}
-                >
-                  {editContent || 'Contenido de ejemplo para mostrar cómo se verá el texto con la fuente seleccionada.'}
-                </Typography>
+                  dangerouslySetInnerHTML={{
+                    __html: editContent || 'Contenido de ejemplo para mostrar cómo se verá el texto con la fuente seleccionada.'
+                  }}
+                />
               </Box>
 
               <Box sx={{ display: 'flex', gap: 2, justifyContent: 'flex-end' }}>
