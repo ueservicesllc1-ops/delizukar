@@ -20,7 +20,8 @@ import {
   AddShoppingCart,
   Favorite,
   FavoriteBorder,
-  Star
+  Star,
+  AccountBalanceWallet
 } from '@mui/icons-material';
 import { useStore } from '../context/StoreContext';
 import { useTranslation } from 'react-i18next';
@@ -237,7 +238,7 @@ const FeaturedProducts = () => {
                       <Button
                         variant="contained"
                         fullWidth
-                        startIcon={<AddShoppingCart />}
+                        startIcon={<AccountBalanceWallet />}
                         onClick={() => addToCart(product)}
                         sx={{
                           backgroundColor: '#c8626d',

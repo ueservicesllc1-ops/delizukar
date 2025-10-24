@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Box, Container, Typography, Grid, Card, CardContent, CardActions, Button, IconButton, TextField, Divider, Checkbox, FormControlLabel } from '@mui/material';
-import { Add, Remove, Delete, ShoppingCart, ArrowBack } from '@mui/icons-material';
+import { Add, Remove, Delete, ShoppingCart, ArrowBack, AccountBalanceWallet } from '@mui/icons-material';
 import { useStore } from '../context/StoreContext';
 import { useNavigate } from 'react-router-dom';
 import AfterpayMessaging from '../components/AfterpayMessaging';
@@ -103,7 +103,7 @@ const Cart = () => {
                 boxShadow: '0 8px 32px rgba(0,0,0,0.1)'
               }}
             >
-              <ShoppingCart sx={{ fontSize: '4rem', color: '#ccc', mb: 3 }} />
+              <AccountBalanceWallet sx={{ fontSize: '4rem', color: '#ccc', mb: 3 }} />
               <Typography
                 variant="h4"
                 sx={{
