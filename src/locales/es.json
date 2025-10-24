@@ -1,7 +1,7 @@
 {
   "navigation": {
     "home": "Inicio",
-    "about": "Acerca de",
+    "about": "Nuestra Historia",
     "services": "Productos",
     "contact": "Contacto",
     "menu": "Menú"
@@ -134,5 +134,13 @@
         "comment": "Simplemente espectacular, les doy cinco estrellas... ¡Mi favorita es la rellena de pistacho!!!!"
       }
     }
+  },
+  "terms": {
+    "title": "Términos y Condiciones",
+    "content": "Términos y Condiciones de DeliZuKar\n\n1. Información General\nEstos Términos y Condiciones rigen el uso de nuestro sitio web y la compra de nuestros productos.\n\n2. Definiciones\n- 'Nosotros', 'Nuestra empresa' se refiere a DeliZuKar\n- 'Usted', 'Cliente' se refiere a la persona que utiliza nuestros servicios\n- 'Productos' se refiere a las galletas y productos de repostería que ofrecemos\n\n3. Uso del Sitio Web\n- El sitio web está destinado únicamente para uso personal y no comercial\n- No puede reproducir, distribuir o modificar el contenido sin autorización\n- Se prohíbe el uso del sitio para actividades ilegales o no autorizadas\n\n4. Información del Producto\n- Las descripciones de productos son precisas al momento de la publicación\n- Nos reservamos el derecho de modificar productos sin previo aviso\n- Las imágenes son representativas y pueden variar ligeramente del producto final\n\n5. Precios y Disponibilidad\n- Todos los precios están en dólares estadounidenses\n- Los precios pueden cambiar sin previo aviso\n- La disponibilidad de productos está sujeta a stock\n\n6. Política de Privacidad\n- Respetamos su privacidad y protegemos su información personal\n- No compartimos información personal con terceros sin consentimiento\n- Utilizamos cookies para mejorar su experiencia de navegación\n\n7. Limitaciones de Responsabilidad\n- Nuestra responsabilidad se limita al valor del producto comprado\n- No nos hacemos responsables por daños indirectos o consecuenciales\n- No garantizamos la disponibilidad continua del sitio web\n\n8. Ley Aplicable\nEstos términos se rigen por las leyes del estado donde opera nuestra empresa.\n\n9. Modificaciones\nNos reservamos el derecho de modificar estos términos en cualquier momento.\n\n10. Contacto\nPara preguntas sobre estos términos:\nEmail: legal@delizukar.com\nTeléfono: (555) 123-4567\n\nÚltima actualización: Diciembre 2024"
+  },
+  "termsService": {
+    "title": "Términos de Servicio",
+    "content": "Términos de Servicio de DeliZuKar\n\n1. Aceptación de los Términos\nAl acceder y utilizar este sitio web, usted acepta estar sujeto a estos Términos de Servicio y a todas las leyes y regulaciones aplicables.\n\n2. Descripción del Servicio\nDeliZuKar ofrece galletas artesanales estilo Nueva York, horneadas con ingredientes premium y entregadas directamente a su puerta.\n\n3. Pedidos y Pagos\n- Todos los pedidos están sujetos a disponibilidad\n- Los precios están sujetos a cambios sin previo aviso\n- El pago debe realizarse al momento del pedido\n- Aceptamos tarjetas de crédito y otros métodos de pago seguros\n\n4. Envíos y Entregas\n- Los pedidos se procesan los lunes y martes\n- Los tiempos de entrega pueden variar según la ubicación\n- No nos hacemos responsables por retrasos causados por terceros\n- Los productos se envían a temperatura ambiente\n\n5. Política de Devoluciones\n- Debido a la naturaleza perecedera de nuestros productos, no aceptamos devoluciones\n- Si hay un problema con su pedido, contáctenos dentro de las 24 horas\n\n6. Limitación de Responsabilidad\n- Nuestra responsabilidad se limita al valor del producto\n- No nos hacemos responsables por daños indirectos o consecuenciales\n\n7. Modificaciones\nNos reservamos el derecho de modificar estos términos en cualquier momento. Los cambios entrarán en vigor inmediatamente después de su publicación.\n\n8. Contacto\nPara preguntas sobre estos términos, contáctenos en:\nEmail: info@delizukar.com\nTeléfono: (555) 123-4567\n\nÚltima actualización: Diciembre 2024"
   }
 }

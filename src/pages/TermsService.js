@@ -2,8 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { Box, Container, Typography } from '@mui/material';
 import { db } from '../firebase/config';
 import { doc, getDoc, collection, getDocs } from 'firebase/firestore';
+import { useTranslation } from 'react-i18next';
 
 const TermsService = () => {
+  const { t } = useTranslation();
   const [pageData, setPageData] = useState({
     title: 'Términos de Servicio',
     content: 'Contenido de términos de servicio estará disponible próximamente',
@@ -91,7 +93,7 @@ const TermsService = () => {
             fontFamily: pageData.titleFont ? `"${pageData.titleFont}", serif` : 'Playfair Display, serif'
           }}
         >
-          {pageData.title}
+          {t('termsService.title', pageData.title)}
         </Typography>
         
         {/* Contenido de la página */}
