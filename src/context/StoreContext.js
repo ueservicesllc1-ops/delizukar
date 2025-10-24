@@ -69,7 +69,7 @@ const initialState = {
   user: null,
   loading: false,
   categories: [
-    { id: 'clasicas', name: 'Clásicas NY', icon: 'cookie' },
+    { id: 'clasicas', name: 'NY Style Cookies', icon: 'cookie' },
     { id: 'chocolate', name: 'Chocolate', icon: 'chocolate' },
     { id: 'vainilla', name: 'Vainilla', icon: 'milk' },
     { id: 'especiales', name: 'Especiales', icon: 'star' },

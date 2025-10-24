@@ -56,7 +56,7 @@ const AdminProducts = () => {
 
   const categories = [
     'Todas',
-    'Clásicas NY',
+    'NY Style Cookies',
     'Chocolate',
     'Especiales',
     'Veganas',

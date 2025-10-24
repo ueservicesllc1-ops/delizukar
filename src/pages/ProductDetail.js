@@ -23,7 +23,7 @@ const ProductDetail = () => {
       "https://images.unsplash.com/photo-1578985545062-69928b1d9587?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80",
       "https://images.unsplash.com/photo-1603133872878-684f208fb84b?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80"
     ],
-    category: "Clásicas NY",
+    category: "NY Style Cookies",
     isNew: true,
     isBestSeller: true,
     description: "Las galletas de chocolate chip más auténticas de Nueva York. Horneadas con ingredientes premium y el sabor tradicional que todos amamos.",

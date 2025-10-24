@@ -67,7 +67,7 @@ const ProductsManager = ({ open, onClose }) => {
   });
 
   const categories = [
-    'Clásicas NY',
+    'NY Style Cookies',
     'Chocolate',
     'Vainilla',
     'Especiales',
