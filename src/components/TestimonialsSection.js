@@ -99,7 +99,7 @@ const TestimonialsSection = () => {
   }
 
   return (
-    <Box className="testimonials-mobile" sx={{ py: 8, backgroundColor: '#f8f9fa' }}>
+    <Box className="testimonials-mobile" sx={{ py: 8, pt: { xs: 10, sm: 8, md: 8 }, backgroundColor: '#f8f9fa' }}>
       <Container maxWidth="lg">
         <motion.div
           initial={{ opacity: 0, y: 50 }}

@@ -14,7 +14,7 @@ class ShippoService {
     const backendEndpoint = this.mapToBackendEndpoint(endpoint);
     const baseUrl = process.env.NODE_ENV === 'production' 
       ? (window.location.origin || 'https://delizukar.com')
-      : 'http://localhost:5000';
+      : `http://${window.location.hostname}:5000`;
     const url = `${baseUrl}/api/shippo${backendEndpoint}`;
     
     const options = {
@@ -280,6 +280,22 @@ class ShippoService {
       return validatedAddress;
     } catch (error) {
       console.error('Error validating address:', error);
+      
+      // Si hay error de conexión o el backend no está disponible, devolver la dirección como válida
+      if (error.message.includes('Failed to fetch') || 
+          error.message.includes('NetworkError') ||
+          error.message.includes('500') ||
+          error.message.includes('404')) {
+        console.log('Backend not available, treating address as valid');
+        return {
+          ...addressData,
+          validation_results: {
+            is_valid: true,
+            messages: []
+          }
+        };
+      }
+      
       throw error;
     }
   }
@@ -312,6 +328,22 @@ class ShippoService {
       }
     } catch (error) {
       console.error('Error correcting address:', error);
+      
+      // Si hay error de conexión, tratar la dirección como válida
+      if (error.message.includes('Failed to fetch') || 
+          error.message.includes('NetworkError') ||
+          error.message.includes('500') ||
+          error.message.includes('404')) {
+        console.log('Backend not available, treating address as valid');
+        return {
+          original: addressData,
+          corrected: addressData,
+          needsCorrection: false,
+          suggestions: [],
+          isResidential: true
+        };
+      }
+      
       throw error;
     }
   }

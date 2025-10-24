@@ -92,11 +92,12 @@ const HeroBanner = () => {
         className="hero-mobile"
         sx={{
           position: 'relative',
-          height: '80vh',
+          height: { xs: '60vh', sm: '80vh', md: '80vh' },
           overflow: 'hidden',
           display: 'flex',
           alignItems: 'center',
-          justifyContent: 'center'
+          justifyContent: 'center',
+          marginBottom: { xs: '-195px', sm: '-152px', md: '-152px' }
         }}
       >
       <Swiper
@@ -127,7 +128,7 @@ const HeroBanner = () => {
                 height: '80vh',
                 backgroundImage: `url(${slide.imageUrl})`,
                 backgroundSize: 'contain',
-                backgroundPosition: 'center bottom',
+                backgroundPosition: 'center 30%',
                 backgroundRepeat: 'no-repeat',
                 display: 'flex',
                 alignItems: 'center',

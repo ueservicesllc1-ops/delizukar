@@ -222,8 +222,8 @@ const Checkout = () => {
   };
 
   return (
-    <Box sx={{ py: 2, pt: 4, backgroundColor: '#fafafa', minHeight: '100vh' }} className="form-mobile">
-      <Container maxWidth="lg" className="container-mobile">
+    <Box sx={{ py: 2, pt: 0, backgroundColor: '#fafafa', minHeight: '100vh' }} className="form-mobile">
+      <Container maxWidth="lg" className="container-mobile" sx={{ px: { xs: 2, sm: 3, md: 4 } }}>
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -275,7 +275,7 @@ const Checkout = () => {
         <form onSubmit={handleSubmit}>
           <Grid container spacing={2}>
             {/* Información de contacto - Izquierda */}
-            <Grid size={12} sx={{ width: '700px', flex: '0 0 700px' }}>
+            <Grid size={12} sx={{ width: { xs: '100%', sm: '100%', md: '700px' }, flex: { xs: '1 1 auto', sm: '1 1 auto', md: '0 0 700px' } }}>
               <motion.div
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
@@ -440,7 +440,7 @@ const Checkout = () => {
             </Grid>
 
             {/* Información de pago y resumen - Derecha */}
-            <Grid size={12} sx={{ width: '400px', flex: '0 0 400px' }}>
+            <Grid size={12} sx={{ width: { xs: '100%', sm: '100%', md: '400px' }, flex: { xs: '1 1 auto', sm: '1 1 auto', md: '0 0 400px' } }}>
               <motion.div
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}

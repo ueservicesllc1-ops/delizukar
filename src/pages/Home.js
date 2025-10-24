@@ -73,7 +73,7 @@ const Home = () => {
 
 
       {/* Featured Products */}
-      <Box sx={{ py: 8, backgroundColor: '#fafafa' }}>
+      <Box sx={{ py: 2, pt: 6, backgroundColor: '#fafafa' }}>
         <Container maxWidth="lg">
           <motion.div
             initial={{ opacity: 0, y: 50 }}
@@ -81,7 +81,7 @@ const Home = () => {
             viewport={{ once: true }}
             transition={{ duration: 0.8 }}
           >
-            <Box sx={{ textAlign: 'center', mb: 6 }}>
+            <Box sx={{ textAlign: 'center', mb: 3 }}>
               <Typography
                 variant="h2"
                 className="featured-products-title"
@@ -90,7 +90,11 @@ const Home = () => {
                   fontWeight: 800,
                   color: '#EC8C8D',
                   mb: 2,
-                  fontFamily: featuredLoading ? 'Playfair Display, serif' : `"${featuredConfig.titleFont}", serif !important`
+                  fontFamily: featuredLoading ? 'Playfair Display, serif' : `"${featuredConfig.titleFont}", serif !important`,
+                  position: 'relative',
+                  zIndex: 10,
+                  '&::before': { display: 'none' },
+                  '&::after': { display: 'none' }
                 }}
               >
                 {featuredLoading ? 'Galletas Destacadas' : featuredConfig.titleText}

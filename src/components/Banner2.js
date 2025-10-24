@@ -100,23 +100,10 @@ const Banner2 = () => {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
+          mt: { xs: 20, sm: 6, md: 8 },
           mb: 8
         }}
       >
-      {/* Overlay opcional si se especifica un color */}
-      {currentPhoto.color && currentPhoto.color !== '#c8626d' && (
-        <Box
-          sx={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            width: '100%',
-            height: '100%',
-            backgroundColor: `${currentPhoto.color}40`, // 40 = 25% de opacidad
-            zIndex: 1
-          }}
-        />
-      )}
 
       {/* Contenido del banner (opcional) */}
       {(currentPhoto.title || currentPhoto.description) && (

@@ -1,7 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
-import { CssBaseline } from '@mui/material';
+import { CssBaseline, Box } from '@mui/material';
 import { Toaster } from 'react-hot-toast';
 // import AOS from 'aos';
 // import 'aos/dist/aos.css';
@@ -143,7 +143,10 @@ function App() {
           }}
         >
           <div className="App">
-            <Routes>
+            <Box sx={{ 
+              paddingTop: { xs: '70px', sm: '70px', md: '70px' }
+            }}>
+              <Routes>
               <Route path="/" element={
                 <>
                   <Header />
@@ -241,7 +244,8 @@ function App() {
                   <CookieCare />
                 </>
               } />
-            </Routes>
+              </Routes>
+            </Box>
             
             <Footer />
             

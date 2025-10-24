@@ -51,7 +51,7 @@ const Nosotros = () => {
   }, []);
 
   return (
-    <Box className="nosotros-mobile" sx={{ pt: 35, pb: 8, opacity: fontsReady ? 1 : 0, transition: 'opacity 200ms ease' }}>
+    <Box className="nosotros-mobile" sx={{ pt: 20, pb: 8, opacity: fontsReady ? 1 : 0, transition: 'opacity 200ms ease' }}>
       <style>
         {`
           @keyframes slowFloat {

@@ -262,23 +262,48 @@ const ShippingCalculator = ({
               {t('shippingOptions.selectOption', 'Select a shipping option:')}
             </Typography>
 
-            <Grid container spacing={2} justifyContent="center">
+            <Grid container spacing={{ xs: 1, sm: 2 }} justifyContent="center">
               {rates.map((rate, index) => (
-                <Grid item xs={12} sm={6} md={6} lg={6} key={index}>
+                <Grid 
+                  item 
+                  xs={12}        // 1 por línea en móvil
+                  sm={6}         // 2 por línea en tablet
+                  md={6}         // 2 por línea en laptop
+                  lg={4}         // 3 por línea en desktop grande
+                  xl={3}         // 4 por línea en pantallas extra grandes
+                  key={index}
+                >
                   <Card
                     sx={{
                       cursor: 'pointer',
                       border: selectedRate?.object_id === rate.object_id ? '2px solid #c8626d' : '1px solid #e0e0e0',
                       transition: 'all 0.3s ease',
+                      height: '100%', // Altura uniforme
+                      display: 'flex',
+                      flexDirection: 'column',
                       '&:hover': {
                         borderColor: '#c8626d',
-                        boxShadow: '0 4px 12px rgba(139, 69, 19, 0.15)'
+                        boxShadow: '0 4px 12px rgba(139, 69, 19, 0.15)',
+                        transform: 'translateY(-2px)' // Efecto sutil
                       }
                     }}
                     onClick={() => handleSelectRate(rate)}
                   >
-                    <CardContent sx={{ p: 1.5 }}>
-                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}>
+                    <CardContent 
+                      sx={{ 
+                        p: { xs: 1, sm: 1.5, md: 2 }, // Padding responsivo
+                        flex: 1,
+                        display: 'flex',
+                        flexDirection: 'column'
+                      }}
+                    >
+                      {/* Header con chip y precio */}
+                      <Box sx={{ 
+                        display: 'flex', 
+                        justifyContent: 'space-between', 
+                        alignItems: 'flex-start', 
+                        mb: { xs: 0.5, sm: 1 } 
+                      }}>
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                           <Chip
                             label={getCarrierName(rate.provider)}
@@ -287,28 +312,62 @@ const ShippingCalculator = ({
                               backgroundColor: getCarrierColor(rate.provider),
                               color: 'white',
                               fontWeight: 600,
-                              fontSize: '0.7rem',
-                              height: '20px'
+                              fontSize: { xs: '0.65rem', sm: '0.7rem' },
+                              height: { xs: '18px', sm: '20px' }
                             }}
                           />
                         </Box>
                         
-                        <Typography variant="h6" sx={{ color: '#c8626d', fontWeight: 700, fontSize: '1rem' }}>
+                        <Typography 
+                          variant="h6" 
+                          sx={{ 
+                            color: '#c8626d', 
+                            fontWeight: 700, 
+                            fontSize: { xs: '0.9rem', sm: '1rem', md: '1.1rem' }
+                          }}
+                        >
                           {formatPrice(rate.amount)}
                         </Typography>
                       </Box>
 
-                      <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1, fontSize: '0.85rem' }}>
+                      {/* Nombre del servicio */}
+                      <Typography 
+                        variant="subtitle2" 
+                        sx={{ 
+                          fontWeight: 600, 
+                          mb: { xs: 0.5, sm: 1 }, 
+                          fontSize: { xs: '0.8rem', sm: '0.85rem', md: '0.9rem' },
+                          lineHeight: 1.2
+                        }}
+                      >
                         {rate.servicelevel?.name || 'Standard'}
                       </Typography>
 
-                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.75rem' }}>
+                      {/* Información de entrega */}
+                      <Box sx={{ 
+                        display: 'flex', 
+                        justifyContent: 'space-between', 
+                        alignItems: 'center',
+                        mt: 'auto' // Empuja hacia abajo
+                      }}>
+                        <Typography 
+                          variant="body2" 
+                          color="text.secondary" 
+                          sx={{ 
+                            fontSize: { xs: '0.7rem', sm: '0.75rem', md: '0.8rem' },
+                            lineHeight: 1.3
+                          }}
+                        >
                           {formatETA(rate.eta, rate)}
                         </Typography>
                         
                         {selectedRate?.object_id === rate.object_id && (
-                          <CheckCircle color="success" sx={{ fontSize: '1.2rem' }} />
+                          <CheckCircle 
+                            color="success" 
+                            sx={{ 
+                              fontSize: { xs: '1rem', sm: '1.2rem' }
+                            }} 
+                          />
                         )}
                       </Box>
                     </CardContent>

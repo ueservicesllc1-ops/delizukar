@@ -202,6 +202,8 @@ const Header = () => {
           <Close />
         </IconButton>
       </Box>
+      
+      
       <List>
         {menuItems.map((item) => (
           <ListItem key={item.label} sx={{ py: 1 }}>
@@ -236,12 +238,15 @@ const Header = () => {
         transition={{ duration: 0.5 }}
       >
         <AppBar
-          position="fixed"
+          position="sticky"
           className="header-mobile"
           sx={{
             backgroundColor: 'white',
             boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
-            zIndex: 1000
+            zIndex: 9999,
+            top: 0,
+            position: 'fixed',
+            width: '100%'
           }}
         >
           <Container maxWidth="lg">
@@ -314,7 +319,7 @@ const Header = () => {
               {!user && (
                 <Box sx={{ 
                   position: 'absolute', 
-                  top: 8, 
+                  top: 4, 
                   right: 16, 
                   zIndex: 10 
                 }}>
@@ -328,10 +333,11 @@ const Header = () => {
                       sx={{
                         borderColor: '#c8626d',
                         color: '#c8626d',
-                        fontSize: '0.7rem',
-                        py: 0.5,
-                        px: 1,
+                        fontSize: { xs: '0.5rem', sm: '0.6rem' },
+                        py: { xs: 0.2, sm: 0.3 },
+                        px: { xs: 0.6, sm: 0.8 },
                         minWidth: 'auto',
+                        height: { xs: '24px', sm: '28px' },
                         '&:hover': {
                           backgroundColor: '#c8626d',
                           color: 'white',
@@ -339,26 +345,7 @@ const Header = () => {
                         }
                       }}
                     >
-                      {t('common.login', 'Login')}
-                    </Button>
-                    <Button
-                      size="small"
-                      variant="contained"
-                      startIcon={<PersonAdd />}
-                      onClick={handleGoogleAuth}
-                      className="header-auth-buttons"
-                      sx={{
-                        backgroundColor: '#c8626d',
-                        fontSize: '0.7rem',
-                        py: 0.5,
-                        px: 1,
-                        minWidth: 'auto',
-                        '&:hover': {
-                          backgroundColor: '#b5555a'
-                        }
-                      }}
-                    >
-                      {t('common.register', 'Registro')}
+                      {t('common.login', 'Iniciar Sesión')}
                     </Button>
                   </Box>
                 </Box>
@@ -374,7 +361,7 @@ const Header = () => {
                 mt: 1,
                 position: 'relative'
               }}>
-                {/* Mobile Menu Button and Language Switcher - Left */}
+                {/* Mobile Menu Button - Left */}
                 {isMobile && (
                   <Box sx={{ 
                     position: 'absolute', 
@@ -394,32 +381,30 @@ const Header = () => {
                     >
                       <MenuIcon />
                     </IconButton>
-                    <LanguageSwitcher />
                   </Box>
                 )}
                 
-                {/* Search Icon and Language Switcher - Left (desktop only) */}
-                {!isMobile && (
-                  <Box sx={{ 
-                    position: 'absolute', 
-                    left: 0, 
-                    display: 'flex', 
-                    alignItems: 'center', 
-                    gap: 1 
-                  }}>
-                    <IconButton
-                      sx={{
-                        color: '#be8782',
-                        '&:hover': {
-                          backgroundColor: '#be878220'
-                        }
-                      }}
-                    >
-                      <Search />
-                    </IconButton>
-                    <LanguageSwitcher />
-                  </Box>
-                )}
+                  {/* Search Icon - Left (desktop only) */}
+                  {!isMobile && (
+                    <Box sx={{ 
+                      position: 'absolute', 
+                      left: 0, 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      gap: 1 
+                    }}>
+                      <IconButton
+                        sx={{
+                          color: '#be8782',
+                          '&:hover': {
+                            backgroundColor: '#be878220'
+                          }
+                        }}
+                      >
+                        <Search />
+                      </IconButton>
+                    </Box>
+                  )}
 
                 {/* Logo - Center */}
                 <motion.div
@@ -450,18 +435,34 @@ const Header = () => {
 
 
                 {/* Cart, Profile, Admin Icons and Auth Buttons - Right */}
+
+                {/* User, Cart and Admin Icons - Horizontal layout - Right */}
                 <Box sx={{ 
                   display: 'flex', 
+                  flexDirection: 'row',
                   alignItems: 'center', 
-                  gap: 1,
+                  gap: 0.2,
                   position: 'absolute',
-                  right: 0
+                  right: 16
                 }}>
-                  {/* Admin Panel - Shield Icon */}
+                  {/* Profile - Left */}
+                  <IconButton
+                    onClick={handleProfileMenuOpen}
+                    sx={{
+                      color: '#c8626d',
+                      fontSize: '1.5rem',
+                      '&:hover': {
+                        backgroundColor: '#c8626d20'
+                      }
+                    }}
+                  >
+                    <Person sx={{ fontSize: '1.5rem' }} />
+                  </IconButton>
+
+                  {/* Admin Panel - Right */}
                   <motion.div
                     whileHover={{ scale: 1.1 }}
                     whileTap={{ scale: 0.9 }}
-                    className="admin-shield-mobile"
                   >
                     <IconButton
                       component="a"
@@ -479,21 +480,7 @@ const Header = () => {
                     </IconButton>
                   </motion.div>
 
-                  {/* Profile */}
-                  <IconButton
-                    onClick={handleProfileMenuOpen}
-                    sx={{
-                      color: '#c8626d',
-                      fontSize: '1.5rem',
-                      '&:hover': {
-                        backgroundColor: '#c8626d20'
-                      }
-                    }}
-                  >
-                    <Person sx={{ fontSize: '1.5rem' }} />
-                  </IconButton>
-
-                  {/* Shopping Cart */}
+                  {/* Shopping Cart - Right */}
                   <motion.div
                     whileHover={{ scale: 1.1 }}
                     whileTap={{ scale: 0.9 }}
@@ -559,6 +546,16 @@ const Header = () => {
                   {/* Mobile actions can go here if needed */}
                 </Box>
               </Box>
+
+                {/* Language Switcher - Bottom Left */}
+                <Box sx={{ 
+                  position: 'absolute', 
+                  bottom: 8, 
+                  left: 16, 
+                  zIndex: 10 
+                }}>
+                  <LanguageSwitcher />
+                </Box>
             </Toolbar>
           </Container>
         </AppBar>
@@ -575,9 +572,11 @@ const Header = () => {
         }}
         sx={{
           display: { xs: 'block', md: 'none' },
+          zIndex: 10001,
           '& .MuiDrawer-paper': {
             boxSizing: 'border-box',
-            width: 250
+            width: 250,
+            zIndex: 10001
           }
         }}
       >
@@ -591,6 +590,9 @@ const Header = () => {
         onClose={handleProfileMenuClose}
         transformOrigin={{ horizontal: 'right', vertical: 'top' }}
         anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
+        sx={{
+          zIndex: 10002
+        }}
       >
         <MenuItem onClick={handleProfileMenuClose}>My Profile</MenuItem>
         <MenuItem onClick={handleProfileMenuClose}>My Orders</MenuItem>

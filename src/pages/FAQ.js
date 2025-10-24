@@ -80,7 +80,12 @@ const FAQ = () => {
   };
 
   return (
-    <Box sx={{ py: 8, pt: 35, opacity: fontsReady ? 1 : 0, transition: 'opacity 200ms ease' }}>
+    <Box sx={{ 
+      py: 8, 
+      pt: { xs: 10, sm: 35, md: 35 }, 
+      opacity: fontsReady ? 1 : 0, 
+      transition: 'opacity 200ms ease' 
+    }}>
       <Container maxWidth="lg">
         <Typography
           variant="h2"

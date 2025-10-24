@@ -34,6 +34,7 @@ const db = getFirestore(firebaseApp);
 app.use(cors({
   origin: [
     'http://localhost:3000',
+    'http://192.168.13.173:3000',
     'https://delizukar-production.up.railway.app',
     'https://dia4qsw7.up.railway.app',
     'https://delizukar.com',

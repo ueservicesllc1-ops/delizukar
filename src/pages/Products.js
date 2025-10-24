@@ -16,42 +16,18 @@ const Products = () => {
   const [selected, setSelected] = useState(null);
 
   return (
-    <Box sx={{ py: 4, pt: 18, backgroundColor: '#fafafa', minHeight: '100vh' }}>
+    <Box sx={{ 
+      py: 4, 
+      pt: { xs: 6, sm: 18, md: 18 }, 
+      backgroundColor: '#fafafa', 
+      minHeight: '100vh' 
+    }}>
       <Container maxWidth="xl" sx={{ maxWidth: '1400px' }}>
         {/* Header */}
-        <Box sx={{ mb: 6 }}>
+        <Box sx={{ mb: 3 }}>
           
           
 
-          {/* Barra de búsqueda */}
-          <Box sx={{ maxWidth: '500px', mx: 'auto', mt: 3, mb: 4 }}>
-            <TextField
-              fullWidth
-              placeholder="Buscar galletas..."
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <Search sx={{ color: '#c8626d' }} />
-                  </InputAdornment>
-                ),
-              }}
-              sx={{
-                '& .MuiOutlinedInput-root': {
-                  borderRadius: '25px',
-                  backgroundColor: 'white',
-                  '& fieldset': {
-                    borderColor: '#ddd',
-                  },
-                  '&:hover fieldset': {
-                    borderColor: '#c8626d',
-                  },
-                  '&.Mui-focused fieldset': {
-                    borderColor: '#c8626d',
-                  },
-                }
-              }}
-            />
-          </Box>
 
           {/* Filtros por categoría eliminados a solicitud */}
         </Box>

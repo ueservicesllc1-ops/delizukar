@@ -69,7 +69,7 @@ const ProductCards = ({ products: propProducts, showAll = false }) => {
                     />
                   
                   {/* Badges */}
-                  <Box sx={{ position: 'absolute', top: 12, left: 12, display: 'flex', flexDirection: 'column', gap: 1 }}>
+                  <Box sx={{ position: 'absolute', top: 12, left: 12, display: 'flex', flexDirection: 'column', gap: 1, zIndex: 1 }}>
                     {product.isNew && (
                       <Chip
                         label={t('product.new', 'New')}

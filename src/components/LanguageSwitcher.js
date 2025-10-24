@@ -27,7 +27,7 @@ const LanguageSwitcher = () => {
   };
 
   const getCurrentLanguageName = () => {
-    return i18n.language === 'es' ? t('language.spanish') : t('language.english');
+    return i18n.language === 'es' ? 'Español' : 'English';
   };
 
   return (
@@ -42,12 +42,13 @@ const LanguageSwitcher = () => {
         sx={{ 
           color: '#c8626d',
           textTransform: 'none',
-          fontSize: '0.8rem',
+          fontSize: '0.7rem',
           fontWeight: 600,
           border: '1px solid #c8626d',
-          borderRadius: '20px',
-          px: 2,
-          py: 0.5,
+          borderRadius: '15px',
+          px: 1,
+          py: 0.3,
+          minWidth: 'auto',
           backgroundColor: 'rgba(200, 98, 109, 0.05)',
           '&:hover': {
             backgroundColor: 'rgba(200, 98, 109, 0.15)',
@@ -96,7 +97,7 @@ const LanguageSwitcher = () => {
             }
           }}
         >
-          {t('language.english')}
+          ENG
         </MenuItem>
         <MenuItem 
           onClick={() => changeLanguage('es')}
@@ -111,7 +112,7 @@ const LanguageSwitcher = () => {
             }
           }}
         >
-          {t('language.spanish')}
+          ESP
         </MenuItem>
       </Menu>
     </Box>

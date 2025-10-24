@@ -145,6 +145,15 @@ const PopupHero = ({ open, onClose }) => {
         <Dialog
           open={open}
           onClose={onClose}
+          sx={{
+            zIndex: 10000,
+            '& .MuiDialog-paper': {
+              zIndex: 10000
+            },
+            '& .MuiBackdrop-root': {
+              zIndex: 9999
+            }
+          }}
           PaperProps={{
             sx: {
               width: '90vw',
@@ -156,7 +165,8 @@ const PopupHero = ({ open, onClose }) => {
               boxShadow: '0 32px 100px rgba(0,0,0,0.25)',
               backgroundColor: 'transparent',
               position: 'relative',
-              backdropFilter: 'blur(20px)'
+              backdropFilter: 'blur(20px)',
+              zIndex: 10000
             }
           }}
         >
