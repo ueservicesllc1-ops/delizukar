@@ -144,7 +144,7 @@ function App() {
         >
           <div className="App">
             <Box sx={{ 
-              paddingTop: { xs: '70px', sm: '70px', md: '70px' }
+              paddingTop: { xs: '500px', sm: '70px', md: '70px' }
             }}>
               <Routes>
               <Route path="/" element={

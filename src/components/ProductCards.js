@@ -212,6 +212,7 @@ const ProductCards = ({ products: propProducts, showAll = false }) => {
 
       {/* Popup de producto */}
       <Dialog
+        className="product-detail-mobile"
         open={open}
         onClose={() => setOpen(false)}
         maxWidth="md"

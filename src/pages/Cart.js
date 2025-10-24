@@ -63,7 +63,7 @@ const Cart = () => {
   };
 
   return (
-    <Box sx={{ py: 4, pt: 22, backgroundColor: '#fafafa', minHeight: '100vh' }}>
+    <Box className="cart-page-mobile" sx={{ py: 4, pt: 22, backgroundColor: '#fafafa', minHeight: '100vh' }}>
       <Container maxWidth="lg">
         {/* Header */}
         <motion.div

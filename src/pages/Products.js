@@ -16,7 +16,7 @@ const Products = () => {
   const [selected, setSelected] = useState(null);
 
   return (
-    <Box sx={{ 
+    <Box className="products-page-mobile" sx={{ 
       py: 4, 
       pt: { xs: 6, sm: 18, md: 18 }, 
       backgroundColor: '#fafafa', 

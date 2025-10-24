@@ -447,6 +447,7 @@ const Header = () => {
                 }}>
                   {/* Profile - Left */}
                   <IconButton
+                    className="user-icon-mobile"
                     onClick={handleProfileMenuOpen}
                     sx={{
                       color: '#c8626d',
@@ -461,6 +462,7 @@ const Header = () => {
 
                   {/* Admin Panel - Right */}
                   <motion.div
+                    className="admin-icon-mobile"
                     whileHover={{ scale: 1.1 }}
                     whileTap={{ scale: 0.9 }}
                   >
@@ -501,6 +503,7 @@ const Header = () => {
                       </Badge>
                     </IconButton>
                   </motion.div>
+                  
                 </Box>
               </Box>
 

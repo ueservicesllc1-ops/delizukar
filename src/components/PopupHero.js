@@ -143,6 +143,7 @@ const PopupHero = ({ open, onClose }) => {
     <AnimatePresence>
       {open && (
         <Dialog
+          className="popup-hero-mobile"
           open={open}
           onClose={onClose}
           sx={{

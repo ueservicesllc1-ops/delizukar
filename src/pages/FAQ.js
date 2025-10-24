@@ -80,7 +80,7 @@ const FAQ = () => {
   };
 
   return (
-    <Box sx={{ 
+    <Box className="faq-page-mobile" sx={{ 
       py: 8, 
       pt: { xs: 10, sm: 35, md: 35 }, 
       opacity: fontsReady ? 1 : 0, 

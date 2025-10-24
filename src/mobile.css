@@ -153,9 +153,16 @@
     justify-content: center !important;
   }
   
+  /* Products Page Mobile - Reduce top spacing */
+  .products-page-mobile {
+    margin-top: -400px !important;
+    padding-top: 0 !important;
+  }
+  
   /* Nosotros Mobile */
   .nosotros-mobile {
     padding-top: 150px !important;
+    margin-top: -430px !important;
   }
   
   .nosotros-title-mobile {
@@ -168,6 +175,13 @@
   /* Contacto Mobile */
   .contacto-mobile {
     padding-top: 160px !important;
+    margin-top: -430px !important;
+  }
+  
+  /* FAQ Page Mobile - Reduce top spacing */
+  .faq-page-mobile {
+    margin-top: -350px !important;
+    padding-top: 0 !important;
   }
   
   .contacto-title-mobile {
@@ -250,6 +264,58 @@
     max-height: calc(100vh - 16px) !important;
     width: calc(100vw - 16px) !important;
     max-width: calc(100vw - 16px) !important;
+  }
+  
+  /* All Modals/Popups Mobile - Make 20% smaller */
+  .MuiDialog-paper {
+    transform: scale(0.8) !important;
+    transform-origin: center !important;
+    margin: 0 !important;
+    max-height: calc(80vh) !important;
+    width: calc(80vw) !important;
+    max-width: calc(80vw) !important;
+  }
+  
+  /* Popup Hero Mobile */
+  .popup-hero-mobile .MuiDialog-paper {
+    transform: scale(0.95) !important;
+    transform-origin: center !important;
+    margin: 0 !important;
+    max-height: calc(95vh) !important;
+    width: calc(95vw) !important;
+    max-width: calc(95vw) !important;
+  }
+  
+  /* Popup Hero Content Mobile - Adjust content to fit */
+  .popup-hero-mobile .MuiDialogContent-root {
+    padding: 12px !important;
+    max-height: calc(85vh) !important;
+    overflow-y: auto !important;
+  }
+  
+  .popup-hero-mobile .MuiTypography-h4 {
+    font-size: 1.4rem !important;
+    line-height: 1.4 !important;
+  }
+  
+  .popup-hero-mobile .MuiTypography-h6 {
+    font-size: 1.1rem !important;
+    line-height: 1.3 !important;
+  }
+  
+  .popup-hero-mobile .MuiButton-root {
+    padding: 10px 20px !important;
+    font-size: 1rem !important;
+  }
+  
+  /* Product Detail Modals Mobile */
+  .product-detail-mobile .MuiDialog-paper {
+    transform: scale(0.8) !important;
+    transform-origin: center !important;
+    margin: 0 !important;
+    max-height: calc(80vh) !important;
+    width: calc(80vw) !important;
+    max-width: calc(80vw) !important;
   }
   
   .MuiDialogTitle-root {
@@ -431,6 +497,23 @@
   .admin-shield-mobile {
     display: none !important;
   }
+  
+  /* Hide Admin Icon on Mobile */
+  .admin-icon-mobile {
+    display: none !important;
+  }
+  
+  /* Hide User Icon on Mobile (original position) */
+  .user-icon-mobile {
+    display: none !important;
+  }
+  
+  /* Cart Page Mobile - Reduce top spacing */
+  .cart-page-mobile {
+    margin-top: -430px !important;
+    padding-top: 0 !important;
+  }
+  
 
   /* Forms Mobile */
   .form-mobile {
@@ -646,4 +729,5 @@
   .desktop-only {
     display: block !important;
   }
+  
 }

@@ -258,6 +258,7 @@ const Home = () => {
 
       {/* Product Detail Dialog */}
       <Dialog
+        className="product-detail-mobile"
         open={productDetailOpen}
         onClose={() => setProductDetailOpen(false)}
         maxWidth="md"
