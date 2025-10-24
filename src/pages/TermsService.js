@@ -113,7 +113,7 @@ const TermsService = () => {
               whiteSpace: 'pre-line'
             }}
           >
-            {pageData.content}
+            {t('termsService.content', pageData.content)}
           </Typography>
         </Box>
       </Container>

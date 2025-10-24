@@ -39,13 +39,46 @@ const RichTextEditor = ({
 
   const handleInput = () => {
     if (editorRef.current && onChange) {
-      onChange(editorRef.current.innerHTML);
+      // Limpiar HTML innecesario y etiquetas problemáticas
+      let cleanHTML = editorRef.current.innerHTML;
+      
+      // Remover etiquetas font problemáticas
+      cleanHTML = cleanHTML.replace(/<font[^>]*>/gi, '');
+      cleanHTML = cleanHTML.replace(/<\/font>/gi, '');
+      
+      // Reemplazar &nbsp; con espacios normales
+      cleanHTML = cleanHTML.replace(/&nbsp;/g, ' ');
+      
+      // Limpiar espacios múltiples
+      cleanHTML = cleanHTML.replace(/\s+/g, ' ');
+      
+      onChange(cleanHTML);
     }
   };
 
   const execCommand = (command, value = null) => {
     document.execCommand(command, false, value);
     editorRef.current?.focus();
+    
+    // Limpiar HTML después de ejecutar comandos
+    setTimeout(() => {
+      if (editorRef.current) {
+        let cleanHTML = editorRef.current.innerHTML;
+        
+        // Remover etiquetas font problemáticas
+        cleanHTML = cleanHTML.replace(/<font[^>]*>/gi, '');
+        cleanHTML = cleanHTML.replace(/<\/font>/gi, '');
+        
+        // Reemplazar &nbsp; con espacios normales
+        cleanHTML = cleanHTML.replace(/&nbsp;/g, ' ');
+        
+        // Limpiar espacios múltiples
+        cleanHTML = cleanHTML.replace(/\s+/g, ' ');
+        
+        editorRef.current.innerHTML = cleanHTML;
+      }
+    }, 100);
+    
     handleInput();
   };
 
@@ -211,6 +244,12 @@ const RichTextEditor = ({
           },
           '& li': {
             margin: '4px 0'
+          },
+          // Prevenir que el navegador genere etiquetas font
+          '& *': {
+            fontFamily: 'inherit !important',
+            fontSize: 'inherit !important',
+            color: 'inherit !important'
           }
         }}
         dangerouslySetInnerHTML={{ __html: value || '' }}

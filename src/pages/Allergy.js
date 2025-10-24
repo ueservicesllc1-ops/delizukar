@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Box, Container, Typography } from '@mui/material';
 import { db } from '../firebase/config';
+import { useTranslation } from 'react-i18next';
 import { doc, getDoc, collection, getDocs } from 'firebase/firestore';
 
 const Allergy = () => {
+  const { t } = useTranslation();
   const [pageData, setPageData] = useState({
     title: 'Avisos de Alergias',
     content: 'Contenido de avisos de alergias estará disponible próximamente',
@@ -91,7 +93,7 @@ const Allergy = () => {
             fontFamily: pageData.titleFont ? `"${pageData.titleFont}", serif` : 'Playfair Display, serif'
           }}
         >
-          {pageData.title}
+          {t('allergy.title', pageData.title)}
         </Typography>
         
         {/* Contenido de la página */}
@@ -111,7 +113,7 @@ const Allergy = () => {
               whiteSpace: 'pre-line'
             }}
           >
-            {pageData.content}
+            {t('allergy.content', pageData.content)}
           </Typography>
         </Box>
       </Container>

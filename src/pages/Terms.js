@@ -119,7 +119,7 @@ const Terms = () => {
               whiteSpace: 'pre-line'
             }}
           >
-            {pageData.content}
+            {t('terms.content', pageData.content)}
           </Typography>
         </Box>
       </Container>
