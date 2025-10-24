@@ -375,27 +375,32 @@ const Home = () => {
                     <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
                       <Rating value={selectedProduct.rating} readOnly sx={{ mr: 1 }} />
                       <Typography variant="body2" sx={{ color: '#666' }}>
-                        ({selectedProduct.reviews} reseñas)
+                        ({selectedProduct.reviews} {t('cart.reviews', 'reviews')})
                       </Typography>
                     </Box>
                   )}
                   
                   {selectedProduct.description && (
                     <Typography variant="body1" sx={{ color: '#666', lineHeight: 1.6, mb: 3, flex: 1 }}>
-                      {selectedProduct.description}
+                      {selectedProduct.description || 
+                        (selectedProduct.name && selectedProduct.name.toLowerCase().includes('ferrero') 
+                          ? t('product.ferreroDescription', 'NY-style cookie with Ferrero Rocher...')
+                          : t('product.defaultDescription', 'Delicious {name} with premium ingredients...', { name: selectedProduct.name })
+                        )
+                      }
                     </Typography>
                   )}
                   
                   {selectedProduct.inventory !== undefined && (
                     <Box sx={{ mb: 3 }}>
                       <Typography variant="body2" sx={{ color: '#666', mb: 1 }}>
-                        Stock available: {selectedProduct.inventory} units
+                        {t('product.stockAvailable', 'Stock available')}: {selectedProduct.inventory} {t('product.units', 'units')}
                       </Typography>
                       <Chip
                         label={
-                          selectedProduct.inventory === 0 ? 'Out of Stock' :
-                          selectedProduct.inventory < 10 ? 'Low Stock' :
-                          selectedProduct.inventory < 50 ? 'Medium Stock' : 'In Stock'
+                          selectedProduct.inventory === 0 ? t('product.outOfStock', 'Out of Stock') :
+                          selectedProduct.inventory < 10 ? t('product.lowStock', 'Low Stock') :
+                          selectedProduct.inventory < 50 ? t('product.mediumStock', 'Medium Stock') : t('product.inStock', 'In Stock')
                         }
                         color={
                           selectedProduct.inventory === 0 ? 'error' :
