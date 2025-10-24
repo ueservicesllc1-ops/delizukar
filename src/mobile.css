@@ -582,10 +582,12 @@
     min-height: 70px !important;
   }
   
-  /* Hero Banner Tablet */
+
+  /* Hero Banner Tablet - Fix for vertical view */
   .hero-mobile {
     padding: 0 !important;
-    margin-top: -600px !important;
+    margin-top: -150px !important;
+    height: 60vh !important;
   }
   
   /* Banner2 Tablet */
@@ -593,9 +595,14 @@
     margin-top: -100px !important;
   }
   
+  /* Hero Color Strip Tablet - Move up the pink strip */
+  .hero-color-strip-mobile {
+    margin-top: -250px !important;
+  }
+  
   /* Testimonials Tablet */
   .testimonials-mobile {
-    margin-top: -150px !important;
+    margin-top: -100px !important;
   }
   
   /* Footer Tablet */
@@ -624,7 +631,8 @@
   
   /* Nosotros Tablet */
   .nosotros-mobile {
-    padding-top: 220px !important;
+    padding-top: 120px !important;
+    margin-top: 0px !important;
   }
   
   .nosotros-title-mobile {
@@ -636,7 +644,8 @@
   
   /* Contacto Tablet */
   .contacto-mobile {
-    padding-top: 100px !important;
+    padding-top: 80px !important;
+    margin-top: 0px !important;
   }
   
   .contacto-title-mobile {
@@ -650,6 +659,24 @@
   
   .contacto-form-mobile .MuiGrid-container {
     justify-content: center !important;
+  }
+  
+  /* Products Tablet */
+  .products-page-mobile {
+    margin-top: 80px !important;
+    padding-top: 0 !important;
+  }
+  
+  /* FAQ Tablet */
+  .faq-page-mobile {
+    margin-top: 100px !important;
+    padding-top: 0 !important;
+  }
+  
+  /* Cart Tablet */
+  .cart-page-mobile {
+    margin-top: 0px !important;
+    padding-top: 0 !important;
   }
   
   /* Admin Dashboard Tablet */
@@ -720,8 +747,99 @@
   }
 }
 
+/* Tablet Horizontal (iPad landscape) specific adjustments */
+@media (min-width: 769px) and (max-width: 1024px) and (orientation: landscape) {
+  /* Hero Banner Tablet Horizontal */
+  .hero-mobile {
+    margin-top: -200px !important;
+    margin-bottom: 500px !important;
+    height: 50vh !important;
+  }
+  
+  /* Home Tablet Horizontal */
+  .home-mobile {
+    margin-top: -200px !important;
+  }
+}
+
+/* Laptop optimizations - Medium screens (1024px to 1366px) */
+@media (min-width: 1024px) and (max-width: 1366px) {
+  /* Laptop Header */
+  .header-mobile {
+    padding: 6px 0 !important;
+    min-height: 65px !important;
+  }
+  
+  /* Laptop Hero Banner */
+  .hero-mobile {
+    padding: 0 !important;
+    margin-top: -50px !important;
+    text-align: center !important;
+  }
+  
+  /* Laptop Products */
+  .products-page-mobile {
+    margin-top: -50px !important;
+    padding-top: 0 !important;
+  }
+  
+  /* Laptop FAQ */
+  .faq-page-mobile {
+    margin-top: -50px !important;
+    padding-top: 0 !important;
+  }
+  
+  /* Laptop Nosotros */
+  .nosotros-mobile {
+    padding-top: 120px !important;
+    margin-top: -50px !important;
+  }
+  
+  /* Laptop Contacto */
+  .contacto-mobile {
+    padding-top: 120px !important;
+    margin-top: -50px !important;
+  }
+  
+  /* Laptop Cart */
+  .cart-page-mobile {
+    margin-top: -50px !important;
+    padding-top: 0 !important;
+  }
+  
+  /* Laptop Modals - Slightly smaller */
+  .MuiDialog-paper {
+    transform: scale(0.9) !important;
+    transform-origin: center !important;
+    margin: 0 !important;
+    max-height: calc(90vh) !important;
+    width: calc(90vw) !important;
+    max-width: calc(90vw) !important;
+  }
+  
+  /* Laptop Popup Hero */
+  .popup-hero-mobile .MuiDialog-paper {
+    transform: scale(0.9) !important;
+    transform-origin: center !important;
+    margin: 0 !important;
+    max-height: calc(90vh) !important;
+    width: calc(90vw) !important;
+    max-width: calc(90vw) !important;
+  }
+  
+  /* Laptop Product Details */
+  .product-detail-mobile .MuiDialog-paper {
+    transform: scale(0.9) !important;
+    transform-origin: center !important;
+    margin: 0 !important;
+    max-height: calc(90vh) !important;
+    width: calc(90vw) !important;
+    max-width: calc(90vw) !important;
+  }
+}
+
 /* Ensure desktop version is unchanged */
-@media (min-width: 1025px) {
+@media (min-width: 1367px) {
   .mobile-only {
     display: none !important;
   }

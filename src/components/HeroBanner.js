@@ -97,7 +97,10 @@ const HeroBanner = () => {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          marginBottom: { xs: '-195px', sm: '-152px', md: '-152px' }
+          marginBottom: { xs: '-195px', sm: '-152px', md: '-152px' },
+          '@media (min-width: 769px) and (max-width: 1024px) and (orientation: landscape)': {
+            marginBottom: '300px'
+          }
         }}
       >
       <Swiper
@@ -206,6 +209,7 @@ const HeroBanner = () => {
 
           {/* Franja de color debajo del banner */}
           <Box
+            className="hero-color-strip-mobile"
             sx={{
               width: '100%',
               height: '50px',

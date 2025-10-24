@@ -67,7 +67,7 @@ const Home = () => {
   }, [popupOpen]);
 
   return (
-    <Box>
+    <Box className="home-mobile">
       {/* Hero Banner */}
       <HeroBanner />
 
