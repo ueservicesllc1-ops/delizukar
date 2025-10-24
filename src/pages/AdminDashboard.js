@@ -30,11 +30,12 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
+  TextField,
+  Alert,
   FormControl,
   InputLabel,
   Select,
   MenuItem,
-  TextField,
   CircularProgress
 } from '@mui/material';
 import {
@@ -55,6 +56,8 @@ import {
   LocalOffer,
   Share,
   Assessment,
+  Security,
+  Lock,
   Close,
   Group,
   AdminPanelSettings
@@ -88,6 +91,9 @@ const AdminDashboard = () => {
   const [stripeBalanceOpen, setStripeBalanceOpen] = useState(false);
   const [salesReportOpen, setSalesReportOpen] = useState(false);
   const [userManagementOpen, setUserManagementOpen] = useState(false);
+  const [pinAuthOpen, setPinAuthOpen] = useState(false);
+  const [pinInput, setPinInput] = useState('');
+  const [pinError, setPinError] = useState('');
   const [messagingSystemOpen, setMessagingSystemOpen] = useState(false);
   const [messageTitle, setMessageTitle] = useState('');
   const [messageBody, setMessageBody] = useState('');
@@ -130,6 +136,7 @@ const AdminDashboard = () => {
   }, [userManagementOpen]);
 
 
+
   const handleSignOut = async () => {
     try {
       await signOut(auth);
@@ -137,6 +144,29 @@ const AdminDashboard = () => {
     } catch (error) {
       console.error('Error al cerrar sesión:', error);
     }
+  };
+
+  const handleCostAnalysisClick = () => {
+    setPinAuthOpen(true);
+    setPinInput('');
+    setPinError('');
+  };
+
+  const handlePinSubmit = () => {
+    if (pinInput === '1619') {
+      setPinAuthOpen(false);
+      setPinInput('');
+      setPinError('');
+      navigate('/admin/costos');
+    } else {
+      setPinError('PIN incorrecto. Contacta al desarrollador para obtener acceso.');
+    }
+  };
+
+  const handlePinCancel = () => {
+    setPinAuthOpen(false);
+    setPinInput('');
+    setPinError('');
   };
 
   const generateExcelReport = () => {
@@ -350,6 +380,7 @@ const AdminDashboard = () => {
       setSendingMessage(false);
     }
   };
+
 
   const generatePDFReport = () => {
     // Crear un elemento temporal para el reporte
@@ -694,6 +725,7 @@ const AdminDashboard = () => {
                               index === 11 ? () => setUserManagementOpen(true) :
                               index === 12 ? () => setMinProductsManagerOpen(true) :
                               index === 13 ? () => setMessagingSystemOpen(true) :
+                              index === 14 ? handleCostAnalysisClick :
                               undefined
                             }
                         sx={{
@@ -917,6 +949,20 @@ const AdminDashboard = () => {
                                   }}
                                 >
                                   Mensajería Push
+                                </Typography>
+                              </Box>
+                            ) : index === 14 ? (
+                              <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1 }}>
+                                <AttachMoney sx={{ color: 'white', fontSize: '2rem' }} />
+                                <Typography
+                                  variant="body2"
+                                  sx={{
+                                    color: 'white',
+                                    fontWeight: 600,
+                                    textShadow: '1px 1px 2px rgba(0,0,0,0.5)'
+                                  }}
+                                >
+                                  Análisis de Costos
                                 </Typography>
                               </Box>
                             ) : (
@@ -1772,6 +1818,152 @@ const AdminDashboard = () => {
               </Typography>
             </Box>
           </DialogContent>
+        </Dialog>
+
+        {/* Popup de Autenticación PIN */}
+        <Dialog
+          open={pinAuthOpen}
+          onClose={handlePinCancel}
+          maxWidth="sm"
+          fullWidth
+          PaperProps={{
+            sx: {
+              borderRadius: '16px',
+              boxShadow: '0 20px 40px rgba(0,0,0,0.15)'
+            }
+          }}
+        >
+          <DialogTitle sx={{ 
+            textAlign: 'center', 
+            pb: 1,
+            backgroundColor: '#c8626d',
+            color: 'white',
+            borderRadius: '16px 16px 0 0'
+          }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1 }}>
+              <Security sx={{ fontSize: 28 }} />
+              <Typography variant="h5" sx={{ fontWeight: 700, fontFamily: '"Asap", sans-serif' }}>
+                Acceso Restringido
+              </Typography>
+            </Box>
+          </DialogTitle>
+          
+          <DialogContent sx={{ p: 4, textAlign: 'center' }}>
+            <Box sx={{ mb: 3 }}>
+              <Lock sx={{ fontSize: 48, color: '#c8626d', mb: 2 }} />
+              <Typography variant="h6" sx={{ 
+                fontWeight: 600, 
+                color: '#333',
+                fontFamily: '"Asap", sans-serif',
+                mb: 1
+              }}>
+                🔒 Módulo de Análisis de Costos
+              </Typography>
+              <Typography variant="body1" sx={{ 
+                color: '#666',
+                fontFamily: '"Asap", sans-serif',
+                mb: 2
+              }}>
+                Este módulo requiere autenticación especial. Contacta al desarrollador para obtener el PIN de acceso.
+              </Typography>
+            </Box>
+
+            <Alert 
+              severity="info" 
+              sx={{ 
+                mb: 3, 
+                borderRadius: '8px',
+                backgroundColor: '#e3f2fd',
+                border: '1px solid #2196f3'
+              }}
+            >
+              <Typography variant="body2" sx={{ fontFamily: '"Asap", sans-serif' }}>
+                <strong>💡 Para acceder:</strong><br/>
+                • Contacta al desarrollador del sistema<br/>
+                • Solicita el PIN de acceso al módulo<br/>
+                • El PIN es personalizado y seguro
+              </Typography>
+            </Alert>
+
+            <TextField
+              fullWidth
+              label="Ingresa el PIN de acceso"
+              type="password"
+              value={pinInput}
+              onChange={(e) => setPinInput(e.target.value)}
+              error={!!pinError}
+              helperText={pinError}
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  borderRadius: '8px',
+                  fontFamily: '"Asap", sans-serif'
+                },
+                '& .MuiInputLabel-root': {
+                  fontFamily: '"Asap", sans-serif'
+                }
+              }}
+              onKeyPress={(e) => {
+                if (e.key === 'Enter') {
+                  handlePinSubmit();
+                }
+              }}
+            />
+
+            <Box sx={{ mt: 3, p: 2, backgroundColor: '#f8f9fa', borderRadius: '8px', border: '1px solid #e0e0e0' }}>
+              <Typography variant="body2" sx={{ 
+                color: '#666',
+                fontFamily: '"Asap", sans-serif',
+                fontStyle: 'italic'
+              }}>
+                🛡️ Este módulo contiene información sensible de costos y análisis financiero. 
+                El acceso está restringido por seguridad.
+              </Typography>
+            </Box>
+          </DialogContent>
+          
+          <DialogActions sx={{ p: 3, justifyContent: 'center', gap: 2 }}>
+            <Button
+              onClick={handlePinCancel}
+              variant="outlined"
+              sx={{
+                borderColor: '#c8626d',
+                color: '#c8626d',
+                fontFamily: '"Asap", sans-serif',
+                fontWeight: 600,
+                px: 3,
+                py: 1,
+                borderRadius: '8px',
+                '&:hover': {
+                  backgroundColor: '#c8626d',
+                  color: 'white'
+                }
+              }}
+            >
+              Cancelar
+            </Button>
+            <Button
+              onClick={handlePinSubmit}
+              variant="contained"
+              disabled={!pinInput.trim()}
+              sx={{
+                backgroundColor: '#c8626d',
+                fontFamily: '"Asap", sans-serif',
+                fontWeight: 600,
+                px: 3,
+                py: 1,
+                borderRadius: '8px',
+                '&:hover': {
+                  backgroundColor: '#b8555a'
+                },
+                '&:disabled': {
+                  backgroundColor: '#ccc',
+                  color: '#666'
+                }
+              }}
+            >
+              🔓 Acceder
+            </Button>
+          </DialogActions>
         </Dialog>
 
         </Box>

@@ -28,6 +28,7 @@ import CheckoutSuccess from './pages/CheckoutSuccess';
 import UserDashboard from './pages/UserDashboard';
 import AdminDashboard from './pages/AdminDashboard';
 import AdminProducts from './pages/AdminProducts';
+import CostAnalysis from './pages/CostAnalysis';
 import Terms from './pages/Terms';
 import TermsService from './pages/TermsService';
 import FAQ from './pages/FAQ';
@@ -211,6 +212,7 @@ function App() {
                   <AdminProducts />
                 </>
               } />
+              <Route path="/admin/costos" element={<CostAnalysis />} />
               <Route path="/terms" element={
                 <>
                   <Header />
