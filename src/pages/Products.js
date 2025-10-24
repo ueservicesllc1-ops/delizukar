@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Box, Container, Typography, Grid, Card, CardContent, CardActions, Button, Chip, Rating, IconButton, TextField, InputAdornment, Dialog, DialogContent, Skeleton } from '@mui/material';
 import { Close } from '@mui/icons-material';
-import { Search, AddShoppingCart, Favorite, FavoriteBorder, AccountBalanceWallet, Handbag } from '@mui/icons-material';
+import { Search, AddShoppingCart, Favorite, FavoriteBorder, AccountBalanceWallet, ShoppingBag } from '@mui/icons-material';
 import { useStore } from '../context/StoreContext';
 import ProductImageCarousel from '../components/ProductImageCarousel';
 import ProductImage from '../components/ProductImage';
@@ -267,7 +267,7 @@ const Products = () => {
                     <Button
                       variant="contained"
                       fullWidth
-                      startIcon={<Handbag />}
+                      startIcon={<ShoppingBag />}
                       sx={{
                         backgroundColor: '#c8626d',
                         color: 'white',
@@ -424,7 +424,7 @@ const Products = () => {
                     <Button
                       variant="contained"
                       fullWidth
-                      startIcon={<Handbag />}
+                      startIcon={<ShoppingBag />}
                       sx={{
                         backgroundColor: '#c8626d',
                         textTransform: 'none',

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Box, Grid, Card, CardContent, CardActions, Button, Chip, Rating, IconButton, Dialog, DialogContent, Typography } from '@mui/material';
-import { Close, AddShoppingCart, FavoriteBorder, AccountBalanceWallet, Handbag } from '@mui/icons-material';
+import { Close, AddShoppingCart, FavoriteBorder, AccountBalanceWallet, ShoppingBag } from '@mui/icons-material';
 import { useStore } from '../context/StoreContext';
 import ProductImage from './ProductImage';
 import { useTranslation } from 'react-i18next';
@@ -180,7 +180,7 @@ const ProductCards = ({ products: propProducts, showAll = false }) => {
                   <Button
                     variant="contained"
                     fullWidth
-                    startIcon={<Handbag />}
+                    startIcon={<ShoppingBag />}
                     sx={{
                       backgroundColor: '#c8626d',
                       color: 'white',
@@ -287,7 +287,7 @@ const ProductCards = ({ products: propProducts, showAll = false }) => {
                   <Button
                     variant="contained"
                     fullWidth
-                    startIcon={<Handbag />}
+                    startIcon={<ShoppingBag />}
                     sx={{
                       backgroundColor: '#c8626d',
                       textTransform: 'none',

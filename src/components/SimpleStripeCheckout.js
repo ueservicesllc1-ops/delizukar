@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { loadStripe } from '@stripe/stripe-js';
 import { Button, Card, CardContent, Typography, Box, Alert, CircularProgress } from '@mui/material';
-import { CreditCard, ShoppingCart, AccountBalanceWallet, Handbag } from '@mui/icons-material';
+import { CreditCard, ShoppingCart, AccountBalanceWallet, ShoppingBag } from '@mui/icons-material';
 
 // Inicializar Stripe con tu clave pública
 const stripePromise = loadStripe('pk_test_51S37NHIfvAAsTaPnMUhWitBIraJUsz8fPmZkQeT8DyXxOILtroJbXDoJF96C36wSahGimqLb2zEFTdq9yggPf8Mq00wARuJH6Q');
@@ -61,7 +61,7 @@ const SimpleStripeCheckout = ({ cartItems, total, customerInfo, onSuccess, onErr
     <Card sx={{ maxWidth: 600, mx: 'auto', mt: 2 }}>
       <CardContent>
         <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
-          <Handbag sx={{ mr: 1, color: '#c8626d' }} />
+          <ShoppingBag sx={{ mr: 1, color: '#c8626d' }} />
           <Typography variant="h5" sx={{ fontWeight: 700, color: '#c8626d' }}>
             Resumen del Pedido
           </Typography>
