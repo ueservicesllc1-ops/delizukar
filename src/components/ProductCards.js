@@ -4,8 +4,10 @@ import { Box, Grid, Card, CardContent, CardActions, Button, Chip, Rating, IconBu
 import { Close, AddShoppingCart, FavoriteBorder } from '@mui/icons-material';
 import { useStore } from '../context/StoreContext';
 import ProductImage from './ProductImage';
+import { useTranslation } from 'react-i18next';
 
 const ProductCards = ({ products: propProducts, showAll = false }) => {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [selected, setSelected] = useState(null);
   const { addToCart, products } = useStore();
@@ -70,7 +72,7 @@ const ProductCards = ({ products: propProducts, showAll = false }) => {
                   <Box sx={{ position: 'absolute', top: 12, left: 12, display: 'flex', flexDirection: 'column', gap: 1 }}>
                     {product.isNew && (
                       <Chip
-                        label="New"
+                        label={t('product.new', 'New')}
                         size="small"
                         sx={{
                           backgroundColor: '#4CAF50',
@@ -82,7 +84,7 @@ const ProductCards = ({ products: propProducts, showAll = false }) => {
                     )}
                     {product.isBestSeller && (
                       <Chip
-                        label="Best Seller"
+                        label={t('product.bestSeller', 'Best Seller')}
                         size="small"
                         sx={{
                           backgroundColor: '#FF6B35',
@@ -196,7 +198,7 @@ const ProductCards = ({ products: propProducts, showAll = false }) => {
                         addToCart(product);
                       }}
                   >
-                    Add to Cart
+                    {t('product.addToCart', 'Add to Cart')}
                   </Button>
                 </CardActions>
               </Card>
@@ -246,13 +248,18 @@ const ProductCards = ({ products: propProducts, showAll = false }) => {
                   </Box>
                   <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
                     <Rating value={selected.rating} precision={0.1} readOnly size="small" sx={{ color: '#FFD700' }} />
-                    <Box component="span" sx={{ ml: 1, color: '#666' }}>({selected.reviews})</Box>
+                    <Box component="span" sx={{ ml: 1, color: '#666' }}>({selected.reviews} {t('cart.reviews', 'reviews')})</Box>
                   </Box>
                   <Box component="h6" sx={{ fontWeight: 700, color: '#c8626d', mb: 2 }}>
                     ${selected.price}
                   </Box>
                   <Box component="p" sx={{ color: '#666', lineHeight: 1.6, mb: 3 }}>
-                    {`Delicious ${selected.name} with premium ingredients. Perfectly baked New York-style cookies to enjoy or share.`}
+                    {selected.description || 
+                      (selected.name && selected.name.toLowerCase().includes('ferrero') 
+                        ? t('product.ferreroDescription', 'NY-style cookie with Ferrero Rocher...')
+                        : t('product.defaultDescription', 'Delicious {name} with premium ingredients...', { name: selected.name })
+                      )
+                    }
                   </Box>
                   <Button
                     variant="contained"
@@ -270,7 +277,7 @@ const ProductCards = ({ products: propProducts, showAll = false }) => {
                       setOpen(false);
                     }}
                   >
-                    Add to Cart
+                    {t('product.addToCart', 'Add to Cart')}
                   </Button>
                 </Box>
               </Grid>

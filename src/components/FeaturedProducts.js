@@ -23,8 +23,10 @@ import {
   Star
 } from '@mui/icons-material';
 import { useStore } from '../context/StoreContext';
+import { useTranslation } from 'react-i18next';
 
 const FeaturedProducts = () => {
+  const { t } = useTranslation();
   const { featuredProducts, addToCart } = useStore();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
@@ -253,7 +255,7 @@ const FeaturedProducts = () => {
                           transition: 'all 0.3s ease'
                         }}
                       >
-                        Add to Cart
+                        {t('product.addToCart', 'Add to Cart')}
                       </Button>
                     </CardActions>
                   </Card>

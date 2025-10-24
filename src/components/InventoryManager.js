@@ -33,8 +33,10 @@ import {
 } from '@mui/icons-material';
 import { collection, getDocs, doc, updateDoc, query, orderBy } from 'firebase/firestore';
 import { db } from '../firebase/config';
+import { useTranslation } from 'react-i18next';
 
 const InventoryManager = ({ open, onClose }) => {
+  const { t } = useTranslation();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [editingProduct, setEditingProduct] = useState(null);
@@ -105,10 +107,10 @@ const InventoryManager = ({ open, onClose }) => {
   };
 
   const getInventoryStatus = (inventory) => {
-    if (inventory === 0) return { label: 'Sin Stock', color: '#f44336' };
-    if (inventory < 10) return { label: 'Bajo Stock', color: '#ff9800' };
-    if (inventory < 50) return { label: 'Stock Medio', color: '#ffc107' };
-    return { label: 'En Stock', color: '#4caf50' };
+    if (inventory === 0) return { label: t('product.outOfStock', 'Out of Stock'), color: '#f44336' };
+    if (inventory < 10) return { label: t('product.lowStock', 'Low Stock'), color: '#ff9800' };
+    if (inventory < 50) return { label: t('product.mediumStock', 'Medium Stock'), color: '#ffc107' };
+    return { label: t('product.inStock', 'In Stock'), color: '#4caf50' };
   };
 
   if (loading) {

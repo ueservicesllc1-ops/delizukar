@@ -11,8 +11,10 @@ import { useTitleConfig } from '../context/TitleConfigContext';
 import { useFeaturedProducts } from '../context/FeaturedProductsContext';
 import { useStore } from '../context/StoreContext';
 import AfterpayMessaging from '../components/AfterpayMessaging';
+import { useTranslation } from 'react-i18next';
 
 const Home = () => {
+  const { t } = useTranslation();
   const { titleConfig, loading } = useTitleConfig();
   const { featuredConfig, featuredProducts, loading: featuredLoading } = useFeaturedProducts();
   const { addToCart } = useStore();
@@ -134,9 +136,9 @@ const Home = () => {
                             />
                             {/* Chips en la esquina superior izquierda */}
                             <Box sx={{ position: 'absolute', top: 8, left: 8, display: 'flex', flexDirection: 'column', gap: 0.5 }}>
-                              {product.featured && <Chip label="Featured" size="small" color="primary" sx={{ fontSize: '0.7rem', height: '24px' }} />}
-                              {product.bestSeller && <Chip label="Best Seller" size="small" color="success" sx={{ fontSize: '0.7rem', height: '24px' }} />}
-                              {product.isNew && <Chip label="New" size="small" color="warning" sx={{ fontSize: '0.7rem', height: '24px' }} />}
+                              {product.featured && <Chip label={t('product.featured', 'Featured')} size="small" color="primary" sx={{ fontSize: '0.7rem', height: '24px' }} />}
+                              {product.bestSeller && <Chip label={t('product.bestSeller', 'Best Seller')} size="small" color="success" sx={{ fontSize: '0.7rem', height: '24px' }} />}
+                              {product.isNew && <Chip label={t('product.new', 'New')} size="small" color="warning" sx={{ fontSize: '0.7rem', height: '24px' }} />}
                             </Box>
                           </Box>
                           <Typography
@@ -193,7 +195,7 @@ const Home = () => {
                               minHeight: '32px'
                             }}
                           >
-                            View Details
+                            {t('home.viewDetails', 'View Details')}
                           </Button>
                         </CardContent>
                       </Card>
@@ -234,7 +236,7 @@ const Home = () => {
                     transition: 'all 0.3s ease'
                   }}
                 >
-                  View All Cookies
+                  {t('home.viewAllCookies', 'View All Cookies')}
                 </Button>
               </motion.div>
             </Box>
@@ -351,9 +353,9 @@ const Home = () => {
                   )}
                   
                   <Box sx={{ display: 'flex', gap: 1, mb: 3 }}>
-                    {selectedProduct.featured && <Chip label="Featured" color="primary" />}
-                    {selectedProduct.bestSeller && <Chip label="Best Seller" color="success" />}
-                    {selectedProduct.isNew && <Chip label="New" color="warning" />}
+                    {selectedProduct.featured && <Chip label={t('product.featured', 'Featured')} color="primary" />}
+                    {selectedProduct.bestSeller && <Chip label={t('product.bestSeller', 'Best Seller')} color="success" />}
+                    {selectedProduct.isNew && <Chip label={t('product.new', 'New')} color="warning" />}
                   </Box>
                   
                   {selectedProduct.rating && (
@@ -419,7 +421,7 @@ const Home = () => {
                   fontWeight: 600
                 }}
               >
-                Add to Cart
+                {t('product.addToCart', 'Add to Cart')}
               </Button>
             </DialogActions>
           </>

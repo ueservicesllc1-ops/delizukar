@@ -40,6 +40,8 @@ import {
   onAuthStateChanged 
 } from 'firebase/auth';
 import { collection, addDoc, getDocs, query, where } from 'firebase/firestore';
+import LanguageSwitcher from './LanguageSwitcher';
+import { useTranslation } from 'react-i18next';
 
 const Header = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -48,6 +50,7 @@ const Header = () => {
   const [user, setUser] = useState(null);
   const [authMenuOpen, setAuthMenuOpen] = useState(false);
   const { cart, getCartItemsCount } = useStore();
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
   const theme = useTheme();
@@ -180,10 +183,10 @@ const Header = () => {
   const cartItemsCount = getCartItemsCount();
 
   const menuItems = [
-    { label: 'HOME', href: '/' },
-    { label: 'ORDER HERE', href: '/productos' },
-    { label: 'OUR HISTORY', href: '/nosotros' },
-    { label: 'CONTACT US', href: '/contacto' },
+    { label: t('navigation.home'), href: '/' },
+    { label: t('navigation.services'), href: '/productos' },
+    { label: t('navigation.about'), href: '/nosotros' },
+    { label: t('navigation.contact'), href: '/contacto' },
     { label: "FAQ's", href: '/faq' }
   ];
 
@@ -300,7 +303,7 @@ const Header = () => {
                       }
                     }}
                   >
-                    Salir
+                    {t('common.logout', 'Salir')}
                   </Button>
                 </Box>
               )}
@@ -334,7 +337,7 @@ const Header = () => {
                         }
                       }}
                     >
-                      Login
+                      {t('common.login', 'Login')}
                     </Button>
                     <Button
                       size="small"
@@ -353,7 +356,7 @@ const Header = () => {
                         }
                       }}
                     >
-                      Registro
+                      {t('common.register', 'Registro')}
                     </Button>
                   </Box>
                 </Box>
@@ -369,37 +372,51 @@ const Header = () => {
                 mt: 1,
                 position: 'relative'
               }}>
-                {/* Mobile Menu Button - Left */}
+                {/* Mobile Menu Button and Language Switcher - Left */}
                 {isMobile && (
-                  <IconButton
-                    onClick={handleDrawerToggle}
-                    sx={{
-                      color: '#eb8b8b',
-                      position: 'absolute',
-                      left: 0,
-                      '&:hover': {
-                        backgroundColor: '#eb8b8b20'
-                      }
-                    }}
-                  >
-                    <MenuIcon />
-                  </IconButton>
+                  <Box sx={{ 
+                    position: 'absolute', 
+                    left: 0, 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    gap: 1 
+                  }}>
+                    <IconButton
+                      onClick={handleDrawerToggle}
+                      sx={{
+                        color: '#eb8b8b',
+                        '&:hover': {
+                          backgroundColor: '#eb8b8b20'
+                        }
+                      }}
+                    >
+                      <MenuIcon />
+                    </IconButton>
+                    <LanguageSwitcher />
+                  </Box>
                 )}
                 
-                {/* Search Icon - Left (desktop only) */}
+                {/* Search Icon and Language Switcher - Left (desktop only) */}
                 {!isMobile && (
-                  <IconButton
-                    sx={{
-                      color: '#be8782',
-                      position: 'absolute',
-                      left: 0,
-                      '&:hover': {
-                        backgroundColor: '#be878220'
-                      }
-                    }}
-                  >
-                    <Search />
-                  </IconButton>
+                  <Box sx={{ 
+                    position: 'absolute', 
+                    left: 0, 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    gap: 1 
+                  }}>
+                    <IconButton
+                      sx={{
+                        color: '#be8782',
+                        '&:hover': {
+                          backgroundColor: '#be878220'
+                        }
+                      }}
+                    >
+                      <Search />
+                    </IconButton>
+                    <LanguageSwitcher />
+                  </Box>
                 )}
 
                 {/* Logo - Center */}
@@ -428,6 +445,7 @@ const Header = () => {
                     />
                   </Box>
                 </motion.div>
+
 
                 {/* Cart, Profile, Admin Icons and Auth Buttons - Right */}
                 <Box sx={{ 
@@ -508,7 +526,7 @@ const Header = () => {
               }}>
                 {/* Desktop Navigation - Centered */}
                 {!isMobile && (
-                  <Box sx={{ display: 'flex', gap: 1, justifyContent: 'center' }}>
+                  <Box sx={{ display: 'flex', gap: 1, justifyContent: 'center', alignItems: 'center' }}>
                     {menuItems.map((item) => (
                         <Button
                           key={item.label}

@@ -2,8 +2,10 @@ import React, { useEffect, useState } from 'react';
 import { Box, Container, Grid, Typography } from '@mui/material';
 import { db } from '../firebase/config';
 import { doc, getDoc, collection, getDocs } from 'firebase/firestore';
+import { useTranslation } from 'react-i18next';
 
 const Nosotros = () => {
+  const { t } = useTranslation();
   const [pageData, setPageData] = useState({
     title: 'Our History',
     content: 'Write your story here. Share how DeliZuKar began...',
@@ -81,7 +83,7 @@ const Nosotros = () => {
             fontFamily: pageData.titleFont ? `"${pageData.titleFont}", serif` : 'Playfair Display, serif'
           }}
         >
-          {pageData.title}
+          {t('about.title', 'Our History')}
         </Typography>
 
         <Box sx={{ 
@@ -116,7 +118,7 @@ const Nosotros = () => {
                   fontSize: { xs: '0.95rem', md: '1.06rem' }
                 }}
               >
-                {pageData.content}
+                {t('about.content', 'Write your story here. Share how DeliZuKar began...')}
               </Typography>
             </Box>
           </Box>

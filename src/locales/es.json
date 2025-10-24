@@ -1,0 +1,138 @@
+{
+  "navigation": {
+    "home": "Inicio",
+    "about": "Acerca de",
+    "services": "Servicios",
+    "contact": "Contacto",
+    "menu": "Menú"
+  },
+  "hero": {
+    "title": "Bienvenido a Delizukar",
+    "subtitle": "Comida deliciosa entregada a tu puerta",
+    "orderNow": "Ordenar Ahora",
+    "learnMore": "Saber Más"
+  },
+  "home": {
+    "viewAllCookies": "Ver Todas las Galletas",
+    "viewDetails": "Ver Detalles"
+  },
+  "product": {
+    "featured": "Destacado",
+    "new": "Nuevo",
+    "bestSeller": "Más Vendido",
+    "addToCart": "Agregar al Carrito",
+    "inStock": "En Stock",
+    "lowStock": "Stock Bajo",
+    "mediumStock": "Stock Medio",
+    "outOfStock": "Sin Stock",
+    "stockAvailable": "Stock disponible",
+    "units": "unidades",
+    "flexiblePayment": "Opciones de pago flexibles disponibles",
+    "financing": "Financiamiento disponible • Aprobación instantánea • Sin intereses",
+    "defaultDescription": "Deliciosas {name} con ingredientes premium. Galletas estilo Nueva York perfectamente horneadas para disfrutar o compartir.",
+    "ferreroDescription": "Galleta estilo NY con Ferrero Rocher, chips de chocolate oscuro y avellanas tostadas—intensa, elegante y adictiva. Una galleta estilo Nueva York con un toque europeo. Llena de piezas de Ferrero Rocher, chips de chocolate oscuro y avellanas tostadas para el crujido perfecto. Intensa, elegante y adictiva—esta galleta nunca pasa desapercibida."
+  },
+  "cart": {
+    "empty": "Tu carrito está vacío",
+    "title": "Carrito de Compras",
+    "subtotal": "Subtotal",
+    "total": "Total",
+    "checkout": "Proceder al Pago",
+    "continueShopping": "Continuar Comprando",
+    "quantity": "Cantidad",
+    "remove": "Eliminar",
+    "item": "artículo",
+    "items": "artículos",
+    "minimumProducts": "Mínimo {count} producto{plural} requerido",
+    "acceptShipping": "Debes aceptar la Política de Envío",
+    "cannotProceed": "No se puede proceder",
+    "reviews": "reseñas",
+    "close": "Cerrar",
+    "orderSummary": "Resumen del Pedido",
+    "shipping": "Envío",
+    "toBeDetermined": "Por determinar",
+    "accept": "Acepto la"
+  },
+  "services": {
+    "title": "Nuestros Servicios",
+    "delivery": "Entrega Rápida",
+    "quality": "Comida de Calidad",
+    "support": "Soporte 24/7"
+  },
+  "footer": {
+    "rights": "Todos los derechos reservados",
+    "privacy": "Política de Privacidad",
+    "terms": "Términos de Servicio",
+    "quickLinks": "Enlaces rápidos",
+    "termsConditions": "Términos y Condiciones",
+    "termsService": "Términos de Servicio",
+    "faq": "Preguntas Frecuentes",
+    "allergyNotices": "Avisos de Alergias",
+    "shippingPolicy": "Política de Envío",
+    "cookieCare": "Instrucciones de Cuidado de Galletas",
+    "navigation": "Navegación",
+    "subscribe": "Suscríbete a nuestros emails",
+    "emailPlaceholder": "Correo electrónico",
+    "followOn": "Síguenos en",
+    "paymentMethods": "Métodos de pago",
+    "madeWith": "Hecho con",
+    "poweredBy": "Desarrollado por Freedom Labs"
+  },
+  "common": {
+    "loading": "Cargando...",
+    "error": "Error",
+    "success": "Éxito",
+    "cancel": "Cancelar",
+    "save": "Guardar",
+    "edit": "Editar",
+    "delete": "Eliminar",
+    "confirm": "Confirmar",
+    "back": "Atrás",
+    "next": "Siguiente",
+    "previous": "Anterior",
+    "login": "Iniciar Sesión",
+    "register": "Registrarse",
+    "logout": "Cerrar Sesión"
+  },
+  "language": {
+    "english": "English",
+    "spanish": "Español"
+  },
+  "about": {
+    "title": "Nuestra Historia",
+    "content": "Por más de doce años, la repostería se ha convertido en una parte esencial de mi vida. Lo que comenzó como una simple curiosidad, acompañada por mi esposo, pronto se transformó en una profunda pasión: crear con mis manos pequeñas obras llenas de sabor, emoción y amor.\n\nSiempre he creído que cada dulce tiene el poder de contar una historia, arrancar una sonrisa o revivir un recuerdo especial. Por eso, para mí, no se trata solo de hornear. Se trata de dar vida a cada una de mis creaciones, cuidando cada detalle y poniendo mi corazón en cada receta.\n\nNuestra cocina no es solo un lugar de trabajo; es nuestro taller de sueños. Es donde combinamos tradición, creatividad y mucha dedicación para asegurar que cada galleta, pastel o postre transmita más que solo buen sabor: transmite amor, alegría y el sincero deseo de hacer felices a otros.\n\nA lo largo de este viaje, he aprendido, fallado, mejorado y, sobre todo, crecido. Y aunque aún quedan muchos sueños por cumplir, cada paso ha valido la pena, porque estoy haciendo lo que amo.\n\nHoy, continúo creando, aprendiendo y soñando de la mano con mi esposo. Porque mientras haya personas que crean en HECHO CON AMOR, la repostería seguirá siendo mi forma de hablarle al mundo.\n\nGracias por estar aquí y por dejarnos ser parte de tus momentos más dulces."
+  },
+  "faq": {
+    "title": "Preguntas Frecuentes",
+    "content": "📦 ¿Cuánto tiempo tardan en enviar sus galletas?\n\nTodos los pedidos se envían los lunes y martes para garantizar frescura y calidad.\n\n❄️ ¿Se envían las galletas en un paquete refrigerado?\n\nNuestras galletas no se envían con paquetes de hielo ni ningún tipo de empaque refrigerado. Están diseñadas para mantenerse frescas durante las condiciones normales de envío.\n\n🌾 ¿Ofrecen productos sin gluten?\n\nAún no, pero estamos trabajando duro en una opción sin gluten y esperamos ofrecerla pronto.\n\n🍪 ¿Cuál es el número mínimo de galletas que puedo pedir?\n\nNuestro pedido mínimo es de 6 galletas. Cada lote requiere tiempo y cuidado para hacer, y esta política nos ayuda a mantener la eficiencia y asegurar la calidad para todos los pedidos.\n\n🛒 ¿Cómo puedo hacer un pedido?\n\nPuedes pedir directamente desde nuestro sitio web:\n\n👉 www.DeliZuKar.com\n\n🗓️ ¿Puedo programar mi pedido?\n\nNo podemos programar fechas específicas de envío o entrega.\n\nTodos los pedidos se envían solo los lunes y martes."
+  },
+  "testimonials": {
+    "title": "Nuestros Clientes Felices",
+    "loading": "Cargando testimonios...",
+    "noTestimonials": "No hay testimonios activos para mostrar",
+    "adminNote": "Los testimonios deben estar marcados como activos en el admin",
+    "verifiedClient": "Cliente Verificado",
+    "clientTestimonials": {
+      "nayrobis": {
+        "name": "Nayrobis Acosta",
+        "comment": "Excelente calidad, sabor delicioso. No puedo decidir cuál es mi favorita porque todas están deliciosas. Empaque hermoso, bien presentado e higiénico. Vale la pena la inversión; la experiencia realmente vale la pena."
+      },
+      "kayri": {
+        "name": "Kayri Díaz",
+        "comment": "¡Me encantaron estas galletas! La textura es perfecta, crujiente por fuera y suave por dentro. El relleno de Lotus tiene un sabor delicioso, no muy dulce, y con ese toque de caramelo y especias que me encanta. Se nota que están hechas con mucho amor en casa. Definitivamente las compraré de nuevo; son perfectas para mi café de la tarde."
+      },
+      "naveri": {
+        "name": "Naveri Saint-Hilaire",
+        "comment": "Me encantaron todas las que probé, pero mis favoritas absolutas fueron las de zanahoria y piña colada. Son las mejores; definitivamente son mi nuevo postre favorito."
+      },
+      "elayne": {
+        "name": "Elayne Cacerez",
+        "comment": "Me encantaron las pequeñas galletas de chocolate, especialmente mi familia, mis hijos. Y los blondies."
+      },
+      "antonion": {
+        "name": "Antonion Medrano",
+        "comment": "Simplemente espectacular, les doy cinco estrellas... ¡Mi favorita es la rellena de pistacho!!!!"
+      }
+    }
+  }
+}

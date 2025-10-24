@@ -2,8 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { Box, Container, Typography } from '@mui/material';
 import { db } from '../firebase/config';
 import { doc, getDoc, collection, getDocs } from 'firebase/firestore';
+import { useTranslation } from 'react-i18next';
 
 const FAQ = () => {
+  const { t } = useTranslation();
   const [pageData, setPageData] = useState({
     title: 'Preguntas Frecuentes',
     content: 'Contenido de preguntas frecuentes estará disponible próximamente',
@@ -91,7 +93,7 @@ const FAQ = () => {
             fontFamily: pageData.titleFont ? `"${pageData.titleFont}", serif` : 'Playfair Display, serif'
           }}
         >
-          {pageData.title}
+          {t('faq.title', 'FAQ\'s')}
         </Typography>
         
         {/* Contenido de la página */}
@@ -111,7 +113,7 @@ const FAQ = () => {
               whiteSpace: 'pre-line'
             }}
           >
-            {pageData.content}
+            {t('faq.content', 'FAQ content will be available soon')}
           </Typography>
         </Box>
       </Container>

@@ -7,8 +7,10 @@ import { useStore } from '../context/StoreContext';
 import { useNavigate } from 'react-router-dom';
 import AfterpayMessaging from '../components/AfterpayMessaging';
 import { useMinProducts } from '../hooks/useMinProducts';
+import { useTranslation } from 'react-i18next';
 
 const Cart = () => {
+  const { t } = useTranslation();
   const { cart, updateCartQuantity, removeFromCart, getCartTotal, getCartItemsCount } = useStore();
   const navigate = useNavigate();
   const { minProducts } = useMinProducts();
@@ -70,7 +72,7 @@ const Cart = () => {
                 fontWeight: 600
               }}
             >
-              Continue Shopping
+              {t('cart.continueShopping', 'Continue Shopping')}
             </Button>
           </Box>
 
@@ -100,7 +102,7 @@ const Cart = () => {
                   mb: 2
                 }}
               >
-                Your cart is empty
+                {t('cart.empty', 'Your cart is empty')}
               </Typography>
               <Typography
                 variant="body1"
@@ -316,13 +318,13 @@ const Cart = () => {
                         fontSize: '1.1rem'
                       }}
                     >
-                      Order Summary
+                      {t('cart.orderSummary', 'Order Summary')}
                     </Typography>
 
                     <Box sx={{ mb: 2 }}>
                       <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
                         <Typography variant="body2" sx={{ color: '#666', fontSize: '0.9rem' }}>
-                          Subtotal ({calculateTotalItems()} {calculateTotalItems() === 1 ? 'item' : 'items'})
+                          {t('cart.subtotal', 'Subtotal')} ({calculateTotalItems()} {calculateTotalItems() === 1 ? t('cart.item', 'item') : t('cart.items', 'items')})
                         </Typography>
                         <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '0.9rem' }}>
                           ${calculateSubtotal().toFixed(2)}
@@ -331,10 +333,10 @@ const Cart = () => {
                       
                       <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
                         <Typography variant="body2" sx={{ color: '#666', fontSize: '0.9rem' }}>
-                          Shipping
+                          {t('cart.shipping', 'Shipping')}
                         </Typography>
                         <Typography variant="body2" sx={{ fontWeight: 600, color: '#666', fontSize: '0.9rem' }}>
-                          To be determined
+                          {t('cart.toBeDetermined', 'To be determined')}
                         </Typography>
                       </Box>
                       
@@ -342,7 +344,7 @@ const Cart = () => {
                       
                       <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
                         <Typography variant="h6" sx={{ fontWeight: 700, color: '#333', fontSize: '1.1rem' }}>
-                          Total
+                          {t('cart.total', 'Total')}
                         </Typography>
                         <Typography variant="h6" sx={{ fontWeight: 700, color: '#c8626d', fontSize: '1.1rem' }}>
                           ${calculateTotal().toFixed(2)}
@@ -372,7 +374,7 @@ const Cart = () => {
                       }
                       label={
                         <Typography variant="body2" sx={{ color: '#666', fontSize: '0.8rem' }}>
-                          I accept the{' '}
+                          {t('cart.accept', 'I accept the')}{' '}
                           <Button
                             variant="text"
                             sx={{
@@ -419,11 +421,11 @@ const Cart = () => {
                         transition: 'all 0.3s ease'
                       }}
                     >
-                      {canProceedToCheckout() ? 'Proceed to Payment' : 
+                      {canProceedToCheckout() ? t('cart.checkout', 'Proceed to Payment') : 
                         calculateTotalItems() < minProducts ? 
-                          `Minimum ${minProducts} product${minProducts > 1 ? 's' : ''} required` :
-                          !acceptShippingPolicy ? 'You must accept the Shipping Policy' :
-                          'Cannot proceed'
+                          t('cart.minimumProducts', 'Minimum {count} product{plural} required').replace('{count}', minProducts).replace('{plural}', minProducts > 1 ? 's' : '') :
+                          !acceptShippingPolicy ? t('cart.acceptShipping', 'You must accept the Shipping Policy') :
+                          t('cart.cannotProceed', 'Cannot proceed')
                       }
                     </Button>
 
@@ -446,7 +448,7 @@ const Cart = () => {
                         }
                       }}
                     >
-                      Continue Shopping
+                      {t('cart.continueShopping', 'Continue Shopping')}
                     </Button>
                   </CardContent>
                 </Card>

@@ -15,8 +15,10 @@ import {
   Instagram,
   Twitter
 } from '@mui/icons-material';
+import { useTranslation } from 'react-i18next';
 
 const Footer = () => {
+  const { t } = useTranslation();
   const currentYear = new Date().getFullYear();
 
   return (
@@ -51,27 +53,27 @@ const Footer = () => {
                   fontSize: '1.1rem'
                 }}
               >
-                Quick links
+                {t('footer.quickLinks', 'Quick links')}
               </Typography>
               
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                 <Link href="/terms" className="footer-link-mobile" sx={{ color: 'white', textDecoration: 'none', fontSize: '0.95rem', '&:hover': { color: '#eb8b8b' } }}>
-                  Terms and Conditions
+                  {t('footer.termsConditions', 'Terms and Conditions')}
                 </Link>
                 <Link href="/terms-service" sx={{ color: 'white', textDecoration: 'none', fontSize: '0.95rem', '&:hover': { color: '#eb8b8b' } }}>
-                  Terms of Service
+                  {t('footer.termsService', 'Terms of Service')}
                 </Link>
                 <Link href="/faq" sx={{ color: 'white', textDecoration: 'none', fontSize: '0.95rem', '&:hover': { color: '#eb8b8b' } }}>
-                  FAQ's
+                  {t('footer.faq', "FAQ's")}
                 </Link>
                 <Link href="/allergy" sx={{ color: 'white', textDecoration: 'none', fontSize: '0.95rem', '&:hover': { color: '#eb8b8b' } }}>
-                  Allergy Notices
+                  {t('footer.allergyNotices', 'Allergy Notices')}
                 </Link>
                 <Link href="/shipping" sx={{ color: 'white', textDecoration: 'none', fontSize: '0.95rem', '&:hover': { color: '#eb8b8b' } }}>
-                  Shipping Policy
+                  {t('footer.shippingPolicy', 'Shipping Policy')}
                 </Link>
                 <Link href="/cookie-care" sx={{ color: 'white', textDecoration: 'none', fontSize: '0.95rem', '&:hover': { color: '#eb8b8b' } }}>
-                  Cookie Care Instructions
+                  {t('footer.cookieCare', 'Cookie Care Instructions')}
                 </Link>
               </Box>
             </motion.div>
@@ -94,18 +96,18 @@ const Footer = () => {
                   fontSize: '1.1rem'
                 }}
               >
-                Navigation
+                {t('footer.navigation', 'Navigation')}
               </Typography>
               
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                 <Link href="/" sx={{ color: 'white', textDecoration: 'none', fontSize: '0.95rem', '&:hover': { color: '#eb8b8b' } }}>
-                  Home
+                  {t('navigation.home', 'Home')}
                 </Link>
                 <Link href="/order" sx={{ color: 'white', textDecoration: 'none', fontSize: '0.95rem', '&:hover': { color: '#eb8b8b' } }}>
-                  Order Here
+                  {t('navigation.services', 'Order Here')}
                 </Link>
                 <Link href="/contact" sx={{ color: 'white', textDecoration: 'none', fontSize: '0.95rem', '&:hover': { color: '#eb8b8b' } }}>
-                  Contact
+                  {t('navigation.contact', 'Contact')}
                 </Link>
               </Box>
             </motion.div>
@@ -128,12 +130,12 @@ const Footer = () => {
                   fontSize: '1.1rem'
                 }}
               >
-                Subscribe to our emails
+                {t('footer.subscribe', 'Subscribe to our emails')}
               </Typography>
               
               <Box sx={{ display: 'flex', gap: 1, mb: 2 }}>
                 <TextField
-                  placeholder="Email"
+                  placeholder={t('footer.emailPlaceholder', 'Email')}
                   variant="outlined"
                   size="small"
                   sx={{
@@ -181,7 +183,7 @@ const Footer = () => {
                   fontSize: '1.1rem'
                 }}
               >
-                Follow on
+                {t('footer.followOn', 'Follow on')}
               </Typography>
               
               <Box sx={{ display: 'flex', gap: 1, mb: 3 }}>
@@ -236,7 +238,7 @@ const Footer = () => {
                   fontSize: '0.9rem'
                 }}
               >
-                Payment methods
+                {t('footer.paymentMethods', 'Payment methods')}
               </Typography>
             </motion.div>
           </Grid>
@@ -257,10 +259,10 @@ const Footer = () => {
                 fontSize: '0.9rem'
               }}
             >
-              © {currentYear} Delizukar. All rights reserved. 
-              Made with ❤️
+              © {currentYear} Delizukar. {t('footer.rights', 'All rights reserved')}. 
+              {t('footer.madeWith', 'Made with')} ❤️
               <br />
-              Powered by Freedom Labs.
+              {t('footer.poweredBy', 'Powered by Freedom Labs')}.
             </Typography>
           </motion.div>
         </Box>

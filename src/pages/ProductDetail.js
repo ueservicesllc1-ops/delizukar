@@ -3,8 +3,10 @@ import { motion } from 'framer-motion';
 import { Box, Container, Typography, Grid, Card, CardMedia, CardContent, Button, Rating, Chip, IconButton } from '@mui/material';
 import { AddShoppingCart, Favorite, Share, ArrowBack } from '@mui/icons-material';
 import { useParams, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 const ProductDetail = () => {
+  const { t } = useTranslation();
   const { id } = useParams();
   const navigate = useNavigate();
 
@@ -97,7 +99,7 @@ const ProductDetail = () => {
                 <Box sx={{ display: 'flex', gap: 1, mb: 2 }}>
                   {product.isNew && (
                     <Chip
-                      label="New"
+                      label={t('product.new', 'New')}
                       sx={{
                         backgroundColor: '#4CAF50',
                         color: 'white',
@@ -300,7 +302,7 @@ const ProductDetail = () => {
                       transition: 'all 0.3s ease'
                     }}
                   >
-                    Add to Cart
+                    {t('product.addToCart', 'Add to Cart')}
                   </Button>
                   
                   <IconButton

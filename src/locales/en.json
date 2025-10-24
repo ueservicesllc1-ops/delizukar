@@ -1,0 +1,138 @@
+{
+  "navigation": {
+    "home": "Home",
+    "about": "About",
+    "services": "Services",
+    "contact": "Contact",
+    "menu": "Menu"
+  },
+  "hero": {
+    "title": "Welcome to Delizukar",
+    "subtitle": "Delicious food delivered to your door",
+    "orderNow": "Order Now",
+    "learnMore": "Learn More"
+  },
+  "home": {
+    "viewAllCookies": "View All Cookies",
+    "viewDetails": "View Details"
+  },
+  "product": {
+    "featured": "Featured",
+    "new": "New",
+    "bestSeller": "Best Seller",
+    "addToCart": "Add to Cart",
+    "inStock": "In Stock",
+    "lowStock": "Low Stock",
+    "mediumStock": "Medium Stock",
+    "outOfStock": "Out of Stock",
+    "stockAvailable": "Stock available",
+    "units": "units",
+    "flexiblePayment": "Flexible payment options available",
+    "financing": "Financing available • Instant approval • No interest",
+    "defaultDescription": "Delicious {name} with premium ingredients. Perfectly baked New York-style cookies to enjoy or share.",
+    "ferreroDescription": "NY-style cookie with Ferrero Rocher, dark chocolate chips, and toasted hazelnuts—intense, elegant, and addictive. A New York–style cookie with a European twist. Packed with Ferrero Rocher pieces, dark chocolate chips, and toasted hazelnuts for the perfect crunch. Intense, elegant, and addictive—this cookie never goes unnoticed."
+  },
+  "cart": {
+    "empty": "Your cart is empty",
+    "title": "Shopping Cart",
+    "subtotal": "Subtotal",
+    "total": "Total",
+    "checkout": "Proceed to Checkout",
+    "continueShopping": "Continue Shopping",
+    "quantity": "Quantity",
+    "remove": "Remove",
+    "item": "item",
+    "items": "items",
+    "minimumProducts": "Minimum {count} product{plural} required",
+    "acceptShipping": "You must accept the Shipping Policy",
+    "cannotProceed": "Cannot proceed",
+    "reviews": "reviews",
+    "close": "Close",
+    "orderSummary": "Order Summary",
+    "shipping": "Shipping",
+    "toBeDetermined": "To be determined",
+    "accept": "I accept the"
+  },
+  "services": {
+    "title": "Our Services",
+    "delivery": "Fast Delivery",
+    "quality": "Quality Food",
+    "support": "24/7 Support"
+  },
+  "footer": {
+    "rights": "All rights reserved",
+    "privacy": "Privacy Policy",
+    "terms": "Terms of Service",
+    "quickLinks": "Quick links",
+    "termsConditions": "Terms and Conditions",
+    "termsService": "Terms of Service",
+    "faq": "FAQ's",
+    "allergyNotices": "Allergy Notices",
+    "shippingPolicy": "Shipping Policy",
+    "cookieCare": "Cookie Care Instructions",
+    "navigation": "Navigation",
+    "subscribe": "Subscribe to our emails",
+    "emailPlaceholder": "Email",
+    "followOn": "Follow on",
+    "paymentMethods": "Payment methods",
+    "madeWith": "Made with",
+    "poweredBy": "Powered by Freedom Labs"
+  },
+  "common": {
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "cancel": "Cancel",
+    "save": "Save",
+    "edit": "Edit",
+    "delete": "Delete",
+    "confirm": "Confirm",
+    "back": "Back",
+    "next": "Next",
+    "previous": "Previous",
+    "login": "Login",
+    "register": "Register",
+    "logout": "Logout"
+  },
+  "language": {
+    "english": "English",
+    "spanish": "Español"
+  },
+  "about": {
+    "title": "Our History",
+    "content": "For more than twelve years, baking has become an essential part of my life. What began as a simple curiosity, accompanied by my husband, soon transformed into a deep passion: creating with my hands small works full of flavor, emotion, and love.\n\nI've always believed that every sweet treat has the power to tell a story, bring a smile to a smile, or revive a special memory. That's why, for me, it's not just about baking. It's about bringing each of my creations to life, taking care of every detail, and putting my heart into every recipe.\n\nOur kitchen isn't just a workplace; it's our dream workshop. It's where we combine tradition, creativity, and a lot of dedication to ensure that each cookie, cake, or dessert conveys more than just good flavor: it conveys love, joy, and the sincere desire to make others happy.\n\nAlong this journey, I've learned, failed, improved, and, above all, grown. And although there are still many dreams left to fulfill, every step has been worth it, because I'm doing what I love.\n\nToday, I continue creating, learning, and dreaming hand in hand with my husband. Because as long as there are people who believe in HOMEMADE WITH LOVE, baking will continue to be my way of speaking to the world.\n\nThank you for being here and for letting us be part of your sweetest moments."
+  },
+  "faq": {
+    "title": "FAQ's",
+    "content": "📦 How long does it take for your cookies to ship?\n\nAll orders are shipped every Monday and Tuesday to ensure freshness and quality.\n\n❄️ Are the cookies shipped in a refrigerated package?\n\nOur cookies are not shipped with ice packs or any type of refrigerated packaging. They're designed to stay fresh during normal shipping conditions.\n\n🌾 Do you offer gluten-free products?\n\nNot yet — but we're working hard on a gluten-free option and hope to offer it soon!\n\n🍪 What's the minimum number of cookies I can order?\n\nOur minimum order is 6 cookies. Each batch takes time and care to make, and this policy helps us maintain efficiency and ensure quality for all orders.\n\n🛒 How do I place an order?\n\nYou can order directly from our website:\n\n👉 www.DeliZuKar.com\n\n🗓️ Can I schedule my order?\n\nWe're unable to schedule specific shipping or delivery dates.\n\nAll orders are shipped on Mondays and Tuesdays only."
+  },
+  "testimonials": {
+    "title": "Our Happy Clients",
+    "loading": "Loading testimonials...",
+    "noTestimonials": "No active testimonials to show",
+    "adminNote": "Testimonials must be marked as active in admin",
+    "verifiedClient": "Verified Client",
+    "clientTestimonials": {
+      "nayrobis": {
+        "name": "Nayrobis Acosta",
+        "comment": "Excellent quality, delicious flavor. I can't decide which one is my favorite because they are all delicious. Beautiful packaging, well presented and hygienic. It's worth the investment; the experience is truly worth it."
+      },
+      "kayri": {
+        "name": "Kayri Díaz",
+        "comment": "I loved these cookies! The texture is perfect, crispy on the outside and soft on the inside. The Lotus filling has a delicious flavor, not too sweet, and with that touch of caramel and spices that I love. You can tell they are made with a lot of love at home. I will definitely buy them again; they are perfect for my afternoon coffee."
+      },
+      "naveri": {
+        "name": "Naveri Saint-Hilaire",
+        "comment": "I loved all the ones I tried, but my absolute favorites were the carrot and piña colada ones. They are the best; they are definitely my new favorite dessert."
+      },
+      "elayne": {
+        "name": "Elayne Cacerez",
+        "comment": "I loved the tiny chocolate chip cookies, especially my family, my kids. And the blondies."
+      },
+      "antonion": {
+        "name": "Antonion Medrano",
+        "comment": "Simply spectacular, I give them five stars... My favorite is the pistachio-filled one!!!!"
+      }
+    }
+  }
+}

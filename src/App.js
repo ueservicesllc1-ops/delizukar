@@ -6,6 +6,9 @@ import { Toaster } from 'react-hot-toast';
 // import AOS from 'aos';
 // import 'aos/dist/aos.css';
 
+// Import i18n configuration
+import './i18n';
+
 // Context
 import { StoreProvider } from './context/StoreContext';
 import { TitleConfigProvider } from './context/TitleConfigContext';

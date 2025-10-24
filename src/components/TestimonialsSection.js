@@ -5,11 +5,14 @@ import { Star } from '@mui/icons-material';
 import { collection, getDocs } from 'firebase/firestore';
 import { db } from '../firebase/config';
 import { useTitleConfig } from '../context/TitleConfigContext';
+import { useTranslation } from 'react-i18next';
 
 const TestimonialsSection = () => {
+  const { t, i18n } = useTranslation();
   const { titleConfig, loading } = useTitleConfig();
   const [testimonials, setTestimonials] = useState([]);
   const [testimonialsLoading, setTestimonialsLoading] = useState(true);
+
 
   // Efecto para aplicar la fuente cuando cambie
   useEffect(() => {
@@ -30,14 +33,17 @@ const TestimonialsSection = () => {
     }
   }, [titleConfig.font, loading]);
 
-  // Cargar testimonios desde Firestore
+  // Cargar testimonios desde Firebase según el idioma
   useEffect(() => {
     const loadTestimonials = async () => {
       try {
-        console.log('🔄 Cargando testimonios en TestimonialsSection...');
+        console.log('🔄 Cargando testimonios desde Firebase...');
         
-        const testimonialsRef = collection(db, 'testimonials');
-        // Cargar todos los testimonios sin filtros complejos
+        // Determinar qué colección cargar según el idioma
+        const collectionName = i18n.language === 'es' ? 'testimonials_es' : 'testimonials';
+        console.log('🌍 Cargando desde colección:', collectionName);
+        
+        const testimonialsRef = collection(db, collectionName);
         const snapshot = await getDocs(testimonialsRef);
         
         console.log('📊 Total testimonios encontrados:', snapshot.docs.length);
@@ -47,40 +53,30 @@ const TestimonialsSection = () => {
           ...doc.data()
         }));
         
-        // Filtrar testimonios activos en JavaScript
+        // Filtrar testimonios activos
         const activeTestimonials = allTestimonials.filter(testimonial => 
-          testimonial.isActive !== false // Considerar activos si no está explícitamente marcado como false
+          testimonial.isActive !== false
         );
         
         console.log('📊 Testimonios activos encontrados:', activeTestimonials.length);
-        
-        const testimonialsData = activeTestimonials.map(testimonial => {
-          console.log('📝 Testimonio activo:', {
-            id: testimonial.id,
-            name: testimonial.name,
-            isActive: testimonial.isActive
-          });
-          return testimonial;
-        });
-        
-        console.log('✅ Testimonios cargados en TestimonialsSection:', testimonialsData);
-        setTestimonials(testimonialsData);
+        console.log('✅ Testimonios cargados desde Firebase:', activeTestimonials);
+        setTestimonials(activeTestimonials);
       } catch (error) {
-        console.error('❌ Error loading testimonials in TestimonialsSection:', error);
+        console.error('❌ Error loading testimonials from Firebase:', error);
       } finally {
         setTestimonialsLoading(false);
       }
     };
 
     loadTestimonials();
-  }, []);
+  }, [i18n.language]); // Dependencia en el idioma para que se recargue cuando cambie
 
   if (testimonialsLoading) {
     return (
       <Box sx={{ py: 8, backgroundColor: '#f8f9fa' }}>
         <Container maxWidth="lg">
           <Typography variant="h6" sx={{ textAlign: 'center', color: '#666' }}>
-            Cargando testimonios...
+            {t('testimonials.loading', 'Cargando testimonios...')}
           </Typography>
         </Container>
       </Box>
@@ -92,10 +88,10 @@ const TestimonialsSection = () => {
       <Box sx={{ py: 8, backgroundColor: '#f8f9fa' }}>
         <Container maxWidth="lg">
           <Typography variant="h6" sx={{ textAlign: 'center', color: '#666' }}>
-            No hay testimonios activos para mostrar
+            {t('testimonials.noTestimonials', 'No hay testimonios activos para mostrar')}
           </Typography>
           <Typography variant="body2" sx={{ textAlign: 'center', color: '#999', mt: 1 }}>
-            Los testimonios deben estar marcados como activos en el admin
+            {t('testimonials.adminNote', 'Los testimonios deben estar marcados como activos en el admin')}
           </Typography>
         </Container>
       </Box>
@@ -123,7 +119,7 @@ const TestimonialsSection = () => {
               fontFamily: loading ? 'Playfair Display, serif' : `"${titleConfig.font}", serif !important`
             }}
           >
-            {loading ? 'Lo que dicen nuestros clientes' : titleConfig.text}
+            {t('testimonials.title', 'Nuestros Clientes Felices')}
           </Typography>
           
 
@@ -192,7 +188,7 @@ const TestimonialsSection = () => {
                             variant="body2"
                             sx={{ color: '#666' }}
                           >
-                            Cliente Verificado
+                            {t('testimonials.verifiedClient', 'Cliente Verificado')}
                           </Typography>
                         </Box>
                       </Box>
