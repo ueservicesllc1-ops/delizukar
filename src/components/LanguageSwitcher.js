@@ -48,9 +48,10 @@ const LanguageSwitcher = () => {
           borderRadius: '20px',
           px: 2,
           py: 0.5,
+          backgroundColor: 'rgba(200, 98, 109, 0.05)',
           '&:hover': {
-            backgroundColor: '#c8626d',
-            color: 'white'
+            backgroundColor: 'rgba(200, 98, 109, 0.15)',
+            color: '#c8626d'
           }
         }}
       >
@@ -72,16 +73,43 @@ const LanguageSwitcher = () => {
           vertical: 'top',
           horizontal: 'left',
         }}
+        PaperProps={{
+          sx: {
+            backgroundColor: '#fafafa',
+            border: '1px solid #e0e0e0',
+            borderRadius: '12px',
+            boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
+            mt: 1
+          }
+        }}
       >
         <MenuItem 
           onClick={() => changeLanguage('en')}
           selected={i18n.language === 'en'}
+          sx={{
+            '&:hover': {
+              backgroundColor: 'rgba(200, 98, 109, 0.1)'
+            },
+            '&.Mui-selected': {
+              backgroundColor: 'rgba(200, 98, 109, 0.15)',
+              color: '#c8626d'
+            }
+          }}
         >
           {t('language.english')}
         </MenuItem>
         <MenuItem 
           onClick={() => changeLanguage('es')}
           selected={i18n.language === 'es'}
+          sx={{
+            '&:hover': {
+              backgroundColor: 'rgba(200, 98, 109, 0.1)'
+            },
+            '&.Mui-selected': {
+              backgroundColor: 'rgba(200, 98, 109, 0.15)',
+              color: '#c8626d'
+            }
+          }}
         >
           {t('language.spanish')}
         </MenuItem>

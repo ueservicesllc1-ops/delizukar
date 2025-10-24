@@ -69,12 +69,12 @@ const initialState = {
   user: null,
   loading: false,
   categories: [
-    { id: 'clasicas', name: 'Clásicas NY', icon: '🍪' },
-    { id: 'chocolate', name: 'Chocolate', icon: '🍫' },
-    { id: 'vainilla', name: 'Vainilla', icon: '🥛' },
-    { id: 'especiales', name: 'Especiales', icon: '✨' },
-    { id: 'veganas', name: 'Veganas', icon: '🌱' },
-    { id: 'sin-gluten', name: 'Sin Gluten', icon: '🌾' }
+    { id: 'clasicas', name: 'Clásicas NY', icon: 'cookie' },
+    { id: 'chocolate', name: 'Chocolate', icon: 'chocolate' },
+    { id: 'vainilla', name: 'Vainilla', icon: 'milk' },
+    { id: 'especiales', name: 'Especiales', icon: 'star' },
+    { id: 'veganas', name: 'Veganas', icon: 'leaf' },
+    { id: 'sin-gluten', name: 'Sin Gluten', icon: 'grain' }
   ],
   featuredProducts: [],
   newProducts: [],

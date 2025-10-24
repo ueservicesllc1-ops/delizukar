@@ -218,7 +218,10 @@ const ProductCards = ({ products: propProducts, showAll = false }) => {
         }}
         PaperProps={{
           sx: {
-            borderRadius: '20px'
+            borderRadius: '20px',
+            backgroundColor: '#fafafa',
+            border: '1px solid #e0e0e0',
+            boxShadow: '0 8px 32px rgba(0,0,0,0.12)'
           }
         }}
       >
@@ -226,7 +229,17 @@ const ProductCards = ({ products: propProducts, showAll = false }) => {
           <IconButton
             aria-label="Cerrar"
             onClick={() => setOpen(false)}
-            sx={{ position: 'absolute', top: 8, right: 8, zIndex: 1, backgroundColor: 'rgba(255,255,255,0.9)' }}
+            sx={{ 
+              position: 'absolute', 
+              top: 8, 
+              right: 8, 
+              zIndex: 1, 
+              backgroundColor: 'rgba(200, 98, 109, 0.1)',
+              color: '#c8626d',
+              '&:hover': {
+                backgroundColor: 'rgba(200, 98, 109, 0.2)'
+              }
+            }}
           >
             <Close />
           </IconButton>

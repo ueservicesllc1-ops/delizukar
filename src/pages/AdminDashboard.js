@@ -388,7 +388,7 @@ const AdminDashboard = () => {
       </div>
 
       <div style="margin-bottom: 25px;">
-        <h3 style="color: #c8626d; border-bottom: 2px solid #c8626d; padding-bottom: 8px; margin-bottom: 15px; font-size: 16px;">🛒 ÓRDENES RECIENTES</h3>
+        <h3 style="color: #c8626d; border-bottom: 2px solid #c8626d; padding-bottom: 8px; margin-bottom: 15px; font-size: 16px;">ÓRDENES RECIENTES</h3>
         <table style="width: 100%; border-collapse: collapse; background: white; border: 1px solid #ddd;">
           <thead>
             <tr style="background: #c8626d; color: white;">

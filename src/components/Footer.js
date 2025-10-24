@@ -260,7 +260,7 @@ const Footer = () => {
               }}
             >
               © {currentYear} Delizukar. {t('footer.rights', 'All rights reserved')}. 
-              {t('footer.madeWith', 'Made with')} ❤️
+              {t('footer.madeWith', 'Made with')} love
               <br />
               {t('footer.poweredBy', 'Powered by Freedom Labs')}.
             </Typography>

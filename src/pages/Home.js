@@ -259,7 +259,10 @@ const Home = () => {
         sx={{
           '& .MuiDialog-paper': {
             borderRadius: '20px',
-            maxHeight: '90vh'
+            maxHeight: '90vh',
+            backgroundColor: '#fafafa',
+            border: '1px solid #e0e0e0',
+            boxShadow: '0 8px 32px rgba(0,0,0,0.12)'
           }
         }}
       >
@@ -272,7 +275,17 @@ const Home = () => {
                 </Typography>
                 <Button
                   onClick={() => setProductDetailOpen(false)}
-                  sx={{ color: '#c8626d' }}
+                  sx={{ 
+                    color: '#c8626d',
+                    backgroundColor: 'rgba(200, 98, 109, 0.1)',
+                    borderRadius: '50%',
+                    minWidth: '40px',
+                    width: '40px',
+                    height: '40px',
+                    '&:hover': {
+                      backgroundColor: 'rgba(200, 98, 109, 0.2)'
+                    }
+                  }}
                 >
                   ✕
                 </Button>
