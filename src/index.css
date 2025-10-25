@@ -151,7 +151,7 @@ body {
   font-weight: bold;
 }
 
-/* Estilos para la paginación de Swiper */
+/* Styles for Swiper pagination */
 .swiper-pagination-bullet {
   background: rgba(255, 255, 255, 0.5) !important;
   opacity: 1 !important;
@@ -223,7 +223,7 @@ body {
   animation-fill-mode: both;
 }
 
-/* Estilos para dispositivos móviles */
+/* Styles for mobile devices */
 @media (max-width: 768px) {
   .swiper-button-next,
   .swiper-button-prev {
@@ -293,7 +293,7 @@ body {
   box-shadow: 0 0 0 2px rgba(139, 69, 19, 0.2) !important;
 }
 
-/* Estilos para las imágenes */
+/* Styles for images */
 .image-hover {
   transition: transform 0.3s ease;
 }
@@ -302,7 +302,7 @@ body {
   transform: scale(1.05);
 }
 
-/* Estilos específicos para imágenes de productos */
+/* Specific styles for product images */
 .product-image-container {
   position: relative;
   overflow: hidden;
@@ -322,7 +322,7 @@ body {
   display: none !important;
 }
 
-/* Asegurar que no haya imágenes de fondo superpuestas */
+/* Ensure no overlapping background images */
 .MuiCardMedia-root {
   background-image: none !important;
   background-color: #f8f8f8 !important;

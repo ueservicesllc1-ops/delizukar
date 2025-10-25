@@ -38,7 +38,7 @@
   },
   "scripts": {
     "start": "react-scripts start",
-    "build": "set GENERATE_SOURCEMAP=false && react-scripts build",
+    "build": "set GENERATE_SOURCEMAP=false && craco build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "server": "node server.js",
@@ -69,5 +69,8 @@
   },
   "overrides": {
     "typescript": "^4.9.5"
+  },
+  "devDependencies": {
+    "@craco/craco": "^7.1.0"
   }
 }

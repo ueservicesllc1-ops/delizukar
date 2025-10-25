@@ -1,4 +1,4 @@
-/* Mobile-specific styles - BLOQUEADO - No modificar */
+/* Mobile-specific styles - BLOCKED - Do not modify */
 @media (max-width: 768px) {
   /* Header Mobile Optimizations */
   .header-mobile {
@@ -630,7 +630,7 @@
     padding-top: 0 !important;
   }
   
-  /* Products Tablet Horizontal - Bajar más los productos */
+  /* Products Tablet Horizontal - Lower products more */
   .products-page-mobile {
     margin-top: 120px !important;
     padding-top: 0 !important;
@@ -716,11 +716,11 @@
   }
 }
 
-/* TEST GLOBAL - DEBE APARECER EN TODAS LAS RESOLUCIONES */
+/* GLOBAL TEST - MUST APPEAR IN ALL RESOLUTIONS */
 
-/* SOLO TABLET HORIZONTAL (iPad landscape) - ÚNICA SECCIÓN A MODIFICAR */
+/* ONLY HORIZONTAL TABLET (iPad landscape) - ONLY SECTION TO MODIFY */
 @media (min-width: 768px) and (max-width: 1200px) and (orientation: landscape) {
-  /* Header fijo para tablet horizontal */
+  /* Fixed header for horizontal tablet */
   .header-mobile {
     position: fixed !important;
     top: 0 !important;
@@ -730,7 +730,7 @@
     backdrop-filter: blur(10px) !important;
   }
   
-  /* Header Container - Altura fija para tablet horizontal */
+  /* Header Container - Fixed height for horizontal tablet */
   .header-container {
     height: 60px !important;
     position: fixed !important;
@@ -749,7 +749,7 @@
     z-index: 1 !important;
   } */
   
-  /* CORREGIR: Franja rosa - DEBE ir exactamente a continuación del banner hero */
+  /* FIX: Pink strip - MUST go exactly after the hero banner */
   .hero-color-strip-mobile {
     margin-top: 0 !important;
     position: relative !important;
@@ -765,29 +765,29 @@
     -ms-user-select: none !important;
   }
   
-  /* Asegurar que el banner hero esté debajo del header - DISABLED for universal responsive system */
+  /* Ensure hero banner is below header - DISABLED for universal responsive system */
   /* .hero-mobile {
     transform: translateY(0) !important;
-  }
+  } */
   
-  /* Forzar que el banner hero no tenga margin negativo en tablet horizontal */
+  /* Force hero banner to not have negative margin on horizontal tablet */
   .hero-mobile * {
     margin-top: 0 !important;
   } */
   
-  /* Ajustar el contenido principal para que no se superponga con el header */
+  /* Adjust main content so it does not overlap with header */
   .home-mobile {
     padding-top: 0 !important;
     margin-top: 0 !important;
   }
   
-  /* Products Page Tablet Horizontal - Header completamente fijo */
+  /* Products Page Tablet Horizontal - Header completely fixed */
   .products-page-mobile {
     margin-top: 100px !important;
     padding-top: 0 !important;
   }
   
-  /* CONTENEDOR FIJO PARA HEADER - NADA PUEDE ESTAR DETRÁS */
+  /* FIXED CONTAINER FOR HEADER - NOTHING CAN BE BEHIND */
   .header-fixed-container {
     position: fixed !important;
     top: 0 !important;
@@ -802,7 +802,7 @@
     pointer-events: none !important;
   }
   
-  /* Header dentro del contenedor fijo */
+  /* Header inside fixed container */
   .products-page-mobile .header-mobile {
     position: relative !important;
     z-index: 999999 !important;
@@ -811,12 +811,12 @@
     pointer-events: auto !important;
   }
   
-  /* Asegurar que nada esté detrás del contenedor fijo */
+  /* Ensure nothing is behind the fixed container */
   .header-fixed-container * {
     z-index: 999999 !important;
   }
   
-  /* Contenido de productos empieza después del header fijo */
+  /* Products content starts after fixed header */
   .products-page-mobile .products-content {
     margin-top: 100px !important;
     padding-top: 0 !important;
@@ -824,14 +824,14 @@
     z-index: 1 !important;
   }
   
-  /* Asegurar que todos los productos estén visibles */
+  /* Ensure all products are visible */
   .products-page-mobile .product-card-mobile {
     margin-top: 0 !important;
     position: relative !important;
     z-index: 1 !important;
   }
   
-  /* Forzar que el contenido principal empiece después del header fijo */
+  /* Force main content to start after fixed header */
   .products-page-mobile .main-content,
   .products-page-mobile .container,
   .products-page-mobile .MuiContainer-root {
@@ -861,13 +861,13 @@
     z-index: 2 !important;
   } */
   
-  /* NOSOTROS PAGE TABLET HORIZONTAL - Header completamente fijo */
+  /* NOSOTROS PAGE TABLET HORIZONTAL - Header completely fixed */
   .nosotros-mobile {
     margin-top: 100px !important;
     padding-top: 0 !important;
   }
   
-  /* Header completamente fijo en página de nosotros */
+  /* Header completely fixed on nosotros page */
   .nosotros-mobile .header-mobile {
     position: relative !important;
     z-index: 999999 !important;
@@ -876,12 +876,12 @@
     pointer-events: auto !important;
   }
   
-  /* Asegurar que nada esté detrás del header en nosotros */
+  /* Ensure nothing is behind header in nosotros */
   .nosotros-mobile .header-mobile * {
     z-index: 999999 !important;
   }
   
-  /* Contenido de nosotros empieza después del header fijo */
+  /* Nosotros content starts after fixed header */
   .nosotros-mobile .nosotros-content {
     margin-top: 100px !important;
     padding-top: 20px !important;
@@ -889,7 +889,7 @@
     z-index: 1 !important;
   }
   
-  /* Forzar que el contenido principal empiece después del header fijo en nosotros */
+  /* Force main content to start after fixed header in nosotros */
   .nosotros-mobile .main-content,
   .nosotros-mobile .container,
   .nosotros-mobile .MuiContainer-root {
@@ -899,13 +899,13 @@
     z-index: 1 !important;
   }
   
-  /* CONTACTO PAGE TABLET HORIZONTAL - Header completamente fijo */
+  /* CONTACTO PAGE TABLET HORIZONTAL - Header completely fixed */
   .contacto-mobile {
     margin-top: 100px !important;
     padding-top: 0 !important;
   }
   
-  /* Header completamente fijo en página de contacto */
+  /* Header completely fixed on contacto page */
   .contacto-mobile .header-mobile {
     position: relative !important;
     z-index: 999999 !important;
@@ -914,12 +914,12 @@
     pointer-events: auto !important;
   }
   
-  /* Asegurar que nada esté detrás del header en contacto */
+  /* Ensure nothing is behind header in contacto */
   .contacto-mobile .header-mobile * {
     z-index: 999999 !important;
   }
   
-  /* Contenido de contacto empieza después del header fijo */
+  /* Contacto content starts after fixed header */
   .contacto-mobile .contacto-content {
     margin-top: 100px !important;
     padding-top: 20px !important;
@@ -927,7 +927,7 @@
     z-index: 1 !important;
   }
   
-  /* Forzar que el contenido principal empiece después del header fijo en contacto */
+  /* Force main content to start after fixed header in contacto */
   .contacto-mobile .main-content,
   .contacto-mobile .container,
   .contacto-mobile .MuiContainer-root {
@@ -937,13 +937,13 @@
     z-index: 1 !important;
   }
   
-  /* FAQ PAGE TABLET HORIZONTAL - Header completamente fijo */
+  /* FAQ PAGE TABLET HORIZONTAL - Header completely fixed */
   .faq-page-mobile {
     margin-top: 100px !important;
     padding-top: 0 !important;
   }
   
-  /* Header completamente fijo en página de FAQ */
+  /* Header completely fixed on FAQ page */
   .faq-page-mobile .header-mobile {
     position: relative !important;
     z-index: 999999 !important;
@@ -952,12 +952,12 @@
     pointer-events: auto !important;
   }
   
-  /* Asegurar que nada esté detrás del header en FAQ */
+  /* Ensure nothing is behind header in FAQ */
   .faq-page-mobile .header-mobile * {
     z-index: 999999 !important;
   }
   
-  /* Contenido de FAQ empieza después del header fijo */
+  /* FAQ content starts after fixed header */
   .faq-page-mobile .faq-content {
     margin-top: 100px !important;
     padding-top: 20px !important;
@@ -965,7 +965,7 @@
     z-index: 1 !important;
   }
   
-  /* Forzar que el contenido principal empiece después del header fijo en FAQ */
+  /* Force main content to start after fixed header in FAQ */
   .faq-page-mobile .main-content,
   .faq-page-mobile .container,
   .faq-page-mobile .MuiContainer-root {
@@ -975,13 +975,13 @@
     z-index: 1 !important;
   }
   
-  /* TERMS PAGE TABLET HORIZONTAL - Header completamente fijo */
+  /* TERMS PAGE TABLET HORIZONTAL - Header completely fixed */
   .terms-page-mobile {
     margin-top: 5px !important;
     padding-top: 0 !important;
   }
   
-  /* Header completamente fijo en página de Terms */
+  /* Header completely fixed on Terms page */
   .terms-page-mobile .header-mobile {
     position: relative !important;
     z-index: 999999 !important;
@@ -990,12 +990,12 @@
     pointer-events: auto !important;
   }
   
-  /* Asegurar que nada esté detrás del header en Terms */
+  /* Ensure nothing is behind header in Terms */
   .terms-page-mobile .header-mobile * {
     z-index: 999999 !important;
   }
   
-  /* Contenido de Terms empieza después del header fijo */
+  /* Terms content starts after fixed header */
   .terms-page-mobile .terms-content {
     margin-top: 5px !important;
     padding-top: 0 !important;
@@ -1003,7 +1003,7 @@
     z-index: 1 !important;
   }
   
-  /* SUBIR EL TÍTULO DE TERMS - Está muy abajo */
+  /* RAISE TERMS TITLE - It is too low */
   .terms-page-mobile .terms-title,
   .terms-page-mobile h1,
   .terms-page-mobile .MuiTypography-h1,
@@ -1014,7 +1014,7 @@
     z-index: 1 !important;
   }
   
-  /* Forzar que el contenido principal empiece después del header fijo en Terms */
+  /* Force main content to start after fixed header in Terms */
   .terms-page-mobile .main-content,
   .terms-page-mobile .container,
   .terms-page-mobile .MuiContainer-root {
@@ -1024,13 +1024,13 @@
     z-index: 1 !important;
   }
   
-  /* CARRITO PAGE TABLET HORIZONTAL - Header completamente fijo */
+  /* CARRITO PAGE TABLET HORIZONTAL - Header completely fixed */
   .cart-page-mobile {
     margin-top: 60px !important;
     padding-top: 0 !important;
   }
   
-  /* Header completamente fijo en página de Carrito */
+  /* Header completely fixed on Cart page */
   .cart-page-mobile .header-mobile {
     position: relative !important;
     z-index: 999999 !important;
@@ -1039,12 +1039,12 @@
     pointer-events: auto !important;
   }
   
-  /* Asegurar que nada esté detrás del header en Carrito */
+  /* Ensure nothing is behind header in Cart */
   .cart-page-mobile .header-mobile * {
     z-index: 999999 !important;
   }
   
-  /* Contenido de Carrito empieza después del header fijo */
+  /* Cart content starts after fixed header */
   .cart-page-mobile .cart-content {
     margin-top: 60px !important;
     padding-top: 10px !important;
@@ -1052,7 +1052,7 @@
     z-index: 1 !important;
   }
   
-  /* Forzar que el contenido principal empiece después del header fijo en Carrito */
+  /* Force main content to start after fixed header in Cart */
   .cart-page-mobile .main-content,
   .cart-page-mobile .container,
   .cart-page-mobile .MuiContainer-root {
