@@ -364,12 +364,27 @@ const ProductsManager = ({ open, onClose }) => {
       maxWidth="lg"
       fullWidth
       className="products-manager-mobile"
+      sx={{
+        zIndex: 9999999,
+        '& .MuiDialog-paper': {
+          zIndex: 9999999
+        },
+        '& .MuiBackdrop-root': {
+          zIndex: 9999998
+        }
+      }}
       PaperProps={{
         sx: {
           borderRadius: '20px',
           boxShadow: '0 8px 32px rgba(0,0,0,0.1)',
           maxHeight: '90vh',
-          height: '90vh'
+          height: '90vh',
+          zIndex: 9999999
+        }
+      }}
+      BackdropProps={{
+        sx: {
+          zIndex: 9999998
         }
       }}
     >
