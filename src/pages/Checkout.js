@@ -481,7 +481,7 @@ const Checkout = () => {
                         <Typography variant="body2" sx={{ color: '#666', fontSize: '0.9rem' }}>
                           {t('checkout.shipping', 'Shipping')}
                         </Typography>
-                        <Typography variant="body2" sx={{ fontWeight: 600, color: shippingInfo ? '#4CAF50' : '#666', fontSize: '0.9rem' }}>
+                        <Typography variant="body2" sx={{ fontWeight: 600, color: shippingInfo ? '#C8626D' : '#666', fontSize: '0.9rem' }}>
                           {shippingInfo ? `$${parseFloat(shippingInfo.cost || 0).toFixed(2)}` : t('checkout.toBeDetermined', 'To be determined')}
                         </Typography>
                       </Box>
@@ -566,7 +566,7 @@ const Checkout = () => {
                     )}
 
                     <Box sx={{ display: 'flex', alignItems: 'center', mb: 1.5 }}>
-                      <Security sx={{ color: '#4CAF50', mr: 1, fontSize: '1rem' }} />
+                      <Security sx={{ color: '#C8626D', mr: 1, fontSize: '1rem' }} />
                       <Typography variant="body2" sx={{ color: '#666', fontSize: '0.8rem' }}>
                         Secure payment with SSL encryption
                       </Typography>
@@ -641,38 +641,38 @@ const Checkout = () => {
                           </Typography>
                           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
                             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                              <Box sx={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: formData.email ? '#4CAF50' : '#ff9800' }} />
-                              <Typography variant="body2" sx={{ fontSize: '0.8rem', color: formData.email ? '#4CAF50' : '#666' }}>
+                              <Box sx={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: formData.email ? '#C8626D' : '#EB8B8B' }} />
+                              <Typography variant="body2" sx={{ fontSize: '0.8rem', color: formData.email ? '#C8626D' : '#666' }}>
                                 Email {formData.email ? '✓' : ''}
                               </Typography>
                             </Box>
                             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                              <Box sx={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: formData.firstName ? '#4CAF50' : '#ff9800' }} />
-                              <Typography variant="body2" sx={{ fontSize: '0.8rem', color: formData.firstName ? '#4CAF50' : '#666' }}>
+                              <Box sx={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: formData.firstName ? '#C8626D' : '#EB8B8B' }} />
+                              <Typography variant="body2" sx={{ fontSize: '0.8rem', color: formData.firstName ? '#C8626D' : '#666' }}>
                                 First Name {formData.firstName ? '✓' : ''}
                               </Typography>
                             </Box>
                             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                              <Box sx={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: formData.lastName ? '#4CAF50' : '#ff9800' }} />
-                              <Typography variant="body2" sx={{ fontSize: '0.8rem', color: formData.lastName ? '#4CAF50' : '#666' }}>
+                              <Box sx={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: formData.lastName ? '#C8626D' : '#EB8B8B' }} />
+                              <Typography variant="body2" sx={{ fontSize: '0.8rem', color: formData.lastName ? '#C8626D' : '#666' }}>
                                 Last Name {formData.lastName ? '✓' : ''}
                               </Typography>
                             </Box>
                             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                              <Box sx={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: formData.address ? '#4CAF50' : '#ff9800' }} />
-                              <Typography variant="body2" sx={{ fontSize: '0.8rem', color: formData.address ? '#4CAF50' : '#666' }}>
+                              <Box sx={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: formData.address ? '#C8626D' : '#EB8B8B' }} />
+                              <Typography variant="body2" sx={{ fontSize: '0.8rem', color: formData.address ? '#C8626D' : '#666' }}>
                                 Address {formData.address ? '✓' : ''}
                               </Typography>
                             </Box>
                             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                              <Box sx={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: formData.city ? '#4CAF50' : '#ff9800' }} />
-                              <Typography variant="body2" sx={{ fontSize: '0.8rem', color: formData.city ? '#4CAF50' : '#666' }}>
+                              <Box sx={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: formData.city ? '#C8626D' : '#EB8B8B' }} />
+                              <Typography variant="body2" sx={{ fontSize: '0.8rem', color: formData.city ? '#C8626D' : '#666' }}>
                                 City {formData.city ? '✓' : ''}
                               </Typography>
                             </Box>
                             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                              <Box sx={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: formData.zipCode ? '#4CAF50' : '#ff9800' }} />
-                              <Typography variant="body2" sx={{ fontSize: '0.8rem', color: formData.zipCode ? '#4CAF50' : '#666' }}>
+                              <Box sx={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: formData.zipCode ? '#C8626D' : '#EB8B8B' }} />
+                              <Typography variant="body2" sx={{ fontSize: '0.8rem', color: formData.zipCode ? '#C8626D' : '#666' }}>
                                 ZIP Code {formData.zipCode ? '✓' : ''}
                               </Typography>
                             </Box>

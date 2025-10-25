@@ -33,12 +33,12 @@
     height: 28px !important;
   }
   
-  /* Hero Banner Mobile */
-  .hero-mobile {
+  /* Hero Banner Mobile - DISABLED for universal responsive system */
+  /* .hero-mobile {
     padding: 0 !important;
     margin-top: -500px !important;
     text-align: center !important;
-  }
+  } */
   
   /* Banner2 Mobile */
   .banner2-mobile {
@@ -106,40 +106,7 @@
     font-weight: 600 !important;
   }
   
-  /* Footer Mobile */
-  .footer-mobile {
-    padding: 24px 0 !important;
-  }
-  
-  .footer-content-mobile {
-    flex-direction: column !important;
-    text-align: center !important;
-    gap: 16px !important;
-  }
-  
-  .footer-section-mobile {
-    margin-bottom: 16px !important;
-  }
-  
-  .footer-title-mobile {
-    font-size: 1rem !important;
-    margin-bottom: 8px !important;
-  }
-  
-  .footer-link-mobile {
-    font-size: 0.85rem !important;
-    padding: 4px 0 !important;
-  }
-  
-  /* Footer Logo Mobile - Move below email bar */
-  .footer-mobile .footer-logo-mobile {
-    position: static !important;
-    top: auto !important;
-    right: auto !important;
-    margin: 20px auto 0 auto !important;
-    display: block !important;
-    text-align: center !important;
-  }
+  /* Footer Mobile - REMOVED - Using universal responsive system */
   
   /* Products Mobile */
   .products-grid-mobile {
@@ -583,12 +550,12 @@
   }
   
 
-  /* Hero Banner Tablet - Fix for vertical view */
-  .hero-mobile {
+  /* Hero Banner Tablet - DISABLED for universal responsive system */
+  /* .hero-mobile {
     padding: 0 !important;
     margin-top: -150px !important;
     height: 60vh !important;
-  }
+  } */
   
   /* Banner2 Tablet */
   .banner2-mobile {
@@ -598,6 +565,12 @@
   /* Hero Color Strip Tablet - Move up the pink strip */
   .hero-color-strip-mobile {
     margin-top: -250px !important;
+    cursor: default !important;
+    pointer-events: none !important;
+    user-select: none !important;
+    -webkit-user-select: none !important;
+    -moz-user-select: none !important;
+    -ms-user-select: none !important;
   }
   
   /* Testimonials Tablet */
@@ -605,17 +578,7 @@
     margin-top: -100px !important;
   }
   
-  /* Footer Tablet */
-  .footer-mobile .footer-logo-mobile {
-    position: static !important;
-    margin: 20px auto 0 auto !important;
-    display: block !important;
-    text-align: center !important;
-  }
-  
-  .footer-mobile .footer-copyright-mobile {
-    margin-top: 20px !important;
-  }
+  /* Footer Tablet - REMOVED - Using universal responsive system */
   
   /* Products Tablet */
   .products-grid-mobile {
@@ -776,15 +739,15 @@
     z-index: 10000 !important;
   }
   
-  /* Hero Banner Container - Empieza después del header en tablet horizontal */
-  .hero-mobile {
+  /* Hero Banner Container - DISABLED for universal responsive system */
+  /* .hero-mobile {
     margin-top: 60px !important;
     padding-top: 0 !important;
     position: relative !important;
     top: 0 !important;
     height: 70vh !important;
     z-index: 1 !important;
-  }
+  } */
   
   /* CORREGIR: Franja rosa - DEBE ir exactamente a continuación del banner hero */
   .hero-color-strip-mobile {
@@ -794,17 +757,23 @@
     transform: none !important;
     top: 0 !important;
     display: block !important;
+    cursor: default !important;
+    pointer-events: none !important;
+    user-select: none !important;
+    -webkit-user-select: none !important;
+    -moz-user-select: none !important;
+    -ms-user-select: none !important;
   }
   
-  /* Asegurar que el banner hero esté debajo del header */
-  .hero-mobile {
+  /* Asegurar que el banner hero esté debajo del header - DISABLED for universal responsive system */
+  /* .hero-mobile {
     transform: translateY(0) !important;
   }
   
   /* Forzar que el banner hero no tenga margin negativo en tablet horizontal */
   .hero-mobile * {
     margin-top: 0 !important;
-  }
+  } */
   
   /* Ajustar el contenido principal para que no se superponga con el header */
   .home-mobile {
@@ -886,11 +855,11 @@
     z-index: 2 !important;
   }
   
-  /* Footer Tablet Horizontal */
-  .footer-mobile {
+  /* Footer Tablet Horizontal - DISABLED for universal responsive system */
+  /* .footer-mobile {
     position: relative !important;
     z-index: 2 !important;
-  }
+  } */
   
   /* NOSOTROS PAGE TABLET HORIZONTAL - Header completamente fijo */
   .nosotros-mobile {
@@ -1102,12 +1071,12 @@
     min-height: 65px !important;
   }
   
-  /* Laptop Hero Banner */
-  .hero-mobile {
+  /* Laptop Hero Banner - DISABLED for universal responsive system */
+  /* .hero-mobile {
     padding: 0 !important;
     margin-top: -50px !important;
     text-align: center !important;
-  }
+  } */
   
   /* Laptop Products */
   .products-page-mobile {

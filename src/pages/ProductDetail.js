@@ -236,7 +236,7 @@ const ProductDetail = () => {
                   </Typography>
                   <Grid container spacing={2}>
                     <Grid item xs={3}>
-                      <Box sx={{ textAlign: 'center', p: 2, backgroundColor: '#f5f5f5', borderRadius: '10px' }}>
+                      <Box sx={{ textAlign: 'center', p: 2, backgroundColor: '#FFFFFF', borderRadius: '10px' }}>
                         <Typography variant="h6" sx={{ fontWeight: 700, color: '#c8626d' }}>
                           {product.nutrition.calories}
                         </Typography>
@@ -246,7 +246,7 @@ const ProductDetail = () => {
                       </Box>
                     </Grid>
                     <Grid item xs={3}>
-                      <Box sx={{ textAlign: 'center', p: 2, backgroundColor: '#f5f5f5', borderRadius: '10px' }}>
+                      <Box sx={{ textAlign: 'center', p: 2, backgroundColor: '#FFFFFF', borderRadius: '10px' }}>
                         <Typography variant="h6" sx={{ fontWeight: 700, color: '#c8626d' }}>
                           {product.nutrition.fat}g
                         </Typography>
@@ -256,7 +256,7 @@ const ProductDetail = () => {
                       </Box>
                     </Grid>
                     <Grid item xs={3}>
-                      <Box sx={{ textAlign: 'center', p: 2, backgroundColor: '#f5f5f5', borderRadius: '10px' }}>
+                      <Box sx={{ textAlign: 'center', p: 2, backgroundColor: '#FFFFFF', borderRadius: '10px' }}>
                         <Typography variant="h6" sx={{ fontWeight: 700, color: '#c8626d' }}>
                           {product.nutrition.carbs}g
                         </Typography>
@@ -266,7 +266,7 @@ const ProductDetail = () => {
                       </Box>
                     </Grid>
                     <Grid item xs={3}>
-                      <Box sx={{ textAlign: 'center', p: 2, backgroundColor: '#f5f5f5', borderRadius: '10px' }}>
+                      <Box sx={{ textAlign: 'center', p: 2, backgroundColor: '#FFFFFF', borderRadius: '10px' }}>
                         <Typography variant="h6" sx={{ fontWeight: 700, color: '#c8626d' }}>
                           {product.nutrition.protein}g
                         </Typography>

@@ -12,6 +12,7 @@ import { useFeaturedProducts } from '../context/FeaturedProductsContext';
 import { useStore } from '../context/StoreContext';
 import AfterpayMessaging from '../components/AfterpayMessaging';
 import { useTranslation } from 'react-i18next';
+import { responsiveComponents } from '../utils/responsiveDesign';
 
 const Home = () => {
   const { t } = useTranslation();
@@ -68,14 +69,19 @@ const Home = () => {
 
   return (
     <Box className="home-mobile" sx={{
-      '@media (min-width: 769px) and (max-width: 1024px) and (orientation: landscape)': {
-        display: 'flex',
-        flexDirection: 'column',
-        paddingTop: '0px'
-      }
+      // Sistema responsivo universal
+      padding: responsiveComponents.container.padding,
+      maxWidth: '100%',
+      margin: '0 auto',
+      marginTop: responsiveComponents.banner.marginTop
     }}>
       {/* Hero Banner */}
       <Box sx={{
+        width: '100vw',
+        marginLeft: 'calc(-50vw + 50%)',
+        marginRight: 'calc(-50vw + 50%)',
+        marginTop: 0,
+        marginBottom: 0,
         '@media (min-width: 769px) and (max-width: 1024px) and (orientation: landscape)': {
           marginTop: '0px'
         }
@@ -91,10 +97,29 @@ const Home = () => {
           height: '50px',
           backgroundColor: '#C8626D',
           position: 'relative',
-          zIndex: 1,
+          zIndex: 999,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
+          marginTop: { xs: '-60px', sm: '-60px', md: '-60px', lg: '-60px', xl: '-60px' },
+          cursor: 'default !important',
+          pointerEvents: 'none !important',
+          userSelect: 'none',
+          WebkitUserSelect: 'none',
+          MozUserSelect: 'none',
+          msUserSelect: 'none',
+          '& *': {
+            cursor: 'default !important',
+            pointerEvents: 'none !important'
+          },
+          '&::before': {
+            cursor: 'default !important',
+            pointerEvents: 'none !important'
+          },
+          '&::after': {
+            cursor: 'default !important',
+            pointerEvents: 'none !important'
+          },
           '@media (min-width: 768px) and (max-width: 1200px) and (orientation: landscape)': {
             marginTop: '0px'
           }
@@ -108,7 +133,13 @@ const Home = () => {
             fontSize: { xs: '0.9rem', md: '1.1rem' },
             textAlign: 'center',
             fontFamily: 'Playfair Display, serif',
-            textShadow: '1px 1px 2px rgba(0,0,0,0.3)'
+            textShadow: '1px 1px 2px rgba(0,0,0,0.3)',
+            cursor: 'default !important',
+            pointerEvents: 'none !important',
+            userSelect: 'none',
+            WebkitUserSelect: 'none',
+            MozUserSelect: 'none',
+            msUserSelect: 'none'
           }}
         >
           DeliZuKar: your heart's Wi-Fi (always keeps you connected to happiness).

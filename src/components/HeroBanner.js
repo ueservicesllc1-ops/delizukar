@@ -6,6 +6,7 @@ import { Button, Box, Typography, Container } from '@mui/material';
 import { ArrowForward, Star } from '@mui/icons-material';
 import { collection, getDocs } from 'firebase/firestore';
 import { db } from '../firebase/config';
+import { responsiveComponents } from '../utils/responsiveDesign';
 import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
@@ -76,7 +77,7 @@ const HeroBanner = () => {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          backgroundColor: '#f5f5f5'
+          backgroundColor: '#8D9A7D'
         }}
       >
         <Typography variant="h6" sx={{ color: '#666' }}>
@@ -92,15 +93,16 @@ const HeroBanner = () => {
           className="hero-mobile"
           sx={{
             position: 'relative',
-            height: { xs: '60vh', sm: '80vh', md: '80vh' },
+            width: '100%',
+            maxWidth: '100%',
             overflow: 'hidden',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            marginBottom: { xs: '-195px', sm: '-152px', md: '-152px' },
-            '@media (min-width: 768px) and (max-width: 1200px) and (orientation: landscape)': {
-              marginBottom: '-152px'
-            }
+            // Sistema responsivo universal
+            height: responsiveComponents.banner.height,
+            padding: responsiveComponents.banner.padding,
+            marginBottom: { xs: '0px', sm: '0px', md: '0px' }
           }}
       >
       <Swiper
@@ -129,13 +131,18 @@ const HeroBanner = () => {
                 position: 'relative',
                 width: '100%',
                 height: '80vh',
+                backgroundColor: '#f8f9fa',
                 backgroundImage: `url(${slide.imageUrl})`,
                 backgroundSize: 'contain',
-                backgroundPosition: 'center 30%',
+                backgroundPosition: 'center center',
                 backgroundRepeat: 'no-repeat',
                 display: 'flex',
                 alignItems: 'center',
-                justifyContent: 'center'
+                justifyContent: 'center',
+                // Sistema responsivo universal
+                height: responsiveComponents.banner.height,
+                backgroundSize: { xs: 'contain', sm: 'contain', md: 'contain', lg: 'contain' },
+                backgroundPosition: 'center center'
               }}
             >
 

@@ -65,6 +65,8 @@ const PopupHeroManager = ({ open, onClose }) => {
   // Estados del formulario
   const [formData, setFormData] = useState({
     title: '¡Ofertas Especiales!',
+    welcomeTitle: '¡Bienvenido a DeliZuKar!',
+    showWelcomeTitle: true,
     description: 'Descubre nuestras deliciosas galletas artesanales horneadas con ingredientes premium y mucho amor',
     image: 'https://images.unsplash.com/photo-1558961363-fa8fdf82db35?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80',
     originalPrice: '15.99',
@@ -106,15 +108,26 @@ const PopupHeroManager = ({ open, onClose }) => {
         setOffers([]);
       }
 
-      // Cargar configuración del popup
-      const configSnap = await getDocs(collection(db, 'appConfig'));
-      const configDoc = configSnap.docs.find(doc => doc.id === 'popupHero');
+      // Cargar configuración del popup desde mainOffer
+      const mainOfferDoc = mainOfferSnap.docs.find(doc => doc.id === 'mainOffer');
       
-      if (configDoc) {
-        const config = configDoc.data();
+      if (mainOfferDoc) {
+        const config = mainOfferDoc.data();
+        console.log('📖 Configuración cargada desde mainOffer:', config);
         setPopupConfig({
           duration: config.duration || 8
         });
+        setFormData(prev => ({
+          ...prev,
+          showWelcomeTitle: config.showWelcomeTitle === true,
+          welcomeTitle: config.welcomeTitle || '¡Bienvenido a DeliZuKar!'
+        }));
+        console.log('🔄 Estado actualizado:', {
+          showWelcomeTitle: config.showWelcomeTitle === true,
+          welcomeTitle: config.welcomeTitle || '¡Bienvenido a DeliZuKar!'
+        });
+      } else {
+        console.log('⚠️ No se encontró mainOffer en Firestore');
       }
     } catch (error) {
       setError('Error cargando ofertas: ' + error.message);
@@ -210,7 +223,8 @@ const PopupHeroManager = ({ open, onClose }) => {
 
       setShowForm(false);
       setEditingOffer(null);
-      loadOffers();
+      // No recargar ofertas para evitar sobrescribir el estado
+      // loadOffers();
     } catch (error) {
       setSnackbarMessage('Error al guardar la oferta: ' + error.message);
       setSnackbarSeverity('error');
@@ -225,7 +239,8 @@ const PopupHeroManager = ({ open, onClose }) => {
       try {
         await deleteDoc(doc(db, 'popupOffers', offerId));
         setSuccess('Oferta eliminada correctamente');
-        loadOffers();
+        // No recargar ofertas para evitar sobrescribir el estado
+        // loadOffers();
       } catch (error) {
         setError('Error eliminando oferta: ' + error.message);
       }
@@ -235,15 +250,35 @@ const PopupHeroManager = ({ open, onClose }) => {
   const handleSaveConfig = async () => {
     try {
       setSaving(true);
-      const configRef = doc(db, 'appConfig', 'popupHero');
-      await setDoc(configRef, {
+      console.log('🔧 Guardando configuración:', {
         duration: popupConfig.duration,
-        updatedAt: new Date().toISOString()
+        showWelcomeTitle: formData.showWelcomeTitle,
+        welcomeTitle: formData.welcomeTitle
       });
+      console.log('🔧 Estado actual del formData:', formData);
+      
+      const configRef = doc(db, 'popupOffers', 'mainOffer');
+      const dataToSave = {
+        duration: popupConfig.duration,
+        showWelcomeTitle: formData.showWelcomeTitle,
+        welcomeTitle: formData.welcomeTitle,
+        updatedAt: new Date().toISOString()
+      };
+      
+      console.log('💾 Datos que se van a guardar en Firestore:', dataToSave);
+      console.log('💾 Referencia del documento:', configRef.path);
+      
+      await setDoc(configRef, dataToSave);
+      
+      console.log('✅ Configuración guardada en Firestore');
       setSnackbarMessage('Configuración guardada correctamente');
       setSnackbarSeverity('success');
       setSnackbarOpen(true);
+      
+      // No recargar la configuración para evitar sobrescribir el estado
+      // loadOffers(); // Comentado para evitar recarga
     } catch (error) {
+      console.error('❌ Error guardando configuración:', error);
       setSnackbarMessage('Error guardando configuración: ' + error.message);
       setSnackbarSeverity('error');
       setSnackbarOpen(true);
@@ -264,13 +299,35 @@ const PopupHeroManager = ({ open, onClose }) => {
     <Dialog
       open={open}
       onClose={handleClose}
-      maxWidth={false}
+      maxWidth="lg"
       fullWidth
+      sx={{
+        zIndex: 999999,
+        '& .MuiDialog-paper': {
+          zIndex: 999999
+        },
+        '& .MuiDialog-root': {
+          zIndex: 999999
+        },
+        '& .MuiBackdrop-root': {
+          zIndex: 999998
+        }
+      }}
+      BackdropProps={{
+        sx: {
+          backgroundColor: 'rgba(0, 0, 0, 0.5)',
+          zIndex: 999998
+        }
+      }}
       PaperProps={{
         sx: {
           borderRadius: '20px',
-          height: '800px',
-          width: '1200px'
+          height: '90vh',
+          maxHeight: '800px',
+          width: '95vw',
+          maxWidth: '1200px',
+          position: 'relative',
+          zIndex: 999999
         }
       }}
     >
@@ -313,6 +370,38 @@ const PopupHeroManager = ({ open, onClose }) => {
                     <Typography variant="h6" sx={{ mb: 2, fontWeight: 700, color: '#C8626D' }}>
                       Configuración General
                     </Typography>
+                    
+                    <TextField
+                      fullWidth
+                      label="Título de Bienvenida"
+                      value={formData.welcomeTitle}
+                      onChange={(e) => {
+                        handleInputChange('welcomeTitle', e.target.value);
+                        // Guardar automáticamente cuando se cambia el título
+                        setTimeout(() => {
+                          handleSaveConfig();
+                        }, 500);
+                      }}
+                      placeholder="Ej: ¡Bienvenido a DeliZuKar!"
+                      sx={{ mb: 2 }}
+                    />
+                    
+                    <FormControlLabel
+                      control={
+                        <Switch
+                          checked={formData.showWelcomeTitle}
+                          onChange={(e) => {
+                            handleInputChange('showWelcomeTitle', e.target.checked);
+                            // Guardar inmediatamente cuando se cambia el toggle
+                            setTimeout(() => {
+                              handleSaveConfig();
+                            }, 100);
+                          }}
+                        />
+                      }
+                      label="Mostrar Título de Bienvenida"
+                      sx={{ mb: 2 }}
+                    />
                     
                     <TextField
                       fullWidth
@@ -856,30 +945,32 @@ const PopupHeroManager = ({ open, onClose }) => {
                       minHeight: '100%',
                       overflow: 'auto'
                     }}>
-                        {/* Título principal */}
-                      <motion.div
-                        initial={{ opacity: 0, x: -30 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ duration: 0.8, delay: 0.4 }}
-                      >
-                        <Typography
-                          variant="h4"
-                          sx={{
-                            color: '#1a1a1a',
-                          fontWeight: 800, 
-                            mb: 1.5,
-                            fontFamily: 'Playfair Display, serif',
-                            textShadow: '0 2px 10px rgba(0,0,0,0.1)',
-                            background: 'linear-gradient(135deg, #1a1a1a 0%, #4a4a4a 100%)',
-                            backgroundClip: 'text',
-                            WebkitBackgroundClip: 'text',
-                            WebkitTextFillColor: 'transparent',
-                            fontSize: '1.8rem'
-                          }}
+                        {/* Título de bienvenida condicional */}
+                      {formData.showWelcomeTitle && (
+                        <motion.div
+                          initial={{ opacity: 0, x: -30 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ duration: 0.8, delay: 0.4 }}
                         >
-                          ¡Bienvenido a DeliZuKar!
-                        </Typography>
-                      </motion.div>
+                          <Typography
+                            variant="h4"
+                            sx={{
+                              color: '#7C2815',
+                              fontWeight: 800, 
+                              mb: 1.5,
+                              fontFamily: 'Playfair Display, serif',
+                              textShadow: '0 2px 10px rgba(0,0,0,0.1)',
+                              background: 'linear-gradient(135deg, #7C2815 0%, #C8626D 100%)',
+                              backgroundClip: 'text',
+                              WebkitBackgroundClip: 'text',
+                              WebkitTextFillColor: 'transparent',
+                              fontSize: '1.8rem'
+                            }}
+                          >
+                            {formData.welcomeTitle || '¡Bienvenido a DeliZuKar!'}
+                          </Typography>
+                        </motion.div>
+                      )}
                         
                         {/* Subtítulo */}
                       <motion.div
@@ -948,11 +1039,11 @@ const PopupHeroManager = ({ open, onClose }) => {
                               ease: "easeInOut"
                             }}
                             style={{
-                              background: 'linear-gradient(135deg, #ff6b6b 0%, #ff5252 100%)',
-                              borderRadius: '15px',
-                              padding: '10px 20px',
-                              boxShadow: '0 6px 24px rgba(255,107,107,0.4)',
-                              border: '2px solid #ff6b6b',
+                              background: 'linear-gradient(135deg, #C8626D 0%, #EB8B8B 100%)',
+                              borderRadius: '12px',
+                              padding: '8px 16px',
+                              boxShadow: '0 4px 16px rgba(200,98,109,0.4)',
+                              border: '2px solid #C8626D',
                               position: 'relative',
                               overflow: 'hidden'
                             }}
@@ -979,11 +1070,11 @@ const PopupHeroManager = ({ open, onClose }) => {
                             />
                             
                             <Typography
-                              variant="h4"
+                              variant="h5"
                               sx={{
                             color: 'white',
                                 fontWeight: 900,
-                                fontSize: '1.3rem',
+                                fontSize: '1.1rem',
                                 textAlign: 'center',
                                 textShadow: '0 2px 10px rgba(0,0,0,0.3)',
                                 position: 'relative',
@@ -1087,7 +1178,7 @@ const PopupHeroManager = ({ open, onClose }) => {
                           >
                             <Button
                               variant="contained"
-                              size="medium"
+                              size="small"
                               startIcon={<motion.div
                                 animate={{ rotate: 360 }}
                                 transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
@@ -1095,21 +1186,21 @@ const PopupHeroManager = ({ open, onClose }) => {
                                 <FlashOn />
                               </motion.div>}
                               sx={{
-                          background: 'linear-gradient(135deg, #ff6b6b 0%, #ff5252 100%)',
+                          background: 'linear-gradient(135deg, #C8626D 0%, #EB8B8B 100%)',
                           color: 'white',
                           fontWeight: 800,
-                                fontSize: '0.9rem',
-                                px: 3,
-                                py: 1,
-                                borderRadius: '50px',
+                                fontSize: '0.8rem',
+                                px: 2,
+                                py: 0.8,
+                                borderRadius: '25px',
                                 textTransform: 'none',
-                          border: '2px solid #ff6b6b',
-                                boxShadow: '0 8px 32px rgba(255,107,107,0.3)',
+                          border: '2px solid #C8626D',
+                                boxShadow: '0 4px 16px rgba(200,98,109,0.3)',
                                 position: 'relative',
                                 overflow: 'hidden',
                                 '&:hover': {
-                                  background: 'linear-gradient(135deg, #ff5252 0%, #ff1744 100%)',
-                                  border: '2px solid #ff5252'
+                                  background: 'linear-gradient(135deg, #EB8B8B 0%, #C8626D 100%)',
+                                  border: '2px solid #EB8B8B'
                                 },
                                 transition: 'all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
                                 '&::before': {

@@ -395,7 +395,7 @@ const CostAnalysisIngredients = () => {
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      backgroundColor: '#f5f5f5'
+                      backgroundColor: '#8D9A7D'
                     }}>
                       <Avatar sx={{ width: 80, height: 80, backgroundColor: '#c8626d' }}>
                         <Inventory sx={{ fontSize: 40 }} />
@@ -930,7 +930,7 @@ const CostAnalysisIngredients = () => {
                   color: '#666',
                   '&:hover': {
                     borderColor: '#999',
-                    backgroundColor: '#f5f5f5'
+                    backgroundColor: '#8D9A7D'
                   }
                 }}
               >

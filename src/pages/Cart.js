@@ -247,7 +247,7 @@ const Cart = () => {
                             <IconButton
                               onClick={() => handleUpdateQuantity(item.id, item.quantity - 1)}
                               sx={{
-                                backgroundColor: '#f5f5f5',
+                                backgroundColor: '#FFFFFF',
                                 color: '#c8626d',
                                 '&:hover': {
                                   backgroundColor: '#c8626d20'
@@ -279,7 +279,7 @@ const Cart = () => {
                             <IconButton
                               onClick={() => handleUpdateQuantity(item.id, item.quantity + 1)}
                               sx={{
-                                backgroundColor: '#f5f5f5',
+                                backgroundColor: '#FFFFFF',
                                 color: '#c8626d',
                                 '&:hover': {
                                   backgroundColor: '#c8626d20'
@@ -292,7 +292,7 @@ const Cart = () => {
                             <IconButton
                               onClick={() => handleRemoveItem(item.id)}
                               sx={{
-                                color: '#f44336',
+                                color: '#7C2815',
                                 ml: 1,
                                 '&:hover': {
                                   backgroundColor: '#ffebee'

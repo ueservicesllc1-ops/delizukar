@@ -273,7 +273,7 @@ function App() {
                 },
                 error: {
                   iconTheme: {
-                    primary: '#f44336',
+                    primary: '#7C2815',
                     secondary: '#fff'
                   }
                 }

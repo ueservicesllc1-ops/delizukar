@@ -29,10 +29,14 @@ const PopupHero = ({ open, onClose }) => {
   const [duration, setDuration] = useState(8); // Duración por defecto: 8 segundos
   const [timeLeft, setTimeLeft] = useState(8);
   const [isClosing, setIsClosing] = useState(false);
+  const [popupConfig, setPopupConfig] = useState({
+    showWelcomeTitle: false,
+    welcomeTitle: ''
+  });
 
   console.log('PopupHero - open:', open, 'loading:', loading, 'offers:', offers.length);
 
-  // Cargar ofertas y configuración desde Firebase
+  // Cargar ofertas y configuración desde Firebase solo una vez
   useEffect(() => {
     const loadOffers = async () => {
       try {
@@ -46,25 +50,43 @@ const PopupHero = ({ open, onClose }) => {
         // Filtrar solo ofertas activas
         const activeOffers = offersData.filter(offer => offer.isActive === true);
         
+        console.log('🔍 PopupHero - Ofertas cargadas:', offersData);
+        console.log('🔍 PopupHero - Ofertas activas:', activeOffers);
+        
         if (activeOffers.length === 0) {
           // Si no hay ofertas activas, no mostrar popup
+          console.log('⚠️ PopupHero - No hay ofertas activas, no se mostrará el popup');
           setOffers([]);
         } else {
+          console.log('✅ PopupHero - Ofertas activas encontradas:', activeOffers.length);
           setOffers(activeOffers);
         }
 
-        // Cargar configuración de duración
-        const configSnapshot = await getDocs(collection(db, 'appConfig'));
-        const configData = configSnapshot.docs.find(doc => doc.id === 'popupHero');
+        // Cargar configuración desde mainOffer (reutilizar la consulta anterior)
+        const mainOfferData = querySnapshot.docs.find(doc => doc.id === 'mainOffer');
         
-        if (configData) {
-          const config = configData.data();
+        if (mainOfferData) {
+          const config = mainOfferData.data();
+          console.log('🔍 PopupHero - Configuración leída desde mainOffer:', config);
           const popupDuration = config.duration || 8; // Duración por defecto: 8 segundos
           setDuration(popupDuration);
           setTimeLeft(popupDuration);
+          setPopupConfig({
+            showWelcomeTitle: config.showWelcomeTitle === true,
+            welcomeTitle: config.welcomeTitle || ''
+          });
+          console.log('🔍 PopupHero - Estado configurado:', {
+            showWelcomeTitle: config.showWelcomeTitle === true,
+            welcomeTitle: config.welcomeTitle || ''
+          });
         } else {
+          console.log('⚠️ PopupHero - No se encontró mainOffer en Firestore');
           setDuration(8);
           setTimeLeft(8);
+          setPopupConfig({
+            showWelcomeTitle: false,
+            welcomeTitle: ''
+          });
         }
         
         setLoading(false);
@@ -85,7 +107,8 @@ const PopupHero = ({ open, onClose }) => {
       }
     };
 
-    if (open) {
+    // Solo cargar si está abierto y no hay ofertas cargadas
+    if (open && offers.length === 0) {
       loadOffers();
     }
   }, [open]);
@@ -186,7 +209,7 @@ const PopupHero = ({ open, onClose }) => {
                 left: 0,
                 right: 0,
                 bottom: 0,
-                background: 'linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%)',
+                background: 'linear-gradient(135deg, #FFFFFF 0%, #8D9A7D 100%)',
                 '&::before': {
                   content: '""',
                   position: 'absolute',
@@ -229,7 +252,7 @@ const PopupHero = ({ open, onClose }) => {
                   variant="h6"
                   sx={{
                     fontWeight: 700,
-                    color: timeLeft <= 3 ? '#ff4444' : '#333',
+                    color: timeLeft <= 3 ? '#7C2815' : '#C8626D',
                     fontSize: '1.1rem'
                   }}
                 >
@@ -392,7 +415,7 @@ const PopupHero = ({ open, onClose }) => {
                 left: 0,
                 right: 0,
                 height: '140px',
-                background: 'linear-gradient(135deg, #ff6b6b 0%, #ff8e8e 100%)',
+                background: 'linear-gradient(135deg, #C8626D 0%, #EB8B8B 100%)',
                 zIndex: 3,
                 boxShadow: '0 4px 20px rgba(255,107,107,0.3)',
                 display: 'flex',
@@ -730,41 +753,43 @@ const PopupHero = ({ open, onClose }) => {
                 minHeight: '350px'
               }}>
                 {/* LADO IZQUIERDO - CONTENIDO */}
-                <Box sx={{ 
-                  flex: 1, 
-                  padding: '30px 25px',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  justifyContent: 'center',
-                  position: 'relative',
-                  minHeight: '100%',
-                  overflow: 'auto'
-                }}>
+                    <Box sx={{
+                      flex: 1, 
+                      padding: '30px 25px',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      justifyContent: 'center',
+                      position: 'relative',
+                      minHeight: '100%',
+                      overflow: 'auto'
+                    }}>
 
-                  {/* Título principal */}
-                  <motion.div
-                    initial={{ opacity: 0, x: -30 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ duration: 0.8, delay: 0.4 }}
-                  >
-                    <Typography
-                      variant="h4"
-                      sx={{
-                        color: '#1a1a1a',
-                        fontWeight: 800,
-                        mb: 1.5,
-                        fontFamily: 'Playfair Display, serif',
-                        textShadow: '0 2px 10px rgba(0,0,0,0.1)',
-                        background: 'linear-gradient(135deg, #1a1a1a 0%, #4a4a4a 100%)',
-                        backgroundClip: 'text',
-                        WebkitBackgroundClip: 'text',
-                        WebkitTextFillColor: 'transparent',
-                        fontSize: '1.8rem'
-                      }}
+                  {/* Título de bienvenida condicional */}
+                  {popupConfig.showWelcomeTitle && (
+                    <motion.div
+                      initial={{ opacity: 0, x: -30 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ duration: 0.8, delay: 0.4 }}
                     >
-                      ¡Bienvenido a DeliZuKar!
-                    </Typography>
-                  </motion.div>
+                      <Typography
+                        variant="h4"
+                        sx={{
+                          color: '#7C2815',
+                          fontWeight: 800,
+                          mb: 1.5,
+                          fontFamily: 'Playfair Display, serif',
+                          textShadow: '0 2px 10px rgba(0,0,0,0.1)',
+                          background: 'linear-gradient(135deg, #7C2815 0%, #C8626D 100%)',
+                          backgroundClip: 'text',
+                          WebkitBackgroundClip: 'text',
+                          WebkitTextFillColor: 'transparent',
+                          fontSize: '1.8rem'
+                        }}
+                      >
+                        {popupConfig.welcomeTitle}
+                      </Typography>
+                    </motion.div>
+                  )}
 
                   {/* Subtítulo */}
                   <motion.div
@@ -775,7 +800,7 @@ const PopupHero = ({ open, onClose }) => {
                     <Typography
                       variant="h6"
                       sx={{
-                        color: '#ff6b6b',
+                        color: '#C8626D',
                         fontWeight: 700,
                         mb: 2,
                         fontFamily: 'Playfair Display, serif',
@@ -813,7 +838,7 @@ const PopupHero = ({ open, onClose }) => {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.8, delay: 1.0 }}
                   >
-                    <Box sx={{ display: 'flex', justifyContent: 'center', mb: 3 }}>
+                        <Box sx={{ display: 'flex', justifyContent: 'center', mb: 3 }}>
                       <motion.div
                         whileHover={{ 
                           scale: 1.1, 
@@ -832,11 +857,11 @@ const PopupHero = ({ open, onClose }) => {
                           ease: "easeInOut"
                         }}
                         style={{
-                          background: 'linear-gradient(135deg, #ff6b6b 0%, #ff5252 100%)',
+                          background: 'linear-gradient(135deg, #C8626D 0%, #EB8B8B 100%)',
                           borderRadius: '15px',
                           padding: '10px 20px',
                           boxShadow: '0 6px 24px rgba(255,107,107,0.4)',
-                          border: '2px solid #ff6b6b',
+                          border: '2px solid #C8626D',
                           position: 'relative',
                           overflow: 'hidden'
                         }}
@@ -979,7 +1004,7 @@ const PopupHero = ({ open, onClose }) => {
                             <FlashOn />
                           </motion.div>}
                           sx={{
-                            background: 'linear-gradient(135deg, #ff6b6b 0%, #ff5252 100%)',
+                            background: 'linear-gradient(135deg, #C8626D 0%, #EB8B8B 100%)',
                             color: 'white',
                             fontWeight: 800,
                             fontSize: '0.9rem',
@@ -987,13 +1012,13 @@ const PopupHero = ({ open, onClose }) => {
                             py: 1,
                             borderRadius: '50px',
                             textTransform: 'none',
-                            border: '2px solid #ff6b6b',
+                            border: '2px solid #C8626D',
                             boxShadow: '0 8px 32px rgba(255,107,107,0.3)',
                             position: 'relative',
                             overflow: 'hidden',
                             '&:hover': {
-                              background: 'linear-gradient(135deg, #ff5252 0%, #ff1744 100%)',
-                              border: '2px solid #ff5252'
+                              background: 'linear-gradient(135deg, #EB8B8B 0%, #C8626D 100%)',
+                              border: '2px solid #EB8B8B'
                             },
                             transition: 'all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
                             '&::before': {
@@ -1030,7 +1055,7 @@ const PopupHero = ({ open, onClose }) => {
                   justifyContent: 'stretch',
                   position: 'relative',
                   overflow: 'hidden',
-                  backgroundColor: '#f8f9fa',
+                  backgroundColor: '#FFFFFF',
                   minHeight: '100%'
                 }}>
                   {/* Contenedor máscara - ventana fija que ocupa todo el espacio */}

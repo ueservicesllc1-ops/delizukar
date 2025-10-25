@@ -44,6 +44,7 @@ import {
 import { collection, addDoc, getDocs, query, where } from 'firebase/firestore';
 import LanguageSwitcher from './LanguageSwitcher';
 import { useTranslation } from 'react-i18next';
+import { responsiveComponents, getResponsiveValue } from '../utils/responsiveDesign';
 
 const Header = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -238,15 +239,20 @@ const Header = () => {
         transition={{ duration: 0.5 }}
       >
         <AppBar
-          position="sticky"
+          position="fixed"
           className="header-mobile"
           sx={{
             backgroundColor: 'white',
             boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
             zIndex: 9999,
             top: 0,
-            position: 'fixed',
-            width: '100%'
+            // Sistema responsivo universal
+            height: responsiveComponents.header.height,
+            width: '100%',
+            '& .MuiToolbar-root': {
+              minHeight: responsiveComponents.header.height,
+              padding: responsiveComponents.header.padding
+            }
           }}
         >
           <Container maxWidth="lg">

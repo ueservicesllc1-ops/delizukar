@@ -60,7 +60,8 @@ import {
   Lock,
   Close,
   Group,
-  AdminPanelSettings
+  AdminPanelSettings,
+  Palette
 } from '@mui/icons-material';
 import FontManager from '../components/FontManager';
 import BannerPhotoManager from '../components/BannerPhotoManager';
@@ -103,6 +104,7 @@ const AdminDashboard = () => {
   const [selectedUsers, setSelectedUsers] = useState([]);
   const [registeredUsers, setRegisteredUsers] = useState([]);
   const [loadingUsers, setLoadingUsers] = useState(false);
+  const [colorPaletteOpen, setColorPaletteOpen] = useState(false);
   const [selectedPeriod, setSelectedPeriod] = useState('current'); // Added period selector
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1); // Added month selector
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear()); // Added year selector
@@ -690,12 +692,13 @@ const AdminDashboard = () => {
         >
           <Box sx={{ mt: 12, pt: 6 }}>
             <Grid container spacing={0} sx={{ maxWidth: '1000px', mx: 'auto' }}>
-              {Array.from({ length: 16 }, (_, index) => {
+              {Array.from({ length: 20 }, (_, index) => {
                 const colors = [
                   '#c8626d', '#be8782', '#b5555a', '#c8626d',
                   '#c8626d', '#c8626d', '#c8626d', '#c8626d',
                   '#BC8F8F', '#F5DEB3', '#DDA0DD', '#98FB98',
-                  '#F0E68C', '#FFB6C1', '#87CEEB', '#FFA07A'
+                  '#F0E68C', '#FFB6C1', '#87CEEB', '#FFA07A',
+                  '#C8626D', '#7C2815', '#EB8B8B', '#8D9A7D'
                 ];
                 const color = colors[index];
                 
@@ -726,6 +729,10 @@ const AdminDashboard = () => {
                               index === 12 ? () => setMinProductsManagerOpen(true) :
                               index === 13 ? () => setMessagingSystemOpen(true) :
                               index === 14 ? handleCostAnalysisClick :
+                              index === 16 ? () => setColorPaletteOpen(true) :
+                              index === 17 ? () => setColorPaletteOpen(true) :
+                              index === 18 ? () => setColorPaletteOpen(true) :
+                              index === 19 ? () => setColorPaletteOpen(true) :
                               undefined
                             }
                         sx={{
@@ -963,6 +970,89 @@ const AdminDashboard = () => {
                                   }}
                                 >
                                   Análisis de Costos
+                                </Typography>
+                              </Box>
+                            ) : index === 16 ? (
+                              <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1 }}>
+                                <Palette sx={{ color: 'white', fontSize: '2rem' }} />
+                                <Typography
+                                  variant="body2"
+                                  sx={{
+                                    color: 'white',
+                                    fontWeight: 600,
+                                    textShadow: '1px 1px 2px rgba(0,0,0,0.5)'
+                                  }}
+                                >
+                                  Paleta de Colores
+                                </Typography>
+                              </Box>
+                            ) : index === 17 ? (
+                              <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1 }}>
+                                <Typography
+                                  variant="h4"
+                                  sx={{
+                                    color: 'white',
+                                    fontWeight: 700,
+                                    textShadow: '1px 1px 2px rgba(0,0,0,0.5)'
+                                  }}
+                                >
+                                  #C8626D
+                                </Typography>
+                                <Typography
+                                  variant="body2"
+                                  sx={{
+                                    color: 'white',
+                                    fontWeight: 600,
+                                    textShadow: '1px 1px 2px rgba(0,0,0,0.5)'
+                                  }}
+                                >
+                                  Color Principal
+                                </Typography>
+                              </Box>
+                            ) : index === 18 ? (
+                              <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1 }}>
+                                <Typography
+                                  variant="h4"
+                                  sx={{
+                                    color: 'white',
+                                    fontWeight: 700,
+                                    textShadow: '1px 1px 2px rgba(0,0,0,0.5)'
+                                  }}
+                                >
+                                  #7C2815
+                                </Typography>
+                                <Typography
+                                  variant="body2"
+                                  sx={{
+                                    color: 'white',
+                                    fontWeight: 600,
+                                    textShadow: '1px 1px 2px rgba(0,0,0,0.5)'
+                                  }}
+                                >
+                                  Color Secundario
+                                </Typography>
+                              </Box>
+                            ) : index === 19 ? (
+                              <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1 }}>
+                                <Typography
+                                  variant="h4"
+                                  sx={{
+                                    color: 'white',
+                                    fontWeight: 700,
+                                    textShadow: '1px 1px 2px rgba(0,0,0,0.5)'
+                                  }}
+                                >
+                                  #EB8B8B
+                                </Typography>
+                                <Typography
+                                  variant="body2"
+                                  sx={{
+                                    color: 'white',
+                                    fontWeight: 600,
+                                    textShadow: '1px 1px 2px rgba(0,0,0,0.5)'
+                                  }}
+                                >
+                                  Color Terciario
                                 </Typography>
                               </Box>
                             ) : (
@@ -1962,6 +2052,161 @@ const AdminDashboard = () => {
               }}
             >
               🔓 Acceder
+            </Button>
+          </DialogActions>
+        </Dialog>
+
+        {/* Modal de Paleta de Colores */}
+        <Dialog
+          open={colorPaletteOpen}
+          onClose={() => setColorPaletteOpen(false)}
+          maxWidth="md"
+          fullWidth
+          PaperProps={{
+            sx: {
+              borderRadius: '16px',
+              boxShadow: '0 20px 40px rgba(0,0,0,0.15)'
+            }
+          }}
+        >
+          <DialogTitle sx={{ 
+            textAlign: 'center', 
+            pb: 1,
+            backgroundColor: '#c8626d',
+            color: 'white',
+            borderRadius: '16px 16px 0 0'
+          }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1 }}>
+              <Palette sx={{ fontSize: 28 }} />
+              <Typography variant="h5" sx={{ fontWeight: 700, fontFamily: '"Asap", sans-serif' }}>
+                Paleta de Colores
+              </Typography>
+            </Box>
+          </DialogTitle>
+          
+          <DialogContent sx={{ p: 4 }}>
+            <Typography variant="h6" sx={{ mb: 3, color: '#c8626d', fontWeight: 600, textAlign: 'center' }}>
+              🎨 Colores de la Marca
+            </Typography>
+            
+            <Grid container spacing={3}>
+              <Grid item xs={12} sm={6}>
+                <Box sx={{ 
+                  p: 3, 
+                  backgroundColor: '#C8626D', 
+                  borderRadius: '12px',
+                  textAlign: 'center',
+                  color: 'white'
+                }}>
+                  <Typography variant="h4" sx={{ fontWeight: 700, mb: 1 }}>
+                    #C8626D
+                  </Typography>
+                  <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                    Color Principal
+                  </Typography>
+                  <Typography variant="body2" sx={{ mt: 1, opacity: 0.9 }}>
+                    Usado en headers, botones principales y elementos destacados
+                  </Typography>
+                </Box>
+              </Grid>
+              
+              <Grid item xs={12} sm={6}>
+                <Box sx={{ 
+                  p: 3, 
+                  backgroundColor: '#7C2815', 
+                  borderRadius: '12px',
+                  textAlign: 'center',
+                  color: 'white'
+                }}>
+                  <Typography variant="h4" sx={{ fontWeight: 700, mb: 1 }}>
+                    #7C2815
+                  </Typography>
+                  <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                    Color Secundario
+                  </Typography>
+                  <Typography variant="body2" sx={{ mt: 1, opacity: 0.9 }}>
+                    Usado en elementos de contraste y acentos
+                  </Typography>
+                </Box>
+              </Grid>
+              
+              <Grid item xs={12} sm={6}>
+                <Box sx={{ 
+                  p: 3, 
+                  backgroundColor: '#EB8B8B', 
+                  borderRadius: '12px',
+                  textAlign: 'center',
+                  color: 'white'
+                }}>
+                  <Typography variant="h4" sx={{ fontWeight: 700, mb: 1 }}>
+                    #EB8B8B
+                  </Typography>
+                  <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                    Color Terciario
+                  </Typography>
+                  <Typography variant="body2" sx={{ mt: 1, opacity: 0.9 }}>
+                    Usado en hover states y elementos interactivos
+                  </Typography>
+                </Box>
+              </Grid>
+              
+              <Grid item xs={12} sm={6}>
+                <Box sx={{ 
+                  p: 3, 
+                  backgroundColor: '#8D9A7D', 
+                  borderRadius: '12px',
+                  textAlign: 'center',
+                  color: 'white'
+                }}>
+                  <Typography variant="h4" sx={{ fontWeight: 700, mb: 1 }}>
+                    #8D9A7D
+                  </Typography>
+                  <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                    Color Complementario
+                  </Typography>
+                  <Typography variant="body2" sx={{ mt: 1, opacity: 0.9 }}>
+                    Usado en elementos de apoyo y fondos
+                  </Typography>
+                </Box>
+              </Grid>
+            </Grid>
+            
+            <Box sx={{ mt: 4, p: 3, backgroundColor: '#f5f5f5', borderRadius: '12px' }}>
+              <Typography variant="h6" sx={{ mb: 2, color: '#c8626d', fontWeight: 600 }}>
+                💡 Información de la Paleta
+              </Typography>
+              <Typography variant="body2" sx={{ color: '#666', mb: 1 }}>
+                • <strong>#C8626D</strong> - Color principal de la marca Delizukar
+              </Typography>
+              <Typography variant="body2" sx={{ color: '#666', mb: 1 }}>
+                • <strong>#7C2815</strong> - Color de contraste para elementos importantes
+              </Typography>
+              <Typography variant="body2" sx={{ color: '#666', mb: 1 }}>
+                • <strong>#EB8B8B</strong> - Color para estados hover y interactivos
+              </Typography>
+              <Typography variant="body2" sx={{ color: '#666' }}>
+                • <strong>#8D9A7D</strong> - Color complementario para fondos y elementos de apoyo
+              </Typography>
+            </Box>
+          </DialogContent>
+          
+          <DialogActions sx={{ p: 3, justifyContent: 'center' }}>
+            <Button
+              onClick={() => setColorPaletteOpen(false)}
+              variant="contained"
+              sx={{
+                backgroundColor: '#c8626d',
+                fontFamily: '"Asap", sans-serif',
+                fontWeight: 600,
+                px: 3,
+                py: 1,
+                borderRadius: '8px',
+                '&:hover': {
+                  backgroundColor: '#b8555a'
+                }
+              }}
+            >
+              Cerrar
             </Button>
           </DialogActions>
         </Dialog>

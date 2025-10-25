@@ -299,7 +299,7 @@ const CostAnalysisDashboard = () => {
             <CardContent>
               <Typography variant="h4" sx={{ 
                 fontWeight: 700, 
-                color: '#f44336',
+                color: '#7C2815',
                 fontFamily: '"Asap", sans-serif'
               }}>
                 ${summary.totalProductionCost.toFixed(2)}

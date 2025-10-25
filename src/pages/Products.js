@@ -225,13 +225,13 @@ const Products = () => {
                         size="small"
                         sx={{
                           backgroundColor: 
-                            (product.inventory || 0) === 0 ? '#f4433620' :
-                            (product.inventory || 0) < 10 ? '#ff980020' :
-                            (product.inventory || 0) < 50 ? '#ffc10720' : '#4caf5020',
+                            (product.inventory || 0) === 0 ? '#7C281520' :
+                            (product.inventory || 0) < 10 ? '#EB8B8B20' :
+                            (product.inventory || 0) < 50 ? '#8D9A7D20' : '#C8626D20',
                           color: 
-                            (product.inventory || 0) === 0 ? '#f44336' :
-                            (product.inventory || 0) < 10 ? '#ff9800' :
-                            (product.inventory || 0) < 50 ? '#ffc107' : '#4caf50',
+                            (product.inventory || 0) === 0 ? '#7C2815' :
+                            (product.inventory || 0) < 10 ? '#EB8B8B' :
+                            (product.inventory || 0) < 50 ? '#8D9A7D' : '#C8626D',
                           fontWeight: 600,
                           fontSize: '0.7rem'
                         }}
@@ -376,13 +376,13 @@ const Products = () => {
                         size="small"
                         sx={{
                           backgroundColor: 
-                            (selected.inventory || 0) === 0 ? '#f4433620' :
-                            (selected.inventory || 0) < 10 ? '#ff980020' :
-                            (selected.inventory || 0) < 50 ? '#ffc10720' : '#4caf5020',
+                            (selected.inventory || 0) === 0 ? '#7C281520' :
+                            (selected.inventory || 0) < 10 ? '#EB8B8B20' :
+                            (selected.inventory || 0) < 50 ? '#8D9A7D20' : '#C8626D20',
                           color: 
-                            (selected.inventory || 0) === 0 ? '#f44336' :
-                            (selected.inventory || 0) < 10 ? '#ff9800' :
-                            (selected.inventory || 0) < 50 ? '#ffc107' : '#4caf50',
+                            (selected.inventory || 0) === 0 ? '#7C2815' :
+                            (selected.inventory || 0) < 10 ? '#EB8B8B' :
+                            (selected.inventory || 0) < 50 ? '#8D9A7D' : '#C8626D',
                           fontWeight: 600,
                           fontSize: '0.8rem'
                         }}

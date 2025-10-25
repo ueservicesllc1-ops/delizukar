@@ -16,6 +16,7 @@ import {
   Twitter
 } from '@mui/icons-material';
 import { useTranslation } from 'react-i18next';
+import { responsiveComponents } from '../utils/responsiveDesign';
 
 const Footer = () => {
   const { t } = useTranslation();
@@ -28,20 +29,27 @@ const Footer = () => {
       sx={{
         backgroundColor: '#C8626D',
         color: 'white',
-        pt: 8,
-        pb: 4,
+        pt: 0,
+        pb: 0,
         position: 'relative'
       }}
     >
       <Container maxWidth="lg">
-        <Grid container spacing={4} className="footer-content-mobile">
-          {/* Quick links */}
-          <Grid item xs={12} md={3} className="footer-section-mobile">
+        <Grid container spacing={{ xs: 3, sm: 4, md: 5, lg: 6, xl: 8 }} className="footer-content-mobile" justifyContent="center" sx={{
+          // Sistema responsivo universal
+          padding: responsiveComponents.footer.padding
+        }}>
+          {/* Sección 1: Enlaces Rápidos */}
+          <Grid item xs={12} sm={6} md={4} lg={3} className="footer-section-mobile">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6 }}
+              sx={{ 
+                // Sistema responsivo universal
+                padding: { xs: '3px 20px', sm: '4px 25px', md: '5px 30px', lg: '6px 35px', xl: '8px 40px' }
+              }}
             >
               <Typography
                 variant="h6"
@@ -49,100 +57,112 @@ const Footer = () => {
                 sx={{
                   fontWeight: 600,
                   color: 'white',
-                  mb: 3,
-                  fontSize: '1.1rem'
+                  mb: 1,
+                  fontSize: '1.1rem',
+                  textAlign: 'center'
                 }}
               >
-                {t('footer.quickLinks', 'Quick links')}
+                Enlaces Rápidos
               </Typography>
               
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                <Link href="/terms" className="footer-link-mobile" sx={{ color: 'white', textDecoration: 'none', fontSize: '0.95rem', '&:hover': { color: '#eb8b8b' } }}>
-                  {t('footer.termsConditions', 'Terms and Conditions')}
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, alignItems: 'center' }}>
+                <Link href="/terms" className="footer-link-mobile" sx={{ color: 'white', textDecoration: 'none', fontSize: '0.95rem', '&:hover': { color: '#EB8B8B' } }}>
+                  Términos y Condiciones
                 </Link>
-                <Link href="/terms-service" sx={{ color: 'white', textDecoration: 'none', fontSize: '0.95rem', '&:hover': { color: '#eb8b8b' } }}>
-                  {t('footer.termsService', 'Terms of Service')}
+                <Link href="/terms-service" sx={{ color: 'white', textDecoration: 'none', fontSize: '0.95rem', '&:hover': { color: '#EB8B8B' } }}>
+                  Términos de Servicio
                 </Link>
-                <Link href="/faq" sx={{ color: 'white', textDecoration: 'none', fontSize: '0.95rem', '&:hover': { color: '#eb8b8b' } }}>
-                  {t('footer.faq', "FAQ's")}
+                <Link href="/faq" sx={{ color: 'white', textDecoration: 'none', fontSize: '0.95rem', '&:hover': { color: '#EB8B8B' } }}>
+                  Preguntas Frecuentes
                 </Link>
-                <Link href="/allergy" sx={{ color: 'white', textDecoration: 'none', fontSize: '0.95rem', '&:hover': { color: '#eb8b8b' } }}>
-                  {t('footer.allergyNotices', 'Allergy Notices')}
+                <Link href="/allergy" sx={{ color: 'white', textDecoration: 'none', fontSize: '0.95rem', '&:hover': { color: '#EB8B8B' } }}>
+                  Avisos de Alergias
                 </Link>
-                <Link href="/shipping" sx={{ color: 'white', textDecoration: 'none', fontSize: '0.95rem', '&:hover': { color: '#eb8b8b' } }}>
-                  {t('footer.shippingPolicy', 'Shipping Policy')}
+                <Link href="/shipping" sx={{ color: 'white', textDecoration: 'none', fontSize: '0.95rem', '&:hover': { color: '#EB8B8B' } }}>
+                  Política de Envío
                 </Link>
-                <Link href="/cookie-care" sx={{ color: 'white', textDecoration: 'none', fontSize: '0.95rem', '&:hover': { color: '#eb8b8b' } }}>
-                  {t('footer.cookieCare', 'Cookie Care Instructions')}
+                <Link href="/cookie-care" sx={{ color: 'white', textDecoration: 'none', fontSize: '0.95rem', '&:hover': { color: '#EB8B8B' } }}>
+                  Instrucciones de Cuidado de Galletas
                 </Link>
               </Box>
             </motion.div>
           </Grid>
 
-          {/* Navigation */}
-          <Grid item xs={12} md={3}>
+          {/* Sección 2: Navegación */}
+          <Grid item xs={12} sm={6} md={4} lg={3}>
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6, delay: 0.1 }}
+              sx={{ 
+                // Sistema responsivo universal
+                padding: { xs: '3px 20px', sm: '4px 25px', md: '5px 30px', lg: '6px 35px', xl: '8px 40px' }
+              }}
             >
               <Typography
                 variant="h6"
                 sx={{
                   fontWeight: 600,
                   color: 'white',
-                  mb: 3,
-                  fontSize: '1.1rem'
+                  mb: 1,
+                  fontSize: '1.1rem',
+                  textAlign: 'center'
                 }}
               >
-                {t('footer.navigation', 'Navigation')}
+                Navegación
               </Typography>
               
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                <Link href="/" sx={{ color: 'white', textDecoration: 'none', fontSize: '0.95rem', '&:hover': { color: '#eb8b8b' } }}>
-                  {t('navigation.home', 'Home')}
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, alignItems: 'center' }}>
+                <Link href="/" sx={{ color: 'white', textDecoration: 'none', fontSize: '0.95rem', '&:hover': { color: '#EB8B8B' } }}>
+                  Inicio
                 </Link>
-                <Link href="/productos" sx={{ color: 'white', textDecoration: 'none', fontSize: '0.95rem', '&:hover': { color: '#eb8b8b' } }}>
-                  {t('navigation.services', 'Productos')}
+                <Link href="/productos" sx={{ color: 'white', textDecoration: 'none', fontSize: '0.95rem', '&:hover': { color: '#EB8B8B' } }}>
+                  Productos
                 </Link>
-                <Link href="/order" sx={{ color: 'white', textDecoration: 'none', fontSize: '0.95rem', '&:hover': { color: '#eb8b8b' } }}>
-                  {t('navigation.order', 'Order Here')}
+                <Link href="/contacto" sx={{ color: 'white', textDecoration: 'none', fontSize: '0.95rem', '&:hover': { color: '#EB8B8B' } }}>
+                  Contacto
                 </Link>
-                <Link href="/contact" sx={{ color: 'white', textDecoration: 'none', fontSize: '0.95rem', '&:hover': { color: '#eb8b8b' } }}>
-                  {t('navigation.contact', 'Contact')}
+                <Link href="/nosotros" sx={{ color: 'white', textDecoration: 'none', fontSize: '0.95rem', '&:hover': { color: '#EB8B8B' } }}>
+                  Nosotros
                 </Link>
               </Box>
             </motion.div>
           </Grid>
 
-          {/* Subscribe */}
-          <Grid item xs={12} md={3}>
+          {/* Sección 3: Redes Sociales y Suscripción */}
+          <Grid item xs={12} sm={12} md={4} lg={3}>
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6, delay: 0.2 }}
+              sx={{ 
+                // Sistema responsivo universal
+                padding: { xs: '3px 20px', sm: '4px 25px', md: '5px 30px', lg: '6px 35px', xl: '8px 40px' }
+              }}
             >
               <Typography
                 variant="h6"
                 sx={{
                   fontWeight: 600,
                   color: 'white',
-                  mb: 3,
-                  fontSize: '1.1rem'
+                  mb: 1,
+                  fontSize: '1.1rem',
+                  textAlign: 'center'
                 }}
               >
-                {t('footer.subscribe', 'Subscribe to our emails')}
+                Suscríbete a nuestros emails
               </Typography>
               
-              <Box sx={{ display: 'flex', gap: 1, mb: 2 }}>
+              <Box sx={{ display: 'flex', gap: 1, mb: 1, justifyContent: 'center' }}>
                 <TextField
-                  placeholder={t('footer.emailPlaceholder', 'Email')}
+                  placeholder="Correo electrónico"
                   variant="outlined"
                   size="small"
                   sx={{
                     flexGrow: 1,
+                    maxWidth: '200px',
                     '& .MuiOutlinedInput-root': {
                       backgroundColor: 'rgba(255,255,255,0.1)',
                       color: 'white',
@@ -150,10 +170,10 @@ const Footer = () => {
                         borderColor: 'rgba(255,255,255,0.3)'
                       },
                       '&:hover fieldset': {
-                        borderColor: '#eb8b8b'
+                        borderColor: '#EB8B8B'
                       },
                       '&.Mui-focused fieldset': {
-                        borderColor: '#eb8b8b'
+                        borderColor: '#EB8B8B'
                       }
                     },
                     '& .MuiInputBase-input': {
@@ -165,38 +185,40 @@ const Footer = () => {
                     }
                   }}
                 />
+                <Button
+                  variant="contained"
+                  sx={{
+                    backgroundColor: '#EB8B8B',
+                    '&:hover': {
+                      backgroundColor: '#C8626D'
+                    }
+                  }}
+                >
+                  Suscribir
+                </Button>
               </Box>
-            </motion.div>
-          </Grid>
 
-          {/* Social & Payment */}
-          <Grid item xs={12} md={3}>
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6, delay: 0.3 }}
-            >
               <Typography
                 variant="h6"
                 sx={{
                   fontWeight: 600,
                   color: 'white',
-                  mb: 3,
-                  fontSize: '1.1rem'
+                  mb: 2,
+                  fontSize: '1.1rem',
+                  textAlign: 'center'
                 }}
               >
-                {t('footer.followOn', 'Follow on')}
+                Síguenos en
               </Typography>
               
-              <Box sx={{ display: 'flex', gap: 1, mb: 3 }}>
+              <Box sx={{ display: 'flex', gap: 1, mb: 1, justifyContent: 'center' }}>
                 <IconButton
                   href="#"
                   sx={{
                     color: 'white',
                     backgroundColor: 'rgba(255,255,255,0.1)',
                     '&:hover': {
-                      backgroundColor: '#eb8b8b',
+                      backgroundColor: '#EB8B8B',
                       color: 'white'
                     },
                     transition: 'all 0.3s ease'
@@ -210,7 +232,7 @@ const Footer = () => {
                     color: 'white',
                     backgroundColor: 'rgba(255,255,255,0.1)',
                     '&:hover': {
-                      backgroundColor: '#eb8b8b',
+                      backgroundColor: '#EB8B8B',
                       color: 'white'
                     },
                     transition: 'all 0.3s ease'
@@ -224,7 +246,7 @@ const Footer = () => {
                     color: 'white',
                     backgroundColor: 'rgba(255,255,255,0.1)',
                     '&:hover': {
-                      backgroundColor: '#eb8b8b',
+                      backgroundColor: '#EB8B8B',
                       color: 'white'
                     },
                     transition: 'all 0.3s ease'
@@ -238,17 +260,18 @@ const Footer = () => {
                 variant="body2"
                 sx={{
                   color: 'white',
-                  fontSize: '0.9rem'
+                  fontSize: '0.9rem',
+                  textAlign: 'center'
                 }}
               >
-                {t('footer.paymentMethods', 'Payment methods')}
+                Métodos de pago
               </Typography>
             </motion.div>
           </Grid>
         </Grid>
 
         {/* Copyright */}
-        <Box className="footer-copyright-mobile" sx={{ textAlign: 'center', mt: 4 }}>
+        <Box className="footer-copyright-mobile" sx={{ textAlign: 'center', mt: 0 }}>
           <motion.div
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
@@ -281,7 +304,7 @@ const Footer = () => {
         style={{
           position: 'absolute',
           top: '40px',
-          right: '60px'
+          right: '120px'
         }}
       >
         <Box
