@@ -6,7 +6,7 @@ import { useStore } from '../context/StoreContext';
 import { useNavigate } from 'react-router-dom';
 import ShippingCalculator from '../components/ShippingCalculator';
 import AddressCorrection from '../components/AddressCorrection';
-import StripeCheckout from '../components/StripeCheckout';
+import PayPalPaymentForm from '../components/PayPalPaymentForm';
 import ShippingConfirmationPopup from '../components/ShippingConfirmationPopup';
 import { useShipping } from '../hooks/useShipping';
 import { useTranslation } from 'react-i18next';
@@ -593,27 +593,13 @@ const Checkout = () => {
                       </Typography>
                     </Box>
                     
-                    {/* Método de pago con Stripe - Solo mostrar si hay datos completos */}
+                    {/* Método de pago con PayPal - Solo mostrar si hay datos completos */}
                     {formData.email && formData.firstName && formData.lastName && formData.address && formData.city && formData.zipCode ? (
-                      <StripeCheckout 
-                        key={`stripe-${formData.email}-${cartTotal}`}
+                      <PayPalPaymentForm 
+                        key={`paypal-${formData.email}-${cartTotal}`}
                         cartItems={cart}
-                        total={cartTotal + (shippingInfo ? parseFloat(shippingInfo.cost || 0) : 0)}
-                        customerInfo={{
-                          email: formData.email,
-                          firstName: formData.firstName,
-                          lastName: formData.lastName,
-                          address: {
-                            line1: formData.address,
-                            city: formData.city,
-                            postal_code: formData.zipCode,
-                            state: 'NY',
-                            country: 'US'
-                          },
-                          phone: formData.phone
-                        }}
-                        onSuccess={(paymentIntent) => {
-                          console.log('✅ Payment successful, clearing cart and navigating');
+                        onPaymentSuccess={(paymentDetails) => {
+                          console.log('✅ PayPal payment successful, clearing cart and navigating');
                           clearCart();
                           
                           // Guardar información de envío en localStorage
@@ -622,12 +608,19 @@ const Checkout = () => {
                             console.log('📦 Shipping info saved:', shippingInfo);
                           }
                           
-                          // Pasar el payment intent ID en la URL
-                          navigate(`/checkout/success?payment_intent=${paymentIntent.id}`);
+                          // Pasar el payment ID en la URL
+                          navigate(`/checkout/success?payment_id=${paymentDetails.paymentId}`);
                         }}
-                        onError={(error) => {
-                          console.log('❌ Payment error:', error);
-                          setStripeError(error.message);
+                        onPaymentError={(error) => {
+                          console.log('❌ PayPal payment error:', error);
+                          setStripeError(error.message || 'Payment failed');
+                        }}
+                        shippingAddress={{
+                          street: formData.address,
+                          city: formData.city,
+                          state: 'NY',
+                          zipCode: formData.zipCode,
+                          country: 'US'
                         }}
                       />
                     ) : (

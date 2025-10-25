@@ -25,10 +25,12 @@ const CheckoutSuccess = () => {
       try {
         console.log('🔍 Checking for payment intent ID...');
         
-        // Obtener el payment intent ID de la URL o localStorage
+        // Obtener el payment ID de la URL o localStorage (tanto Stripe como PayPal)
         const urlParams = new URLSearchParams(window.location.search);
         const paymentIntentId = urlParams.get('payment_intent') || 
-                               localStorage.getItem('lastPaymentIntentId');
+                                urlParams.get('payment_id') ||
+                                localStorage.getItem('lastPaymentIntentId') ||
+                                localStorage.getItem('lastPaymentId');
         
         console.log('🔍 Payment Intent ID found:', paymentIntentId);
         
