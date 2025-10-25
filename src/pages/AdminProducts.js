@@ -561,10 +561,25 @@ const AdminProducts = () => {
           onClose={handleCloseDialog}
           maxWidth="md"
           fullWidth
+          sx={{
+            zIndex: 999999,
+            '& .MuiDialog-paper': {
+              zIndex: 999999
+            },
+            '& .MuiBackdrop-root': {
+              zIndex: 999998
+            }
+          }}
           PaperProps={{
             sx: {
               borderRadius: '20px',
-              boxShadow: '0 16px 48px rgba(0,0,0,0.2)'
+              boxShadow: '0 16px 48px rgba(0,0,0,0.2)',
+              zIndex: 999999
+            }
+          }}
+          BackdropProps={{
+            sx: {
+              zIndex: 999998
             }
           }}
         >
