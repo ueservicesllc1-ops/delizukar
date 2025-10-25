@@ -25,6 +25,7 @@ const Checkout = () => {
     city: '',
     zipCode: '',
     phone: '',
+    state: 'NY', // Agregar estado por defecto
     cardNumber: '',
     expiryDate: '',
     cvv: '',
@@ -130,7 +131,7 @@ const Checkout = () => {
       name: `${formData.firstName} ${formData.lastName}`,
       street1: formData.address,
       city: formData.city,
-      state: 'NY', // Asumiendo que es Nueva York
+      state: formData.state || 'NY', // Usar el estado del formulario si está disponible
       zip: formData.zipCode,
       country: 'US',
       phone: formData.phone,
@@ -138,6 +139,7 @@ const Checkout = () => {
       is_residential: true
     };
 
+    console.log('Creating shipping data with address:', toAddress);
     return createOrderData(cart, fromAddress, toAddress);
   };
 
@@ -191,6 +193,7 @@ const Checkout = () => {
         address: correctedAddressData.street1 || prev.address,
         city: correctedAddressData.city || prev.city,
         zipCode: correctedAddressData.zip || prev.zipCode,
+        state: correctedAddressData.state || prev.state,
         phone: correctedAddressData.phone || prev.phone,
         email: correctedAddressData.email || prev.email
       }));
@@ -198,7 +201,11 @@ const Checkout = () => {
     
     // Cerrar corrección y abrir calculador de envíos
     setAddressCorrectionOpen(false);
-    setShippingOpen(true);
+    
+    // Esperar un momento para que se actualicen los datos del formulario
+    setTimeout(() => {
+      setShippingOpen(true);
+    }, 100);
   };
 
   // Manejar aceptación del envío
@@ -423,6 +430,22 @@ const Checkout = () => {
                           label={t('checkout.zipCode', 'ZIP Code')}
                           name="zipCode"
                           value={formData.zipCode}
+                          onChange={handleInputChange}
+                          required
+                          size="small"
+                          sx={{
+                            '& .MuiOutlinedInput-root': {
+                              borderRadius: '8px'
+                            }
+                          }}
+                        />
+                      </Grid>
+                      <Grid size={{ xs: 12, sm: 6 }}>
+                        <TextField
+                          fullWidth
+                          label={t('checkout.state', 'State')}
+                          name="state"
+                          value={formData.state}
                           onChange={handleInputChange}
                           required
                           size="small"
