@@ -101,10 +101,25 @@ const SocialMediaManager = ({ open, onClose }) => {
       onClose={onClose}
       maxWidth="md"
       fullWidth
+      sx={{
+        zIndex: 9999999,
+        '& .MuiDialog-paper': {
+          zIndex: 9999999
+        },
+        '& .MuiBackdrop-root': {
+          zIndex: 9999998
+        }
+      }}
       PaperProps={{
         sx: {
           borderRadius: '16px',
-          boxShadow: '0 20px 60px rgba(0,0,0,0.15)'
+          boxShadow: '0 20px 60px rgba(0,0,0,0.15)',
+          zIndex: 9999999
+        }
+      }}
+      BackdropProps={{
+        sx: {
+          zIndex: 9999998
         }
       }}
     >

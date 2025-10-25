@@ -364,10 +364,20 @@ const TestimonialsManager = ({ open, onClose }) => {
       fullWidth
       className="testimonials-manager-mobile"
       sx={{
+        zIndex: 9999999,
         '& .MuiDialog-paper': {
           borderRadius: '20px',
           height: '80vh',
-          minHeight: '600px'
+          minHeight: '600px',
+          zIndex: 9999999
+        },
+        '& .MuiBackdrop-root': {
+          zIndex: 9999998
+        }
+      }}
+      BackdropProps={{
+        sx: {
+          zIndex: 9999998
         }
       }}
     >

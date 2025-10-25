@@ -129,9 +129,19 @@ const InventoryManager = ({ open, onClose }) => {
       fullWidth
       className="inventory-manager-mobile"
       sx={{
+        zIndex: 9999999,
         '& .MuiDialog-paper': {
           borderRadius: '20px',
-          maxHeight: '90vh'
+          maxHeight: '90vh',
+          zIndex: 9999999
+        },
+        '& .MuiBackdrop-root': {
+          zIndex: 9999998
+        }
+      }}
+      BackdropProps={{
+        sx: {
+          zIndex: 9999998
         }
       }}
     >

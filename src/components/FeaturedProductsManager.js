@@ -198,12 +198,22 @@ const FeaturedProductsManager = ({ open, onClose }) => {
       maxWidth={false}
       fullWidth
       sx={{
+        zIndex: 9999999,
         '& .MuiDialog-paper': {
           borderRadius: '12px',
           maxHeight: '90vh',
           height: '90vh',
           width: '1200px',
-          maxWidth: '1200px'
+          maxWidth: '1200px',
+          zIndex: 9999999
+        },
+        '& .MuiBackdrop-root': {
+          zIndex: 9999998
+        }
+      }}
+      BackdropProps={{
+        sx: {
+          zIndex: 9999998
         }
       }}
     >

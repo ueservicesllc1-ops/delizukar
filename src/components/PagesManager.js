@@ -269,10 +269,20 @@ const PagesManager = ({ open, onClose }) => {
       maxWidth="lg"
       fullWidth
       sx={{
+        zIndex: 9999999,
         '& .MuiDialog-paper': {
           borderRadius: '20px',
           boxShadow: '0 8px 32px rgba(0,0,0,0.1)',
-          maxHeight: '90vh'
+          maxHeight: '90vh',
+          zIndex: 9999999
+        },
+        '& .MuiBackdrop-root': {
+          zIndex: 9999998
+        }
+      }}
+      BackdropProps={{
+        sx: {
+          zIndex: 9999998
         }
       }}
     >
