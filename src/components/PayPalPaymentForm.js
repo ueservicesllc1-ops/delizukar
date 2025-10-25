@@ -12,6 +12,7 @@ import {
   CircularProgress,
 } from '@mui/material';
 import PayPalCheckout from './PayPalCheckout';
+import PayPalCardPayment from './PayPalCardPayment';
 import { toast } from 'react-hot-toast';
 
 const PayPalPaymentForm = ({ 
@@ -27,7 +28,7 @@ const PayPalPaymentForm = ({
     total: 0,
   });
   const [isProcessing, setIsProcessing] = useState(false);
-  const [paymentMethod, setPaymentMethod] = useState('paypal');
+  const [paymentMethod, setPaymentMethod] = useState('card');
 
   // Calculate order totals
   useEffect(() => {
@@ -149,7 +150,7 @@ const PayPalPaymentForm = ({
             </Typography>
             
             <Alert severity="info" sx={{ mb: 2 }}>
-              Secure payment powered by PayPal
+              Secure payment powered by PayPal - Accepts all major credit/debit cards
             </Alert>
             
             {isProcessing ? (
@@ -160,13 +161,12 @@ const PayPalPaymentForm = ({
                 </Typography>
               </Box>
             ) : (
-              <PayPalCheckout
+              <PayPalCardPayment
                 amount={orderData.total}
                 currency="USD"
                 description={`Payment for ${cartItems.length} item(s)`}
                 onSuccess={handlePaymentSuccess}
                 onError={handlePaymentError}
-                onCancel={handlePaymentCancel}
               />
             )}
           </Box>
