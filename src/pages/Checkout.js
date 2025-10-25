@@ -40,8 +40,8 @@ const Checkout = () => {
   const [addressCorrectionOpen, setAddressCorrectionOpen] = useState(false);
   const [correctedAddress, setCorrectedAddress] = useState(null);
   
-  // Estados para Stripe
-  const [stripeError, setStripeError] = useState(null);
+  // Estados para PayPal
+  const [paymentError, setPaymentError] = useState(null);
   
   // Estados para popup de confirmación de envío
   const [shippingConfirmationOpen, setShippingConfirmationOpen] = useState(false);
@@ -589,7 +589,7 @@ const Checkout = () => {
                           fontSize: '1.1rem'
                         }}
                       >
-                        Payment Information
+                        {t('checkout.paymentInfo', 'Payment Information')}
                       </Typography>
                     </Box>
                     
@@ -613,7 +613,7 @@ const Checkout = () => {
                         }}
                         onPaymentError={(error) => {
                           console.log('❌ PayPal payment error:', error);
-                          setStripeError(error.message || 'Payment failed');
+                          setPaymentError(error.message || 'Payment failed');
                         }}
                         shippingAddress={{
                           street: formData.address,
@@ -674,9 +674,9 @@ const Checkout = () => {
                       </Box>
                     )}
                     
-                    {stripeError && (
+                    {paymentError && (
                       <Alert severity="error" sx={{ mt: 2 }}>
-                        {stripeError}
+                        {paymentError}
                       </Alert>
                     )}
                   </CardContent>
@@ -738,7 +738,7 @@ const Checkout = () => {
           }}
           onPaymentError={(error) => {
             console.log('❌ Payment error:', error);
-            setStripeError(error.message);
+            setPaymentError(error.message);
           }}
         />
       </Container>
