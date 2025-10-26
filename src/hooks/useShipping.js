@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import shippoService from '../services/shippoService';
+import easypostService from '../services/easypostService';
 
 export const useShipping = () => {
   const [shippingRates, setShippingRates] = useState([]);
@@ -13,7 +13,7 @@ export const useShipping = () => {
       setLoading(true);
       setError(null);
       
-      const rates = await shippoService.getShippingRates(fromAddress, toAddress, parcel);
+      const rates = await easypostService.getShippingRates(fromAddress, toAddress, parcel);
       setShippingRates(rates);
       
       return rates;
@@ -32,7 +32,7 @@ export const useShipping = () => {
       setLoading(true);
       setError(null);
       
-      const address = await shippoService.createAddress(addressData);
+      const address = await easypostService.createAddress(addressData);
       return address;
     } catch (err) {
       console.error('Error creating shipping address:', err);
@@ -49,7 +49,7 @@ export const useShipping = () => {
       setLoading(true);
       setError(null);
       
-      const validatedAddress = await shippoService.validateAddress(addressData);
+      const validatedAddress = await easypostService.validateAddress(addressData);
       return validatedAddress;
     } catch (err) {
       console.error('Error validating address:', err);
@@ -78,7 +78,7 @@ export const useShipping = () => {
     const itemCount = cartItems.reduce((total, item) => total + item.quantity, 0);
     const heightMultiplier = Math.ceil(itemCount / 6); // 6 galletas por nivel
 
-    return shippoService.createParcel(
+    return easypostService.createParcel(
       totalWeight,
       baseDimensions.length,
       baseDimensions.width,
@@ -86,7 +86,7 @@ export const useShipping = () => {
     );
   }, []);
 
-  // Crear datos de orden para Shippo Elements
+  // Crear datos de orden para EasyPost
   const createOrderData = useCallback((cartItems, fromAddress, toAddress) => {
     const parcel = createParcelFromCart(cartItems);
     
@@ -125,7 +125,7 @@ export const useShipping = () => {
     console.log('Order created:', orderData);
     
     // Guardar el order_id para futuras referencias
-    localStorage.setItem('shippoOrderId', orderData.order_id);
+    localStorage.setItem('easypostOrderId', orderData.order_id);
     
     return orderData;
   }, []);

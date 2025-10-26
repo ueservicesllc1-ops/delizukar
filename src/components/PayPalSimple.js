@@ -15,7 +15,9 @@ const PayPalButtonContainer = ({
   currency, 
   description,
   onSuccess,
-  onError
+  onError,
+  shippingAddress,
+  shippingInfo
 }) => {
   const [{ isResolved, isRejected }] = usePayPalScriptReducer();
 
@@ -47,6 +49,8 @@ const PayPalButtonContainer = ({
     );
   }
 
+  console.log('🎯 [PayPal] PayPalButtonContainer renderizado, onSuccess:', typeof onSuccess);
+
   const handleApprove = (data, actions) => {
     console.log('PayPal Simple - Creating order for amount:', amount);
     
@@ -66,21 +70,37 @@ const PayPalButtonContainer = ({
     });
   };
 
-  const handleCapture = (data, actions) => {
-    console.log('PayPal Simple - Capturing payment:', data);
+  const handleCapture = async (data, actions) => {
+    console.log('🔵🔵🔵 [PayPal] FUNCIÓN handleCapture LLAMADA');
+    console.log('🔵 [PayPal] Iniciando captura de pago...');
+    console.log('🔵 [PayPal] Data:', data);
+    console.log('🔵 [PayPal] onSuccess existe?', typeof onSuccess);
     
-    return actions.order.capture().then((details) => {
-      console.log('PayPal Simple - Payment captured:', details);
+    try {
+      console.log('🔵 [PayPal] Llamando actions.order.capture()...');
+      const details = await actions.order.capture();
+      console.log('✅ [PayPal] Pago capturado exitosamente:', details);
       
+      // Llamar onSuccess directamente como funcionaba antes
       if (onSuccess) {
+        console.log('🔵 [PayPal] Llamando onSuccess callback...');
         onSuccess({
           ...details,
           paymentMethod: 'paypal',
+          amount: amount
         });
+        console.log('✅ [PayPal] onSuccess ejecutado');
       }
       
       toast.success('Payment completed successfully!');
-    });
+      console.log('✅ [PayPal] Todo completado exitosamente');
+    } catch (error) {
+      console.error('❌ [PayPal] Error capturando pago:', error);
+      console.error('❌ [PayPal] Stack:', error.stack);
+      if (onError) {
+        onError(error);
+      }
+    }
   };
 
   const handleError = (error) => {
@@ -97,6 +117,8 @@ const PayPalButtonContainer = ({
     console.log('PayPal Simple - Payment cancelled:', data);
     toast.error('Payment was cancelled.');
   };
+
+  console.log('🎯🎯 [PayPal] Renderizando PayPalButtons, onSuccess es:', typeof onSuccess);
 
   return (
     <PayPalButtons
@@ -120,7 +142,9 @@ const PayPalSimple = ({
   onSuccess, 
   onError, 
   currency = "USD",
-  description = "Payment with PayPal"
+  description = "Payment with PayPal",
+  shippingAddress = null,
+  shippingInfo = null
 }) => {
   // Obtener configuración desde variables de entorno
   const clientId = process.env.REACT_APP_PAYPAL_CLIENT_ID;
@@ -163,6 +187,8 @@ const PayPalSimple = ({
           description={description}
           onSuccess={onSuccess}
           onError={onError}
+          shippingAddress={shippingAddress}
+          shippingInfo={shippingInfo}
         />
       </Box>
     </PayPalScriptProvider>

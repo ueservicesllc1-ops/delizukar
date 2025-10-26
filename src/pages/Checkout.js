@@ -10,6 +10,8 @@ import PayPalPaymentForm from '../components/PayPalPaymentForm';
 import ShippingConfirmationPopup from '../components/ShippingConfirmationPopup';
 import { useShipping } from '../hooks/useShipping';
 import { useTranslation } from 'react-i18next';
+import { db } from '../firebase/config';
+import { collection, addDoc } from 'firebase/firestore';
 
 const Checkout = () => {
   const { t } = useTranslation();
@@ -25,7 +27,7 @@ const Checkout = () => {
     city: '',
     zipCode: '',
     phone: '',
-    state: 'NY', // Agregar estado por defecto
+    state: '', // El usuario debe ingresar el estado
     cardNumber: '',
     expiryDate: '',
     cvv: '',
@@ -112,7 +114,7 @@ const Checkout = () => {
     }
   };
 
-  // Crear datos de envío para Shippo
+  // Crear datos de envío para EasyPost
   const createShippingData = () => {
     const fromAddress = {
       name: 'Delizukar',
@@ -127,21 +129,38 @@ const Checkout = () => {
       is_residential: false
     };
 
-    const toAddress = {
-      name: `${formData.firstName} ${formData.lastName}`,
-      street1: formData.address,
-      city: formData.city,
-      state: formData.state || 'NY', // Usar el estado del formulario si está disponible
-      zip: formData.zipCode,
-      country: 'US',
-      phone: formData.phone,
-      email: formData.email,
-      is_residential: true
-    };
+    // Si hay una dirección corregida, usarla; si no, usar formData
+    let toAddress;
+    if (correctedAddress) {
+      toAddress = {
+        name: correctedAddress.name || `${formData.firstName} ${formData.lastName}`,
+        street1: correctedAddress.street1 || formData.address,
+        city: correctedAddress.city || formData.city,
+        state: correctedAddress.state || formData.state || '',
+        zip: correctedAddress.zip || formData.zipCode,
+        country: 'US',
+        phone: correctedAddress.phone || formData.phone,
+        email: correctedAddress.email || formData.email,
+        is_residential: true
+      };
+    } else {
+      toAddress = {
+        name: `${formData.firstName} ${formData.lastName}`,
+        street1: formData.address,
+        city: formData.city,
+        state: formData.state || '',
+        zip: formData.zipCode,
+        country: 'US',
+        phone: formData.phone,
+        email: formData.email,
+        is_residential: true
+      };
+    }
 
     console.log('Creating shipping data with address:', toAddress);
     console.log('Cart items:', cart);
     console.log('From address:', fromAddress);
+    console.log('Using corrected address:', !!correctedAddress);
     
     const orderData = createOrderData(cart, fromAddress, toAddress);
     console.log('Generated order data:', orderData);
@@ -157,7 +176,7 @@ const Checkout = () => {
       name: `${formData.firstName || ''} ${formData.lastName || ''}`,
       street1: formData.address || '',
       city: formData.city || '',
-      state: 'NY', // Asumiendo que es Nueva York
+      state: formData.state || '', // Usar el estado del formulario
       zip: formData.zipCode || '',
       country: 'US',
       phone: formData.phone || '',
@@ -187,6 +206,9 @@ const Checkout = () => {
   // Manejar dirección corregida
   const handleAddressCorrected = (correctedAddressData) => {
     console.log('Address corrected:', correctedAddressData);
+    
+    // Guardar la dirección corregida
+    setCorrectedAddress(correctedAddressData);
     
     // Actualizar los datos del formulario con la dirección corregida
     if (correctedAddressData) {
@@ -640,8 +662,11 @@ const Checkout = () => {
                         cartItems={cart}
                         shippingInfo={shippingInfo}
                         onPaymentSuccess={(paymentDetails) => {
+                          console.log('🚀🚀🚀 [Checkout] onPaymentSuccess LLAMADO');
                           console.log('✅ PayPal payment successful, clearing cart and navigating');
                           console.log('💰 Payment details:', paymentDetails);
+                          console.log('🔍 paymentDetails.id:', paymentDetails.id);
+                          console.log('🔍 paymentDetails.paymentId:', paymentDetails.paymentId);
                           
                           // Guardar información de envío y pago en localStorage
                           if (shippingInfo) {
@@ -651,9 +676,46 @@ const Checkout = () => {
                           
                           // Guardar detalles del pago
                           if (paymentDetails.amount) {
+                            console.log('💰 [Checkout] paymentDetails.amount:', paymentDetails.amount);
+                            console.log('💰 [Checkout] paymentDetails:', paymentDetails);
                             localStorage.setItem('lastPaymentAmount', paymentDetails.amount);
-                            console.log('💰 Payment amount saved:', paymentDetails.amount);
+                            console.log('💰 [Checkout] Payment amount saved:', paymentDetails.amount);
                           }
+                          
+                          // Guardar directamente en Firestore - SÚPER SIMPLE
+                          const orderData = {
+                            sessionId: paymentDetails.paymentId,
+                            paymentIntentId: paymentDetails.paymentId,
+                            customerInfo: {
+                              firstName: formData.firstName,
+                              lastName: formData.lastName,
+                              email: formData.email,
+                              phone: formData.phone,
+                              address: {
+                                line1: formData.address,
+                                city: formData.city,
+                                postal_code: formData.zipCode,
+                                state: formData.state,
+                                country: 'US'
+                              }
+                            },
+                            cartItems: cart,
+                            total: cartTotal,
+                            paymentStatus: 'paid',
+                            shippingInfo: shippingInfo,
+                            createdAt: new Date(),
+                            updatedAt: new Date()
+                          };
+                          
+                          addDoc(collection(db, 'orders'), orderData)
+                            .then(docRef => {
+                              console.log('✅ Orden guardada en Firestore:', docRef.id);
+                              localStorage.setItem('lastOrderId', docRef.id);
+                            })
+                            .catch(error => {
+                              console.error('❌ Error guardando orden:', error);
+                              alert('Error guardando orden: ' + error.message);
+                            });
                           
                           clearCart();
                           
@@ -667,7 +729,7 @@ const Checkout = () => {
                         shippingAddress={{
                           street: formData.address,
                           city: formData.city,
-                          state: 'NY',
+                          state: formData.state,
                           zipCode: formData.zipCode,
                           country: 'US'
                         }}
@@ -767,7 +829,7 @@ const Checkout = () => {
               line1: formData.address,
               city: formData.city,
               postal_code: formData.zipCode,
-              state: 'NY',
+              state: formData.state,
               country: 'US'
             },
             phone: formData.phone

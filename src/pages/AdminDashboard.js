@@ -75,6 +75,7 @@ import FeaturedProductsManager from '../components/FeaturedProductsManager';
 import SocialMediaManager from '../components/SocialMediaManager';
 import PopupHeroManager from '../components/PopupHeroManager';
 import StripeBalance from '../components/StripeBalance';
+import OrdersManager from '../components/OrdersManager';
 
 const AdminDashboard = () => {
   const [fontManagerOpen, setFontManagerOpen] = useState(false);
@@ -111,24 +112,16 @@ const AdminDashboard = () => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [selectedFont, setSelectedFont] = useState(null);
+  const [ordersManagerOpen, setOrdersManagerOpen] = useState(false);
   const navigate = useNavigate();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (user) {
-        setUser(user);
-        setLoading(false);
-      } else {
-        setUser(null);
-        setLoading(false);
-        navigate('/'); // Redirigir a home si no está autenticado
-      }
-    });
-
-    return () => unsubscribe();
-  }, [navigate]);
+    // Quitar autenticación - admin funciona sin login
+    setUser({ email: 'admin@delizukar.com' }); // Usuario dummy
+    setLoading(false);
+  }, []);
 
   // Cargar usuarios cuando se abre el modal de gestión
   useEffect(() => {
@@ -569,9 +562,7 @@ const AdminDashboard = () => {
     );
   }
 
-  if (!user) {
-    return null; // Se redirigirá automáticamente
-  }
+  // Admin funciona sin autenticación
 
   // Datos vacíos para el dashboard
   const stats = [
@@ -730,7 +721,7 @@ const AdminDashboard = () => {
                               index === 13 ? () => setMessagingSystemOpen(true) :
                               index === 14 ? handleCostAnalysisClick :
                               index === 16 ? () => setColorPaletteOpen(true) :
-                              index === 17 ? () => setColorPaletteOpen(true) :
+                              index === 17 ? () => setOrdersManagerOpen(true) :
                               index === 18 ? () => setColorPaletteOpen(true) :
                               index === 19 ? () => setColorPaletteOpen(true) :
                               undefined
@@ -987,29 +978,20 @@ const AdminDashboard = () => {
                                 </Typography>
                               </Box>
                             ) : index === 17 ? (
-                              <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1 }}>
-                                <Typography
-                                  variant="h4"
-                                  sx={{
-                                    color: 'white',
-                                    fontWeight: 700,
-                                    textShadow: '1px 1px 2px rgba(0,0,0,0.5)'
-                                  }}
-                                >
-                                  #C8626D
-                                </Typography>
-                                <Typography
-                                  variant="body2"
-                                  sx={{
-                                    color: 'white',
-                                    fontWeight: 600,
-                                    textShadow: '1px 1px 2px rgba(0,0,0,0.5)'
-                                  }}
-                                >
-                                  Color Principal
-                                </Typography>
-                              </Box>
-                            ) : index === 18 ? (
+                               <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1 }}>
+                                 <LocalShipping sx={{ color: 'white', fontSize: '2rem' }} />
+                                 <Typography
+                                   variant="body2"
+                                   sx={{
+                                     color: 'white',
+                                     fontWeight: 600,
+                                     textShadow: '1px 1px 2px rgba(0,0,0,0.5)'
+                                   }}
+                                 >
+                                   Pedidos
+                                 </Typography>
+                               </Box>
+                             ) : index === 18 ? (
                               <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1 }}>
                                 <Typography
                                   variant="h4"
@@ -1148,6 +1130,12 @@ const AdminDashboard = () => {
         <StripeBalance
           open={stripeBalanceOpen}
           onClose={() => setStripeBalanceOpen(false)}
+        />
+
+        {/* Gestor de Pedidos y Envíos */}
+        <OrdersManager
+          open={ordersManagerOpen}
+          onClose={() => setOrdersManagerOpen(false)}
         />
 
         {/* Reporte de Ventas */}

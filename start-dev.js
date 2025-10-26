@@ -35,7 +35,11 @@ console.log('');
 console.log('🔧 Iniciando servidor backend...');
 const serverProcess = spawn('node', ['server.js'], {
   stdio: 'inherit',
-  cwd: __dirname
+  cwd: __dirname,
+  env: {
+    ...process.env,
+    NODE_PATH: path.join(__dirname, 'node_modules')
+  }
 });
 
 serverProcess.on('error', (err) => {

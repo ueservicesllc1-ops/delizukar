@@ -180,6 +180,8 @@ const PayPalPaymentForm = ({
                     description={`Payment for ${cartItems.length} item(s)`}
                     onSuccess={handlePaymentSuccess}
                     onError={handlePaymentError}
+                    shippingAddress={shippingAddress}
+                    shippingInfo={shippingInfo}
                   />
                 );
               })()

@@ -16,7 +16,8 @@ import {
 } from '@mui/material';
 import { LocalShipping, CheckCircle, Close } from '@mui/icons-material';
 import { useTranslation } from 'react-i18next';
-import shippoService from '../services/shippoService';
+// Eliminado shippoService - ahora usamos EasyPost
+import easypostService from '../services/easypostService';
 
 const ShippingCalculator = ({ 
   open, 
@@ -53,19 +54,33 @@ const ShippingCalculator = ({
       
       console.log('Order data structure is valid');
       
-      // Obtener tarifas de Shippo
-      console.log('Getting rates from Shippo...');
-      const rates = await shippoService.getShippingRates(
+      // Obtener tarifas de EasyPost
+      console.log('Getting rates from EasyPost...');
+      const rates = await easypostService.getShippingRates(
         orderData.address_from,
         orderData.address_to,
         orderData.parcels[0]
       );
       
-      console.log('Rates received from Shippo:', rates);
-      setRates(rates);
+      console.log('Rates received from EasyPost:', rates);
+      
+      // Filtrar solo USPS, UPS, FedEx y DHL
+      const filteredRates = rates.filter(rate => {
+        const carrier = rate.carrier?.toLowerCase();
+        return carrier === 'usps' || 
+               carrier === 'ups' || 
+               carrier === 'upsdap' || 
+               carrier === 'fedex' || 
+               carrier === 'fedexdefault' ||
+               carrier === 'dhl' ||
+               carrier === 'dhlexpress';
+      });
+      
+      console.log('Filtered rates (USPS, UPS, FedEx, DHL only):', filteredRates);
+      setRates(filteredRates);
     } catch (err) {
       console.error('Error calculating rates:', err);
-      setError('No se pudieron obtener las tarifas de envío. Por favor, verifica la configuración de Shippo.');
+      setError('No se pudieron obtener las tarifas de envío. Por favor, verifica la configuración de EasyPost.');
     } finally {
       setLoading(false);
     }

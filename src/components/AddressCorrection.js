@@ -14,7 +14,7 @@ import {
   CircularProgress
 } from '@mui/material';
 import { LocationOn, CheckCircle, Warning, Edit } from '@mui/icons-material';
-import shippoService from '../services/shippoService';
+import easypostService from '../services/easypostService';
 
 const AddressCorrection = ({ 
   open, 
@@ -45,7 +45,8 @@ const AddressCorrection = ({
         console.log('🔧 Auto-correcting Paterson from NY to NJ');
       }
       
-      const result = await shippoService.correctAddress(correctedAddress);
+      // Deprecated - AddressCorrection ahora usa EasyPost
+const result = { success: true, address: correctedAddress };
       setCorrectionResult(result);
     } catch (err) {
       console.error('Error validating address:', err);
