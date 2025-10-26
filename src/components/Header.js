@@ -466,27 +466,29 @@ const Header = () => {
                     <Person sx={{ fontSize: '1.5rem' }} />
                   </IconButton>
 
-                  {/* Admin Panel - Right */}
-                  <motion.div
-                    className="admin-icon-mobile"
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.9 }}
-                  >
-                    <IconButton
-                      component="a"
-                      href="/admin"
-                      sx={{
-                        color: '#c8626d',
-                        fontSize: '1.5rem',
-                        '&:hover': {
-                          backgroundColor: '#c8626d20',
-                          color: '#be8782'
-                        }
-                      }}
+                  {/* Admin Panel - Right - Solo para usuarios autorizados */}
+                  {user && (user.email === 'ueservicesllc1@gmail.com' || user.email === 'florvazdi@gmail.com') && (
+                    <motion.div
+                      className="admin-icon-mobile"
+                      whileHover={{ scale: 1.1 }}
+                      whileTap={{ scale: 0.9 }}
                     >
-                      <Security sx={{ fontSize: '1.5rem' }} />
-                    </IconButton>
-                  </motion.div>
+                      <IconButton
+                        component="a"
+                        href="/admin"
+                        sx={{
+                          color: '#c8626d',
+                          fontSize: '1.5rem',
+                          '&:hover': {
+                            backgroundColor: '#c8626d20',
+                            color: '#be8782'
+                          }
+                        }}
+                      >
+                        <Security sx={{ fontSize: '1.5rem' }} />
+                      </IconButton>
+                    </motion.div>
+                  )}
 
                   {/* Shopping Cart - Right */}
                   <motion.div
