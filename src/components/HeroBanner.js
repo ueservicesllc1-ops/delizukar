@@ -77,10 +77,10 @@ const HeroBanner = () => {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          backgroundColor: '#8D9A7D'
+          backgroundColor: '#ffffff'
         }}
       >
-        <Typography variant="h6" sx={{ color: '#666' }}>
+        <Typography variant="h6" sx={{ color: '#333' }}>
           Cargando banner...
         </Typography>
       </Box>

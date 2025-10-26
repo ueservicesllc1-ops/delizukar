@@ -120,7 +120,7 @@ app.post('/api/easypost/create-address', async (req, res) => {
     const response = await fetch('https://api.easypost.com/v2/addresses', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${process.env.EASYPOST_API_KEY || 'EZAK59b460158953437d87998d578f6dc4331O4txfaIxeJt9tg0yeHQYg'}`,
+        'Authorization': `Bearer ${process.env.EASYPOST_API_KEY}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(req.body),
@@ -144,7 +144,7 @@ app.get('/api/easypost/account', async (req, res) => {
     const response = await fetch('https://api.easypost.com/v2/user', {
       method: 'GET',
       headers: {
-        'Authorization': `Bearer ${process.env.EASYPOST_API_KEY || 'EZAK59b460158953437d87998d578f6dc4331O4txfaIxeJt9tg0yeHQYg'}`,
+        'Authorization': `Bearer ${process.env.EASYPOST_API_KEY}`,
         'Content-Type': 'application/json',
       },
     });
@@ -170,7 +170,7 @@ app.post('/api/easypost/buy-label', async (req, res) => {
     console.log('🔍 DEBUG: Buying shipping label with EasyPost');
     console.log('🔍 DEBUG: Request body:', JSON.stringify(req.body, null, 2));
     
-    const apiKey = process.env.EASYPOST_API_KEY || 'EZAK59b460158953437d87998d578f6dc4331O4txfaIxeJt9tg0yeHQYg';
+    const apiKey = process.env.EASYPOST_API_KEY;
     const { rateId } = req.body;
     
     if (!rateId) {
@@ -211,7 +211,7 @@ app.post('/api/easypost/rates', async (req, res) => {
     console.log('🔍 DEBUG: Calculating shipping rates with EasyPost');
     console.log('🔍 DEBUG: Request body:', JSON.stringify(req.body, null, 2));
     
-    const apiKey = process.env.EASYPOST_API_KEY || 'EZAK59b460158953437d87998d578f6dc4331O4txfaIxeJt9tg0yeHQYg';
+    const apiKey = process.env.EASYPOST_API_KEY;
     
     // Convertir el formato de Shippo a EasyPost
     const { address_from, address_to, parcels } = req.body;
@@ -318,7 +318,7 @@ async function buyShippingLabelForOrder(shippingInfo) {
       return null;
     }
     
-    const apiKey = process.env.EASYPOST_API_KEY || 'EZAK59b460158953437d87998d578f6dc4331O4txfaIxeJt9tg0yeHQYg';
+    const apiKey = process.env.EASYPOST_API_KEY;
     const rateId = shippingInfo.rateId;
     
     // Extract shipment ID from rate ID
@@ -367,7 +367,7 @@ app.post('/api/create-shipment-complete', async (req, res) => {
       });
     }
 
-    const apiKey = process.env.EASYPOST_API_KEY || 'EZAK59b460158953437d87998d578f6dc4331O4txfaIxeJt9tg0yeHQYg';
+    const apiKey = process.env.EASYPOST_API_KEY;
     
     // Extraer información del pedido
     const customerInfo = order.customerInfo || order.customer || {};

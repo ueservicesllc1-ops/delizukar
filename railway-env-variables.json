@@ -11,7 +11,6 @@
   "PORT": "5000",
   "NODE_ENV": "production",
   "FRONTEND_URL": "https://delizukar.com",
-  "SHIPPO_API_TOKEN": "shippo_test_93aabd71c2ae25aa49eabd97509318062138d6c8",
   "EASYPOST_API_KEY": "EZAK59b460158953437d87998d578f6dc4331O4txfaIxeJt9tg0yeHQYg",
   "EMAIL_USER": "confirmacion@delizukar.com",
   "EMAIL_PASS": "Lugina1619@",
