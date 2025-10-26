@@ -65,7 +65,26 @@ const CheckoutSuccess = () => {
             console.log('✅ Payment data received:', paymentData);
             
             // Usar el monto guardado si está disponible, sino usar el del backend
-            const finalAmount = savedPaymentAmount ? parseFloat(savedPaymentAmount) : (paymentData.amount / 100);
+            let finalAmount = savedPaymentAmount ? parseFloat(savedPaymentAmount) : (paymentData.amount / 100);
+            
+            // Si el monto sigue siendo 0, calcular desde el shippingInfo
+            if (finalAmount === 0 && shippingInfo?.cost) {
+              // Intentar calcular el total desde el shipping info
+              finalAmount = shippingInfo.cost || 0;
+              console.log('⚠️ Using shipping cost as total:', finalAmount);
+            }
+            
+            // Asegurar que shippingInfo tiene el cost correctamente parseado
+            const shippingCost = shippingInfo?.cost ? parseFloat(shippingInfo.cost) : 0;
+            const subtotal = finalAmount - shippingCost;
+            
+            console.log('💰 Payment calculation:', {
+              savedPaymentAmount,
+              paymentDataAmount: paymentData.amount,
+              finalAmount,
+              shippingCost,
+              subtotal
+            });
             
             setOrderDetails({
               sessionId: paymentData.id,
@@ -73,8 +92,8 @@ const CheckoutSuccess = () => {
               currency: paymentData.currency || 'USD',
               customerEmail: paymentData.receipt_email || paymentData.customer_email,
               paymentStatus: paymentData.status,
-              shipping: shippingInfo?.cost || 0,
-              subtotal: finalAmount - (shippingInfo?.cost || 0)
+              shipping: shippingCost,
+              subtotal: subtotal
             });
           } else {
             const errorData = await response.json();

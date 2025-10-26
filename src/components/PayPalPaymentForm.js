@@ -58,13 +58,14 @@ const PayPalPaymentForm = ({
 
   const handlePaymentSuccess = (details) => {
     console.log('Payment successful:', details);
+    console.log('💰 Order data when payment succeeds:', orderData);
     setIsProcessing(true);
     
     // Here you would typically send the payment details to your backend
     // to verify the payment and update your database
     
     if (onPaymentSuccess) {
-      onPaymentSuccess({
+      const paymentDetails = {
         paymentId: details.id,
         status: details.status,
         amount: orderData.total,
@@ -72,7 +73,9 @@ const PayPalPaymentForm = ({
         payer: details.payer,
         create_time: details.create_time,
         update_time: details.update_time,
-      });
+      };
+      console.log('💰 Sending payment details to parent:', paymentDetails);
+      onPaymentSuccess(paymentDetails);
     }
     
     toast.success('Payment completed successfully!');
@@ -163,13 +166,23 @@ const PayPalPaymentForm = ({
                 </Typography>
               </Box>
             ) : (
-              <PayPalSimple
-                amount={orderData.total}
-                currency="USD"
-                description={`Payment for ${cartItems.length} item(s)`}
-                onSuccess={handlePaymentSuccess}
-                onError={handlePaymentError}
-              />
+              (() => {
+                console.log('💰 Sending to PayPal:', {
+                  amount: orderData.total,
+                  subtotal: orderData.subtotal,
+                  shipping: orderData.shipping,
+                  fullOrderData: orderData
+                });
+                return (
+                  <PayPalSimple
+                    amount={orderData.total}
+                    currency="USD"
+                    description={`Payment for ${cartItems.length} item(s)`}
+                    onSuccess={handlePaymentSuccess}
+                    onError={handlePaymentError}
+                  />
+                );
+              })()
             )}
           </Box>
           

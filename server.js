@@ -117,7 +117,48 @@ app.get('/api/shippo/account', async (req, res) => {
   }
 });
 
-// 3. Calcular tarifas de envío con EasyPost
+// 3. Comprar etiqueta de envío en EasyPost
+app.post('/api/shippo/buy-label', async (req, res) => {
+  try {
+    console.log('🔍 DEBUG: Buying shipping label with EasyPost');
+    console.log('🔍 DEBUG: Request body:', JSON.stringify(req.body, null, 2));
+    
+    const apiKey = process.env.EASYPOST_API_KEY || 'EZTK59b460158953437d87998d578f6dc433q02S0DwSYw5ISPTB5j0SDQ';
+    const { rateId } = req.body;
+    
+    if (!rateId) {
+      return res.status(400).json({ error: 'Rate ID is required' });
+    }
+    
+    const response = await fetch(`https://api.easypost.com/v2/shipments/${rateId.split('_')[0]}/buy`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ rate: { id: rateId } }),
+    });
+    
+    console.log('🔍 DEBUG: Buy label response status:', response.status);
+    
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('❌ EasyPost buy label error:', response.status, errorText);
+      throw new Error(`EasyPost API error: ${response.status} - ${errorText}`);
+    }
+    
+    const data = await response.json();
+    console.log('✅ Label purchased successfully');
+    console.log('🔍 DEBUG: Label data:', JSON.stringify(data, null, 2));
+    
+    res.json(data);
+  } catch (error) {
+    console.error('❌ EasyPost buy label error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// 4. Calcular tarifas de envío con EasyPost
 app.post('/api/shippo/rates', async (req, res) => {
   try {
     console.log('🔍 DEBUG: Calculating shipping rates with EasyPost');
@@ -216,6 +257,50 @@ app.post('/api/shippo/rates', async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
+
+// ==================== ORDER MANAGEMENT ENDPOINTS ====================
+
+// Helper function to automatically buy shipping label after payment
+async function buyShippingLabelForOrder(shippingInfo) {
+  try {
+    console.log('📦 Attempting to buy shipping label automatically...');
+    console.log('📦 Shipping info:', shippingInfo);
+    
+    if (!shippingInfo || !shippingInfo.rateId) {
+      console.log('⚠️ No shipping info or rate ID provided, skipping label purchase');
+      return null;
+    }
+    
+    const apiKey = process.env.EASYPOST_API_KEY || 'EZTK59b460158953437d87998d578f6dc433q02S0DwSYw5ISPTB5j0SDQ';
+    const rateId = shippingInfo.rateId;
+    
+    // Extract shipment ID from rate ID
+    const shipmentId = rateId.split('_')[0];
+    
+    const response = await fetch(`https://api.easypost.com/v2/shipments/${shipmentId}/buy`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ rate: { id: rateId } }),
+    });
+    
+    if (response.ok) {
+      const labelData = await response.json();
+      console.log('✅ Label purchased automatically:', labelData.id);
+      console.log('📬 Tracking code:', labelData.tracking_code);
+      return labelData;
+    } else {
+      const errorText = await response.text();
+      console.error('❌ Failed to buy label automatically:', errorText);
+      return null;
+    }
+  } catch (error) {
+    console.error('❌ Error buying label automatically:', error);
+    return null;
+  }
+}
 
 // ==================== STRIPE ENDPOINTS ====================
 
