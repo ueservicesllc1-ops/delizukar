@@ -113,3 +113,4 @@ testPayPalConnection().then(() => {
   console.log('4. Si persiste el error, revisa la consola del navegador');
 });
 
+

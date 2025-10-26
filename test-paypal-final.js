@@ -47,3 +47,4 @@ console.log('- Revisa la consola del navegador (F12)');
 console.log('- Ejecuta: npm run debug-paypal');
 console.log('- Lee: PAYPAL_TROUBLESHOOTING.md');
 
+

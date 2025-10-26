@@ -74,7 +74,7 @@ import TestimonialsManager from '../components/TestimonialsManager';
 import FeaturedProductsManager from '../components/FeaturedProductsManager';
 import SocialMediaManager from '../components/SocialMediaManager';
 import PopupHeroManager from '../components/PopupHeroManager';
-import StripeBalance from '../components/StripeBalance';
+import PayPalBalance from '../components/PayPalBalance';
 import OrdersManager from '../components/OrdersManager';
 
 const AdminDashboard = () => {
@@ -90,7 +90,7 @@ const AdminDashboard = () => {
   const [featuredProductsManagerOpen, setFeaturedProductsManagerOpen] = useState(false);
   const [socialMediaManagerOpen, setSocialMediaManagerOpen] = useState(false);
   const [popupHeroManagerOpen, setPopupHeroManagerOpen] = useState(false);
-  const [stripeBalanceOpen, setStripeBalanceOpen] = useState(false);
+  const [paypalBalanceOpen, setPaypalBalanceOpen] = useState(false);
   const [salesReportOpen, setSalesReportOpen] = useState(false);
   const [userManagementOpen, setUserManagementOpen] = useState(false);
   const [pinAuthOpen, setPinAuthOpen] = useState(false);
@@ -714,7 +714,7 @@ const AdminDashboard = () => {
                               index === 6 ? () => setFeaturedProductsManagerOpen(true) :
                               index === 7 ? () => setSocialMediaManagerOpen(true) :
                               index === 8 ? () => setPopupHeroManagerOpen(true) :
-                              index === 9 ? () => setStripeBalanceOpen(true) :
+                              index === 9 ? () => setPaypalBalanceOpen(true) :
                               index === 10 ? () => setSalesReportOpen(true) :
                               index === 11 ? () => setUserManagementOpen(true) :
                               index === 12 ? () => setMinProductsManagerOpen(true) :
@@ -779,7 +779,7 @@ const AdminDashboard = () => {
                                     textShadow: '1px 1px 2px rgba(0,0,0,0.5)'
                                   }}
                                 >
-                                  Balance Stripe
+                                  Balance PayPal
                                 </Typography>
                               </Box>
                             ) : index === 10 ? (
@@ -1127,9 +1127,9 @@ const AdminDashboard = () => {
           onClose={() => setPopupHeroManagerOpen(false)}
         />
 
-        <StripeBalance
-          open={stripeBalanceOpen}
-          onClose={() => setStripeBalanceOpen(false)}
+        <PayPalBalance
+          open={paypalBalanceOpen}
+          onClose={() => setPaypalBalanceOpen(false)}
         />
 
         {/* Gestor de Pedidos y Envíos */}

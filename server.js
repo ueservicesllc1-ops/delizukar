@@ -5,9 +5,25 @@ console.log('EASYPOST_API_KEY:', process.env.EASYPOST_API_KEY ? 'SET' : 'NOT SET
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
+const nodemailer = require('nodemailer');
+const { initializeApp } = require('firebase/app');
+const { getFirestore, collection, addDoc, doc, getDoc, updateDoc, query, orderBy } = require('firebase/firestore');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
+
+// Initialize Firebase
+const firebaseConfig = {
+  apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
+  authDomain: process.env.REACT_APP_FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.REACT_APP_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.REACT_APP_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.REACT_APP_FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.REACT_APP_FIREBASE_APP_ID
+};
+
+const firebaseApp = initializeApp(firebaseConfig);
+const db = getFirestore(firebaseApp);
 
 // Enhanced middleware with security best practices
 app.use(cors({
@@ -22,7 +38,7 @@ app.use(cors({
   ].filter(Boolean),
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Stripe-Signature']
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
 }));
 
 // Allow Railway healthcheck hostname
@@ -62,10 +78,41 @@ app.get('/api/health', (req, res) => {
   });
 });
 
+// Test endpoint para verificar conectividad con Firestore
+app.get('/api/test-firestore', async (req, res) => {
+  try {
+    console.log('🔍 Testing Firestore connection...');
+    
+    // Intentar crear una colección de prueba
+    const testDoc = {
+      test: true,
+      timestamp: new Date(),
+      message: 'Firestore connection test'
+    };
+    
+    const docRef = await addDoc(collection(db, 'test'), testDoc);
+    console.log('✅ Test document created with ID:', docRef.id);
+    
+    res.json({
+      success: true,
+      message: 'Firestore connection successful',
+      testDocId: docRef.id,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('❌ Firestore test failed:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message,
+      code: error.code
+    });
+  }
+});
+
 // ==================== EASYPOST ENDPOINTS ====================
 
 // 1. Crear dirección en EasyPost
-app.post('/api/shippo/create-address', async (req, res) => {
+app.post('/api/easypost/create-address', async (req, res) => {
   try {
     console.log('🔍 DEBUG: Creating address in EasyPost');
     console.log('🔍 DEBUG: EASYPOST_API_KEY exists:', !!process.env.EASYPOST_API_KEY);
@@ -73,7 +120,7 @@ app.post('/api/shippo/create-address', async (req, res) => {
     const response = await fetch('https://api.easypost.com/v2/addresses', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${process.env.EASYPOST_API_KEY || 'EZTK59b460158953437d87998d578f6dc433q02S0DwSYw5ISPTB5j0SDQ'}`,
+        'Authorization': `Bearer ${process.env.EASYPOST_API_KEY || 'EZAK59b460158953437d87998d578f6dc4331O4txfaIxeJt9tg0yeHQYg'}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(req.body),
@@ -89,7 +136,7 @@ app.post('/api/shippo/create-address', async (req, res) => {
 });
 
 // 2. Obtener información de cuenta de EasyPost
-app.get('/api/shippo/account', async (req, res) => {
+app.get('/api/easypost/account', async (req, res) => {
   try {
     console.log('🔍 DEBUG: Getting EasyPost account info');
     console.log('🔍 DEBUG: EASYPOST_API_KEY exists:', !!process.env.EASYPOST_API_KEY);
@@ -97,7 +144,7 @@ app.get('/api/shippo/account', async (req, res) => {
     const response = await fetch('https://api.easypost.com/v2/user', {
       method: 'GET',
       headers: {
-        'Authorization': `Bearer ${process.env.EASYPOST_API_KEY || 'EZTK59b460158953437d87998d578f6dc433q02S0DwSYw5ISPTB5j0SDQ'}`,
+        'Authorization': `Bearer ${process.env.EASYPOST_API_KEY || 'EZAK59b460158953437d87998d578f6dc4331O4txfaIxeJt9tg0yeHQYg'}`,
         'Content-Type': 'application/json',
       },
     });
@@ -118,12 +165,12 @@ app.get('/api/shippo/account', async (req, res) => {
 });
 
 // 3. Comprar etiqueta de envío en EasyPost
-app.post('/api/shippo/buy-label', async (req, res) => {
+app.post('/api/easypost/buy-label', async (req, res) => {
   try {
     console.log('🔍 DEBUG: Buying shipping label with EasyPost');
     console.log('🔍 DEBUG: Request body:', JSON.stringify(req.body, null, 2));
     
-    const apiKey = process.env.EASYPOST_API_KEY || 'EZTK59b460158953437d87998d578f6dc433q02S0DwSYw5ISPTB5j0SDQ';
+    const apiKey = process.env.EASYPOST_API_KEY || 'EZAK59b460158953437d87998d578f6dc4331O4txfaIxeJt9tg0yeHQYg';
     const { rateId } = req.body;
     
     if (!rateId) {
@@ -146,7 +193,7 @@ app.post('/api/shippo/buy-label', async (req, res) => {
       console.error('❌ EasyPost buy label error:', response.status, errorText);
       throw new Error(`EasyPost API error: ${response.status} - ${errorText}`);
     }
-    
+
     const data = await response.json();
     console.log('✅ Label purchased successfully');
     console.log('🔍 DEBUG: Label data:', JSON.stringify(data, null, 2));
@@ -159,12 +206,12 @@ app.post('/api/shippo/buy-label', async (req, res) => {
 });
 
 // 4. Calcular tarifas de envío con EasyPost
-app.post('/api/shippo/rates', async (req, res) => {
+app.post('/api/easypost/rates', async (req, res) => {
   try {
     console.log('🔍 DEBUG: Calculating shipping rates with EasyPost');
     console.log('🔍 DEBUG: Request body:', JSON.stringify(req.body, null, 2));
     
-    const apiKey = process.env.EASYPOST_API_KEY || 'EZTK59b460158953437d87998d578f6dc433q02S0DwSYw5ISPTB5j0SDQ';
+    const apiKey = process.env.EASYPOST_API_KEY || 'EZAK59b460158953437d87998d578f6dc4331O4txfaIxeJt9tg0yeHQYg';
     
     // Convertir el formato de Shippo a EasyPost
     const { address_from, address_to, parcels } = req.body;
@@ -271,7 +318,7 @@ async function buyShippingLabelForOrder(shippingInfo) {
       return null;
     }
     
-    const apiKey = process.env.EASYPOST_API_KEY || 'EZTK59b460158953437d87998d578f6dc433q02S0DwSYw5ISPTB5j0SDQ';
+    const apiKey = process.env.EASYPOST_API_KEY || 'EZAK59b460158953437d87998d578f6dc4331O4txfaIxeJt9tg0yeHQYg';
     const rateId = shippingInfo.rateId;
     
     // Extract shipment ID from rate ID
@@ -302,261 +349,533 @@ async function buyShippingLabelForOrder(shippingInfo) {
   }
 }
 
-// ==================== STRIPE ENDPOINTS ====================
-
-// 1. Crear sesión de Checkout
-app.post('/api/create-checkout-session', async (req, res) => {
+// Endpoint: Crear envío completo con EasyPost
+app.post('/api/create-shipment-complete', async (req, res) => {
   try {
-    // Verificar si Stripe está configurado
-    if (!process.env.STRIPE_SECRET_KEY || process.env.STRIPE_SECRET_KEY === 'sk_test_dummy_key_for_development') {
-      return res.status(500).json({ 
-        error: 'Stripe not configured. Please set STRIPE_SECRET_KEY environment variable.' 
+    const { orderId, order } = req.body;
+    
+    console.log('🚚 Creando envío completo para pedido:', orderId);
+    console.log('📦 Order data:', JSON.stringify(order, null, 2));
+    
+    if (!order || !order.customerInfo) {
+      console.log('❌ Error: Datos del pedido incompletos');
+      console.log('Order:', order);
+      console.log('CustomerInfo:', order?.customerInfo);
+      return res.status(400).json({
+        success: false,
+        error: 'Datos del pedido incompletos'
       });
     }
-    const { 
-      cartItems, 
-      total, 
-      customerInfo, 
-      successUrl, 
-      cancelUrl,
-      paymentMethodTypes,
-      customerCreation,
-      billingAddressCollection,
-      shippingAddressCollection,
-      phoneNumberCollection,
-      automaticTax
-    } = req.body;
 
-    console.log('Creating checkout session for:', customerInfo.email);
-
-    const session = await stripe.checkout.sessions.create({
-      payment_method_types: paymentMethodTypes || ['card', 'link', 'klarna', 'paypal', 'afterpay_clearpay', 'affirm'],
-      line_items: cartItems.map(item => ({
-        price_data: {
-          currency: 'usd',
-          product_data: {
-            name: item.name,
-            images: [item.image],
-            description: item.description || '',
-          },
-          unit_amount: Math.round(item.price * 100), // Convertir a centavos
-        },
-        quantity: item.quantity,
-      })),
-      mode: 'payment',
-      success_url: successUrl || `${process.env.FRONTEND_URL || 'http://localhost:3000'}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: cancelUrl || `${process.env.FRONTEND_URL || 'http://localhost:3000'}/checkout`,
-      customer_email: customerInfo.email,
-      customer_creation: customerCreation || 'always',
-      billing_address_collection: billingAddressCollection || 'required',
-      shipping_address_collection: shippingAddressCollection || {
-        allowed_countries: ['US', 'CA', 'MX', 'ES', 'FR', 'DE', 'IT', 'GB'],
+    const apiKey = process.env.EASYPOST_API_KEY || 'EZAK59b460158953437d87998d578f6dc4331O4txfaIxeJt9tg0yeHQYg';
+    
+    // Extraer información del pedido
+    const customerInfo = order.customerInfo || order.customer || {};
+    const shippingInfo = order.shippingInfo || order.shipping || {};
+    
+    console.log('👤 Customer Info:', JSON.stringify(customerInfo, null, 2));
+    console.log('📍 Shipping Info:', JSON.stringify(shippingInfo, null, 2));
+    
+    // Validar datos mínimos requeridos
+    const requiredFields = ['firstName', 'lastName', 'email'];
+    const missingFields = requiredFields.filter(field => !customerInfo[field]);
+    
+    if (missingFields.length > 0) {
+      console.log('❌ Campos faltantes:', missingFields);
+      return res.status(400).json({
+        success: false,
+        error: `Datos incompletos del cliente. Faltan: ${missingFields.join(', ')}`
+      });
+    }
+    
+    // Crear direcciones en EasyPost
+    const fromAddress = {
+      name: 'Delizukar',
+      street1: '123 Delizukar St',
+      city: 'Miami',
+      state: 'FL',
+      zip: '33101',
+      country: 'US',
+      email: 'envios@delizukar.com'
+    };
+    
+    // Extraer dirección del customerInfo (puede estar dentro de address object o como propiedades separadas)
+    const address = customerInfo.address || {};
+    console.log('🔍 [Address Debug] customerInfo.address:', JSON.stringify(address, null, 2));
+    console.log('🔍 [Address Debug] customerInfo completo:', JSON.stringify(customerInfo, null, 2));
+    
+    const street1 = address.line1 || address.street1 || customerInfo.street1 || address.address || '123 Main St';
+    const city = address.city || customerInfo.city || 'Miami';
+    const zip = address.postal_code || address.zipCode || customerInfo.zipCode || customerInfo.zip || '33101';
+    const country = address.country || customerInfo.country || 'US';
+    
+    console.log('🔍 [Address Debug] Extraídos:', { street1, city, zip, country });
+    
+    // Corregir estado basado en el código postal
+    // Mapeo completo de códigos postales a estados (los primeros 2 dígitos)
+    const zipToState = {
+      // Massachusetts, Maine, New Hampshire, Vermont, Rhode Island
+      '01': 'MA', '02': 'MA', '03': 'VT', '04': 'VT', '05': 'ME', '06': 'CT',
+      // New York, New Jersey
+      '07': 'NJ', '08': 'NJ', '09': 'NJ', '10': 'NY', '11': 'NY', '12': 'NY', 
+      '13': 'NY', '14': 'NY',
+      // Pennsylvania
+      '15': 'PA', '16': 'PA', '17': 'PA', '18': 'PA', '19': 'PA',
+      // Maryland, Delaware, Virginia, West Virginia, North Carolina
+      '20': 'MD', '21': 'VA', '22': 'VA', '23': 'VA', '24': 'VA', '25': 'NC', 
+      '26': 'NC', '27': 'NC', '28': 'NC',
+      // South Carolina, Georgia
+      '29': 'SC', '30': 'GA', '31': 'GA', '32': 'GA', '33': 'GA',
+      // Florida
+      '32': 'FL', '33': 'FL', '34': 'FL', '35': 'FL', '36': 'FL', '37': 'FL', 
+      '38': 'FL', '39': 'FL',
+      // Alabama, Mississippi, Louisiana, Arkansas
+      '35': 'AL', '36': 'AL', '35': 'MS', '38': 'MS', '70': 'LA', '71': 'LA', 
+      '72': 'LA', '73': 'LA',
+      // Tennessee, Kentucky
+      '37': 'TN', '38': 'TN', '40': 'KY', '41': 'KY', '42': 'KY',
+      // Ohio
+      '43': 'OH', '44': 'OH', '45': 'OH', '46': 'OH', '47': 'OH', '48': 'OH', 
+      '49': 'OH',
+      // Indiana, Michigan
+      '46': 'IN', '47': 'IN', '48': 'IN', '48': 'MI', '49': 'MI',
+      // Wisconsin, Minnesota, Iowa
+      '53': 'WI', '54': 'WI', '55': 'MN', '56': 'MN', '50': 'IA', '51': 'IA', 
+      '52': 'IA',
+      // North Dakota, South Dakota, Nebraska, Kansas
+      '58': 'ND', '57': 'SD', '68': 'SD', '67': 'NE', '66': 'KS', '67': 'KS',
+      // Missouri, Oklahoma
+      '63': 'MO', '64': 'MO', '65': 'MO', '73': 'OK', '74': 'OK',
+      // Texas
+      '75': 'TX', '76': 'TX', '77': 'TX', '78': 'TX', '79': 'TX',
+      // Colorado, New Mexico, Arizona, Utah
+      '80': 'CO', '81': 'CO', '85': 'AZ', '86': 'AZ', '84': 'UT',
+      // Nevada, California
+      '89': 'NV', '90': 'CA', '91': 'CA', '92': 'CA', '93': 'CA', '94': 'CA', 
+      '95': 'CA', '96': 'CA',
+      // Oregon, Washington, Idaho, Montana, Wyoming, Alaska, Hawaii
+      '97': 'OR', '98': 'WA', '99': 'ID', '59': 'MT', '82': 'WY', '99': 'AK', 
+      '96': 'HI',
+      // Washington DC, Puerto Rico, Virgin Islands
+      '20': 'DC', '00': 'PR', '00': 'VI'
+    };
+    
+    let state = address.state || customerInfo.state || 'FL';
+    
+    // Si el código postal está en el mapeo, usar ese estado
+    if (zip && zip.length >= 2) {
+      const zipPrefix = zip.substring(0, 2);
+      if (zipToState[zipPrefix]) {
+        state = zipToState[zipPrefix];
+        console.log(`✅ Estado corregido a ${state} basado en código postal ${zip}`);
+      }
+    }
+    
+    const toAddress = {
+      name: `${customerInfo.firstName || 'Cliente'} ${customerInfo.lastName || ''}`,
+      street1: street1,
+      city: city,
+      state: state,
+      zip: zip,
+      country: country,
+      phone: customerInfo.phone || '',
+      email: customerInfo.email || ''
+    };
+    
+    console.log('📍 DIRECCIÓN EXACTA A ENVIAR A EASYPOST:');
+    console.log('   Nombre:', toAddress.name);
+    console.log('   Calle:', toAddress.street1);
+    console.log('   Ciudad:', toAddress.city);
+    console.log('   Estado:', toAddress.state);
+    console.log('   Código Postal:', toAddress.zip);
+    console.log('   País:', toAddress.country);
+    console.log('📮 From Address:', JSON.stringify(fromAddress, null, 2));
+    console.log('📮 To Address:', JSON.stringify(toAddress, null, 2));
+    
+    // Crear shipment en EasyPost SIN verificación estricta para evitar rechazos de USPS
+    const shipmentData = {
+      shipment: {
+        to_address: toAddress,
+        from_address: fromAddress,
+        parcel: {
+          length: '10',
+          width: '10',
+          height: '10',
+          weight: '1'
+        }
+      }
+    };
+    
+    console.log('📦 Creando shipment en EasyPost...');
+    const shipmentResponse = await fetch('https://api.easypost.com/v2/shipments', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
       },
-      phone_number_collection: phoneNumberCollection || {
-        enabled: true,
-      },
-      automatic_tax: automaticTax || {
-        enabled: true,
-      },
-      // Configuración para envío automático de recibos
-      payment_intent_data: {
-        receipt_email: customerInfo.email,
-        metadata: {
-          customer_email: customerInfo.email,
-          customer_name: `${customerInfo.firstName} ${customerInfo.lastName}`,
-          order_items: JSON.stringify(cartItems),
-        },
-      },
+      body: JSON.stringify(shipmentData),
     });
-
-    console.log('Checkout session created:', session.id);
-    res.json({ sessionId: session.id, url: session.url });
-  } catch (error) {
-    console.error('Error creating checkout session:', error);
-    res.status(500).json({ error: error.message });
-  }
-});
-
-// 2. Crear Payment Intent
-app.post('/api/create-payment-intent', async (req, res) => {
-  try {
-    console.log('🔍 DEBUG: Received request to create-payment-intent');
-    console.log('🔍 DEBUG: STRIPE_SECRET_KEY exists:', !!process.env.STRIPE_SECRET_KEY);
-    console.log('🔍 DEBUG: STRIPE_SECRET_KEY value:', process.env.STRIPE_SECRET_KEY ? process.env.STRIPE_SECRET_KEY.substring(0, 20) + '...' : 'undefined');
     
-    // Verificar si Stripe está configurado
-    if (!process.env.STRIPE_SECRET_KEY || process.env.STRIPE_SECRET_KEY === 'sk_test_dummy_key_for_development') {
-      console.log('❌ ERROR: Stripe not configured');
+    if (!shipmentResponse.ok) {
+      const errorText = await shipmentResponse.text();
+      console.error('❌ Error creando shipment:', errorText);
       return res.status(500).json({ 
-        error: 'Stripe not configured. Please set STRIPE_SECRET_KEY environment variable.' 
+        success: false,
+        error: 'Error al crear shipment en EasyPost'
       });
     }
     
-    const { cartItems, total, customerInfo, captureMethod } = req.body;
-    console.log('🔍 DEBUG: Request body:', { cartItems, total, customerInfo, captureMethod });
-
-    console.log('Creating payment intent for:', customerInfo.email);
-
-    // Enhanced PaymentIntent creation with API v2 features
-    const paymentIntent = await stripe.paymentIntents.create({
-      amount: Math.round(total * 100), // Convertir a centavos
-      currency: 'usd',
-      automatic_payment_methods: {
-        enabled: true,
-        allow_redirects: 'always', // Permitir métodos que requieren redirección
+    const shipment = await shipmentResponse.json();
+    console.log('✅ Shipment creado:', shipment.id);
+    
+    // Verificar si EasyPost sugirió correcciones a la dirección
+    console.log('🔍 [Shipment Debug] shipment.to_address:', JSON.stringify(shipment.to_address, null, 2));
+    console.log('🔍 [Shipment Debug] shipment.messages:', JSON.stringify(shipment.messages, null, 2));
+    
+    if (shipment.to_address && shipment.to_address.verifications && shipment.to_address.verifications.delivery) {
+      const deliveryVerification = shipment.to_address.verifications.delivery;
+      console.log('📋 Verificación de dirección completa:', JSON.stringify(deliveryVerification, null, 2));
+      
+      if (deliveryVerification.success === false) {
+        console.log('❌ Dirección no verificada:', deliveryVerification.errors);
+        const errorMessages = deliveryVerification.errors?.map(e => e.message || e).join(', ') || 'Unknown error';
+        console.log('❌ [EasyPost Error] Message:', errorMessages);
+        return res.status(400).json({
+          success: false,
+          error: `La dirección no pudo ser verificada: ${errorMessages}. Por favor, verifica que la dirección sea correcta y completa.`
+        });
+      }
+      
+      if (deliveryVerification.success === true) {
+        console.log('✅ Dirección verificada y aceptada');
+        if (shipment.to_address.street1 !== toAddress.street1) {
+          console.log(`📝 Dirección corregida: "${toAddress.street1}" → "${shipment.to_address.street1}"`);
+        }
+      }
+    } else {
+      console.log('⚠️ No hay verificación de dirección en la respuesta de EasyPost');
+    }
+    
+    // Verificar mensajes generales del shipment
+    if (shipment.messages && shipment.messages.length > 0) {
+      console.log('⚠️ Mensajes del shipment:', shipment.messages);
+    }
+    
+    // Obtener rate disponible - priorizar UPS sobre USPS
+    let rate = null;
+    if (shipment.rates && shipment.rates.length > 0) {
+      // Buscar primero UPS
+      const upsRate = shipment.rates.find(r => r.carrier === 'UPS');
+      if (upsRate) {
+        rate = upsRate;
+        console.log('✅ Seleccionando rate UPS:', rate.service);
+      } else {
+        // Si no hay UPS, usar el primero disponible
+        rate = shipment.rates[0];
+        console.log('⚠️ No hay UPS disponible, usando:', rate.carrier, rate.service);
+      }
+    }
+    
+    if (!rate) {
+      return res.status(400).json({
+        success: false,
+        error: 'No hay tarifas disponibles para este envío'
+      });
+    }
+    
+    // Comprar la etiqueta usando el shipment ya verificado
+    console.log('💰 Comprando etiqueta...');
+    console.log('   Shipment ID:', shipment.id);
+    console.log('   Rate ID:', rate.id);
+    console.log('   Rate carrier:', rate.carrier);
+    console.log('   Rate service:', rate.service);
+    console.log('   Rate amount:', rate.amount);
+    console.log('   Usando dirección VERIFICADA de EasyPost:', shipment.to_address.street1);
+    
+    const buyResponse = await fetch(`https://api.easypost.com/v2/shipments/${shipment.id}/buy`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
       },
-      capture_method: captureMethod || 'automatic',
-      metadata: {
-        customer_email: customerInfo.email || 'test@example.com',
-        customer_name: `${customerInfo.firstName || 'Usuario'} ${customerInfo.lastName || 'Test'}`,
-        order_items: JSON.stringify(cartItems.map(item => ({
-          id: item.id,
-          name: item.name,
-          price: item.price,
-          quantity: item.quantity
-        }))),
-        source: 'web_checkout',
-        version: '2.0',
-        integration: 'stripe_js_v2'
-      },
-      receipt_email: customerInfo.email || 'test@example.com',
-      setup_future_usage: 'off_session', // For future payments
-      // Configuración para autorización separada
-      ...(captureMethod === 'manual' && {
-        capture_method: 'manual',
+      body: JSON.stringify({ 
+        rate: { id: rate.id }
       }),
-    }, {
-      // Enhanced request options with idempotency
-      idempotencyKey: `pi_${Date.now()}_${customerInfo.email}`,
-      timeout: 30000,
-      maxNetworkRetries: 3
     });
-
-    console.log('✅ Payment intent created:', paymentIntent.id);
-    res.json({ clientSecret: paymentIntent.client_secret });
-  } catch (error) {
-    console.error('❌ ERROR creating payment intent:', error);
-    console.error('❌ Error details:', {
-      message: error.message,
-      type: error.type,
-      code: error.code,
-      statusCode: error.statusCode
-    });
-    res.status(500).json({ 
-      error: error.message,
-      details: {
-        type: error.type,
-        code: error.code,
-        statusCode: error.statusCode
+    
+    if (!buyResponse.ok) {
+      const errorText = await buyResponse.text();
+      console.error('❌ Error comprando etiqueta - Status:', buyResponse.status);
+      console.error('❌ Error comprando etiqueta - Response:', errorText);
+      
+      // Intentar parsear el error para dar más detalles
+      let errorMessage = 'Error al comprar etiqueta';
+      try {
+        const errorData = JSON.parse(errorText);
+        console.error('❌ Error data:', JSON.stringify(errorData, null, 2));
+        if (errorData.error && errorData.error.message) {
+          errorMessage = errorData.error.message;
+          if (errorData.error.code === 'ADDRESS.VERIFY.FAILURE') {
+            errorMessage = 'La dirección del cliente no pudo ser verificada por el servicio de envíos. Por favor, verifica que la dirección sea correcta.';
+          }
+        }
+      } catch (e) {
+        console.error('❌ Error parseando respuesta de error:', e);
+      }
+      
+      return res.status(500).json({
+        success: false,
+        error: errorMessage
+      });
+    }
+    
+    const label = await buyResponse.json();
+    console.log('✅ Etiqueta comprada:', label.id);
+    
+    // Retornar datos del email para que el frontend use EmailJS
+    res.json({
+      success: true,
+      data: {
+        orderId: orderId,
+        trackingCode: label.tracking_code,
+        labelUrl: label.postage_label.label_url,
+        emailData: {
+          to_email: customerInfo.email,
+          to_name: customerInfo.firstName,
+          order_id: orderId,
+          tracking_code: label.tracking_code,
+          tracking_url: `https://track.easypost.com/d/${label.tracking_code}`,
+          label_url: label.postage_label.label_url
+        }
       }
     });
+    
+  } catch (error) {
+    console.error('❌ Error creando envío completo:', error);
+    console.error('❌ Error stack:', error.stack);
+    console.error('❌ Error details:', JSON.stringify(error, Object.getOwnPropertyNames(error)));
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
   }
 });
 
-// 3. Capturar pago (para autorización separada)
-app.post('/api/capture-payment', async (req, res) => {
+// ==================== EMAIL ENDPOINTS ====================
+
+// Endpoint: Enviar email de prueba (retorna los datos, el frontend usa EmailJS)
+app.post('/api/send-test-email', async (req, res) => {
   try {
-    const { paymentIntentId, amountToCapture } = req.body;
+    const { email } = req.body;
+    
+    if (!email) {
+      return res.status(400).json({
+        success: false,
+        error: 'Email es requerido'
+      });
+    }
 
-    console.log('Capturing payment:', paymentIntentId);
+    console.log(`📧 Preparando datos de email de prueba para ${email}...`);
 
-    const paymentIntent = await stripe.paymentIntents.capture(
-      paymentIntentId,
-      {
-        amount_to_capture: amountToCapture ? Math.round(amountToCapture * 100) : undefined,
+    // Crear datos de prueba
+    const testOrder = {
+      nombre: 'Cliente de Prueba',
+      id: 'TEST-' + Date.now(),
+      direccion: {
+        street1: '123 Test St',
+        city: 'Test City',
+        state: 'TS',
+        zip: '12345',
+        country: 'US'
       }
-    );
+    };
 
-    console.log('Payment captured:', paymentIntent.id);
-    res.json({ paymentIntent });
+    const testTrackingCode = 'EZ' + Date.now().toString().substring(4, 14);
+    const testLabelUrl = 'https://www.easypost.com/example-label.pdf';
+
+    // Retornar los datos para que el frontend use EmailJS
+    res.json({
+      success: true,
+      message: 'Datos listos para enviar con EmailJS',
+      emailData: {
+        to_email: email,
+        to_name: testOrder.nombre,
+        order_id: testOrder.id,
+        tracking_code: testTrackingCode,
+        tracking_url: `https://track.easypost.com/d/${testTrackingCode}`,
+        label_url: testLabelUrl
+      }
+    });
+
   } catch (error) {
-    console.error('Error capturing payment:', error);
-    res.status(500).json({ error: error.message });
+    console.error('❌ Error preparando email de prueba:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
   }
 });
 
-// 4. Obtener sesión de checkout
-app.get('/api/checkout-session/:sessionId', async (req, res) => {
-  try {
-    const { sessionId } = req.params;
-    const session = await stripe.checkout.sessions.retrieve(sessionId);
-    res.json({ session });
-  } catch (error) {
-    console.error('Error retrieving checkout session:', error);
-    res.status(500).json({ error: error.message });
-  }
-});
+// ==================== ORDER MANAGEMENT ENDPOINTS ====================
 
-// 5. Obtener Payment Intent (Stripe) o Payment Info (PayPal)
+// 1. Obtener información de pago (solo PayPal)
 app.get('/api/payment-intent/:paymentIntentId', async (req, res) => {
   try {
     const { paymentIntentId } = req.params;
-    console.log('🔍 DEBUG: Getting payment intent:', paymentIntentId);
+    console.log('🔍 DEBUG: Getting PayPal payment info:', paymentIntentId);
     
-    // Verificar si es un PayPal ID o un Stripe ID
-    // PayPal IDs generalmente tienen letras y números, y no empiezan con pi_ o ch_
-    const isPayPal = !paymentIntentId.startsWith('pi_') && 
-                     !paymentIntentId.startsWith('ch_') && 
-                     !paymentIntentId.startsWith('cs_') &&
-                     !paymentIntentId.startsWith('seti_');
+    // Para PayPal, devolver información básica
+    console.log('✅ PayPal payment detected:', paymentIntentId);
     
-    console.log('🔍 DEBUG: isPayPal:', isPayPal);
-    
-    if (isPayPal) {
-      // Para PayPal, devolver información básica desde localStorage o memoria
-      console.log('✅ PayPal payment detected:', paymentIntentId);
-      
-      // Intentar obtener información del pago desde localStorage en el frontend
-      // Por ahora, devolver información genérica
-      res.json({
-        id: paymentIntentId,
-        amount: 0, // El frontend debería tener este valor
-        currency: 'usd',
-        status: 'succeeded',
-        type: 'paypal'
-      });
-    } else {
-      // Solo intentar con Stripe si está configurado
-      console.log('⚠️ Stripe payment detected but Stripe is not configured');
-      res.status(404).json({ 
-        error: 'Stripe is not configured',
-        type: 'unsupported_payment_method'
-      });
-    }
+    res.json({
+      id: paymentIntentId,
+      amount: 0, // El frontend debería tener este valor
+      currency: 'usd',
+      status: 'succeeded',
+      type: 'paypal'
+    });
   } catch (error) {
-    console.error('❌ Error getting payment intent:', error);
+    console.error('❌ Error getting payment info:', error);
     res.status(500).json({ error: error.message });
   }
 });
 
-// 5. Crear orden en Firestore
+// 2. Crear orden en Firestore
 app.post('/api/create-order', async (req, res) => {
   try {
-    const { sessionId, paymentIntentId, customerInfo, cartItems, total, paymentStatus, createdAt, updatedAt } = req.body;
+    console.log('🔵 [Backend] POST /api/create-order recibido');
+    console.log('🔵 [Backend] Request body:', JSON.stringify(req.body, null, 2));
+    
+    const { sessionId, paymentIntentId, customerInfo, cartItems, total, paymentStatus, createdAt, updatedAt, shippingInfo } = req.body;
 
-    console.log('Creating order in Firestore for session:', sessionId);
-    console.log('Order data received:', { sessionId, paymentIntentId, customerInfo: !!customerInfo, cartItems: cartItems?.length, total });
+    // Validar datos requeridos
+    if (!customerInfo || !customerInfo.email) {
+      console.error('❌ [Backend] Customer info missing or invalid');
+      return res.status(400).json({ 
+        error: 'Customer information is required',
+        details: 'Email is mandatory'
+      });
+    }
+
+    if (!cartItems || !Array.isArray(cartItems) || cartItems.length === 0) {
+      console.error('❌ [Backend] Cart items missing or empty');
+      return res.status(400).json({ 
+        error: 'Cart items are required',
+        details: 'At least one item must be in the cart'
+      });
+    }
+
+    if (!total || parseFloat(total) <= 0) {
+      console.error('❌ [Backend] Invalid total amount');
+      return res.status(400).json({ 
+        error: 'Invalid total amount',
+        details: 'Total must be greater than 0'
+      });
+    }
+
+    console.log('🔵 [Backend] Creating order in Firestore for session:', sessionId);
+    console.log('🔵 [Backend] Order data received:', { sessionId, paymentIntentId, customerInfo: !!customerInfo, cartItems: cartItems?.length, total });
+
+    // Limpiar cartItems de campos que causan problemas - solo campos básicos
+    const cleanedCartItems = cartItems.map(item => {
+      // Crear objeto limpio sin campos problemáticos
+      const cleanedItem = {
+        id: String(item.id || ''),
+        name: String(item.name || ''),
+        price: parseFloat(item.price) || 0,
+        quantity: parseInt(item.quantity) || 0,
+        image: String(item.image || '')
+      };
+      
+      // Validar que el item tiene datos mínimos
+      if (!cleanedItem.id || !cleanedItem.name || cleanedItem.price <= 0 || cleanedItem.quantity <= 0) {
+        console.warn('⚠️ [Backend] Invalid cart item:', cleanedItem);
+      }
+      
+      // Remover cualquier campo extra que pueda causar problemas con Firestore
+      return cleanedItem;
+    });
+
+    // Limpiar shippingInfo - solo campos esenciales, sin objetos anidados
+    let cleanedShippingInfo = null;
+    if (shippingInfo && Object.keys(shippingInfo).length > 0) {
+      cleanedShippingInfo = {
+        carrier: shippingInfo.carrier || null,
+        serviceLevel: shippingInfo.serviceLevel || null,
+        cost: parseFloat(shippingInfo.cost) || 0,
+        trackingNumber: shippingInfo.trackingNumber || null
+      };
+    }
 
     const orderData = {
       sessionId: sessionId || paymentIntentId, // Usar sessionId o paymentIntentId como fallback
       paymentIntentId: paymentIntentId || sessionId,
-      customerInfo,
-      cartItems,
-      total,
+      customerInfo: {
+        firstName: String(customerInfo?.firstName || ''),
+        lastName: String(customerInfo?.lastName || ''),
+        email: String(customerInfo?.email || ''),
+        phone: String(customerInfo?.phone || ''),
+        address: {
+          line1: String(customerInfo?.address?.line1 || ''),
+          city: String(customerInfo?.address?.city || ''),
+          postal_code: String(customerInfo?.address?.postal_code || ''),
+          state: String(customerInfo?.address?.state || ''),
+          country: String(customerInfo?.address?.country || 'US')
+        }
+      },
+      cartItems: cleanedCartItems,
+      total: parseFloat(total) || 0,
       paymentStatus: paymentStatus || 'paid',
-      createdAt: createdAt ? new Date(createdAt) : new Date(),
-      updatedAt: updatedAt ? new Date(updatedAt) : new Date(),
+      status: 'pending', // Estado inicial
+      createdAt: new Date(),
+      updatedAt: new Date()
     };
 
-    console.log('Order data to save:', orderData);
+    // Solo agregar shippingInfo si existe
+    if (cleanedShippingInfo) {
+      orderData.shippingInfo = cleanedShippingInfo;
+    }
 
+    console.log('🔵 [Backend] Order data to save:', JSON.stringify(orderData, null, 2));
+
+    console.log('🔵 [Backend] Guardando en Firestore...');
     const docRef = await addDoc(collection(db, 'orders'), orderData);
     
-    console.log('✅ Order created with ID:', docRef.id);
-    res.json({ orderId: docRef.id, order: orderData });
+    console.log('✅ [Backend] Order created with ID:', docRef.id);
+    
+    // Retornar respuesta exitosa con más información
+    res.json({ 
+      success: true,
+      orderId: docRef.id, 
+      order: orderData,
+      message: 'Order created successfully'
+    });
   } catch (error) {
-    console.error('❌ Error creating order:', error);
-    res.status(500).json({ error: error.message });
+    console.error('❌ [Backend] Error creating order:', error);
+    console.error('❌ [Backend] Error message:', error.message);
+    console.error('❌ [Backend] Error stack:', error.stack);
+    console.error('❌ [Backend] Error details:', JSON.stringify(error, null, 2));
+    
+    // Determinar el tipo de error y responder apropiadamente
+    let statusCode = 500;
+    let errorMessage = 'Internal server error';
+    
+    if (error.code === 'permission-denied') {
+      statusCode = 403;
+      errorMessage = 'Permission denied - check Firebase rules';
+    } else if (error.code === 'invalid-argument') {
+      statusCode = 400;
+      errorMessage = 'Invalid data format';
+    } else if (error.code === 'unavailable') {
+      statusCode = 503;
+      errorMessage = 'Service temporarily unavailable';
+    }
+    
+    res.status(statusCode).json({ 
+      success: false,
+      error: errorMessage,
+      details: process.env.NODE_ENV === 'development' ? error.message : 'Something went wrong'
+    });
   }
 });
 
@@ -601,322 +920,7 @@ app.get('/api/order/:orderId', async (req, res) => {
   }
 });
 
-// 8. Obtener recibo de pago
-app.get('/api/receipt/:paymentIntentId', async (req, res) => {
-  try {
-    const { paymentIntentId } = req.params;
-
-    console.log('Retrieving receipt for payment intent:', paymentIntentId);
-
-    // Obtener el PaymentIntent de Stripe
-    const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
-    
-    // Obtener el recibo del charge
-    const charge = paymentIntent.charges?.data?.[0];
-    const receiptUrl = charge?.receipt_url;
-
-    if (receiptUrl) {
-      res.json({ 
-        receiptUrl,
-        paymentIntent: {
-          id: paymentIntent.id,
-          amount: paymentIntent.amount,
-          currency: paymentIntent.currency,
-          status: paymentIntent.status,
-          created: paymentIntent.created
-        },
-        charge: {
-          id: charge.id,
-          receiptNumber: charge.receipt_number,
-          receiptUrl: charge.receipt_url
-        }
-      });
-    } else {
-      res.status(404).json({ error: 'Receipt not found' });
-    }
-  } catch (error) {
-    console.error('Error getting receipt:', error);
-    res.status(500).json({ error: error.message });
-  }
-});
-
-// 9. Enviar recibo manualmente
-app.post('/api/send-receipt', async (req, res) => {
-  try {
-    const { paymentIntentId, email } = req.body;
-
-    console.log('Sending receipt for payment intent:', paymentIntentId, 'to:', email);
-
-    // Obtener el PaymentIntent
-    const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
-    
-    // Enviar recibo usando la API de Stripe
-    const charge = paymentIntent.charges?.data?.[0];
-    if (charge) {
-      // Stripe envía automáticamente el recibo si receipt_email está configurado
-      // Para envío manual, podrías usar tu propio sistema de emails
-      res.json({ 
-        success: true, 
-        message: 'Receipt sent successfully',
-        receiptUrl: charge.receipt_url
-      });
-    } else {
-      res.status(404).json({ error: 'Charge not found' });
-    }
-  } catch (error) {
-    console.error('Error sending receipt:', error);
-    res.status(500).json({ error: error.message });
-  }
-});
-
-// 10. Obtener balance de Stripe
-app.get('/api/balance', async (req, res) => {
-  try {
-    console.log('Retrieving Stripe balance');
-
-    const balance = await stripe.balance.retrieve();
-    
-    console.log('🔍 Raw Stripe balance response:', JSON.stringify(balance, null, 2));
-    console.log('🔍 Available balance:', balance.available);
-    console.log('🔍 Pending balance:', balance.pending);
-    
-    res.json({
-      balance: {
-        available: balance.available.map(b => ({
-          amount: b.amount / 100,
-          currency: b.currency,
-          sourceTypes: b.source_types
-        })),
-        pending: balance.pending.map(b => ({
-          amount: b.amount / 100,
-          currency: b.currency,
-          sourceTypes: b.source_types
-        }))
-      }
-    });
-  } catch (error) {
-    console.error('Error getting balance:', error);
-    res.status(500).json({ error: error.message });
-  }
-});
-
-// ==================== WEBHOOK HANDLER ====================
-
-app.post('/api/webhook', async (req, res) => {
-  const sig = req.headers['stripe-signature'];
-  const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
-  let event;
-
-  try {
-    event = stripe.webhooks.constructEvent(req.body, sig, webhookSecret);
-    console.log('Webhook received:', event.type);
-  } catch (err) {
-    console.log(`Webhook signature verification failed.`, err.message);
-    return res.status(400).send(`Webhook Error: ${err.message}`);
-  }
-
-  // Manejar el evento
-  try {
-    switch (event.type) {
-      case 'payment_intent.succeeded':
-        await handlePaymentIntentSucceeded(event.data.object);
-        break;
-      case 'payment_intent.payment_failed':
-        await handlePaymentIntentFailed(event.data.object);
-        break;
-      case 'payment_intent.amount_capturable_updated':
-        await handlePaymentIntentCapturable(event.data.object);
-        break;
-      case 'checkout.session.completed':
-        await handleCheckoutSessionCompleted(event.data.object);
-        break;
-      case 'checkout.session.expired':
-        await handleCheckoutSessionExpired(event.data.object);
-        break;
-      case 'balance.available':
-        await handleBalanceAvailable(event.data.object);
-        break;
-      case 'charge.dispute.created':
-        await handleChargeDisputeCreated(event.data.object);
-        break;
-      case 'payment_intent.requires_action':
-        await handlePaymentIntentRequiresAction(event.data.object);
-        break;
-      case 'invoice.payment_succeeded':
-        await handleInvoicePaymentSucceeded(event.data.object);
-        break;
-      default:
-        console.log(`Unhandled event type ${event.type}`);
-    }
-  } catch (error) {
-    console.error('Error handling webhook event:', error);
-    return res.status(500).json({ error: 'Webhook handler error' });
-  }
-
-  res.json({ received: true });
-});
-
-// ==================== WEBHOOK HANDLERS ====================
-
-async function handlePaymentIntentSucceeded(paymentIntent) {
-  console.log('PaymentIntent succeeded:', paymentIntent.id);
-  
-  try {
-    // Buscar orden por sessionId o paymentIntentId
-    const ordersRef = collection(db, 'orders');
-    
-    // Crear orden en Firestore con detalles completos
-    const orderData = {
-      paymentIntentId: paymentIntent.id,
-      customerEmail: paymentIntent.receipt_email,
-      customerName: paymentIntent.metadata?.customer_name,
-      amount: paymentIntent.amount / 100, // Convertir de centavos
-      currency: paymentIntent.currency,
-      status: 'completed',
-      paymentMethod: paymentIntent.payment_method,
-      orderItems: JSON.parse(paymentIntent.metadata?.order_items || '[]'),
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      // Información de balance según Stripe docs
-      balanceTransaction: paymentIntent.latest_charge,
-      receiptUrl: paymentIntent.charges?.data?.[0]?.receipt_url,
-      // Metadata adicional
-      metadata: paymentIntent.metadata
-    };
-
-    const docRef = await addDoc(ordersRef, orderData);
-    console.log('Order created successfully:', docRef.id);
-    
-    // Enviar recibo automáticamente si está configurado
-    if (paymentIntent.receipt_email) {
-      console.log('Receipt will be sent automatically to:', paymentIntent.receipt_email);
-    }
-    
-  } catch (error) {
-    console.error('Error handling payment success:', error);
-  }
-}
-
-async function handlePaymentIntentFailed(paymentIntent) {
-  console.log('PaymentIntent failed:', paymentIntent.id);
-  
-  try {
-    // Actualizar orden como fallida
-    console.log('Payment failed for:', paymentIntent.metadata);
-  } catch (error) {
-    console.error('Error handling payment failure:', error);
-  }
-}
-
-async function handlePaymentIntentCapturable(paymentIntent) {
-  console.log('PaymentIntent capturable:', paymentIntent.id);
-  
-  try {
-    // Manejar autorización lista para capturar
-    console.log('Payment ready for capture:', paymentIntent.metadata);
-  } catch (error) {
-    console.error('Error handling capturable payment:', error);
-  }
-}
-
-async function handleCheckoutSessionCompleted(session) {
-  console.log('Checkout session completed:', session.id);
-  
-  try {
-    // Crear orden en Firestore
-    const orderData = {
-      sessionId: session.id,
-      customerInfo: {
-        email: session.customer_email,
-        name: session.customer_details?.name,
-      },
-      paymentStatus: 'completed',
-      total: session.amount_total / 100, // Convertir de centavos
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
-
-    const docRef = await addDoc(collection(db, 'orders'), orderData);
-    console.log('Order created from checkout session:', docRef.id);
-  } catch (error) {
-    console.error('Error handling checkout completion:', error);
-  }
-}
-
-async function handleCheckoutSessionExpired(session) {
-  console.log('Checkout session expired:', session.id);
-  
-  try {
-    // Manejar sesión expirada
-    console.log('Session expired for:', session.customer_email);
-  } catch (error) {
-    console.error('Error handling session expiration:', error);
-  }
-}
-
-// Nuevos handlers basados en la documentación de Stripe
-async function handleBalanceAvailable(balance) {
-  console.log('Balance available:', balance);
-  
-  try {
-    // Registrar cuando los fondos están disponibles según Stripe docs
-    console.log('Funds are now available in your Stripe balance');
-    console.log('Available amount:', balance.available[0]?.amount / 100, balance.available[0]?.currency);
-    
-    // Aquí podrías implementar lógica para notificar sobre fondos disponibles
-    // o actualizar el estado de órdenes pendientes
-  } catch (error) {
-    console.error('Error handling balance available:', error);
-  }
-}
-
-async function handleChargeDisputeCreated(dispute) {
-  console.log('Charge dispute created:', dispute.id);
-  
-  try {
-    // Manejar disputas según Stripe docs
-    console.log('Dispute amount:', dispute.amount / 100, dispute.currency);
-    console.log('Dispute reason:', dispute.reason);
-    console.log('Charge ID:', dispute.charge);
-    
-    // Aquí podrías implementar lógica para manejar disputas
-    // como notificar al equipo o actualizar el estado de la orden
-  } catch (error) {
-    console.error('Error handling charge dispute:', error);
-  }
-}
-
-async function handlePaymentIntentRequiresAction(paymentIntent) {
-  console.log('Payment intent requires action:', paymentIntent.id);
-  
-  try {
-    // Manejar autenticación 3D Secure según Stripe docs
-    console.log('Payment requires additional authentication (3D Secure)');
-    console.log('Next action:', paymentIntent.next_action);
-    
-    // Aquí podrías implementar lógica para manejar 3D Secure
-  } catch (error) {
-    console.error('Error handling payment intent requires action:', error);
-  }
-}
-
-async function handleInvoicePaymentSucceeded(invoice) {
-  console.log('Invoice payment succeeded:', invoice.id);
-  
-  try {
-    // Manejar pagos de suscripciones según Stripe docs
-    console.log('Subscription payment completed');
-    console.log('Customer:', invoice.customer);
-    console.log('Amount paid:', invoice.amount_paid / 100, invoice.currency);
-    
-    // Aquí podrías implementar lógica para manejar suscripciones
-  } catch (error) {
-    console.error('Error handling invoice payment success:', error);
-  }
-}
-
 // ==================== HEALTH CHECK ====================
-// MUST BE BEFORE STATIC FILES AND CATCH-ALL
 
 // Health check for Railway - must be very simple and fast
 app.get('/health', (req, res) => {
@@ -929,11 +933,7 @@ app.get('/api/health', (req, res) => {
   res.status(200).json({ 
     status: 'OK', 
     timestamp: new Date().toISOString(),
-    uptime: process.uptime(),
-    stripe: {
-      configured: !!process.env.STRIPE_SECRET_KEY,
-      mode: process.env.STRIPE_SECRET_KEY?.startsWith('sk_test_') ? 'test' : 'live'
-    }
+    uptime: process.uptime()
   });
 });
 
@@ -976,7 +976,6 @@ app.use((err, req, res, next) => {
 
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`🚀 Server running on port ${PORT}`);
-  console.log(`💳 Stripe configured in ${process.env.STRIPE_SECRET_KEY?.startsWith('sk_test_') ? 'TEST' : 'LIVE'} mode`);
   console.log(`🔥 Firebase connected to project: ${process.env.REACT_APP_FIREBASE_PROJECT_ID}`);
   console.log(`🔍 Health check available at: /health and /api/health`);
   console.log(`📁 Static files served from: ${path.join(__dirname, 'build')}`);
