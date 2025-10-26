@@ -22,7 +22,6 @@ import {
   Payment
 } from '@mui/icons-material';
 import { useTranslation } from 'react-i18next';
-import StripeCheckout from './StripeCheckout';
 
 const ShippingConfirmationPopup = ({ 
   open, 
@@ -232,13 +231,9 @@ const ShippingConfirmationPopup = ({
                 </Alert>
               )}
 
-              <StripeCheckout 
-                cartItems={cartItems}
-                total={total + (shippingInfo ? parseFloat(shippingInfo.cost || 0) : 0)}
-                customerInfo={customerInfo}
-                onSuccess={handlePaymentSuccess}
-                onError={handlePaymentError}
-              />
+              <Alert severity="info" sx={{ mb: 2 }}>
+                Por favor, complete el pago en la página de checkout principal.
+              </Alert>
             </CardContent>
           </Card>
         )}

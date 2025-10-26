@@ -80,10 +80,11 @@ const Home = () => {
         width: '100vw',
         marginLeft: 'calc(-50vw + 50%)',
         marginRight: 'calc(-50vw + 50%)',
-        marginTop: 0,
-        marginBottom: 0,
+        marginTop: '-30px',
+        marginBottom: '-50px',
+        position: 'relative',
         '@media (min-width: 769px) and (max-width: 1024px) and (orientation: landscape)': {
-          marginTop: '0px'
+          marginTop: '-30px'
         }
       }}>
         <HeroBanner />
@@ -98,10 +99,10 @@ const Home = () => {
           backgroundColor: '#C8626D',
           position: 'relative',
           zIndex: 999,
+          marginTop: '-40px',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          marginTop: { xs: '-60px', sm: '-60px', md: '-60px', lg: '-60px', xl: '-60px' },
           cursor: 'default !important',
           pointerEvents: 'none !important',
           userSelect: 'none',
@@ -122,6 +123,9 @@ const Home = () => {
           },
           '@media (min-width: 768px) and (max-width: 1200px) and (orientation: landscape)': {
             marginTop: '0px'
+          },
+          '@media (min-width: 1201px)': {
+            marginTop: '-58px'
           }
         }}
       >
@@ -139,7 +143,12 @@ const Home = () => {
             userSelect: 'none',
             WebkitUserSelect: 'none',
             MozUserSelect: 'none',
-            msUserSelect: 'none'
+            msUserSelect: 'none',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            width: '100%',
+            height: '100%'
           }}
         >
           DeliZuKar: your heart's Wi-Fi (always keeps you connected to happiness).

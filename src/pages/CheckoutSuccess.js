@@ -49,6 +49,10 @@ const CheckoutSuccess = () => {
             }
           }
           
+          // Cargar monto del pago desde localStorage
+          const savedPaymentAmount = localStorage.getItem('lastPaymentAmount');
+          console.log('💰 Saved payment amount:', savedPaymentAmount);
+          
           // Consultar datos reales desde el backend
           const baseUrl = process.env.NODE_ENV === 'production' 
             ? window.location.origin 
@@ -60,14 +64,17 @@ const CheckoutSuccess = () => {
             const paymentData = await response.json();
             console.log('✅ Payment data received:', paymentData);
             
+            // Usar el monto guardado si está disponible, sino usar el del backend
+            const finalAmount = savedPaymentAmount ? parseFloat(savedPaymentAmount) : (paymentData.amount / 100);
+            
             setOrderDetails({
               sessionId: paymentData.id,
-              amount: paymentData.amount / 100, // Convertir de centavos
-              currency: paymentData.currency,
+              amount: finalAmount, // Usar el monto correcto
+              currency: paymentData.currency || 'USD',
               customerEmail: paymentData.receipt_email || paymentData.customer_email,
               paymentStatus: paymentData.status,
-              shipping: paymentData.shipping?.amount || 0,
-              subtotal: (paymentData.amount / 100) - (paymentData.shipping?.amount || 0)
+              shipping: shippingInfo?.cost || 0,
+              subtotal: finalAmount - (shippingInfo?.cost || 0)
             });
           } else {
             const errorData = await response.json();

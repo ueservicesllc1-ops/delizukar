@@ -140,7 +140,12 @@ const Checkout = () => {
     };
 
     console.log('Creating shipping data with address:', toAddress);
-    return createOrderData(cart, fromAddress, toAddress);
+    console.log('Cart items:', cart);
+    console.log('From address:', fromAddress);
+    
+    const orderData = createOrderData(cart, fromAddress, toAddress);
+    console.log('Generated order data:', orderData);
+    return orderData;
   };
 
   // Abrir calculador de envíos automáticamente
@@ -617,19 +622,40 @@ const Checkout = () => {
                     </Box>
                     
                     {/* Método de pago con PayPal - Solo mostrar si hay datos completos */}
-                    {formData.email && formData.firstName && formData.lastName && formData.address && formData.city && formData.zipCode ? (
+                    {(() => {
+                      const hasAllFields = formData.email && formData.firstName && formData.lastName && formData.address && formData.city && formData.zipCode;
+                      console.log('Form data check:', {
+                        email: !!formData.email,
+                        firstName: !!formData.firstName,
+                        lastName: !!formData.lastName,
+                        address: !!formData.address,
+                        city: !!formData.city,
+                        zipCode: !!formData.zipCode,
+                        hasAllFields
+                      });
+                      return hasAllFields;
+                    })() ? (
                       <PayPalPaymentForm 
                         key={`paypal-${formData.email}-${cartTotal}`}
                         cartItems={cart}
+                        shippingInfo={shippingInfo}
                         onPaymentSuccess={(paymentDetails) => {
                           console.log('✅ PayPal payment successful, clearing cart and navigating');
-                          clearCart();
+                          console.log('💰 Payment details:', paymentDetails);
                           
-                          // Guardar información de envío en localStorage
+                          // Guardar información de envío y pago en localStorage
                           if (shippingInfo) {
                             localStorage.setItem('lastShippingInfo', JSON.stringify(shippingInfo));
                             console.log('📦 Shipping info saved:', shippingInfo);
                           }
+                          
+                          // Guardar detalles del pago
+                          if (paymentDetails.amount) {
+                            localStorage.setItem('lastPaymentAmount', paymentDetails.amount);
+                            console.log('💰 Payment amount saved:', paymentDetails.amount);
+                          }
+                          
+                          clearCart();
                           
                           // Pasar el payment ID en la URL
                           navigate(`/checkout/success?payment_id=${paymentDetails.paymentId}`);

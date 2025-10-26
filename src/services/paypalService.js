@@ -3,13 +3,24 @@ const PAYPAL_BASE_URL = process.env.NODE_ENV === 'production'
   ? 'https://api-m.paypal.com' 
   : 'https://api-m.sandbox.paypal.com';
 
-const PAYPAL_CLIENT_ID = "AVB4RgfQ-5QsURuFvjuEozb155zmRaOnMq7K-8gZOQWSMRS2ChXP8YSo_RlLJ8HG9cCJvd7rglAnwS1m";
-const PAYPAL_CLIENT_SECRET = "EGjLCduhMazEK4gPHZohA_nsMa3KpiCSHeZ8Kv-70yX2flsN4vMKkaROLinIWFtXieEg3xHIPvwNV4U_";
+const PAYPAL_CLIENT_ID = process.env.REACT_APP_PAYPAL_CLIENT_ID || "sb";
+const PAYPAL_CLIENT_SECRET = process.env.PAYPAL_CLIENT_SECRET || "";
+
+// Supported currencies according to PayPal documentation
+const SUPPORTED_CURRENCIES = ['USD', 'EUR', 'GBP', 'CAD', 'AUD', 'JPY', 'MXN', 'BRL', 'INR', 'SGD', 'HKD', 'CNY', 'CHF', 'SEK', 'DKK', 'NOK', 'PLN', 'NZD', 'THB', 'PHP', 'MYR', 'IDR', 'KRW', 'TRY', 'RUB', 'SAR', 'AED', 'ZAR', 'ILS', 'HUF', 'CZK'];
 
 class PayPalService {
   constructor() {
     this.accessToken = null;
     this.tokenExpiry = null;
+  }
+
+  // Validate if currency is supported
+  validateCurrency(currency) {
+    if (!SUPPORTED_CURRENCIES.includes(currency.toUpperCase())) {
+      throw new Error(`Currency ${currency} is not supported by PayPal. Supported currencies: ${SUPPORTED_CURRENCIES.join(', ')}`);
+    }
+    return true;
   }
 
   // Get access token for PayPal API calls
@@ -19,6 +30,15 @@ class PayPalService {
     }
 
     try {
+      // Validate credentials
+      if (!PAYPAL_CLIENT_ID || PAYPAL_CLIENT_ID === "sb") {
+        throw new Error('PayPal Client ID is not configured. Please set REACT_APP_PAYPAL_CLIENT_ID environment variable.');
+      }
+      
+      if (!PAYPAL_CLIENT_SECRET || PAYPAL_CLIENT_SECRET === "") {
+        throw new Error('PayPal Client Secret is not configured. Please set PAYPAL_CLIENT_SECRET environment variable.');
+      }
+
       const credentials = btoa(`${PAYPAL_CLIENT_ID}:${PAYPAL_CLIENT_SECRET}`);
       
       const response = await fetch(`${PAYPAL_BASE_URL}/v1/oauth2/token`, {
@@ -31,7 +51,8 @@ class PayPalService {
       });
 
       if (!response.ok) {
-        throw new Error(`Failed to get access token: ${response.statusText}`);
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(`Failed to get access token: ${response.statusText}. ${errorData.error_description || ''}`);
       }
 
       const data = await response.json();

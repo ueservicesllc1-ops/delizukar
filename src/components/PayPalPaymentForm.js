@@ -13,13 +13,15 @@ import {
 } from '@mui/material';
 import PayPalCheckout from './PayPalCheckout';
 import PayPalCardPayment from './PayPalCardPayment';
+import PayPalSimple from './PayPalSimple';
 import { toast } from 'react-hot-toast';
 
 const PayPalPaymentForm = ({ 
   cartItems = [], 
   onPaymentSuccess, 
   onPaymentError,
-  shippingAddress = null 
+  shippingAddress = null,
+  shippingInfo = null
 }) => {
   const [orderData, setOrderData] = useState({
     subtotal: 0,
@@ -34,18 +36,25 @@ const PayPalPaymentForm = ({
   useEffect(() => {
     if (cartItems && cartItems.length > 0) {
       const subtotal = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-      const shipping = subtotal > 50 ? 0 : 10; // Free shipping over $50
-      const tax = subtotal * 0.08; // 8% tax
+      
+      // Use real shipping cost if available, otherwise default to $10
+      let shipping = 0;
+      if (shippingInfo && shippingInfo.cost) {
+        shipping = parseFloat(shippingInfo.cost);
+      } else {
+        shipping = 10; // Default shipping cost
+      }
+      
+      const tax = 0; // No tax for cookies
       const total = subtotal + shipping + tax;
 
       setOrderData({
         subtotal: subtotal.toFixed(2),
         shipping: shipping.toFixed(2),
-        tax: tax.toFixed(2),
         total: total.toFixed(2),
       });
     }
-  }, [cartItems]);
+  }, [cartItems, shippingInfo]);
 
   const handlePaymentSuccess = (details) => {
     console.log('Payment successful:', details);
@@ -122,13 +131,6 @@ const PayPalPaymentForm = ({
             </Grid>
             
             <Grid item xs={12}>
-              <Box display="flex" justifyContent="space-between">
-                <Typography>Tax:</Typography>
-                <Typography>${orderData.tax}</Typography>
-              </Box>
-            </Grid>
-            
-            <Grid item xs={12}>
               <Divider />
             </Grid>
             
@@ -161,7 +163,7 @@ const PayPalPaymentForm = ({
                 </Typography>
               </Box>
             ) : (
-              <PayPalCardPayment
+              <PayPalSimple
                 amount={orderData.total}
                 currency="USD"
                 description={`Payment for ${cartItems.length} item(s)`}

@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { PayPalScriptProvider, PayPalButtons } from '@paypal/react-paypal-js';
+import React, { useState, useEffect } from 'react';
+import { PayPalScriptProvider, PayPalButtons, usePayPalScriptReducer } from '@paypal/react-paypal-js';
 import {
   Box,
   Card,
@@ -25,6 +25,67 @@ import {
 import { PAYPAL_CONFIG } from '../paypal/config';
 import paypalService from '../services/paypalService';
 import { toast } from 'react-hot-toast';
+
+// Componente interno para manejar el estado de PayPal
+const PayPalButtonComponent = ({ amount, currency, description, onApprove, onError, onCancel }) => {
+  const [{ isPending, isResolved, isRejected }] = usePayPalScriptReducer();
+
+  if (isPending) {
+    return (
+      <Box sx={{ textAlign: 'center', py: 4 }}>
+        <CircularProgress />
+        <Typography variant="body2" sx={{ mt: 2 }}>
+          Loading PayPal...
+        </Typography>
+      </Box>
+    );
+  }
+
+  if (isRejected) {
+    return (
+      <Box sx={{ textAlign: 'center', py: 4 }}>
+        <Typography variant="body2" color="error" sx={{ mb: 2 }}>
+          PayPal is not available. Please check your internet connection and try again.
+        </Typography>
+        <Button 
+          variant="contained" 
+          onClick={() => window.location.reload()}
+          sx={{ backgroundColor: '#c8626d' }}
+        >
+          Refresh Page
+        </Button>
+      </Box>
+    );
+  }
+
+  return (
+    <PayPalButtons
+      style={{
+        layout: 'vertical',
+        color: 'blue',
+        shape: 'rect',
+        label: 'pay',
+        height: 45,
+      }}
+      createOrder={(data, actions) => {
+        return actions.order.create({
+          purchase_units: [
+            {
+              amount: {
+                value: amount.toString(),
+                currency_code: currency,
+              },
+              description: description,
+            },
+          ],
+        });
+      }}
+      onApprove={onApprove}
+      onError={onError}
+      onCancel={onCancel}
+    />
+  );
+};
 
 const PayPalCardPayment = ({ 
   amount, 
@@ -102,149 +163,32 @@ const PayPalCardPayment = ({
         clientId: PAYPAL_CONFIG.clientId,
         currency: currency,
         intent: PAYPAL_CONFIG.intent,
-        components: 'buttons,marks,messages',
-        enableFunding: 'card,credit,paylater',
+        components: 'buttons',
+        enableFunding: 'card,credit',
         disableFunding: 'paypal',
-        style: {
-          layout: 'vertical',
-          color: 'blue',
-          shape: 'rect',
-          label: 'pay',
-          height: 45,
-        },
+        debug: process.env.NODE_ENV === 'development',
+        vault: false,
+        "data-sdk-integration-source": "integrationbuilder_ac",
+        "data-namespace": undefined,
+        "data-client-token": undefined,
       }}
     >
-      <Box>
-        <Card>
-          <CardContent>
-            <Box display="flex" alignItems="center" mb={3}>
-              <CreditCard sx={{ mr: 1, color: 'primary.main' }} />
-              <Typography variant="h5">
-                Pay with Credit/Debit Card
-              </Typography>
-            </Box>
-
-            <Alert severity="info" sx={{ mb: 3 }}>
-              <Typography variant="body2">
-                <strong>Secure Payment:</strong> Your card information is processed securely by PayPal. 
-                We accept Visa, Mastercard, American Express, and Discover cards.
-              </Typography>
-            </Alert>
-
-            <Grid container spacing={3}>
-              <Grid item xs={12}>
-                <Box textAlign="center" mb={2}>
-                  <Typography variant="h4" color="primary" fontWeight="bold">
-                    ${amount}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    {description}
-                  </Typography>
-                </Box>
-              </Grid>
-
-              <Grid item xs={12}>
-                <Divider sx={{ my: 2 }}>
-                  <Typography variant="body2" color="text.secondary">
-                    Choose Payment Method
-                  </Typography>
-                </Divider>
-              </Grid>
-
-              <Grid item xs={12}>
-                <FormControl fullWidth>
-                  <InputLabel>Payment Method</InputLabel>
-                  <Select
-                    value={paymentMethod}
-                    onChange={(e) => setPaymentMethod(e.target.value)}
-                  >
-                    <MenuItem value="card">
-                      <Box display="flex" alignItems="center">
-                        <CreditCard sx={{ mr: 1 }} />
-                        Credit/Debit Card
-                      </Box>
-                    </MenuItem>
-                    <MenuItem value="paypal">
-                      <Box display="flex" alignItems="center">
-                        <Security sx={{ mr: 1 }} />
-                        PayPal Account
-                      </Box>
-                    </MenuItem>
-                  </Select>
-                </FormControl>
-              </Grid>
-
-              {isProcessing && (
-                <Grid item xs={12}>
-                  <Box display="flex" flexDirection="column" alignItems="center" py={4}>
-                    <CircularProgress />
-                    <Typography variant="body2" sx={{ mt: 2 }}>
-                      Processing your card payment...
-                    </Typography>
-                  </Box>
-                </Grid>
-              )}
-
-              {!isProcessing && (
-                <Grid item xs={12}>
-                  <Box sx={{ 
-                    border: '2px dashed #e0e0e0', 
-                    borderRadius: 2, 
-                    p: 3, 
-                    textAlign: 'center',
-                    backgroundColor: '#fafafa'
-                  }}>
-                    <PayPalButtons
-                      style={{
-                        layout: 'vertical',
-                        color: 'blue',
-                        shape: 'rect',
-                        label: 'pay',
-                        height: 45,
-                      }}
-                      createOrder={(data, actions) => {
-                        return actions.order.create({
-                          purchase_units: [
-                            {
-                              amount: {
-                                value: amount.toString(),
-                                currency_code: currency,
-                              },
-                              description: description,
-                            },
-                          ],
-                          payment_source: {
-                            card: {
-                              attributes: {
-                                vault: {
-                                  store_in_vault: 'ON_SUCCESS',
-                                  usage_pattern: 'IMMEDIATE',
-                                  usage_type: 'MERCHANT',
-                                },
-                              },
-                            },
-                          },
-                        });
-                      }}
-                      onApprove={handleApprove}
-                      onError={handleError}
-                      onCancel={handleCancel}
-                    />
-                  </Box>
-                </Grid>
-              )}
-
-              <Grid item xs={12}>
-                <Box display="flex" alignItems="center" justifyContent="center" mt={2}>
-                  <Security sx={{ mr: 1, color: 'success.main' }} />
-                  <Typography variant="body2" color="text.secondary">
-                    Secured by PayPal • SSL Encrypted
-                  </Typography>
-                </Box>
-              </Grid>
-            </Grid>
-          </CardContent>
-        </Card>
+      <Box sx={{ p: 3, textAlign: 'center' }}>
+        <Typography variant="h6" sx={{ mb: 2 }}>
+          Pay with Credit/Debit Card
+        </Typography>
+        <Typography variant="body2" sx={{ mb: 3, color: 'text.secondary' }}>
+          Secure payment powered by PayPal
+        </Typography>
+        
+        <PayPalButtonComponent
+          amount={amount}
+          currency={currency}
+          description={description}
+          onApprove={handleApprove}
+          onError={handleError}
+          onCancel={handleCancel}
+        />
       </Box>
     </PayPalScriptProvider>
   );

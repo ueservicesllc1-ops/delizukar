@@ -1,34 +1,13 @@
 require('dotenv').config();
 console.log('🔍 Environment variables loaded:');
-console.log('STRIPE_SECRET_KEY:', process.env.STRIPE_SECRET_KEY ? 'SET' : 'NOT SET');
-console.log('REACT_APP_STRIPE_PUBLISHABLE_KEY:', process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY ? 'SET' : 'NOT SET');
+console.log('EASYPOST_API_KEY:', process.env.EASYPOST_API_KEY ? 'SET' : 'NOT SET');
+
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
-const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY || 'sk_test_dummy_key_for_development', {
-  apiVersion: '2023-10-16', // Stable API version
-  maxNetworkRetries: 3, // Enhanced retry logic
-  timeout: 30000, // 30 second timeout
-});
-const { initializeApp } = require('firebase/app');
-const { getFirestore, collection, addDoc, doc, updateDoc, getDoc } = require('firebase/firestore');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
-
-// Firebase configuration
-const firebaseConfig = {
-  apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
-  authDomain: process.env.REACT_APP_FIREBASE_AUTH_DOMAIN,
-  projectId: process.env.REACT_APP_FIREBASE_PROJECT_ID,
-  storageBucket: process.env.REACT_APP_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: process.env.REACT_APP_FIREBASE_MESSAGING_SENDER_ID,
-  appId: process.env.REACT_APP_FIREBASE_APP_ID
-};
-
-// Initialize Firebase
-const firebaseApp = initializeApp(firebaseConfig);
-const db = getFirestore(firebaseApp);
 
 // Enhanced middleware with security best practices
 app.use(cors({
@@ -83,74 +62,157 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-// ==================== SHIPPO ENDPOINTS ====================
+// ==================== EASYPOST ENDPOINTS ====================
 
-// 1. Crear dirección en Shippo
+// 1. Crear dirección en EasyPost
 app.post('/api/shippo/create-address', async (req, res) => {
   try {
-    console.log('🔍 DEBUG: Creating address in Shippo');
-    console.log('🔍 DEBUG: SHIPPO_API_TOKEN exists:', !!process.env.SHIPPO_API_TOKEN);
-    console.log('🔍 DEBUG: SHIPPO_API_TOKEN value:', process.env.SHIPPO_API_TOKEN ? process.env.SHIPPO_API_TOKEN.substring(0, 20) + '...' : 'undefined');
+    console.log('🔍 DEBUG: Creating address in EasyPost');
+    console.log('🔍 DEBUG: EASYPOST_API_KEY exists:', !!process.env.EASYPOST_API_KEY);
     
-    const response = await fetch('https://api.goshippo.com/addresses/', {
+    const response = await fetch('https://api.easypost.com/v2/addresses', {
       method: 'POST',
       headers: {
-        'Authorization': `ShippoToken ${process.env.SHIPPO_API_TOKEN || 'shippo_test_placeholder'}`,
+        'Authorization': `Bearer ${process.env.EASYPOST_API_KEY || 'EZTK59b460158953437d87998d578f6dc433q02S0DwSYw5ISPTB5j0SDQ'}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(req.body),
     });
 
     const data = await response.json();
-    console.log('✅ Shippo address created:', data.object_id);
+    console.log('✅ EasyPost address created:', data.id);
     res.json(data);
   } catch (error) {
-    console.error('❌ Shippo error:', error);
+    console.error('❌ EasyPost error:', error);
     res.status(500).json({ error: error.message });
   }
 });
 
-// 2. Obtener información de cuenta de Shippo
+// 2. Obtener información de cuenta de EasyPost
 app.get('/api/shippo/account', async (req, res) => {
   try {
-    console.log('🔍 DEBUG: Getting Shippo account info');
+    console.log('🔍 DEBUG: Getting EasyPost account info');
+    console.log('🔍 DEBUG: EASYPOST_API_KEY exists:', !!process.env.EASYPOST_API_KEY);
     
-    const response = await fetch('https://api.goshippo.com/account/', {
+    const response = await fetch('https://api.easypost.com/v2/user', {
       method: 'GET',
       headers: {
-        'Authorization': `ShippoToken ${process.env.SHIPPO_API_TOKEN || 'shippo_test_placeholder'}`,
+        'Authorization': `Bearer ${process.env.EASYPOST_API_KEY || 'EZTK59b460158953437d87998d578f6dc433q02S0DwSYw5ISPTB5j0SDQ'}`,
         'Content-Type': 'application/json',
       },
     });
 
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('❌ EasyPost API error:', response.status, errorText);
+      throw new Error(`EasyPost API error: ${response.status} - ${errorText}`);
+    }
+
     const data = await response.json();
-    console.log('✅ Shippo account info retrieved');
+    console.log('✅ EasyPost account info retrieved');
     res.json(data);
   } catch (error) {
-    console.error('❌ Shippo account error:', error);
+    console.error('❌ EasyPost account error:', error);
     res.status(500).json({ error: error.message });
   }
 });
 
-// 3. Calcular tarifas de envío
+// 3. Calcular tarifas de envío con EasyPost
 app.post('/api/shippo/rates', async (req, res) => {
   try {
-    console.log('🔍 DEBUG: Calculating shipping rates');
+    console.log('🔍 DEBUG: Calculating shipping rates with EasyPost');
+    console.log('🔍 DEBUG: Request body:', JSON.stringify(req.body, null, 2));
     
-    const response = await fetch('https://api.goshippo.com/shipments/', {
+    const apiKey = process.env.EASYPOST_API_KEY || 'EZTK59b460158953437d87998d578f6dc433q02S0DwSYw5ISPTB5j0SDQ';
+    
+    // Convertir el formato de Shippo a EasyPost
+    const { address_from, address_to, parcels } = req.body;
+    
+    const shipmentData = {
+      shipment: {
+        to_address: {
+          name: address_to.name || '',
+          street1: address_to.street1,
+          city: address_to.city,
+          state: address_to.state,
+          zip: address_to.zip,
+          country: address_to.country || 'US',
+          phone: address_to.phone || '',
+          email: address_to.email || ''
+        },
+        from_address: {
+          name: address_from.name || 'Delizukar',
+          street1: address_from.street1,
+          city: address_from.city,
+          state: address_from.state,
+          zip: address_from.zip,
+          country: address_from.country || 'US',
+          phone: address_from.phone || '',
+          email: address_from.email || 'support@delizukar.com'
+        },
+        parcel: {
+          length: parcels[0].length || '10',
+          width: parcels[0].width || '10',
+          height: parcels[0].height || '10',
+          weight: parcels[0].weight || '1'
+        }
+      }
+    };
+    
+    console.log('🔍 DEBUG: Converted to EasyPost format:', JSON.stringify(shipmentData, null, 2));
+    
+    const response = await fetch('https://api.easypost.com/v2/shipments', {
       method: 'POST',
       headers: {
-        'Authorization': `ShippoToken ${process.env.SHIPPO_API_TOKEN || 'shippo_test_placeholder'}`,
+        'Authorization': `Bearer ${apiKey}`,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(req.body),
+      body: JSON.stringify(shipmentData),
     });
+
+    console.log('🔍 DEBUG: Response status:', response.status);
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('❌ EasyPost API error:', response.status, errorText);
+      throw new Error(`EasyPost API error: ${response.status} - ${errorText}`);
+    }
 
     const data = await response.json();
     console.log('✅ Shipping rates calculated');
-    res.json(data);
+    console.log('🔍 DEBUG: Response data:', JSON.stringify(data, null, 2));
+    
+    // EasyPost devuelve rates directamente en la raíz del objeto
+    const easypostRates = data.rates || [];
+    console.log('🔍 DEBUG: Rates count:', easypostRates.length);
+    
+    // Transformar rates de EasyPost al formato de Shippo para compatibilidad con el frontend
+    // IMPORTANTE: No calculamos eta aquí, el frontend lo calculará basándose en la lógica de envío del lunes
+    const rates = easypostRates.map(rate => ({
+      object_id: rate.id,
+      provider: rate.carrier?.toLowerCase() || rate.carrier,
+      carrier: rate.carrier,
+      servicelevel: {
+        name: rate.service
+      },
+      service: rate.service,
+      amount: parseFloat(rate.rate),
+      currency: rate.currency,
+      eta: null, // El frontend calculará la fecha correcta
+      delivery_days: rate.delivery_days || rate.est_delivery_days
+    }));
+    
+    // Devolver en formato similar a Shippo para compatibilidad con el frontend
+    const responseData = {
+      rates: rates,
+      shipment: data
+    };
+    
+    console.log('🔍 DEBUG: Transformed rates:', JSON.stringify(rates, null, 2));
+    
+    res.json(responseData);
   } catch (error) {
-    console.error('❌ Shippo rates error:', error);
+    console.error('❌ EasyPost rates error:', error);
     res.status(500).json({ error: error.message });
   }
 });
@@ -340,16 +402,42 @@ app.get('/api/checkout-session/:sessionId', async (req, res) => {
   }
 });
 
-// 5. Obtener Payment Intent
+// 5. Obtener Payment Intent (Stripe) o Payment Info (PayPal)
 app.get('/api/payment-intent/:paymentIntentId', async (req, res) => {
   try {
     const { paymentIntentId } = req.params;
     console.log('🔍 DEBUG: Getting payment intent:', paymentIntentId);
     
-    const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
-    console.log('✅ Payment intent retrieved:', paymentIntent.id);
+    // Verificar si es un PayPal ID o un Stripe ID
+    // PayPal IDs generalmente tienen letras y números, y no empiezan con pi_ o ch_
+    const isPayPal = !paymentIntentId.startsWith('pi_') && 
+                     !paymentIntentId.startsWith('ch_') && 
+                     !paymentIntentId.startsWith('cs_') &&
+                     !paymentIntentId.startsWith('seti_');
     
-    res.json(paymentIntent);
+    console.log('🔍 DEBUG: isPayPal:', isPayPal);
+    
+    if (isPayPal) {
+      // Para PayPal, devolver información básica desde localStorage o memoria
+      console.log('✅ PayPal payment detected:', paymentIntentId);
+      
+      // Intentar obtener información del pago desde localStorage en el frontend
+      // Por ahora, devolver información genérica
+      res.json({
+        id: paymentIntentId,
+        amount: 0, // El frontend debería tener este valor
+        currency: 'usd',
+        status: 'succeeded',
+        type: 'paypal'
+      });
+    } else {
+      // Solo intentar con Stripe si está configurado
+      console.log('⚠️ Stripe payment detected but Stripe is not configured');
+      res.status(404).json({ 
+        error: 'Stripe is not configured',
+        type: 'unsupported_payment_method'
+      });
+    }
   } catch (error) {
     console.error('❌ Error getting payment intent:', error);
     res.status(500).json({ error: error.message });

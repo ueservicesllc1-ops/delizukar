@@ -10,6 +10,10 @@ const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY ||
 });
 
 const PaymentMethodMessaging = ({ amount, currency = 'USD', countryCode = 'US' }) => {
+  // Stripe is disabled - returning null to avoid loading Stripe library
+  return null;
+  
+  /* DISABLED - Stripe not in use
   const { t } = useTranslation();
   // Convert amount to cents for Stripe
   const amountInCents = amount ? Math.round(amount * 100) : 0;
@@ -66,6 +70,7 @@ const PaymentMethodMessaging = ({ amount, currency = 'USD', countryCode = 'US' }
       </Typography>
     </Box>
   );
+  */
 };
 
 export default PaymentMethodMessaging;

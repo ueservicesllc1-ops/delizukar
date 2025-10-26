@@ -1,9 +1,9 @@
 // PayPal Configuration
 export const PAYPAL_CONFIG = {
-  clientId: "AVB4RgfQ-5QsURuFvjuEozb155zmRaOnMq7K-8gZOQWSMRS2ChXP8YSo_RlLJ8HG9cCJvd7rglAnwS1m",
-  currency: "USD",
-  intent: "capture", // or "authorize"
-  environment: "sandbox", // Change to "production" for live payments
+  clientId: process.env.REACT_APP_PAYPAL_CLIENT_ID || "sb", // PayPal client ID from environment
+  currency: process.env.REACT_APP_PAYPAL_CURRENCY || "USD",
+  intent: process.env.REACT_APP_PAYPAL_INTENT || "capture", // or "authorize"
+  environment: process.env.REACT_APP_PAYPAL_ENVIRONMENT || "sandbox", // Change to "production" for live payments
 };
 
 // PayPal Button Styles

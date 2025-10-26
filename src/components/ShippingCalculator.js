@@ -31,7 +31,9 @@ const ShippingCalculator = ({
   const [error, setError] = useState(null);
 
   useEffect(() => {
+    console.log('ShippingCalculator useEffect triggered:', { open, orderData });
     if (open && orderData) {
+      console.log('Opening shipping calculator with order data:', orderData);
       calculateRates();
     }
   }, [open, orderData]);
@@ -41,29 +43,29 @@ const ShippingCalculator = ({
       setLoading(true);
       setError(null);
       
-      console.log('Order data:', orderData);
+      console.log('Starting calculateRates with order data:', orderData);
       
-      // Probar conexión primero
-      const isConnected = await shippoService.testConnection();
-      if (!isConnected) {
-        console.log('Using mock rates due to connection issues');
-        setRates(shippoService.getMockRates());
-        return;
+      // Verificar que orderData tenga la estructura correcta
+      if (!orderData || !orderData.address_from || !orderData.address_to || !orderData.parcels) {
+        console.error('Invalid order data structure:', orderData);
+        throw new Error('Invalid order data structure');
       }
       
+      console.log('Order data structure is valid');
+      
+      // Obtener tarifas de Shippo
+      console.log('Getting rates from Shippo...');
       const rates = await shippoService.getShippingRates(
         orderData.address_from,
         orderData.address_to,
         orderData.parcels[0]
       );
       
-      console.log('Rates received:', rates);
+      console.log('Rates received from Shippo:', rates);
       setRates(rates);
     } catch (err) {
       console.error('Error calculating rates:', err);
-      console.log('Falling back to mock rates');
-      setRates(shippoService.getMockRates());
-      setError('Usando tarifas de ejemplo (modo desarrollo)');
+      setError('No se pudieron obtener las tarifas de envío. Por favor, verifica la configuración de Shippo.');
     } finally {
       setLoading(false);
     }
@@ -82,8 +84,8 @@ const ShippingCalculator = ({
         packingSlipUrl: null,
         eta: selectedRate.eta,
         cost: selectedRate.amount,
-        carrier: selectedRate.provider,
-        serviceLevel: selectedRate.servicelevel?.name
+                  carrier: selectedRate.carrier || selectedRate.provider,
+        serviceLevel: selectedRate.service || selectedRate.servicelevel?.name
       });
       onClose();
     }
@@ -93,15 +95,20 @@ const ShippingCalculator = ({
     return `$${parseFloat(amount).toFixed(2)}`;
   };
 
-  // Función para calcular fecha de envío según la nueva lógica
+  // Función para calcular fecha de envío según la lógica de la empresa
+  // Recogen pedidos de lunes a jueves y envían el siguiente lunes
   const calculateShippingDate = () => {
     const today = new Date();
     const currentDay = today.getDay(); // 0 = domingo, 1 = lunes, ..., 6 = sábado
     
+    console.log('📆 Hoy es:', today.toLocaleDateString('es-ES'), 'Día de la semana:', currentDay);
+    
     // Calcular días hasta el próximo lunes
+    // Según la lógica: pedidos de lunes a jueves se envían el siguiente lunes
+    // Pedidos de viernes a domingo se envían el lunes de la semana siguiente
     let daysToMonday;
     if (currentDay === 0) { // Domingo
-      daysToMonday = 8; // Siguiente lunes (no el inmediato)
+      daysToMonday = 8; // Lunes de la semana siguiente (no el inmediato)
     } else if (currentDay === 1) { // Lunes
       daysToMonday = 7; // Siguiente lunes
     } else if (currentDay === 2) { // Martes
@@ -117,26 +124,35 @@ const ShippingCalculator = ({
     }
     
     // Fecha de envío (próximo lunes)
-    return new Date(today.getTime() + (daysToMonday * 24 * 60 * 60 * 1000));
+    const shippingDate = new Date(today.getTime() + (daysToMonday * 24 * 60 * 60 * 1000));
+    
+    console.log('📦 Días hasta el lunes:', daysToMonday);
+    console.log('📬 Fecha de envío:', shippingDate.toLocaleDateString('es-ES'));
+    
+    return shippingDate;
   };
 
   const formatETA = (eta, rate) => {
-    if (!eta) return 'N/A';
-    
     // Calcular fecha de envío según la nueva lógica
     const shippingDate = calculateShippingDate();
+    
+    console.log('📅 Fecha de envío calculada:', shippingDate.toLocaleDateString('es-ES'));
     
     // Determinar rango de días de tránsito según el tipo de servicio
     let minDays = 2;
     let maxDays = 3;
     
-    if (rate && rate.provider) {
-      const provider = rate.provider.toLowerCase();
-      const serviceLevel = rate.servicelevel?.name?.toLowerCase() || '';
+    const carrier = (rate.carrier || rate.provider || '').toLowerCase();
+    const serviceLevel = (rate.service || rate.servicelevel?.name || '').toLowerCase();
+    
+    console.log('🚚 Carrier:', carrier, 'Service:', serviceLevel);
+    
+    if (rate && carrier) {
+      const provider = carrier;
       
       // Asignar rango de días de tránsito según el proveedor y servicio
       if (provider === 'usps') {
-        if (serviceLevel.includes('ground') || serviceLevel.includes('standard')) {
+        if (serviceLevel.includes('ground') || serviceLevel.includes('advantage')) {
           minDays = 2; maxDays = 3; // 2-3 días
         } else if (serviceLevel.includes('priority')) {
           minDays = 1; maxDays = 2; // 1-2 días
@@ -149,23 +165,31 @@ const ShippingCalculator = ({
         } else if (serviceLevel.includes('standard')) {
           minDays = 1; maxDays = 3; // 1-3 días
         }
-      } else if (provider === 'fedex') {
-        if (serviceLevel.includes('ground')) {
+      } else if (provider === 'fedex' || provider === 'fedexdefault') {
+        if (serviceLevel.includes('smart') || serviceLevel.includes('post')) {
+          minDays = 2; maxDays = 3; // 2-3 días
+        } else if (serviceLevel.includes('ground')) {
           minDays = 1; maxDays = 5; // 1-5 días
         } else if (serviceLevel.includes('standard')) {
           minDays = 1; maxDays = 3; // 1-3 días
         }
+      } else if (provider === 'easypost') {
+        // EasyPost no especifica el carrier directamente, usar valores por defecto
+        minDays = 2; maxDays = 3;
       }
     }
+    
+    console.log('📦 Días de tránsito:', minDays, '-', maxDays);
     
     // Calcular fechas de entrega: fecha de envío + rango de días
     const minDeliveryDate = new Date(shippingDate.getTime() + (minDays * 24 * 60 * 60 * 1000));
     const maxDeliveryDate = new Date(shippingDate.getTime() + (maxDays * 24 * 60 * 60 * 1000));
     
+    console.log('📬 Fechas de entrega:', minDeliveryDate.toLocaleDateString('es-ES'), '-', maxDeliveryDate.toLocaleDateString('es-ES'));
+    
     // Formatear fechas
     const formatDate = (date) => {
       return date.toLocaleDateString('es-ES', {
-        weekday: 'long',
         day: 'numeric',
         month: 'long'
       });
@@ -173,7 +197,7 @@ const ShippingCalculator = ({
     
     // Si es el mismo día, mostrar solo una fecha
     if (minDays === maxDays) {
-      return formatDate(minDeliveryDate);
+      return `${formatDate(minDeliveryDate)}`;
     }
     
     // Mostrar rango de fechas
@@ -256,10 +280,31 @@ const ShippingCalculator = ({
           </Box>
         )}
 
+        {!loading && rates.length === 0 && (
+          <Box sx={{ textAlign: 'center', py: 4 }}>
+            <Typography variant="h6" sx={{ mb: 2, color: 'text.secondary' }}>
+              No shipping options available
+            </Typography>
+            <Typography variant="body2" sx={{ color: 'text.secondary', mb: 3 }}>
+              Please check your address or try again later.
+            </Typography>
+            <Button 
+              variant="contained" 
+              onClick={calculateRates}
+              sx={{ backgroundColor: '#c8626d' }}
+            >
+              Try Again
+            </Button>
+          </Box>
+        )}
+
         {rates.length > 0 && (
           <>
             <Typography variant="h6" sx={{ mb: 3, fontWeight: 600, textAlign: 'center' }}>
               {t('shippingOptions.selectOption', 'Select a shipping option:')}
+            </Typography>
+            <Typography variant="body2" sx={{ mb: 2, textAlign: 'center', color: 'text.secondary' }}>
+              Found {rates.length} shipping options
             </Typography>
 
             <Grid container spacing={{ xs: 1, sm: 2 }} justifyContent="center">
@@ -306,10 +351,10 @@ const ShippingCalculator = ({
                       }}>
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                           <Chip
-                            label={getCarrierName(rate.provider)}
+                            label={getCarrierName(rate.carrier || rate.provider)}
                             size="small"
                             sx={{
-                              backgroundColor: getCarrierColor(rate.provider),
+                              backgroundColor: getCarrierColor(rate.carrier || rate.provider),
                               color: 'white',
                               fontWeight: 600,
                               fontSize: { xs: '0.65rem', sm: '0.7rem' },
@@ -340,7 +385,7 @@ const ShippingCalculator = ({
                           lineHeight: 1.2
                         }}
                       >
-                        {rate.servicelevel?.name || 'Standard'}
+                        {rate.service || rate.servicelevel?.name || 'Standard'}
                       </Typography>
 
                       {/* Información de entrega */}

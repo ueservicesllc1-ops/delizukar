@@ -46,8 +46,11 @@
     "dev": "node start-dev.js",
     "quick": "node quick-start.js",
     "setup": "node setup-stripe.js",
+    "setup-paypal": "node setup-paypal.js",
     "test-stripe": "node test-stripe-integration.js",
     "test-payment": "node test-payment-simple.js",
+    "test-paypal": "node test-paypal-integration.js",
+    "debug-paypal": "node debug-paypal.js",
     "dev:full": "concurrently \"npm run server\" \"npm start\""
   },
   "eslintConfig": {

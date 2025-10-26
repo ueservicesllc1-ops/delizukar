@@ -359,3 +359,151 @@ body {
   text-transform: uppercase;
 }
 
+/* ============================================ */
+/* iPad & Tablet Specific Styles (NEW) */
+/* ============================================ */
+
+/* iPad Portrait (768px - 1024px) */
+@media only screen and (min-width: 768px) and (max-width: 1024px) and (orientation: portrait) {
+  /* SOLO PARA IPAD - No afecta desktop */
+  html {
+    font-size: 14px; /* Reduce tamaño base para iPad */
+  }
+  
+  body {
+    font-size: 14px !important;
+    -webkit-text-size-adjust: 100%;
+    -moz-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+    zoom: 0.9; /* Escala todo 10% más pequeño en iPad */
+  }
+  
+  /* Imágenes más pequeñas en iPad */
+  img {
+    max-width: 100% !important;
+    height: auto !important;
+  }
+  
+  /* Headers más pequeños en iPad */
+  h1 { font-size: 1.8rem !important; }
+  h2 { font-size: 1.5rem !important; }
+  h3 { font-size: 1.3rem !important; }
+  h4 { font-size: 1.1rem !important; }
+  
+  /* Containers ajustados para iPad */
+  .MuiContainer-root {
+    max-width: 100% !important;
+    padding-left: 20px !important;
+    padding-right: 20px !important;
+  }
+  
+  /* Header más alto en iPad portrait */
+  .header-mobile {
+    height: 80px !important;
+    padding: 0 20px !important;
+  }
+  
+  /* Botones más pequeños en iPad */
+  .MuiButton-root {
+    padding: 8px 16px !important;
+    font-size: 0.9rem !important;
+  }
+}
+
+/* iPad Landscape (768px - 1024px) */
+@media only screen and (min-width: 768px) and (max-width: 1024px) and (orientation: landscape) {
+  /* SOLO PARA IPAD - No afecta desktop */
+  html {
+    font-size: 14px; /* Reduce tamaño base para iPad */
+  }
+  
+  body {
+    font-size: 14px !important;
+    -webkit-text-size-adjust: 100%;
+    -moz-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+    zoom: 0.9; /* Escala todo 10% más pequeño en iPad */
+  }
+  
+  /* Imágenes más pequeñas en iPad */
+  img {
+    max-width: 100% !important;
+    height: auto !important;
+  }
+  
+  /* Headers más pequeños en iPad landscape */
+  h1 { font-size: 1.8rem !important; }
+  h2 { font-size: 1.5rem !important; }
+  h3 { font-size: 1.3rem !important; }
+  h4 { font-size: 1.1rem !important; }
+  
+  /* Containers ajustados para iPad landscape */
+  .MuiContainer-root {
+    max-width: 100% !important;
+    padding-left: 24px !important;
+    padding-right: 24px !important;
+  }
+  
+  /* Header más alto en iPad landscape */
+  .header-mobile {
+    height: 80px !important;
+    padding: 0 24px !important;
+  }
+  
+  /* Botones más pequeños en iPad landscape */
+  .MuiButton-root {
+    padding: 8px 16px !important;
+    font-size: 0.9rem !important;
+  }
+}
+
+/* iPad Pro 11" (834px x 1194px) */
+@media only screen and (min-width: 834px) and (max-width: 1194px) {
+  .MuiContainer-root {
+    max-width: 1200px !important;
+  }
+}
+
+/* iPad Pro 12.9" (1024px x 1366px) */
+@media only screen and (min-width: 1024px) and (max-width: 1366px) {
+  .MuiContainer-root {
+    max-width: 1400px !important;
+  }
+}
+
+/* Touch targets for iPad - larger for better usability */
+@media only screen and (min-width: 768px) and (max-width: 1024px) {
+  button, a, input, select, textarea {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  /* Better spacing for iPad */
+  .MuiButton-root {
+    padding: 12px 24px !important;
+    font-size: 1rem !important;
+  }
+  
+  /* Form fields adjusted for iPad */
+  .MuiTextField-root {
+    margin-bottom: 20px !important;
+  }
+  
+  .MuiTextField-root input {
+    font-size: 16px !important; /* Prevents zoom on iOS */
+    padding: 14px !important;
+  }
+}
+
+/* Prevent text size adjustment in Safari/iOS */
+@supports (-webkit-touch-callout: none) {
+  body {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  
+  input, textarea, select {
+    font-size: 16px !important;
+  }
+}
+

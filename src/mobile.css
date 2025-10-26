@@ -134,6 +134,7 @@
   
   .nosotros-title-mobile {
     margin-bottom: 32px !important;
+    margin-top: -30px !important;
     display: block !important;
     visibility: visible !important;
     opacity: 1 !important;
@@ -726,13 +727,14 @@
     top: 0 !important;
     z-index: 10000 !important;
     width: 100% !important;
+    height: 165px !important;
     background: rgba(255, 255, 255, 0.95) !important;
     backdrop-filter: blur(10px) !important;
   }
   
   /* Header Container - Fixed height for horizontal tablet */
   .header-container {
-    height: 60px !important;
+    height: 165px !important;
     position: fixed !important;
     top: 0 !important;
     width: 100% !important;
@@ -771,7 +773,7 @@
   } */
   
   /* Force hero banner to not have negative margin on horizontal tablet */
-  .hero-mobile * {
+  /* .hero-mobile * {
     margin-top: 0 !important;
   } */
   
@@ -795,7 +797,7 @@
     right: 0 !important;
     z-index: 999999 !important;
     width: 100% !important;
-    height: 80px !important;
+    height: 165px !important;
     background: rgba(255, 255, 255, 0.98) !important;
     backdrop-filter: blur(15px) !important;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1) !important;
@@ -807,7 +809,7 @@
     position: relative !important;
     z-index: 999999 !important;
     width: 100% !important;
-    height: 80px !important;
+    height: 165px !important;
     pointer-events: auto !important;
   }
   
@@ -872,7 +874,7 @@
     position: relative !important;
     z-index: 999999 !important;
     width: 100% !important;
-    height: 80px !important;
+    height: 165px !important;
     pointer-events: auto !important;
   }
   
@@ -910,7 +912,7 @@
     position: relative !important;
     z-index: 999999 !important;
     width: 100% !important;
-    height: 80px !important;
+    height: 165px !important;
     pointer-events: auto !important;
   }
   
@@ -948,7 +950,7 @@
     position: relative !important;
     z-index: 999999 !important;
     width: 100% !important;
-    height: 80px !important;
+    height: 165px !important;
     pointer-events: auto !important;
   }
   
@@ -986,7 +988,7 @@
     position: relative !important;
     z-index: 999999 !important;
     width: 100% !important;
-    height: 80px !important;
+    height: 165px !important;
     pointer-events: auto !important;
   }
   
@@ -1035,7 +1037,7 @@
     position: relative !important;
     z-index: 999999 !important;
     width: 100% !important;
-    height: 80px !important;
+    height: 165px !important;
     pointer-events: auto !important;
   }
   

@@ -303,8 +303,8 @@ const Footer = () => {
         transition={{ duration: 0.6, delay: 0.2 }}
         style={{
           position: 'absolute',
-          top: '40px',
-          right: '120px'
+          top: '100px',
+          right: '40px'
         }}
       >
         <Box

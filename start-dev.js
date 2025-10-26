@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * Script de inicio para desarrollo con Stripe API v2
+ * Script de inicio para desarrollo con EasyPost
  * Inicia tanto el servidor backend como el frontend
  */
 
@@ -9,13 +9,11 @@ const { spawn } = require('child_process');
 const path = require('path');
 require('dotenv').config();
 
-console.log('🚀 Iniciando aplicación con Stripe API v2...\n');
+console.log('🚀 Iniciando aplicación con EasyPost...\n');
 
 // Verificar variables de entorno
 const requiredEnvVars = [
-  'STRIPE_SECRET_KEY',
-  'REACT_APP_STRIPE_PUBLISHABLE_KEY',
-  'REACT_APP_FIREBASE_PROJECT_ID'
+  'EASYPOST_API_KEY'
 ];
 
 const missingVars = requiredEnvVars.filter(varName => !process.env[varName]);
@@ -25,13 +23,12 @@ if (missingVars.length > 0) {
   missingVars.forEach(varName => {
     console.error(`   - ${varName}`);
   });
-  console.error('\n📝 Crea un archivo .env basado en config.env.example');
+  console.error('\n📝 Crea un archivo .env con EASYPOST_API_KEY');
   process.exit(1);
 }
 
 console.log('✅ Variables de entorno configuradas correctamente');
-console.log('💳 Modo Stripe:', process.env.STRIPE_SECRET_KEY?.startsWith('sk_test_') ? 'PRUEBA' : 'PRODUCCIÓN');
-console.log('🔥 Firebase:', process.env.REACT_APP_FIREBASE_PROJECT_ID);
+console.log('📦 EasyPost API Key configurada');
 console.log('');
 
 // Iniciar servidor backend
@@ -54,7 +51,11 @@ setTimeout(() => {
   const reactProcess = spawn('npm', ['start'], {
     stdio: 'inherit',
     cwd: __dirname,
-    shell: true
+    shell: true,
+    env: {
+      ...process.env,
+      PORT: '3000'
+    }
   });
 
   reactProcess.on('error', (err) => {
@@ -82,7 +83,6 @@ setTimeout(() => {
 
 console.log('📱 Aplicación disponible en: http://localhost:3000');
 console.log('🔧 API disponible en: http://localhost:5000');
-console.log('💳 Stripe Dashboard: https://dashboard.stripe.com/');
-console.log('🔥 Firebase Console: https://console.firebase.google.com/');
+console.log('📦 EasyPost Dashboard: https://app.easypost.com/');
 console.log('');
 console.log('Presiona Ctrl+C para detener la aplicación');

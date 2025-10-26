@@ -1,10 +1,10 @@
 // Configuración de Shippo
-const SHIPPO_API_TOKEN = 'shippo_test_067939bd744254985bb01ba3567591c692cfc4e6';
+// NO hardcodeamos el token - se usa a través del backend
 const SHIPPO_API_BASE = 'https://api.goshippo.com';
 
 class ShippoService {
   constructor() {
-    this.apiToken = SHIPPO_API_TOKEN;
+    this.apiToken = null; // No se usa en frontend
     this.baseURL = SHIPPO_API_BASE;
   }
 
@@ -135,88 +135,11 @@ class ShippoService {
       return shipment.rates || [];
     } catch (error) {
       console.error('Error getting shipping rates:', error);
-      
-      // Si hay error, devolver tarifas de ejemplo para desarrollo
-      if (error.message.includes('401') || error.message.includes('403') || 
-          error.message.includes('Token does not exist') || 
-          (error.detail && error.detail.includes('Token does not exist'))) {
-        console.log('Using mock rates for development - Shippo token not configured');
-        return this.getMockRates();
-      }
-      
       throw error;
     }
   }
 
-  // Tarifas de ejemplo para desarrollo
-  getMockRates() {
-    return [
-      {
-        object_id: 'rate_1',
-        provider: 'usps',
-        servicelevel: { name: 'USPS Ground' },
-        amount: '12.50',
-        currency: 'USD',
-        eta: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString()
-      },
-      {
-        object_id: 'rate_2',
-        provider: 'fedex',
-        servicelevel: { name: 'FedEx Ground' },
-        amount: '15.75',
-        currency: 'USD',
-        eta: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString()
-      },
-      {
-        object_id: 'rate_3',
-        provider: 'fedex',
-        servicelevel: { name: 'FedEx 2Day' },
-        amount: '22.50',
-        currency: 'USD',
-        eta: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString()
-      },
-      {
-        object_id: 'rate_4',
-        provider: 'fedex',
-        servicelevel: { name: 'FedEx Overnight' },
-        amount: '35.99',
-        currency: 'USD',
-        eta: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000).toISOString()
-      },
-      {
-        object_id: 'rate_5',
-        provider: 'dhl',
-        servicelevel: { name: 'DHL Express' },
-        amount: '28.75',
-        currency: 'USD',
-        eta: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString()
-      },
-      {
-        object_id: 'rate_6',
-        provider: 'dhl',
-        servicelevel: { name: 'DHL Ground' },
-        amount: '18.25',
-        currency: 'USD',
-        eta: new Date(Date.now() + 4 * 24 * 60 * 60 * 1000).toISOString()
-      },
-      {
-        object_id: 'rate_7',
-        provider: 'ups',
-        servicelevel: { name: 'UPS Ground' },
-        amount: '14.25',
-        currency: 'USD',
-        eta: new Date(Date.now() + 4 * 24 * 60 * 60 * 1000).toISOString()
-      },
-      {
-        object_id: 'rate_8',
-        provider: 'ups',
-        servicelevel: { name: 'UPS 2nd Day Air' },
-        amount: '24.99',
-        currency: 'USD',
-        eta: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString()
-      }
-    ];
-  }
+
 
   // Crear transacción (comprar etiqueta)
   async createTransaction(rateId) {
@@ -252,20 +175,6 @@ class ShippoService {
       return account;
     } catch (error) {
       console.error('Error getting account info:', error);
-      
-      // Si el token no existe, devolver info mock
-      if (error.message.includes('Token does not exist') || 
-          (error.detail && error.detail.includes('Token does not exist'))) {
-        console.log('Using mock account info - Shippo token not configured');
-        return {
-          object_id: 'mock_account',
-          username: 'delizukar_test',
-          email: 'test@delizukar.com',
-          first_name: 'Delizukar',
-          last_name: 'Test'
-        };
-      }
-      
       throw error;
     }
   }
@@ -329,19 +238,13 @@ class ShippoService {
     } catch (error) {
       console.error('Error correcting address:', error);
       
-      // Si hay error de conexión, tratar la dirección como válida
+      // Si hay error de conexión, lanzar error para que el usuario sepa que el servidor no está disponible
       if (error.message.includes('Failed to fetch') || 
           error.message.includes('NetworkError') ||
           error.message.includes('500') ||
           error.message.includes('404')) {
-        console.log('Backend not available, treating address as valid');
-        return {
-          original: addressData,
-          corrected: addressData,
-          needsCorrection: false,
-          suggestions: [],
-          isResidential: true
-        };
+        console.log('Backend not available, cannot validate address');
+        throw new Error('Servidor no disponible. Por favor, inicie el servidor con: npm run server');
       }
       
       throw error;

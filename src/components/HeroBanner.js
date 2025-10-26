@@ -183,35 +183,6 @@ const HeroBanner = () => {
           </SwiperSlide>
         ))}
       </Swiper>
-
-      {/* Indicador de slide personalizado */}
-      <Box
-        sx={{
-          position: 'absolute',
-          bottom: '30px',
-          left: '50%',
-          transform: 'translateX(-50%)',
-          zIndex: 10,
-          display: 'flex',
-          gap: 1
-        }}
-      >
-        {bannerPhotos.map((_, index) => (
-          <motion.div
-            key={index}
-            className={`slide-indicator ${index === currentSlide ? 'active' : ''}`}
-            style={{
-              width: index === currentSlide ? '30px' : '10px',
-              height: '10px',
-              backgroundColor: index === currentSlide ? '#fff' : 'rgba(255,255,255,0.5)',
-              borderRadius: '5px',
-              cursor: 'pointer',
-              transition: 'all 0.3s ease'
-            }}
-            whileHover={{ scale: 1.2 }}
-          />
-        ))}
-      </Box>
     </Box>
 
     </>
