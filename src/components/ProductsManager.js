@@ -59,7 +59,7 @@ const ProductsManager = ({ open, onClose }) => {
     weight: '',
     image: '',
     rating: 5,
-    category: '',
+    category: 'NY Style Cookies',
     isNew: false,
     isBestSeller: false,
     featured: false,
@@ -457,29 +457,6 @@ const ProductsManager = ({ open, onClose }) => {
                       />
                     </Grid>
                     
-                    <Grid item xs={12} md={6}>
-                      <FormControl fullWidth sx={{ mb: 2 }}>
-                        <InputLabel sx={{ fontSize: '1rem' }}>Categoría</InputLabel>
-                        <Select
-                          value={formData.category}
-                          onChange={(e) => handleInputChange('category', e.target.value)}
-                          required
-                          sx={{ 
-                            fontSize: '1rem',
-                            '& .MuiSelect-select': {
-                              padding: '16px 14px',
-                              fontSize: '1rem'
-                            }
-                          }}
-                        >
-                          {categories.map(category => (
-                            <MenuItem key={category} value={category} sx={{ fontSize: '1rem', padding: '12px 16px' }}>
-                              {category}
-                            </MenuItem>
-                          ))}
-                        </Select>
-                      </FormControl>
-                    </Grid>
                     
                     <Grid item xs={12} md={6}>
                       <TextField
