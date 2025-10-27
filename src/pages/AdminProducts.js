@@ -616,13 +616,20 @@ const AdminProducts = () => {
               </Grid>
               <Grid item xs={12} sm={6}>
                 <FormControl fullWidth>
-                  <InputLabel>Categoría</InputLabel>
+                  <InputLabel sx={{ fontSize: '1rem' }}>Categoría</InputLabel>
                   <Select
                     defaultValue={editingProduct?.category || ''}
-                    sx={{ borderRadius: '12px' }}
+                    sx={{ 
+                      borderRadius: '12px',
+                      fontSize: '1rem',
+                      '& .MuiSelect-select': {
+                        padding: '16px 14px',
+                        fontSize: '1rem'
+                      }
+                    }}
                   >
                     {categories.slice(1).map((category) => (
-                      <MenuItem key={category} value={category}>
+                      <MenuItem key={category} value={category} sx={{ fontSize: '1rem', padding: '12px 16px' }}>
                         {category}
                       </MenuItem>
                     ))}

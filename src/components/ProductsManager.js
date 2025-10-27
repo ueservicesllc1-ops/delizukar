@@ -459,14 +459,21 @@ const ProductsManager = ({ open, onClose }) => {
                     
                     <Grid item xs={12} md={6}>
                       <FormControl fullWidth sx={{ mb: 2 }}>
-                        <InputLabel>Categoría</InputLabel>
+                        <InputLabel sx={{ fontSize: '1rem' }}>Categoría</InputLabel>
                         <Select
                           value={formData.category}
                           onChange={(e) => handleInputChange('category', e.target.value)}
                           required
+                          sx={{ 
+                            fontSize: '1rem',
+                            '& .MuiSelect-select': {
+                              padding: '16px 14px',
+                              fontSize: '1rem'
+                            }
+                          }}
                         >
                           {categories.map(category => (
-                            <MenuItem key={category} value={category}>
+                            <MenuItem key={category} value={category} sx={{ fontSize: '1rem', padding: '12px 16px' }}>
                               {category}
                             </MenuItem>
                           ))}
