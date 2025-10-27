@@ -130,14 +130,14 @@ const Home = () => {
         }}
       >
         <Typography
-          variant="h6"
+          variant="body1"
           sx={{
-            color: 'white',
-            fontWeight: 600,
-            fontSize: { xs: '0.9rem', md: '1.1rem' },
+            color: '#ffffff',
+            fontWeight: 700,
+            fontSize: { xs: '0.6rem', sm: '0.65rem', md: '0.9rem' },
             textAlign: 'center',
-            fontFamily: 'Playfair Display, serif',
-            textShadow: '1px 1px 2px rgba(0,0,0,0.3)',
+            fontFamily: 'Arial, sans-serif',
+            textShadow: '2px 2px 4px rgba(0,0,0,0.7)',
             cursor: 'default !important',
             pointerEvents: 'none !important',
             userSelect: 'none',
@@ -148,7 +148,13 @@ const Home = () => {
             alignItems: 'center',
             justifyContent: 'center',
             width: '100%',
-            height: '100%'
+            height: '100%',
+            zIndex: 1000,
+            position: 'relative',
+            letterSpacing: '0.3px',
+            whiteSpace: 'nowrap',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis'
           }}
         >
           DeliZuKar: your heart's Wi-Fi (always keeps you connected to happiness).

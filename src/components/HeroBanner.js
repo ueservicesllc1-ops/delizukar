@@ -130,7 +130,7 @@ const HeroBanner = () => {
               sx={{
                 position: 'relative',
                 width: '100%',
-                height: '80vh',
+                height: responsiveComponents.banner.height,
                 backgroundColor: '#f8f9fa',
                 backgroundImage: `url(${slide.imageUrl})`,
                 backgroundSize: 'contain',

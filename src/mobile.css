@@ -33,21 +33,167 @@
     height: 28px !important;
   }
   
-  /* Hero Banner Mobile - DISABLED for universal responsive system */
-  /* .hero-mobile {
+  /* Hero Banner Mobile - Bajar a -500px */
+  .hero-mobile {
     padding: 0 !important;
     margin-top: -500px !important;
     text-align: center !important;
-  } */
+    height: 60vh !important;
+    position: relative !important;
+    z-index: 10 !important;
+  }
+  
+  /* Contenedor principal móvil - Flex para control total */
+  .home-mobile,
+  .main-content,
+  .container,
+  .MuiContainer-root {
+    display: flex !important;
+    flex-direction: column !important;
+    position: relative !important;
+  }
   
   /* Banner2 Mobile */
   .banner2-mobile {
     margin-top: -150px !important;
   }
   
-  /* Testimonials Mobile */
-  .testimonials-mobile {
-    margin-top: -200px !important;
+  /* Franja Rosa Mobile - Posición -220px y menos alta */
+  .hero-color-strip-mobile,
+  .hero-color-strip,
+  [class*="color-strip"],
+  [class*="ColorStrip"],
+  [style*="#c8626D"],
+  [style*="#c8626d"],
+  [style*="c8626D"],
+  [style*="c8626d"],
+  [style*="background-color: #c8626D"],
+  [style*="background-color: #c8626d"],
+  [style*="background: #c8626D"],
+  [style*="background: #c8626d"] {
+    margin-top: -220px !important;
+    position: relative !important;
+    z-index: 10 !important;
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    height: 40px !important;
+    padding: 8px 0 !important;
+  }
+  
+  /* Forzar texto blanco en franja rosa - Más específico */
+  .hero-color-strip-mobile,
+  .hero-color-strip,
+  [class*="color-strip"],
+  [class*="ColorStrip"],
+  [style*="#c8626D"],
+  [style*="#c8626d"],
+  [style*="c8626D"],
+  [style*="c8626d"],
+  [style*="background-color: #c8626D"],
+  [style*="background-color: #c8626d"],
+  [style*="background: #c8626D"],
+  [style*="background: #c8626d"] {
+    color: #ffffff !important;
+  }
+  
+  /* Texto específico de la franja rosa - DeliZuKar - AL FRENTE DE TODO */
+  .hero-color-strip-mobile .MuiTypography-h6,
+  .hero-color-strip .MuiTypography-h6,
+  [class*="color-strip"] .MuiTypography-h6,
+  [class*="ColorStrip"] .MuiTypography-h6,
+  [style*="#c8626D"] .MuiTypography-h6,
+  [style*="#c8626d"] .MuiTypography-h6,
+  [style*="c8626D"] .MuiTypography-h6,
+  [style*="c8626d"] .MuiTypography-h6,
+  [style*="background-color: #c8626D"] .MuiTypography-h6,
+  [style*="background-color: #c8626d"] .MuiTypography-h6,
+  [style*="background: #c8626D"] .MuiTypography-h6,
+  [style*="background: #c8626d"] .MuiTypography-h6 {
+    color: #ffffff !important;
+    font-weight: bold !important;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.8) !important;
+    z-index: 9999 !important;
+    font-size: 0.7rem !important;
+    line-height: 1.1 !important;
+    white-space: nowrap !important;
+    padding: 0 8px !important;
+    text-align: center !important;
+    transform: translateY(-5px) !important;
+    position: relative !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    background: transparent !important;
+  }
+  
+  /* FORZAR COLOR BLANCO - Regla más agresiva */
+  .home-mobile .hero-color-strip-mobile .MuiTypography-h6,
+  .home-mobile [style*="#c8626D"] .MuiTypography-h6,
+  .home-mobile [style*="#c8626d"] .MuiTypography-h6,
+  .home-mobile [style*="background-color: #c8626D"] .MuiTypography-h6,
+  .home-mobile [style*="background-color: #c8626d"] .MuiTypography-h6 {
+    color: #ffffff !important;
+    z-index: 99999 !important;
+    position: relative !important;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.8) !important;
+  }
+  [style*="#c8626D"] h1,
+  [style*="#c8626D"] h2,
+  [style*="#c8626D"] h3,
+  [style*="#c8626D"] h4,
+  [style*="#c8626D"] h5,
+  [style*="#c8626D"] h6,
+  [style*="#c8626d"] h1,
+  [style*="#c8626d"] h2,
+  [style*="#c8626d"] h3,
+  [style*="#c8626d"] h4,
+  [style*="#c8626d"] h5,
+  [style*="#c8626d"] h6,
+  [style*="background-color: #c8626D"] h1,
+  [style*="background-color: #c8626D"] h2,
+  [style*="background-color: #c8626D"] h3,
+  [style*="background-color: #c8626D"] h4,
+  [style*="background-color: #c8626D"] h5,
+  [style*="background-color: #c8626D"] h6,
+  [style*="background-color: #c8626d"] h1,
+  [style*="background-color: #c8626d"] h2,
+  [style*="background-color: #c8626d"] h3,
+  [style*="background-color: #c8626d"] h4,
+  [style*="background-color: #c8626d"] h5,
+  [style*="background-color: #c8626d"] h6 {
+    color: #ffffff !important;
+  }
+  
+  /* Solo título Galletas Destacadas - Traer al frente (excluyendo franja rosa) */
+  .home-mobile > div > h2:not([style*="#c8626D"]):not([style*="#c8626d"]),
+  .home-mobile > div > h1:not([style*="#c8626D"]):not([style*="#c8626d"]),
+  .home-mobile > div > h3:not([style*="#c8626D"]):not([style*="#c8626d"]),
+  .home-mobile > div > h4:not([style*="#c8626D"]):not([style*="#c8626d"]),
+  .home-mobile > div > h5:not([style*="#c8626D"]):not([style*="#c8626d"]),
+  .home-mobile > div > h6:not([style*="#c8626D"]):not([style*="#c8626d"]),
+  .home-mobile .MuiContainer-root h2:not([style*="#c8626D"]):not([style*="#c8626d"]),
+  .home-mobile .MuiContainer-root h1:not([style*="#c8626D"]):not([style*="#c8626d"]),
+  .home-mobile .MuiContainer-root h3:not([style*="#c8626D"]):not([style*="#c8626d"]),
+  .home-mobile .MuiContainer-root h4:not([style*="#c8626D"]):not([style*="#c8626d"]),
+  .home-mobile .MuiContainer-root h5:not([style*="#c8626D"]):not([style*="#c8626d"]),
+  .home-mobile .MuiContainer-root h6:not([style*="#c8626D"]):not([style*="#c8626d"]),
+  .home-mobile .MuiBox-root h2:not([style*="#c8626D"]):not([style*="#c8626d"]),
+  .home-mobile .MuiBox-root h1:not([style*="#c8626D"]):not([style*="#c8626d"]),
+  .home-mobile .MuiBox-root h3:not([style*="#c8626D"]):not([style*="#c8626d"]),
+  .home-mobile .MuiBox-root h4:not([style*="#c8626D"]):not([style*="#c8626d"]),
+  .home-mobile .MuiBox-root h5:not([style*="#c8626D"]):not([style*="#c8626d"]),
+  .home-mobile .MuiBox-root h6:not([style*="#c8626D"]):not([style*="#c8626d"]) {
+    position: relative !important;
+    z-index: 15 !important;
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    margin-top: 0 !important;
+    padding-top: 20px !important;
+    background: transparent !important;
+    color: #EC8C8D !important;
+    font-weight: 800 !important;
   }
   
   .hero-title-mobile {
@@ -1138,6 +1284,736 @@
     max-height: calc(90vh) !important;
     width: calc(90vw) !important;
     max-width: calc(90vw) !important;
+  }
+}
+
+/* iPhone 14 Pro Max Specific Optimizations - Viewport: 430px × 932px */
+@supports (-webkit-touch-callout: none) {
+  @media screen and (max-width: 430px) and (max-height: 932px) {
+    /* iPhone 14 Pro Max Hero Banner - Ajuste específico */
+    .hero-mobile {
+      margin-top: -500px !important;
+      padding-top: 0 !important;
+      height: 60vh !important;
+      position: relative !important;
+      z-index: 10 !important;
+    }
+    
+    /* iPhone 14 Pro Max Franja Rosa - Ajuste específico y menos alta (subir un poco) */
+    .hero-color-strip-mobile,
+    .hero-color-strip,
+    [class*="color-strip"],
+    [class*="ColorStrip"],
+    [style*="#c8626D"],
+    [style*="#c8626d"],
+    [style*="c8626D"],
+    [style*="c8626d"],
+    [style*="background-color: #c8626D"],
+    [style*="background-color: #c8626d"],
+    [style*="background: #c8626D"],
+    [style*="background: #c8626d"] {
+      margin-top: -200px !important;
+      position: relative !important;
+      z-index: 10 !important;
+      display: block !important;
+      visibility: visible !important;
+      opacity: 1 !important;
+      height: 40px !important;
+      padding: 8px 0 !important;
+    }
+    
+    /* iPhone 14 Pro Max Texto en la franja rosa */
+    .hero-color-strip-mobile *,
+    .hero-color-strip *,
+    [class*="color-strip"] *,
+    [class*="ColorStrip"] *,
+    [style*="#c8626D"] *,
+    [style*="#c8626d"] *,
+    [style*="c8626D"] *,
+    [style*="c8626d"] *,
+    [style*="background-color: #c8626D"] *,
+    [style*="background-color: #c8626d"] *,
+    [style*="background: #c8626D"] *,
+    [style*="background: #c8626d"] * {
+      color: #ffffff !important;
+      font-weight: bold !important;
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.5) !important;
+      z-index: 11 !important;
+      font-size: 0.7rem !important;
+      line-height: 1.1 !important;
+      white-space: nowrap !important;
+      padding: 0 8px !important;
+      text-align: center !important;
+    }
+  }
+}
+
+/* iPhone 15 Pro Specific Optimizations - Viewport: 393px × 852px */
+@supports (-webkit-touch-callout: none) {
+  @media screen and (max-width: 393px) and (max-height: 852px) {
+    /* iPhone 16 Header Optimizations */
+    .header-mobile {
+      padding: 2px 0 !important;
+      min-height: 50px !important;
+    }
+    
+    .header-logo {
+      font-size: 1rem !important;
+      font-weight: 600 !important;
+    }
+    
+    .header-actions {
+      gap: 6px !important;
+    }
+    
+    .header-cart-icon {
+      font-size: 1.1rem !important;
+    }
+    
+    .header-auth-buttons {
+      font-size: 0.7rem !important;
+      padding: 3px 6px !important;
+    }
+    
+    .header-user-avatar {
+      width: 24px !important;
+      height: 24px !important;
+    }
+    
+    /* iPhone 16 Hero Banner */
+    .hero-title-mobile {
+      font-size: 1.5rem !important;
+      line-height: 1.1 !important;
+      margin-bottom: 12px !important;
+    }
+    
+    .hero-subtitle-mobile {
+      font-size: 0.9rem !important;
+      margin-bottom: 16px !important;
+    }
+    
+    .hero-button-mobile {
+      padding: 10px 20px !important;
+      font-size: 0.85rem !important;
+    }
+    
+    /* iPhone 16 Product Cards */
+    .product-card-mobile {
+      margin-bottom: 12px !important;
+    }
+    
+    .product-card-content-mobile {
+      padding: 10px !important;
+    }
+    
+    .product-title-mobile {
+      font-size: 0.9rem !important;
+      line-height: 1.2 !important;
+    }
+    
+    .product-price-mobile {
+      font-size: 1rem !important;
+      font-weight: 600 !important;
+    }
+    
+    /* iPhone 16 Testimonials */
+    .testimonial-card-mobile {
+      margin: 0 6px !important;
+    }
+    
+    .testimonial-content-mobile {
+      padding: 12px !important;
+    }
+    
+    .testimonial-text-mobile {
+      font-size: 0.8rem !important;
+      line-height: 1.3 !important;
+    }
+    
+    .testimonial-name-mobile {
+      font-size: 0.8rem !important;
+      font-weight: 600 !important;
+    }
+    
+    /* iPhone 16 Page Spacing - Flex y posicionamiento */
+    .products-page-mobile {
+      margin-top: -800px !important;
+      padding-top: 0 !important;
+      position: relative !important;
+      z-index: 5 !important;
+      display: flex !important;
+      flex-direction: column !important;
+    }
+    
+    .nosotros-mobile {
+      padding-top: 120px !important;
+      margin-top: -800px !important;
+      position: relative !important;
+      z-index: 5 !important;
+      display: flex !important;
+      flex-direction: column !important;
+    }
+    
+    .contacto-mobile {
+      padding-top: 130px !important;
+      margin-top: -800px !important;
+      position: relative !important;
+      z-index: 5 !important;
+      display: flex !important;
+      flex-direction: column !important;
+    }
+    
+    .faq-page-mobile {
+      margin-top: -750px !important;
+      padding-top: 0 !important;
+      position: relative !important;
+      z-index: 5 !important;
+      display: flex !important;
+      flex-direction: column !important;
+    }
+    
+    .cart-page-mobile {
+      margin-top: -800px !important;
+      padding-top: 0 !important;
+      position: relative !important;
+      z-index: 5 !important;
+      display: flex !important;
+      flex-direction: column !important;
+    }
+    
+    /* iPhone 16 Admin Dashboard */
+    .admin-dashboard-mobile {
+      padding-top: -140px !important;
+      margin-top: -140px !important;
+    }
+    
+    .admin-dashboard-mobile .MuiButton-root {
+      height: 120px !important;
+      font-size: 1rem !important;
+      padding: 16px 8px !important;
+    }
+    
+    .admin-dashboard-mobile .MuiButton-label {
+      font-size: 0.95rem !important;
+      line-height: 1.4 !important;
+    }
+    
+    /* iPhone 16 Modals - Smaller for better fit */
+    .MuiDialog-paper {
+      transform: scale(0.75) !important;
+      transform-origin: center !important;
+      margin: 0 !important;
+      max-height: calc(75vh) !important;
+      width: calc(75vw) !important;
+      max-width: calc(75vw) !important;
+    }
+    
+    .MuiDialogTitle-root {
+      padding: 10px 12px !important;
+      font-size: 1rem !important;
+    }
+    
+    .MuiDialogContent-root {
+      padding: 12px !important;
+      max-height: calc(100vh - 100px) !important;
+      overflow-y: auto !important;
+    }
+    
+    .MuiDialogActions-root {
+      padding: 10px 12px !important;
+      flex-direction: column !important;
+      gap: 6px !important;
+    }
+    
+    .MuiDialogActions-root .MuiButton-root {
+      width: 100% !important;
+      margin: 0 !important;
+      padding: 8px 16px !important;
+      font-size: 0.9rem !important;
+    }
+    
+    /* iPhone 16 Form Fields */
+    .MuiTextField-root {
+      margin-bottom: 12px !important;
+    }
+    
+    .MuiFormControl-root {
+      margin-bottom: 12px !important;
+      width: 100% !important;
+    }
+    
+    .form-input-mobile {
+      font-size: 16px !important; /* Prevents zoom on iOS */
+      padding: 10px !important;
+    }
+    
+    .form-button-mobile {
+      width: 100% !important;
+      padding: 12px !important;
+      font-size: 0.9rem !important;
+    }
+    
+    /* iPhone 16 Tables */
+    .MuiTable-root {
+      font-size: 0.7rem !important;
+    }
+    
+    .MuiTableCell-root {
+      padding: 6px 3px !important;
+      font-size: 0.7rem !important;
+    }
+    
+    .MuiTableHead-root .MuiTableCell-root {
+      font-weight: 600 !important;
+      font-size: 0.65rem !important;
+    }
+    
+    /* iPhone 16 General Optimizations */
+    .container-mobile {
+      padding: 0 12px !important;
+    }
+    
+    .section-mobile {
+      padding: 20px 0 !important;
+    }
+    
+    .text-mobile {
+      font-size: 0.85rem !important;
+      line-height: 1.3 !important;
+    }
+    
+    .button-mobile {
+      min-height: 40px !important; /* iOS touch target */
+      padding: 10px 16px !important;
+    }
+    
+    /* iPhone 15 Pro Hero Banner - Ajuste específico para iPhone 15 Pro */
+    .hero-mobile {
+      margin-top: -480px !important;
+      padding-top: 0 !important;
+      height: 60vh !important;
+      position: relative !important;
+      z-index: 10 !important;
+    }
+    
+    /* iPhone 15 Pro Franja Rosa - Ajuste específico para iPhone 15 Pro y menos alta */
+    .hero-color-strip-mobile,
+    .hero-color-strip,
+    [class*="color-strip"],
+    [class*="ColorStrip"],
+    [style*="#c8626D"],
+    [style*="#c8626d"],
+    [style*="c8626D"],
+    [style*="c8626d"],
+    [style*="background-color: #c8626D"],
+    [style*="background-color: #c8626d"],
+    [style*="background: #c8626D"],
+    [style*="background: #c8626d"] {
+      margin-top: -200px !important;
+      position: relative !important;
+      z-index: 10 !important;
+      display: block !important;
+      visibility: visible !important;
+      opacity: 1 !important;
+      height: 40px !important;
+      padding: 8px 0 !important;
+    }
+    
+    /* iPhone 15 Pro Texto en la franja rosa - Más pequeño y al frente de todo */
+    .hero-color-strip-mobile *,
+    .hero-color-strip *,
+    [class*="color-strip"] *,
+    [class*="ColorStrip"] *,
+    [style*="#c8626D"] *,
+    [style*="#c8626d"] *,
+    [style*="c8626D"] *,
+    [style*="c8626d"] *,
+    [style*="background-color: #c8626D"] *,
+    [style*="background-color: #c8626d"] *,
+    [style*="background: #c8626D"] *,
+    [style*="background: #c8626d"] * {
+      color: #ffffff !important;
+      font-weight: bold !important;
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.5) !important;
+      z-index: 30 !important;
+      font-size: 0.5rem !important;
+      line-height: 1.0 !important;
+      white-space: nowrap !important;
+      padding: 0 4px !important;
+      text-align: center !important;
+      transform: translateY(-5px) !important;
+      position: relative !important;
+    }
+    
+    /* iPhone 15 Pro Solo título Galletas Destacadas - Traer al frente (excluyendo franja rosa) */
+    .home-mobile > div > h2:not([style*="#c8626D"]):not([style*="#c8626d"]),
+    .home-mobile > div > h1:not([style*="#c8626D"]):not([style*="#c8626d"]),
+    .home-mobile > div > h3:not([style*="#c8626D"]):not([style*="#c8626d"]),
+    .home-mobile > div > h4:not([style*="#c8626D"]):not([style*="#c8626d"]),
+    .home-mobile > div > h5:not([style*="#c8626D"]):not([style*="#c8626d"]),
+    .home-mobile > div > h6:not([style*="#c8626D"]):not([style*="#c8626d"]),
+    .home-mobile .MuiContainer-root h2:not([style*="#c8626D"]):not([style*="#c8626d"]),
+    .home-mobile .MuiContainer-root h1:not([style*="#c8626D"]):not([style*="#c8626d"]),
+    .home-mobile .MuiContainer-root h3:not([style*="#c8626D"]):not([style*="#c8626d"]),
+    .home-mobile .MuiContainer-root h4:not([style*="#c8626D"]):not([style*="#c8626d"]),
+    .home-mobile .MuiContainer-root h5:not([style*="#c8626D"]):not([style*="#c8626d"]),
+    .home-mobile .MuiContainer-root h6:not([style*="#c8626D"]):not([style*="#c8626d"]),
+    .home-mobile .MuiBox-root h2:not([style*="#c8626D"]):not([style*="#c8626d"]),
+    .home-mobile .MuiBox-root h1:not([style*="#c8626D"]):not([style*="#c8626d"]),
+    .home-mobile .MuiBox-root h3:not([style*="#c8626D"]):not([style*="#c8626d"]),
+    .home-mobile .MuiBox-root h4:not([style*="#c8626D"]):not([style*="#c8626d"]),
+    .home-mobile .MuiBox-root h5:not([style*="#c8626D"]):not([style*="#c8626d"]),
+    .home-mobile .MuiBox-root h6:not([style*="#c8626D"]):not([style*="#c8626d"]) {
+      position: relative !important;
+      z-index: 20 !important;
+      display: block !important;
+      visibility: visible !important;
+      opacity: 1 !important;
+      margin-top: 0 !important;
+      padding-top: 20px !important;
+      background: transparent !important;
+      color: #EC8C8D !important;
+      font-weight: 800 !important;
+    }
+    
+    /* iPhone 16 Contenedor principal - Flex */
+    .home-mobile,
+    .main-content,
+    .container,
+    .MuiContainer-root {
+      display: flex !important;
+      flex-direction: column !important;
+      position: relative !important;
+    }
+    
+    /* iPhone 16 Banner2 - Subir contenido debajo del banner */
+    .banner2-mobile {
+      transform: translateY(-600px) !important;
+      position: relative !important;
+      z-index: 5 !important;
+    }
+    
+    /* iPhone 16 Testimonials - Subir contenido debajo del banner */
+    .testimonials-mobile {
+      transform: translateY(-700px) !important;
+      position: relative !important;
+      z-index: 5 !important;
+    }
+  }
+}
+
+/* iPhone 16 Specific Optimizations - Viewport: 393px × 852px */
+@supports (-webkit-touch-callout: none) {
+  @media screen and (max-width: 393px) and (max-height: 852px) {
+    /* iPhone 16 Header Optimizations */
+    .header-mobile {
+      padding: 2px 0 !important;
+      min-height: 50px !important;
+    }
+    
+    .header-logo {
+      font-size: 1rem !important;
+      font-weight: 600 !important;
+    }
+    
+    .header-actions {
+      gap: 6px !important;
+    }
+    
+    .header-cart-icon {
+      font-size: 1.1rem !important;
+    }
+    
+    .header-auth-buttons {
+      font-size: 0.7rem !important;
+      padding: 3px 6px !important;
+    }
+    
+    .header-user-avatar {
+      width: 24px !important;
+      height: 24px !important;
+    }
+    
+    /* iPhone 16 Hero Banner - Ajuste específico para iPhone 16 */
+    .hero-mobile {
+      margin-top: -480px !important;
+      padding-top: 0 !important;
+      height: 60vh !important;
+      position: relative !important;
+      z-index: 10 !important;
+    }
+    
+    /* iPhone 16 Franja Rosa - Ajuste específico para iPhone 16 */
+    .hero-color-strip-mobile,
+    .hero-color-strip,
+    [class*="color-strip"],
+    [class*="ColorStrip"],
+    [style*="#c8626D"],
+    [style*="#c8626d"],
+    [style*="c8626D"],
+    [style*="c8626d"],
+    [style*="background-color: #c8626D"],
+    [style*="background-color: #c8626d"],
+    [style*="background: #c8626D"],
+    [style*="background: #c8626d"] {
+      margin-top: -200px !important;
+      position: relative !important;
+      z-index: 10 !important;
+      display: block !important;
+      visibility: visible !important;
+      opacity: 1 !important;
+      height: 40px !important;
+      padding: 8px 0 !important;
+    }
+    
+    /* iPhone 16 Texto en la franja rosa - Más pequeño y al frente de todo */
+    .hero-color-strip-mobile *,
+    .hero-color-strip *,
+    [class*="color-strip"] *,
+    [class*="ColorStrip"] *,
+    [style*="#c8626D"] *,
+    [style*="#c8626d"] *,
+    [style*="c8626D"] *,
+    [style*="c8626d"] *,
+    [style*="background-color: #c8626D"] *,
+    [style*="background-color: #c8626d"] *,
+    [style*="background: #c8626D"] *,
+    [style*="background: #c8626d"] * {
+      color: #ffffff !important;
+      font-weight: bold !important;
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.5) !important;
+      z-index: 30 !important;
+      font-size: 0.5rem !important;
+      line-height: 1.0 !important;
+      white-space: nowrap !important;
+      padding: 0 4px !important;
+      text-align: center !important;
+      transform: translateY(-5px) !important;
+      position: relative !important;
+    }
+    
+    /* iPhone 16 Solo título Galletas Destacadas - Traer al frente (excluyendo franja rosa) */
+    .home-mobile > div > h2:not([style*="#c8626D"]):not([style*="#c8626d"]),
+    .home-mobile > div > h1:not([style*="#c8626D"]):not([style*="#c8626d"]),
+    .home-mobile > div > h3:not([style*="#c8626D"]):not([style*="#c8626d"]),
+    .home-mobile > div > h4:not([style*="#c8626D"]):not([style*="#c8626d"]),
+    .home-mobile > div > h5:not([style*="#c8626D"]):not([style*="#c8626d"]),
+    .home-mobile > div > h6:not([style*="#c8626D"]):not([style*="#c8626d"]),
+    .home-mobile .MuiContainer-root h2:not([style*="#c8626D"]):not([style*="#c8626d"]),
+    .home-mobile .MuiContainer-root h1:not([style*="#c8626D"]):not([style*="#c8626d"]),
+    .home-mobile .MuiContainer-root h3:not([style*="#c8626D"]):not([style*="#c8626d"]),
+    .home-mobile .MuiContainer-root h4:not([style*="#c8626D"]):not([style*="#c8626d"]),
+    .home-mobile .MuiContainer-root h5:not([style*="#c8626D"]):not([style*="#c8626d"]),
+    .home-mobile .MuiContainer-root h6:not([style*="#c8626D"]):not([style*="#c8626d"]),
+    .home-mobile .MuiBox-root h2:not([style*="#c8626D"]):not([style*="#c8626d"]),
+    .home-mobile .MuiBox-root h1:not([style*="#c8626D"]):not([style*="#c8626d"]),
+    .home-mobile .MuiBox-root h3:not([style*="#c8626D"]):not([style*="#c8626d"]),
+    .home-mobile .MuiBox-root h4:not([style*="#c8626D"]):not([style*="#c8626d"]),
+    .home-mobile .MuiBox-root h5:not([style*="#c8626D"]):not([style*="#c8626d"]),
+    .home-mobile .MuiBox-root h6:not([style*="#c8626D"]):not([style*="#c8626d"]) {
+      position: relative !important;
+      z-index: 20 !important;
+      display: block !important;
+      visibility: visible !important;
+      opacity: 1 !important;
+      margin-top: 0 !important;
+      padding-top: 20px !important;
+      background: transparent !important;
+      color: #EC8C8D !important;
+      font-weight: 800 !important;
+    }
+    
+    /* iPhone 16 Contenedor principal - Flex */
+    .home-mobile,
+    .main-content,
+    .container,
+    .MuiContainer-root {
+      display: flex !important;
+      flex-direction: column !important;
+      position: relative !important;
+    }
+    
+    /* iPhone 16 Banner2 - Subir contenido debajo del banner */
+    .banner2-mobile {
+      transform: translateY(-600px) !important;
+      position: relative !important;
+      z-index: 5 !important;
+    }
+    
+    /* iPhone 16 Testimonials - Subir contenido debajo del banner */
+    .testimonials-mobile {
+      transform: translateY(-700px) !important;
+      position: relative !important;
+      z-index: 5 !important;
+    }
+    
+    /* iPhone 16 Page Spacing - Flex y posicionamiento */
+    .products-page-mobile {
+      margin-top: -800px !important;
+      padding-top: 0 !important;
+      position: relative !important;
+      z-index: 5 !important;
+      display: flex !important;
+      flex-direction: column !important;
+    }
+    
+    .nosotros-mobile {
+      padding-top: 120px !important;
+      margin-top: -800px !important;
+      position: relative !important;
+      z-index: 5 !important;
+      display: flex !important;
+      flex-direction: column !important;
+    }
+    
+    .contacto-mobile {
+      padding-top: 130px !important;
+      margin-top: -800px !important;
+      position: relative !important;
+      z-index: 5 !important;
+      display: flex !important;
+      flex-direction: column !important;
+    }
+    
+    .faq-page-mobile {
+      margin-top: -750px !important;
+      padding-top: 0 !important;
+      position: relative !important;
+      z-index: 5 !important;
+      display: flex !important;
+      flex-direction: column !important;
+    }
+    
+    .cart-page-mobile {
+      margin-top: -800px !important;
+      padding-top: 0 !important;
+      position: relative !important;
+      z-index: 5 !important;
+      display: flex !important;
+      flex-direction: column !important;
+    }
+    
+    /* iPhone 16 Admin Dashboard */
+    .admin-dashboard-mobile {
+      padding-top: -140px !important;
+      margin-top: -140px !important;
+    }
+    
+    .admin-dashboard-mobile .MuiButton-root {
+      height: 120px !important;
+      font-size: 1rem !important;
+      padding: 16px 8px !important;
+    }
+    
+    .admin-dashboard-mobile .MuiButton-label {
+      font-size: 0.95rem !important;
+      line-height: 1.4 !important;
+    }
+    
+    /* iPhone 16 Modals - Smaller for better fit */
+    .MuiDialog-paper {
+      transform: scale(0.75) !important;
+      transform-origin: center !important;
+      margin: 0 !important;
+      max-height: calc(75vh) !important;
+      width: calc(75vw) !important;
+      max-width: calc(75vw) !important;
+    }
+    
+    .MuiDialogTitle-root {
+      padding: 10px 12px !important;
+      font-size: 1rem !important;
+    }
+    
+    .MuiDialogContent-root {
+      padding: 12px !important;
+      max-height: calc(100vh - 100px) !important;
+      overflow-y: auto !important;
+    }
+    
+    .MuiDialogActions-root {
+      padding: 10px 12px !important;
+      flex-direction: column !important;
+      gap: 6px !important;
+    }
+    
+    .MuiDialogActions-root .MuiButton-root {
+      width: 100% !important;
+      margin: 0 !important;
+      padding: 8px 16px !important;
+      font-size: 0.9rem !important;
+    }
+    
+    /* iPhone 16 Form Fields */
+    .MuiTextField-root {
+      margin-bottom: 12px !important;
+    }
+    
+    .MuiFormControl-root {
+      margin-bottom: 12px !important;
+      width: 100% !important;
+    }
+    
+    .form-input-mobile {
+      font-size: 16px !important; /* Prevents zoom on iOS */
+      padding: 10px !important;
+    }
+    
+    .form-button-mobile {
+      width: 100% !important;
+      padding: 12px !important;
+      font-size: 0.9rem !important;
+    }
+    
+    /* iPhone 16 Tables */
+    .MuiTable-root {
+      font-size: 0.7rem !important;
+    }
+    
+    .MuiTableCell-root {
+      padding: 6px 3px !important;
+      font-size: 0.7rem !important;
+    }
+    
+    .MuiTableHead-root .MuiTableCell-root {
+      font-weight: 600 !important;
+      font-size: 0.65rem !important;
+    }
+    
+    /* iPhone 16 General Optimizations */
+    .container-mobile {
+      padding: 0 12px !important;
+    }
+    
+    .section-mobile {
+      padding: 20px 0 !important;
+    }
+    
+    .text-mobile {
+      font-size: 0.85rem !important;
+      line-height: 1.3 !important;
+    }
+    
+    .button-mobile {
+      min-height: 40px !important; /* iOS touch target */
+      padding: 10px 16px !important;
+    }
+    
+    /* iPhone 16 Banner2 - Bajar mucho más el Banner2 */
+    .banner2-mobile {
+      margin-top: 500px !important;
+      padding-top: 0 !important;
+      position: relative !important;
+      z-index: 5 !important;
+    }
+    
+    /* iPhone 16 Testimonials - Subir un poco la sección de testimonios */
+    .testimonials-mobile {
+      margin-top: -50px !important;
+      padding-top: 0 !important;
+      position: relative !important;
+      z-index: 5 !important;
+    }
   }
 }
 
