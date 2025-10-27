@@ -2028,6 +2028,105 @@
       position: relative !important;
       z-index: 5 !important;
     }
+    
+    /* iPhone 16 Products Page - Bajar productos para que no estén debajo del header */
+    .products-page-mobile {
+      margin-top: -320px !important;
+      padding-top: 0 !important;
+      position: relative !important;
+      z-index: 5 !important;
+    }
+    
+    /* iPhone 16 Nosotros Page - Bajar contenido para que no esté debajo del header */
+    .nosotros-mobile {
+      margin-top: -320px !important;
+      padding-top: 0 !important;
+      position: relative !important;
+      z-index: 5 !important;
+    }
+    
+    /* iPhone 16 Contacto Page - Bajar contenido para que no esté debajo del header */
+    .contacto-mobile {
+      margin-top: -320px !important;
+      padding-top: 0 !important;
+      position: relative !important;
+      z-index: 5 !important;
+    }
+    
+    /* iPhone 16 Cart Page - Bajar contenido para que no esté debajo del header */
+    .cart-page-mobile {
+      margin-top: -320px !important;
+      padding-top: 0 !important;
+      position: relative !important;
+      z-index: 5 !important;
+    }
+    
+    /* iPhone 16 Checkout Page - Subir al top ya que no tiene header */
+    .checkout-page-mobile {
+      margin-top: -500px !important;
+      padding-top: 0 !important;
+      position: relative !important;
+      z-index: 5 !important;
+    }
+    
+    /* iPhone 16 Checkout Form - Subir el formulario al top */
+    .form-mobile {
+      margin-top: -500px !important;
+      padding-top: 0 !important;
+      position: relative !important;
+      z-index: 5 !important;
+    }
+    
+    /* iPhone 16 Checkout Container - Subir el contenedor al top */
+    .container-mobile {
+      margin-top: -500px !important;
+      padding-top: 0 !important;
+      position: relative !important;
+      z-index: 5 !important;
+    }
+    
+    /* iPhone 16 Terms Page - Bajar contenido para que no esté debajo del header */
+    .terms-page-mobile {
+      margin-top: -500px !important;
+      padding-top: 0 !important;
+      position: relative !important;
+      z-index: 5 !important;
+      display: flex !important;
+      flex-direction: column !important;
+    }
+    
+    /* iPhone 16 Terms Box - Ajustar el padding-top específico */
+    .terms-page-mobile .MuiBox-root {
+      padding-top: 0 !important;
+      margin-top: -500px !important;
+      position: relative !important;
+      z-index: 5 !important;
+      display: flex !important;
+      flex-direction: column !important;
+    }
+    
+    /* iPhone 16 Terms Container - Ajustar el contenedor */
+    .terms-page-mobile .MuiContainer-root {
+      margin-top: -500px !important;
+      padding-top: 0 !important;
+      position: relative !important;
+      z-index: 5 !important;
+    }
+    
+    /* iPhone 16 Terms Header Override - Anular reglas del header que bloquean */
+    .terms-page-mobile .header-mobile {
+      position: relative !important;
+      z-index: 1 !important;
+      height: auto !important;
+    }
+    
+    /* iPhone 16 Terms Content Override - Anular contenido que está bloqueado */
+    .terms-page-mobile .terms-content {
+      margin-top: -500px !important;
+      padding-top: 0 !important;
+      position: relative !important;
+      z-index: 5 !important;
+    }
   }
 }
 
