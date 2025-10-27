@@ -191,3 +191,4 @@ npm start
 ¡Con estas soluciones deberías poder resolver el error "PayPal is not available"! 🎉
 
 
+
