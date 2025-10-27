@@ -53,9 +53,9 @@ const Footer = () => {
       if (docSnap.exists()) {
         const data = docSnap.data();
         setSocialLinks({
-          facebook: data.facebook || '',
-          instagram: data.instagram || '',
-          tiktok: data.tiktok || ''
+          facebook: data.facebook ? (data.facebook.startsWith('http') ? data.facebook : `https://${data.facebook}`) : '',
+          instagram: data.instagram ? (data.instagram.startsWith('http') ? data.instagram : `https://${data.instagram}`) : '',
+          tiktok: data.tiktok ? (data.tiktok.startsWith('http') ? data.tiktok : `https://${data.tiktok}`) : ''
         });
       }
     } catch (error) {

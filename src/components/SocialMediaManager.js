@@ -76,7 +76,18 @@ const SocialMediaManager = ({ open, onClose }) => {
   const handleSave = async () => {
     setLoading(true);
     try {
-      await setDoc(doc(db, 'config', 'socialMedia'), socialLinks);
+      // Asegurar que los enlaces tengan el protocolo https://
+      const processedLinks = {};
+      Object.keys(socialLinks).forEach(key => {
+        const link = socialLinks[key];
+        if (link && link.trim() !== '') {
+          processedLinks[key] = link.startsWith('http') ? link : `https://${link}`;
+        } else {
+          processedLinks[key] = '';
+        }
+      });
+      
+      await setDoc(doc(db, 'config', 'socialMedia'), processedLinks);
       alert('Enlaces de redes sociales guardados correctamente');
       onClose();
     } catch (error) {
