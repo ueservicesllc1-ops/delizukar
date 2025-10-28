@@ -887,15 +887,15 @@
     z-index: 10000 !important;
   }
   
-  /* Hero Banner Container - DISABLED for universal responsive system */
-  /* .hero-mobile {
-    margin-top: 60px !important;
+  /* iPad Hero Banner - Subir 20px */
+  .hero-mobile {
+    margin-top: 40px !important;
     padding-top: 0 !important;
     position: relative !important;
     top: 0 !important;
     height: 70vh !important;
     z-index: 1 !important;
-  } */
+  }
   
   /* FIX: Pink strip - MUST go exactly after the hero banner */
   .hero-color-strip-mobile {

@@ -76,6 +76,7 @@ import SocialMediaManager from '../components/SocialMediaManager';
 import PopupHeroManager from '../components/PopupHeroManager';
 import PayPalBalance from '../components/PayPalBalance';
 import OrdersManager from '../components/OrdersManager';
+import VoucherManager from '../components/VoucherManager';
 
 const AdminDashboard = () => {
   const [fontManagerOpen, setFontManagerOpen] = useState(false);
@@ -113,6 +114,7 @@ const AdminDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [selectedFont, setSelectedFont] = useState(null);
   const [ordersManagerOpen, setOrdersManagerOpen] = useState(false);
+  const [voucherManagerOpen, setVoucherManagerOpen] = useState(false);
   const navigate = useNavigate();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
@@ -723,7 +725,7 @@ const AdminDashboard = () => {
                               index === 16 ? () => setColorPaletteOpen(true) :
                               index === 17 ? () => setOrdersManagerOpen(true) :
                               index === 18 ? () => setColorPaletteOpen(true) :
-                              index === 19 ? () => setColorPaletteOpen(true) :
+                              index === 19 ? () => setVoucherManagerOpen(true) :
                               undefined
                             }
                         sx={{
@@ -1016,16 +1018,7 @@ const AdminDashboard = () => {
                               </Box>
                             ) : index === 19 ? (
                               <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1 }}>
-                                <Typography
-                                  variant="h4"
-                                  sx={{
-                                    color: 'white',
-                                    fontWeight: 700,
-                                    textShadow: '1px 1px 2px rgba(0,0,0,0.5)'
-                                  }}
-                                >
-                                  #EB8B8B
-                                </Typography>
+                                <LocalOffer sx={{ color: 'white', fontSize: '2rem' }} />
                                 <Typography
                                   variant="body2"
                                   sx={{
@@ -1034,7 +1027,7 @@ const AdminDashboard = () => {
                                     textShadow: '1px 1px 2px rgba(0,0,0,0.5)'
                                   }}
                                 >
-                                  Color Terciario
+                                  Crear Voucher
                                 </Typography>
                               </Box>
                             ) : (
@@ -1136,6 +1129,12 @@ const AdminDashboard = () => {
         <OrdersManager
           open={ordersManagerOpen}
           onClose={() => setOrdersManagerOpen(false)}
+        />
+
+        {/* Gestor de Vouchers */}
+        <VoucherManager
+          open={voucherManagerOpen}
+          onClose={() => setVoucherManagerOpen(false)}
         />
 
         {/* Reporte de Ventas */}

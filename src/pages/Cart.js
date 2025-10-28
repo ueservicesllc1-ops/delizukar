@@ -1,13 +1,16 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Box, Container, Typography, Grid, Card, CardContent, CardActions, Button, IconButton, TextField, Divider, Checkbox, FormControlLabel } from '@mui/material';
-import { Add, Remove, Delete, ShoppingCart, ArrowBack, AccountBalanceWallet, ShoppingBag } from '@mui/icons-material';
+import { Box, Container, Typography, Grid, Card, CardContent, CardActions, Button, IconButton, TextField, Divider, Checkbox, FormControlLabel, Alert, Chip } from '@mui/material';
+import { Add, Remove, Delete, ShoppingCart, ArrowBack, AccountBalanceWallet, ShoppingBag, LocalOffer, CheckCircle } from '@mui/icons-material';
 import { useStore } from '../context/StoreContext';
 import { useNavigate } from 'react-router-dom';
 import AfterpayMessaging from '../components/AfterpayMessaging';
 import { useMinProducts } from '../hooks/useMinProducts';
 import { useTranslation } from 'react-i18next';
+import { auth, db } from '../firebase/config';
+import { onAuthStateChanged } from 'firebase/auth';
+import { doc, getDoc, updateDoc, collection, query, where, getDocs } from 'firebase/firestore';
 
 const Cart = () => {
   const { t } = useTranslation();
@@ -31,8 +34,33 @@ const Cart = () => {
   // Estado para el checkbox de política de envío
   const [acceptShippingPolicy, setAcceptShippingPolicy] = useState(false);
 
+  // Estados para vouchers
+  const [user, setUser] = useState(null);
+  const [voucherCode, setVoucherCode] = useState('');
+  const [appliedVoucher, setAppliedVoucher] = useState(null);
+  const [voucherError, setVoucherError] = useState('');
+  const [voucherSuccess, setVoucherSuccess] = useState('');
+  const [loadingVoucher, setLoadingVoucher] = useState(false);
+
   // Usar solo el carrito real del contexto
   const items = cart;
+
+  // Detectar usuario logueado
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setUser({
+          uid: user.uid,
+          email: user.email,
+          displayName: user.displayName
+        });
+      } else {
+        setUser(null);
+      }
+    });
+
+    return () => unsubscribe();
+  }, []);
 
   // Funciones para manejar cambios de cantidad
   const handleUpdateQuantity = (itemId, newQuantity) => {
@@ -54,7 +82,76 @@ const Cart = () => {
   };
 
   const calculateTotal = () => {
-    return calculateSubtotal(); // Envío gratis
+    const subtotal = calculateSubtotal();
+    if (appliedVoucher) {
+      const discount = subtotal * (appliedVoucher.discountPercentage / 100);
+      return subtotal - discount;
+    }
+    return subtotal; // Envío gratis
+  };
+
+  // Funciones para manejar vouchers
+  const handleApplyVoucher = async () => {
+    if (!user) {
+      setVoucherError('Debes estar logueado para usar vouchers');
+      return;
+    }
+
+    if (!voucherCode.trim()) {
+      setVoucherError('Ingresa un código de voucher');
+      return;
+    }
+
+    setLoadingVoucher(true);
+    setVoucherError('');
+    setVoucherSuccess('');
+
+    try {
+      // Buscar el voucher en Firestore
+      const vouchersRef = collection(db, 'vouchers');
+      const q = query(vouchersRef, where('code', '==', voucherCode.trim().toUpperCase()));
+      const querySnapshot = await getDocs(q);
+
+      if (querySnapshot.empty) {
+        throw new Error('Código de voucher no válido');
+      }
+
+      const voucherDoc = querySnapshot.docs[0];
+      const voucherData = { id: voucherDoc.id, ...voucherDoc.data() };
+
+      // Verificar si el voucher está activo
+      if (!voucherData.isActive) {
+        throw new Error('Este voucher no está activo');
+      }
+
+      // Verificar si el usuario ya usó este voucher
+      if (voucherData.usedBy && voucherData.usedBy.includes(user.uid)) {
+        throw new Error('Ya has usado este voucher anteriormente');
+      }
+
+      // Aplicar el voucher
+      setAppliedVoucher(voucherData);
+      setVoucherSuccess(`Voucher aplicado! Descuento del ${voucherData.discountPercentage}%`);
+      setVoucherCode('');
+
+    } catch (error) {
+      console.error('Error aplicando voucher:', error);
+      setVoucherError(error.message);
+    } finally {
+      setLoadingVoucher(false);
+    }
+  };
+
+  const handleRemoveVoucher = () => {
+    setAppliedVoucher(null);
+    setVoucherError('');
+    setVoucherSuccess('');
+  };
+
+  const getDiscountAmount = () => {
+    if (!appliedVoucher) return 0;
+    const subtotal = calculateSubtotal();
+    return subtotal * (appliedVoucher.discountPercentage / 100);
   };
 
   // Verificar si se puede proceder al checkout
@@ -341,6 +438,69 @@ const Cart = () => {
                       {t('cart.orderSummary', 'Order Summary')}
                     </Typography>
 
+                    {/* Sección de Vouchers */}
+                    {user ? (
+                      <Box sx={{ mb: 3 }}>
+                        <Typography variant="h6" sx={{ fontWeight: 600, color: '#333', mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
+                          <LocalOffer sx={{ color: '#c8626d' }} />
+                          Código de Descuento
+                        </Typography>
+                        
+                        {appliedVoucher ? (
+                          <Box sx={{ mb: 2 }}>
+                            <Alert severity="success" sx={{ mb: 1 }}>
+                              {voucherSuccess}
+                            </Alert>
+                            <Chip
+                              label={`${appliedVoucher.code} - ${appliedVoucher.discountPercentage}% descuento`}
+                              onDelete={handleRemoveVoucher}
+                              color="success"
+                              sx={{ fontWeight: 600 }}
+                            />
+                          </Box>
+                        ) : (
+                          <Box sx={{ display: 'flex', gap: 1, mb: 2 }}>
+                            <TextField
+                              fullWidth
+                              placeholder="Ingresa tu código de descuento"
+                              value={voucherCode}
+                              onChange={(e) => setVoucherCode(e.target.value.toUpperCase())}
+                              size="small"
+                              sx={{ flex: 1 }}
+                            />
+                            <Button
+                              variant="contained"
+                              onClick={handleApplyVoucher}
+                              disabled={loadingVoucher || !voucherCode.trim()}
+                              sx={{
+                                backgroundColor: '#c8626d',
+                                color: 'white',
+                                px: 3,
+                                '&:hover': {
+                                  backgroundColor: '#b5555a'
+                                }
+                              }}
+                            >
+                              {loadingVoucher ? 'Aplicando...' : 'Aplicar'}
+                            </Button>
+                          </Box>
+                        )}
+                        
+                        {voucherError && (
+                          <Alert severity="error" sx={{ mb: 2 }}>
+                            {voucherError}
+                          </Alert>
+                        )}
+                      </Box>
+                    ) : (
+                      <Box sx={{ mb: 3, p: 2, backgroundColor: '#f8f9fa', borderRadius: '8px' }}>
+                        <Typography variant="body2" sx={{ color: '#666', textAlign: 'center' }}>
+                          <LocalOffer sx={{ fontSize: '1rem', mr: 1, verticalAlign: 'middle' }} />
+                          Inicia sesión para usar códigos de descuento
+                        </Typography>
+                      </Box>
+                    )}
+
                     <Box sx={{ mb: 2 }}>
                       <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
                         <Typography variant="body2" sx={{ color: '#666', fontSize: '0.9rem' }}>
@@ -350,6 +510,17 @@ const Cart = () => {
                           ${calculateSubtotal().toFixed(2)}
                         </Typography>
                       </Box>
+                      
+                      {appliedVoucher && (
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                          <Typography variant="body2" sx={{ color: '#4caf50', fontSize: '0.9rem' }}>
+                            Descuento ({appliedVoucher.code})
+                          </Typography>
+                          <Typography variant="body2" sx={{ fontWeight: 600, color: '#4caf50', fontSize: '0.9rem' }}>
+                            -${getDiscountAmount().toFixed(2)}
+                          </Typography>
+                        </Box>
+                      )}
                       
                       <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
                         <Typography variant="body2" sx={{ color: '#666', fontSize: '0.9rem' }}>
