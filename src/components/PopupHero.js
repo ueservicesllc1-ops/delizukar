@@ -730,7 +730,6 @@ const PopupHero = ({ open, onClose }) => {
                     style={{
                   height: '90px',
                       width: 'auto',
-                  filter: 'brightness(0) saturate(100%) invert(27%) sepia(51%) saturate(2878%) hue-rotate(346deg) brightness(87%) contrast(97%)',
                   position: 'relative',
                   zIndex: 2
                     }}
