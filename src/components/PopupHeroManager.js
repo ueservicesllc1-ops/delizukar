@@ -102,10 +102,13 @@ const PopupHeroManager = ({ open, onClose }) => {
       if (mainOfferSnap.docs.length > 0) {
         const mainOffer = mainOfferSnap.docs.find(doc => doc.id === 'mainOffer');
         if (mainOffer) {
-          setOffers([{
+          const offerData = {
             id: mainOffer.id,
             ...mainOffer.data()
-          }]);
+          };
+          console.log('📖 Oferta cargada desde Firebase:', offerData);
+          console.log('🖼️ URL de imagen cargada:', offerData.image);
+          setOffers([offerData]);
         } else {
           setOffers([]);
         }
@@ -260,12 +263,16 @@ const PopupHeroManager = ({ open, onClose }) => {
         updatedAt: new Date()
       };
 
+      console.log('💾 Guardando datos del popup:', offerData);
+      console.log('🖼️ URL de imagen a guardar:', offerData.image);
+
       // Siempre usar el mismo documento para la oferta principal
       const mainOfferRef = doc(db, 'popupOffers', 'mainOffer');
       
       try {
         // Intentar actualizar el documento principal
         await updateDoc(mainOfferRef, offerData);
+        console.log('✅ Documento actualizado exitosamente');
         setSnackbarMessage('¡Oferta actualizada correctamente!');
         setSnackbarSeverity('success');
         setSnackbarOpen(true);
@@ -273,6 +280,7 @@ const PopupHeroManager = ({ open, onClose }) => {
         // Si no existe, crearlo
         if (error.code === 'not-found') {
           await setDoc(mainOfferRef, offerData);
+          console.log('✅ Documento creado exitosamente');
           setSnackbarMessage('¡Oferta creada correctamente!');
           setSnackbarSeverity('success');
           setSnackbarOpen(true);
@@ -286,6 +294,7 @@ const PopupHeroManager = ({ open, onClose }) => {
       // No recargar ofertas para evitar sobrescribir el estado
       // loadOffers();
     } catch (error) {
+      console.error('❌ Error guardando oferta:', error);
       setSnackbarMessage('Error al guardar la oferta: ' + error.message);
       setSnackbarSeverity('error');
       setSnackbarOpen(true);
