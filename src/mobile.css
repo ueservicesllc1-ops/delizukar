@@ -1305,12 +1305,49 @@
   
   /* Laptop Popup Hero */
   .popup-hero-mobile .MuiDialog-paper {
-    transform: scale(0.9) !important;
+    transform: scale(0.95) !important;
     transform-origin: center !important;
     margin: 0 !important;
-    max-height: calc(90vh) !important;
-    width: calc(90vw) !important;
-    max-width: calc(90vw) !important;
+    max-height: calc(95vh) !important;
+    height: calc(95vh) !important;
+    width: calc(85vw) !important;
+    max-width: calc(85vw) !important;
+  }
+  
+  /* Laptop Popup Hero Content */
+  .popup-hero-mobile .MuiDialogContent-root {
+    padding: 20px !important;
+    max-height: calc(85vh) !important;
+    height: calc(85vh) !important;
+    overflow-y: auto !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+  
+  /* Laptop Popup Hero Typography */
+  .popup-hero-mobile .MuiTypography-h4 {
+    font-size: 1.6rem !important;
+    line-height: 1.3 !important;
+    margin-bottom: 8px !important;
+  }
+  
+  .popup-hero-mobile .MuiTypography-h6 {
+    font-size: 1.2rem !important;
+    line-height: 1.3 !important;
+    margin-bottom: 12px !important;
+  }
+  
+  .popup-hero-mobile .MuiTypography-body2 {
+    font-size: 0.9rem !important;
+    line-height: 1.5 !important;
+    margin-bottom: 16px !important;
+  }
+  
+  /* Laptop Popup Hero Button */
+  .popup-hero-mobile .MuiButton-root {
+    padding: 12px 24px !important;
+    font-size: 1rem !important;
+    margin-top: 8px !important;
   }
   
   /* Laptop Product Details */
