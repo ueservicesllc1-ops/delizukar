@@ -111,7 +111,7 @@ Para cancelar tu suscripción, visita: https://delizukar.com/unsubscribe?email=$
           
           const result = await emailjs.send(
             'service_7biylnb',
-            'template_8x9k2mj',
+            'template_poovxvk',
             {
               to_email: subscription.email,
               message: `Hola,
