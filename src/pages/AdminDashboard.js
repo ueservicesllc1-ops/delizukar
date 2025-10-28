@@ -61,7 +61,8 @@ import {
   Close,
   Group,
   AdminPanelSettings,
-  Palette
+  Palette,
+  Email
 } from '@mui/icons-material';
 import FontManager from '../components/FontManager';
 import BannerPhotoManager from '../components/BannerPhotoManager';
@@ -77,6 +78,7 @@ import PopupHeroManager from '../components/PopupHeroManager';
 import PayPalBalance from '../components/PayPalBalance';
 import OrdersManager from '../components/OrdersManager';
 import VoucherManager from '../components/VoucherManager';
+import SubscriptionManager from '../components/SubscriptionManager';
 
 const AdminDashboard = () => {
   const [fontManagerOpen, setFontManagerOpen] = useState(false);
@@ -115,6 +117,7 @@ const AdminDashboard = () => {
   const [selectedFont, setSelectedFont] = useState(null);
   const [ordersManagerOpen, setOrdersManagerOpen] = useState(false);
   const [voucherManagerOpen, setVoucherManagerOpen] = useState(false);
+  const [subscriptionManagerOpen, setSubscriptionManagerOpen] = useState(false);
   const navigate = useNavigate();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
@@ -724,7 +727,7 @@ const AdminDashboard = () => {
                               index === 14 ? handleCostAnalysisClick :
                               index === 16 ? () => setColorPaletteOpen(true) :
                               index === 17 ? () => setOrdersManagerOpen(true) :
-                              index === 18 ? () => setColorPaletteOpen(true) :
+                              index === 18 ? () => setSubscriptionManagerOpen(true) :
                               index === 19 ? () => setVoucherManagerOpen(true) :
                               undefined
                             }
@@ -995,16 +998,7 @@ const AdminDashboard = () => {
                                </Box>
                              ) : index === 18 ? (
                               <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1 }}>
-                                <Typography
-                                  variant="h4"
-                                  sx={{
-                                    color: 'white',
-                                    fontWeight: 700,
-                                    textShadow: '1px 1px 2px rgba(0,0,0,0.5)'
-                                  }}
-                                >
-                                  #7C2815
-                                </Typography>
+                                <Email sx={{ color: 'white', fontSize: '2rem' }} />
                                 <Typography
                                   variant="body2"
                                   sx={{
@@ -1013,7 +1007,7 @@ const AdminDashboard = () => {
                                     textShadow: '1px 1px 2px rgba(0,0,0,0.5)'
                                   }}
                                 >
-                                  Color Secundario
+                                  Suscriptores
                                 </Typography>
                               </Box>
                             ) : index === 19 ? (
@@ -1135,6 +1129,12 @@ const AdminDashboard = () => {
         <VoucherManager
           open={voucherManagerOpen}
           onClose={() => setVoucherManagerOpen(false)}
+        />
+
+        {/* Gestor de Suscriptores */}
+        <SubscriptionManager
+          open={subscriptionManagerOpen}
+          onClose={() => setSubscriptionManagerOpen(false)}
         />
 
         {/* Reporte de Ventas */}

@@ -16,7 +16,7 @@ import {
 } from '@mui/icons-material';
 import { useTranslation } from 'react-i18next';
 import { responsiveComponents } from '../utils/responsiveDesign';
-import { doc, getDoc } from 'firebase/firestore';
+import { doc, getDoc, collection, addDoc, query, where, getDocs } from 'firebase/firestore';
 import { db } from '../firebase/config';
 
 // Componente TikTok personalizado
@@ -39,6 +39,9 @@ const Footer = () => {
     instagram: '',
     tiktok: ''
   });
+  const [email, setEmail] = useState('');
+  const [subscriptionMessage, setSubscriptionMessage] = useState('');
+  const [subscriptionLoading, setSubscriptionLoading] = useState(false);
 
   // Cargar enlaces de redes sociales desde Firebase
   useEffect(() => {
@@ -60,6 +63,56 @@ const Footer = () => {
       }
     } catch (error) {
       console.error('Error cargando enlaces de redes sociales:', error);
+    }
+  };
+
+  const handleSubscribe = async () => {
+    if (!email.trim()) {
+      setSubscriptionMessage('Por favor ingresa tu email');
+      return;
+    }
+
+    if (!email.includes('@')) {
+      setSubscriptionMessage('Por favor ingresa un email válido');
+      return;
+    }
+
+    setSubscriptionLoading(true);
+    setSubscriptionMessage('');
+
+    try {
+      // Verificar si el email ya está suscrito
+      const subscriptionsRef = collection(db, 'emailSubscriptions');
+      const q = query(subscriptionsRef, where('email', '==', email.trim().toLowerCase()));
+      const querySnapshot = await getDocs(q);
+
+      if (!querySnapshot.empty) {
+        setSubscriptionMessage('Este email ya está suscrito');
+        setSubscriptionLoading(false);
+        return;
+      }
+
+      // Agregar nueva suscripción
+      await addDoc(subscriptionsRef, {
+        email: email.trim().toLowerCase(),
+        subscribedAt: new Date().toISOString(),
+        status: 'active',
+        source: 'footer'
+      });
+
+      setSubscriptionMessage('¡Te has suscrito exitosamente!');
+      setEmail('');
+      
+      // Limpiar mensaje después de 3 segundos
+      setTimeout(() => {
+        setSubscriptionMessage('');
+      }, 3000);
+
+    } catch (error) {
+      console.error('Error suscribiendo email:', error);
+      setSubscriptionMessage('Error al suscribirse. Inténtalo de nuevo.');
+    } finally {
+      setSubscriptionLoading(false);
     }
   };
 
@@ -201,6 +254,9 @@ const Footer = () => {
                   placeholder="Correo electrónico"
                   variant="outlined"
                   size="small"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  disabled={subscriptionLoading}
                   sx={{
                     flexGrow: 1,
                     maxWidth: '200px',
@@ -228,16 +284,36 @@ const Footer = () => {
                 />
                 <Button
                   variant="contained"
+                  onClick={handleSubscribe}
+                  disabled={subscriptionLoading || !email.trim()}
                   sx={{
                     backgroundColor: '#EB8B8B',
                     '&:hover': {
                       backgroundColor: '#C8626D'
+                    },
+                    '&:disabled': {
+                      backgroundColor: 'rgba(255, 255, 255, 0.3)',
+                      color: 'rgba(255, 255, 255, 0.7)'
                     }
                   }}
                 >
-                  Suscribir
+                  {subscriptionLoading ? 'Suscribiendo...' : 'Suscribir'}
                 </Button>
               </Box>
+
+              {subscriptionMessage && (
+                <Typography
+                  variant="body2"
+                  sx={{
+                    color: subscriptionMessage.includes('exitosamente') ? '#4CAF50' : '#FF9800',
+                    textAlign: 'center',
+                    mt: 1,
+                    fontWeight: 600
+                  }}
+                >
+                  {subscriptionMessage}
+                </Typography>
+              )}
 
               <Typography
                 variant="h6"
