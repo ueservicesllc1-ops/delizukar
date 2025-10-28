@@ -111,13 +111,22 @@ Para cancelar tu suscripción, visita: https://delizukar.com/unsubscribe?email=$
           
           const result = await emailjs.send(
             'service_7biylnb',
-            'template_newsletter',
+            'template_poovxvk',
             {
               to_email: subscription.email,
-              subject: emailSubject,
-              email_type: emailType.charAt(0).toUpperCase() + emailType.slice(1),
-              message: emailMessage,
-              unsubscribe_link: `https://delizukar.com/unsubscribe?email=${subscription.email}`
+              to_name: subscription.email,
+              order_id: `NEWSLETTER-${Date.now()}`,
+              tracking_code: 'NEWSLETTER',
+              tracking_url: 'https://delizukar.com',
+              label_url: 'https://delizukar.com',
+              message: `Hola,
+
+${emailMessage}
+
+---
+${emailType.charAt(0).toUpperCase() + emailType.slice(1)} de Delizukar
+
+Para cancelar tu suscripción, visita: https://delizukar.com/unsubscribe?email=${subscription.email}`
             },
             'woa-DlbiNozuQWT44'
           );
