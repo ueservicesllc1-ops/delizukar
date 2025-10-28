@@ -86,7 +86,7 @@ const SubscriptionManager = ({ open, onClose }) => {
         try {
           await emailjs.send(
             'service_7biylnb',
-            'template_8x9k2mj',
+            'template_ic9r7ln',
             {
               to_email: subscription.email,
               message: `Hola,
