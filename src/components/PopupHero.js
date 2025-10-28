@@ -828,7 +828,7 @@ const PopupHero = ({ open, onClose }) => {
                         fontWeight: 500
                       }}
                     >
-                      {currentOfferData.description || 'Descubre nuestras deliciosas galletas artesanales horneadas con ingredientes premium y mucho amor'}
+                      {currentOfferData.description || ''}
                     </Typography>
                   </motion.div>
 
