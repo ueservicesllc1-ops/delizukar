@@ -178,23 +178,25 @@ const Home = () => {
             transition={{ duration: 0.8 }}
           >
             <Box sx={{ textAlign: 'center', mb: 3 }}>
-              <Typography
-                variant="h2"
-                className="featured-products-title"
-                sx={{
-                  fontSize: { xs: '2rem', md: '3rem' },
-                  fontWeight: 800,
-                  color: '#EC8C8D',
-                  mb: 2,
-                  fontFamily: featuredLoading ? 'Playfair Display, serif' : `"${featuredConfig.titleFont}", serif !important`,
-                  position: 'relative',
-                  zIndex: 10,
-                  '&::before': { display: 'none' },
-                  '&::after': { display: 'none' }
-                }}
-              >
-                {featuredLoading ? 'Galletas Destacadas' : featuredConfig.titleText}
-              </Typography>
+              {!featuredLoading && featuredConfig.titleFont && (
+                <Typography
+                  variant="h2"
+                  className="featured-products-title"
+                  sx={{
+                    fontSize: { xs: '2rem', md: '3rem' },
+                    fontWeight: 800,
+                    color: '#EC8C8D',
+                    mb: 2,
+                    fontFamily: `"${featuredConfig.titleFont}", serif !important`,
+                    position: 'relative',
+                    zIndex: 10,
+                    '&::before': { display: 'none' },
+                    '&::after': { display: 'none' }
+                  }}
+                >
+                  {t('home.featuredCookies', 'Galletas Destacadas')}
+                </Typography>
+              )}
             </Box>
 
             {featuredProducts.length > 0 ? (

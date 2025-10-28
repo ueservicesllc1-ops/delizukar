@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import {
   Box,
@@ -28,11 +28,32 @@ import { useStore } from '../context/StoreContext';
 import { useTranslation } from 'react-i18next';
 
 const FeaturedProducts = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { featuredProducts, addToCart } = useStore();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const [currentLanguage, setCurrentLanguage] = useState(i18n.language);
 
+  // Forzar re-render cuando cambie el idioma
+  useEffect(() => {
+    const handleLanguageChange = (lng) => {
+      console.log('🌍 Idioma cambiado a:', lng);
+      setCurrentLanguage(lng);
+    };
+
+    i18n.on('languageChanged', handleLanguageChange);
+    
+    return () => {
+      i18n.off('languageChanged', handleLanguageChange);
+    };
+  }, [i18n]);
+
+  // Debug: verificar traducciones
+  useEffect(() => {
+    console.log('🔍 Idioma actual:', i18n.language);
+    console.log('🔍 Traducción featuredCookies:', t('home.featuredCookies'));
+    console.log('🔍 Traducción featuredDescription:', t('home.featuredDescription'));
+  }, [i18n.language, t]);
 
   const containerVariants = {
     hidden: { opacity: 0 },

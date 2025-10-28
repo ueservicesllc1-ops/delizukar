@@ -156,27 +156,27 @@ const Footer = () => {
                   textAlign: 'center'
                 }}
               >
-                Enlaces Rápidos
+{t('footer.quickLinks', 'Enlaces Rápidos')}
               </Typography>
               
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, alignItems: 'center' }}>
                 <Link href="/terms" className="footer-link-mobile" sx={{ color: 'white', textDecoration: 'none', fontSize: '0.95rem', '&:hover': { color: '#EB8B8B' } }}>
-                  Términos y Condiciones
+                  {t('footer.termsConditions', 'Términos y Condiciones')}
                 </Link>
                 <Link href="/terms-service" sx={{ color: 'white', textDecoration: 'none', fontSize: '0.95rem', '&:hover': { color: '#EB8B8B' } }}>
-                  Términos de Servicio
+                  {t('footer.termsService', 'Términos de Servicio')}
                 </Link>
                 <Link href="/faq" sx={{ color: 'white', textDecoration: 'none', fontSize: '0.95rem', '&:hover': { color: '#EB8B8B' } }}>
-                  Preguntas Frecuentes
+                  {t('footer.faq', 'Preguntas Frecuentes')}
                 </Link>
                 <Link href="/allergy" sx={{ color: 'white', textDecoration: 'none', fontSize: '0.95rem', '&:hover': { color: '#EB8B8B' } }}>
-                  Avisos de Alergias
+                  {t('footer.allergyNotices', 'Avisos de Alergias')}
                 </Link>
                 <Link href="/shipping" sx={{ color: 'white', textDecoration: 'none', fontSize: '0.95rem', '&:hover': { color: '#EB8B8B' } }}>
-                  Política de Envío
+                  {t('footer.shippingPolicy', 'Política de Envío')}
                 </Link>
                 <Link href="/cookie-care" sx={{ color: 'white', textDecoration: 'none', fontSize: '0.95rem', '&:hover': { color: '#EB8B8B' } }}>
-                  Instrucciones de Cuidado de Galletas
+                  {t('footer.cookieCare', 'Instrucciones de Cuidado de Galletas')}
                 </Link>
               </Box>
             </motion.div>
@@ -204,21 +204,21 @@ const Footer = () => {
                   textAlign: 'center'
                 }}
               >
-                Navegación
+{t('footer.navigation', 'Navegación')}
               </Typography>
               
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, alignItems: 'center' }}>
                 <Link href="/" sx={{ color: 'white', textDecoration: 'none', fontSize: '0.95rem', '&:hover': { color: '#EB8B8B' } }}>
-                  Inicio
+                  {t('footer.home', 'Inicio')}
                 </Link>
                 <Link href="/productos" sx={{ color: 'white', textDecoration: 'none', fontSize: '0.95rem', '&:hover': { color: '#EB8B8B' } }}>
-                  Productos
+                  {t('footer.products', 'Productos')}
                 </Link>
                 <Link href="/contacto" sx={{ color: 'white', textDecoration: 'none', fontSize: '0.95rem', '&:hover': { color: '#EB8B8B' } }}>
-                  Contacto
+                  {t('footer.contact', 'Contacto')}
                 </Link>
                 <Link href="/nosotros" sx={{ color: 'white', textDecoration: 'none', fontSize: '0.95rem', '&:hover': { color: '#EB8B8B' } }}>
-                  Nosotros
+                  {t('footer.about', 'Nosotros')}
                 </Link>
               </Box>
             </motion.div>
@@ -246,12 +246,12 @@ const Footer = () => {
                   textAlign: 'center'
                 }}
               >
-                Suscríbete a nuestros emails
+{t('footer.subscribe', 'Suscríbete a nuestros emails')}
               </Typography>
               
               <Box sx={{ display: 'flex', gap: 1, mb: 1, justifyContent: 'center' }}>
                 <TextField
-                  placeholder="Correo electrónico"
+                  placeholder={t('footer.emailPlaceholder', 'Correo electrónico')}
                   variant="outlined"
                   size="small"
                   value={email}
@@ -325,7 +325,7 @@ const Footer = () => {
                   textAlign: 'center'
                 }}
               >
-                Síguenos en
+{t('footer.followOn', 'Síguenos en')}
               </Typography>
               
               <Box sx={{ display: 'flex', gap: 1, mb: 1, justifyContent: 'center' }}>

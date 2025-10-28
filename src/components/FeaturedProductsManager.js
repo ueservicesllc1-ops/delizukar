@@ -54,7 +54,7 @@ const FeaturedProductsManager = ({ open, onClose }) => {
   
   // Configuración del título
   const [titleConfig, setTitleConfig] = useState({
-    text: 'Galletas Destacadas',
+    text: '',
     font: 'Playfair Display'
   });
   
@@ -90,7 +90,7 @@ const FeaturedProductsManager = ({ open, onClose }) => {
       if (configData) {
         const config = configData.data();
         setTitleConfig({
-          text: config.titleText || 'Galletas Destacadas',
+          text: config.titleText || '',
           font: config.titleFont || 'Playfair Display'
         });
         setFeaturedProducts(config.selectedProducts || []);
@@ -251,7 +251,7 @@ const FeaturedProductsManager = ({ open, onClose }) => {
                   label="Texto del título"
                   value={titleConfig.text}
                   onChange={(e) => setTitleConfig(prev => ({ ...prev, text: e.target.value }))}
-                  placeholder="Galletas Destacadas"
+                  placeholder=""
                 />
               </Grid>
               

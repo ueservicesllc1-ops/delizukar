@@ -7,7 +7,7 @@ const FeaturedProductsContext = createContext();
 
 export const FeaturedProductsProvider = ({ children }) => {
   const [featuredConfig, setFeaturedConfig] = useState({
-    titleText: 'Galletas Destacadas',
+    titleText: '',
     titleFont: 'Playfair Display',
     selectedProducts: []
   });
@@ -24,7 +24,7 @@ export const FeaturedProductsProvider = ({ children }) => {
         console.log('📋 Datos encontrados en appConfig/featuredProducts:', data);
         
         const newConfig = {
-          titleText: data.titleText || 'Galletas Destacadas',
+          titleText: data.titleText || '',
           titleFont: data.titleFont || 'Playfair Display',
           selectedProducts: data.selectedProducts || []
         };
