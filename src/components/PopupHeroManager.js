@@ -109,6 +109,26 @@ const PopupHeroManager = ({ open, onClose }) => {
           console.log('📖 Oferta cargada desde Firebase:', offerData);
           console.log('🖼️ URL de imagen cargada:', offerData.image);
           setOffers([offerData]);
+          
+          // Actualizar el formulario con los datos cargados
+          setFormData(prev => ({
+            ...prev,
+            title: offerData.title || prev.title,
+            description: offerData.description || prev.description,
+            image: offerData.image || prev.image,
+            discountPercent: offerData.discountPercent || prev.discountPercent,
+            discountText: offerData.discountText || prev.discountText,
+            discountConditions: offerData.discountConditions || prev.discountConditions,
+            discountCode: offerData.discountCode || prev.discountCode,
+            buttonText: offerData.buttonText || prev.buttonText,
+            actionUrl: offerData.actionUrl || prev.actionUrl,
+            isActive: offerData.isActive !== false
+          }));
+          
+          // También actualizar imagePreview si hay imagen
+          if (offerData.image) {
+            setImagePreview(offerData.image);
+          }
         } else {
           setOffers([]);
         }
@@ -1404,7 +1424,7 @@ const PopupHeroManager = ({ open, onClose }) => {
                       }}>
                         {/* Imagen que se mueve detrás de la máscara */}
                         <motion.img
-                          src={formData.image || "https://images.unsplash.com/photo-1558961363-fa8fdf82db35?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80"}
+                          src={formData.image || imagePreview || "https://images.unsplash.com/photo-1558961363-fa8fdf82db35?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80"}
                           alt="Deliciosas Galletas"
                           style={{
                             width: '120%',
