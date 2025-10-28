@@ -86,12 +86,12 @@ const SubscriptionManager = ({ open, onClose }) => {
         try {
           await emailjs.send(
             'service_7biylnb',
-            'template_8x9k2mj',
+            'template_mass_email',
             {
               to_email: subscription.email,
               subject: emailSubject,
               message: emailMessage,
-              email_type: emailType,
+              email_type: emailType.charAt(0).toUpperCase() + emailType.slice(1),
               company_name: 'Delizukar',
               unsubscribe_link: `https://delizukar.com/unsubscribe?email=${subscription.email}`
             },
