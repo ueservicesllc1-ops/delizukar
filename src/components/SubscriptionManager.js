@@ -40,6 +40,9 @@ const SubscriptionManager = ({ open, onClose }) => {
         ...doc.data()
       }));
       
+      console.log('📧 Suscriptores cargados desde Firebase:', loadedSubscriptions.length);
+      console.log('📋 Lista de suscriptores:', loadedSubscriptions);
+      
       setSubscriptions(loadedSubscriptions);
     } catch (err) {
       console.error('Error loading subscriptions:', err);
@@ -73,6 +76,12 @@ const SubscriptionManager = ({ open, onClose }) => {
       return;
     }
 
+    console.log('📧 Iniciando envío masivo de emails...');
+    console.log('👥 Suscriptores encontrados:', subscriptions.length);
+    console.log('📝 Asunto:', emailSubject);
+    console.log('📄 Mensaje:', emailMessage);
+    console.log('🏷️ Tipo:', emailType);
+
     setSendingEmails(true);
     setError('');
     setSuccess('');
@@ -84,12 +93,11 @@ const SubscriptionManager = ({ open, onClose }) => {
 
       for (const subscription of subscriptions) {
         try {
-          await emailjs.send(
-            'service_7biylnb',
-            'template_ic9r7ln',
-            {
-              to_email: subscription.email,
-              message: `Hola,
+          console.log(`📤 Enviando email a: ${subscription.email}`);
+          
+          const emailParams = {
+            to_email: subscription.email,
+            message: `Hola,
 
 ${emailMessage}
 
@@ -97,17 +105,30 @@ ${emailMessage}
 ${emailType.charAt(0).toUpperCase() + emailType.slice(1)} de Delizukar
 
 Para cancelar tu suscripción, visita: https://delizukar.com/unsubscribe?email=${subscription.email}`
-            },
+          };
+          
+          console.log('📋 Parámetros del email:', emailParams);
+          
+          const result = await emailjs.send(
+            'service_7biylnb',
+            'template_ic9r7ln',
+            emailParams,
             'woa-DlbiNozuQWT44'
           );
           
+          console.log(`✅ Email enviado exitosamente a ${subscription.email}:`, result);
           sentCount++;
           setEmailProgress({ sent: sentCount, total: subscriptions.length });
           
           // Pequeña pausa para evitar límites de rate
           await new Promise(resolve => setTimeout(resolve, 100));
         } catch (emailError) {
-          console.error(`Error enviando email a ${subscription.email}:`, emailError);
+          console.error(`❌ Error enviando email a ${subscription.email}:`, emailError);
+          console.error('Detalles del error:', {
+            status: emailError.status,
+            text: emailError.text,
+            message: emailError.message
+          });
           failedCount++;
         }
       }
