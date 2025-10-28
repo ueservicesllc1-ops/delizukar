@@ -110,40 +110,24 @@ const OrdersManager = ({ open, onClose }) => {
     try {
       setSendingTestEmail(true);
       
-      // 1. Obtener datos del email del backend
-      const response = await fetch('http://localhost:5000/api/send-test-email', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
+      // Enviar email de prueba directamente con EmailJS
+      await emailjs.send(
+        'service_7biylnb',
+        'template_poovxvk',
+        {
+          to_email: testEmail,
+          to_name: 'Cliente de Prueba',
+          order_id: 'TEST-001',
+          tracking_code: 'TRK123456789',
+          tracking_url: 'https://tracking.easypost.com/TRK123456789',
+          label_url: 'https://example.com/label.pdf'
         },
-        body: JSON.stringify({
-          email: testEmail
-        })
-      });
-
-      const result = await response.json();
-
-      if (response.ok && result.success && result.emailData) {
-        // 2. Enviar email con EmailJS
-        await emailjs.send(
-          'service_7biylnb',
-          'template_poovxvk',
-          {
-            to_email: result.emailData.to_email,
-            to_name: result.emailData.to_name,
-            order_id: result.emailData.order_id,
-            tracking_code: result.emailData.tracking_code,
-            tracking_url: result.emailData.tracking_url,
-            label_url: result.emailData.label_url
-          }
-        );
-        
-        alert('✅ Email de prueba enviado exitosamente a ' + testEmail);
-        setTestEmailDialog(false);
-        setTestEmail('');
-      } else {
-        alert('❌ Error al enviar email: ' + (result.error || 'Error desconocido'));
-      }
+        'user_7biylnb'
+      );
+      
+      alert('✅ Email de prueba enviado exitosamente a ' + testEmail);
+      setTestEmailDialog(false);
+      setTestEmail('');
     } catch (error) {
       console.error('Error enviando email de prueba:', error);
       alert('❌ Error al enviar email: ' + error.message);
