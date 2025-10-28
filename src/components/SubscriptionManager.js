@@ -1,17 +1,25 @@
 import React, { useState, useEffect } from 'react';
 import {
   Dialog, DialogTitle, DialogContent, DialogActions, Button, Box, Typography,
-  Alert, CircularProgress, Grid, Card, CardContent, IconButton, Chip, Divider
+  Alert, CircularProgress, Grid, Card, CardContent, IconButton, Chip, Divider,
+  TextField, FormControl, InputLabel, Select, MenuItem
 } from '@mui/material';
-import { Close, Email, Person, CalendarToday, CheckCircle, Cancel } from '@mui/icons-material';
+import { Close, Email, Person, CalendarToday, CheckCircle, Cancel, Send } from '@mui/icons-material';
 import { collection, getDocs, query, orderBy, deleteDoc, doc } from 'firebase/firestore';
 import { db } from '../firebase/config';
+import emailjs from '@emailjs/browser';
 
 const SubscriptionManager = ({ open, onClose }) => {
   const [subscriptions, setSubscriptions] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [massEmailOpen, setMassEmailOpen] = useState(false);
+  const [emailSubject, setEmailSubject] = useState('');
+  const [emailMessage, setEmailMessage] = useState('');
+  const [emailType, setEmailType] = useState('newsletter');
+  const [sendingEmails, setSendingEmails] = useState(false);
+  const [emailProgress, setEmailProgress] = useState({ sent: 0, total: 0 });
 
   useEffect(() => {
     if (open) {
@@ -54,6 +62,74 @@ const SubscriptionManager = ({ open, onClose }) => {
     }
   };
 
+  const handleSendMassEmail = async () => {
+    if (!emailSubject.trim() || !emailMessage.trim()) {
+      setError('Por favor completa el asunto y el mensaje');
+      return;
+    }
+
+    if (subscriptions.length === 0) {
+      setError('No hay suscriptores para enviar el email');
+      return;
+    }
+
+    setSendingEmails(true);
+    setError('');
+    setSuccess('');
+    setEmailProgress({ sent: 0, total: subscriptions.length });
+
+    try {
+      let sentCount = 0;
+      let failedCount = 0;
+
+      for (const subscription of subscriptions) {
+        try {
+          await emailjs.send(
+            'service_7biylnb',
+            'template_8x9k2mj',
+            {
+              to_email: subscription.email,
+              subject: emailSubject,
+              message: emailMessage,
+              email_type: emailType,
+              company_name: 'Delizukar',
+              unsubscribe_link: `https://delizukar.com/unsubscribe?email=${subscription.email}`
+            },
+            'user_7biylnb'
+          );
+          
+          sentCount++;
+          setEmailProgress({ sent: sentCount, total: subscriptions.length });
+          
+          // Pequeña pausa para evitar límites de rate
+          await new Promise(resolve => setTimeout(resolve, 100));
+        } catch (emailError) {
+          console.error(`Error enviando email a ${subscription.email}:`, emailError);
+          failedCount++;
+        }
+      }
+
+      if (sentCount > 0) {
+        setSuccess(`✅ Email enviado exitosamente a ${sentCount} suscriptores${failedCount > 0 ? ` (${failedCount} fallaron)` : ''}`);
+      } else {
+        setError('❌ No se pudo enviar ningún email');
+      }
+
+      // Limpiar formulario
+      setEmailSubject('');
+      setEmailMessage('');
+      setEmailType('newsletter');
+      setMassEmailOpen(false);
+
+    } catch (error) {
+      console.error('Error enviando emails masivos:', error);
+      setError('Error al enviar los emails: ' + error.message);
+    } finally {
+      setSendingEmails(false);
+      setEmailProgress({ sent: 0, total: 0 });
+    }
+  };
+
   const formatDate = (dateString) => {
     const date = new Date(dateString);
     return date.toLocaleDateString('es-ES', {
@@ -81,9 +157,24 @@ const SubscriptionManager = ({ open, onClose }) => {
 
         {/* Estadísticas */}
         <Box sx={{ mb: 3, p: 2, backgroundColor: '#f8f9fa', borderRadius: '8px' }}>
-          <Typography variant="h6" sx={{ mb: 2, color: '#c8626d', fontWeight: 600 }}>
-            📊 Estadísticas de Suscripciones
-          </Typography>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+            <Typography variant="h6" sx={{ color: '#c8626d', fontWeight: 600 }}>
+              📊 Estadísticas de Suscripciones
+            </Typography>
+            <Button
+              variant="contained"
+              startIcon={<Send />}
+              onClick={() => setMassEmailOpen(true)}
+              disabled={subscriptions.length === 0}
+              sx={{
+                backgroundColor: '#c8626d',
+                '&:hover': { backgroundColor: '#be8782' },
+                '&:disabled': { backgroundColor: '#ccc' }
+              }}
+            >
+              Enviar Email Masivo
+            </Button>
+          </Box>
           <Grid container spacing={2}>
             <Grid item xs={12} sm={4}>
               <Card sx={{ p: 2, backgroundColor: '#c8626d', color: 'white', textAlign: 'center' }}>
@@ -217,6 +308,114 @@ const SubscriptionManager = ({ open, onClose }) => {
           Cerrar
         </Button>
       </DialogActions>
+
+      {/* Modal de Envío Masivo */}
+      <Dialog open={massEmailOpen} onClose={() => !sendingEmails && setMassEmailOpen(false)} maxWidth="md" fullWidth>
+        <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'linear-gradient(135deg, #c8626d 0%, #be8782 100%)', color: 'white' }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Send />
+            <Typography variant="h6" sx={{ fontWeight: 700 }}>Enviar Email Masivo</Typography>
+          </Box>
+          <IconButton onClick={() => !sendingEmails && setMassEmailOpen(false)} sx={{ color: 'white' }} disabled={sendingEmails}>
+            <Close />
+          </IconButton>
+        </DialogTitle>
+        
+        <DialogContent sx={{ p: 3 }}>
+          <Typography variant="body1" sx={{ mb: 3, color: '#666' }}>
+            Enviarás este email a <strong>{subscriptions.length}</strong> suscriptores registrados.
+          </Typography>
+
+          <Grid container spacing={2}>
+            <Grid item xs={12}>
+              <FormControl fullWidth sx={{ mb: 2 }}>
+                <InputLabel>Tipo de Email</InputLabel>
+                <Select
+                  value={emailType}
+                  onChange={(e) => setEmailType(e.target.value)}
+                  label="Tipo de Email"
+                  disabled={sendingEmails}
+                >
+                  <MenuItem value="newsletter">📰 Newsletter</MenuItem>
+                  <MenuItem value="promotion">🎉 Promoción</MenuItem>
+                  <MenuItem value="announcement">📢 Anuncio</MenuItem>
+                  <MenuItem value="update">🔄 Actualización</MenuItem>
+                </Select>
+              </FormControl>
+            </Grid>
+            
+            <Grid item xs={12}>
+              <TextField
+                fullWidth
+                label="Asunto del Email"
+                value={emailSubject}
+                onChange={(e) => setEmailSubject(e.target.value)}
+                disabled={sendingEmails}
+                placeholder="Ej: ¡Nuevos productos disponibles!"
+                sx={{ mb: 2 }}
+              />
+            </Grid>
+            
+            <Grid item xs={12}>
+              <TextField
+                fullWidth
+                multiline
+                rows={8}
+                label="Mensaje"
+                value={emailMessage}
+                onChange={(e) => setEmailMessage(e.target.value)}
+                disabled={sendingEmails}
+                placeholder="Escribe tu mensaje aquí..."
+                sx={{ mb: 2 }}
+              />
+            </Grid>
+
+            {sendingEmails && (
+              <Grid item xs={12}>
+                <Box sx={{ p: 2, backgroundColor: '#e8f5e8', borderRadius: '8px', textAlign: 'center' }}>
+                  <Typography variant="body2" sx={{ color: '#2e7d32', fontWeight: 600, mb: 1 }}>
+                    📧 Enviando emails... {emailProgress.sent} de {emailProgress.total}
+                  </Typography>
+                  <Box sx={{ width: '100%', backgroundColor: '#c8e6c9', borderRadius: '4px', height: '8px' }}>
+                    <Box 
+                      sx={{ 
+                        backgroundColor: '#4caf50', 
+                        height: '100%', 
+                        borderRadius: '4px',
+                        width: `${(emailProgress.sent / emailProgress.total) * 100}%`,
+                        transition: 'width 0.3s ease'
+                      }} 
+                    />
+                  </Box>
+                </Box>
+              </Grid>
+            )}
+          </Grid>
+        </DialogContent>
+        
+        <DialogActions sx={{ p: 3, justifyContent: 'center' }}>
+          <Button
+            onClick={() => setMassEmailOpen(false)}
+            variant="outlined"
+            disabled={sendingEmails}
+            sx={{ mr: 2 }}
+          >
+            Cancelar
+          </Button>
+          <Button
+            onClick={handleSendMassEmail}
+            variant="contained"
+            disabled={sendingEmails || !emailSubject.trim() || !emailMessage.trim()}
+            startIcon={sendingEmails ? <CircularProgress size={20} /> : <Send />}
+            sx={{
+              backgroundColor: '#c8626d',
+              '&:hover': { backgroundColor: '#be8782' }
+            }}
+          >
+            {sendingEmails ? 'Enviando...' : 'Enviar a Todos'}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Dialog>
   );
 };
