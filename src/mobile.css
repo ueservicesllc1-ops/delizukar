@@ -989,11 +989,48 @@
     z-index: 1 !important;
   }
   
+  /* iPad Products Grid - 4 en 4 horizontalmente con flex */
+  .products-page-mobile .MuiGrid-container {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    justify-content: space-between !important;
+    gap: 16px !important;
+  }
+  
+  .products-page-mobile .MuiGrid-item {
+    flex: 0 0 calc(25% - 12px) !important;
+    max-width: calc(25% - 12px) !important;
+    margin: 0 !important;
+  }
+  
+  .products-page-mobile .product-card-mobile {
+    width: 100% !important;
+    margin: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    height: 100% !important;
+  }
+  
   /* Banner2 Tablet Horizontal */
   .banner2-mobile {
     margin-top: 0 !important;
     position: relative !important;
     z-index: 2 !important;
+  }
+  
+  /* iPad Footer Logo - Bajar solo 20px */
+  .footer-logo-mobile {
+    margin-top: 20px !important;
+  }
+  
+  /* iPad Footer - Más separación horizontal entre columnas */
+  .footer-mobile .MuiGrid-container {
+    gap: 40px !important;
+    justify-content: space-around !important;
+  }
+  
+  .footer-mobile .footer-section-mobile {
+    margin: 0 20px !important;
   }
   
   /* Testimonials Tablet Horizontal */
@@ -2019,6 +2056,24 @@
       z-index: 10 !important;
     }
     
+    /* iPhone 16 Footer - Fondo blanco */
+    .footer-mobile {
+      background-color: white !important;
+      color: #333 !important;
+    }
+    
+    .footer-mobile .footer-title-mobile {
+      color: #333 !important;
+    }
+    
+    .footer-mobile .MuiLink-root {
+      color: #333 !important;
+    }
+    
+    .footer-mobile .MuiTypography-root {
+      color: #333 !important;
+    }
+    
     /* iPhone 16 Testimonials - Subir un poco la sección de testimonios */
     .testimonials-mobile {
       margin-top: -50px !important;
@@ -2140,4 +2195,13 @@
     display: block !important;
   }
   
+  /* Desktop Footer - Más separación horizontal entre columnas */
+  .footer-mobile .MuiGrid-container {
+    gap: 40px !important;
+    justify-content: space-around !important;
+  }
+  
+  .footer-mobile .footer-section-mobile {
+    margin: 0 20px !important;
+  }
 }
