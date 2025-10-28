@@ -737,29 +737,25 @@ const Checkout = () => {
                           console.log('🔍 paymentDetails.id:', paymentDetails.id);
                           console.log('🔍 paymentDetails.paymentId:', paymentDetails.paymentId);
                           
-                          // Marcar voucher como usado si hay uno aplicado
+                          // Registrar uso del voucher en la colección voucherUsages
                           if (appliedVoucher && user) {
                             try {
-                              const vouchersRef = collection(db, 'vouchers');
-                              const q = query(vouchersRef, where('code', '==', appliedVoucher.code));
-                              const querySnapshot = await getDocs(q);
-                              
-                              if (!querySnapshot.empty) {
-                                const voucherDoc = querySnapshot.docs[0];
-                                const currentUsedBy = voucherDoc.data().usedBy || [];
-                                
-                                if (!currentUsedBy.includes(user.uid)) {
-                                  await updateDoc(doc(db, 'vouchers', voucherDoc.id), {
-                                    usedBy: [...currentUsedBy, user.uid]
-                                  });
-                                  console.log('✅ Voucher marcado como usado:', appliedVoucher.code);
-                                }
-                              }
+                              const voucherUsagesRef = collection(db, 'voucherUsages');
+                              await addDoc(voucherUsagesRef, {
+                                voucherCode: appliedVoucher.code,
+                                userId: user.uid,
+                                userEmail: user.email,
+                                discountPercentage: appliedVoucher.discountPercentage,
+                                usedAt: new Date(),
+                                orderAmount: calculateTotal(),
+                                paymentId: paymentDetails.id || paymentDetails.paymentId
+                              });
+                              console.log('✅ Uso de voucher registrado:', appliedVoucher.code);
                               
                               // Limpiar voucher del localStorage
                               localStorage.removeItem('appliedVoucher');
                             } catch (error) {
-                              console.error('Error marcando voucher como usado:', error);
+                              console.error('Error registrando uso de voucher:', error);
                             }
                           }
                           

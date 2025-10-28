@@ -124,8 +124,16 @@ const Cart = () => {
         throw new Error('Este voucher no está activo');
       }
 
-      // Verificar si el usuario ya usó este voucher
-      if (voucherData.usedBy && voucherData.usedBy.includes(user.uid)) {
+      // Verificar si el usuario ya usó este voucher en la colección voucherUsages
+      const voucherUsagesRef = collection(db, 'voucherUsages');
+      const usageQuery = query(
+        voucherUsagesRef, 
+        where('voucherCode', '==', voucherData.code),
+        where('userId', '==', user.uid)
+      );
+      const usageSnapshot = await getDocs(usageQuery);
+
+      if (!usageSnapshot.empty) {
         throw new Error('Ya has usado este voucher anteriormente');
       }
 
