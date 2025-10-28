@@ -136,27 +136,50 @@ const PopupHeroManager = ({ open, onClose }) => {
         setOffers([]);
       }
 
-      // Cargar configuración del popup desde mainOffer
-      const mainOfferDoc = mainOfferSnap.docs.find(doc => doc.id === 'mainOffer');
-      
-      if (mainOfferDoc) {
-        const config = mainOfferDoc.data();
-        console.log('📖 Configuración cargada desde mainOffer:', config);
-        setPopupConfig({
-          duration: config.duration || 8
-        });
-        setFormData(prev => ({
-          ...prev,
-          showWelcomeTitle: config.showWelcomeTitle === true,
-          welcomeTitle: config.welcomeTitle || '¡Bienvenido a DeliZuKar!'
-        }));
-        console.log('🔄 Estado actualizado:', {
-          showWelcomeTitle: config.showWelcomeTitle === true,
-          welcomeTitle: config.welcomeTitle || '¡Bienvenido a DeliZuKar!'
-        });
-      } else {
-        console.log('⚠️ No se encontró mainOffer en Firestore');
-      }
+        // Cargar configuración del popup desde mainOffer
+        const mainOfferDoc = mainOfferSnap.docs.find(doc => doc.id === 'mainOffer');
+        
+        if (mainOfferDoc) {
+          const config = mainOfferDoc.data();
+          console.log('📖 Configuración cargada desde mainOffer:', config);
+          setPopupConfig({
+            duration: config.duration || 8
+          });
+          
+          // Actualizar TODOS los campos del formulario con datos de Firebase
+          setFormData(prev => ({
+            ...prev,
+            title: config.title || prev.title,
+            welcomeTitle: config.welcomeTitle || prev.welcomeTitle,
+            showWelcomeTitle: config.showWelcomeTitle === true,
+            description: config.description || prev.description,
+            image: config.image || prev.image,
+            originalPrice: config.originalPrice || prev.originalPrice,
+            discountPrice: config.discountPrice || prev.discountPrice,
+            discountPercent: config.discountPercent || prev.discountPercent,
+            discountText: config.discountText || prev.discountText,
+            discountConditions: config.discountConditions || prev.discountConditions,
+            discountCode: config.discountCode || prev.discountCode,
+            buttonText: config.buttonText || prev.buttonText,
+            actionUrl: config.actionUrl || prev.actionUrl,
+            isActive: config.isActive !== false
+          }));
+          
+          // También actualizar imagePreview si hay imagen
+          if (config.image) {
+            setImagePreview(config.image);
+          }
+          
+          console.log('🔄 Estado actualizado con datos de Firebase:', {
+            title: config.title,
+            description: config.description,
+            image: config.image,
+            showWelcomeTitle: config.showWelcomeTitle === true,
+            welcomeTitle: config.welcomeTitle
+          });
+        } else {
+          console.log('⚠️ No se encontró mainOffer en Firestore');
+        }
     } catch (error) {
       setError('Error cargando ofertas: ' + error.message);
       setOffers([]);
