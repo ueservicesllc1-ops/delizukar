@@ -114,11 +114,10 @@ Para cancelar tu suscripción, visita: https://delizukar.com/unsubscribe?email=$
             'template_ic9r7ln',
             {
               to_email: subscription.email,
-              subject: emailSubject,
-              company_name: 'DeliZuKar',
-              email_type: emailType.charAt(0).toUpperCase() + emailType.slice(1),
-              message: emailMessage,
-              unsubscribe_link: `https://delizukar.com/unsubscribe?email=${subscription.email}`
+              nombre_de_empresa: 'DeliZuKar',
+              tipo_de_correo_electronico: emailType.charAt(0).toUpperCase() + emailType.slice(1),
+              sujeto: emailSubject,
+              mensaje: emailMessage
             },
             'woa-DlbiNozuQWT44'
           );
