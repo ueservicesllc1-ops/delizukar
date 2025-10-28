@@ -38,10 +38,13 @@ import {
   Visibility,
   Settings,
   AutoAwesome,
-  FlashOn
+  FlashOn,
+  CloudUpload,
+  Image
 } from '@mui/icons-material';
 import { collection, addDoc, updateDoc, deleteDoc, getDocs, doc, setDoc } from 'firebase/firestore';
-import { db } from '../firebase/config';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { db, storage } from '../firebase/config';
 import PopupHero from './PopupHero';
 
 const PopupHeroManager = ({ open, onClose }) => {
@@ -61,6 +64,8 @@ const PopupHeroManager = ({ open, onClose }) => {
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState('');
   const [snackbarSeverity, setSnackbarSeverity] = useState('success');
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const [imagePreview, setImagePreview] = useState('');
 
   // Estados del formulario
   const [formData, setFormData] = useState({
@@ -142,6 +147,61 @@ const PopupHeroManager = ({ open, onClose }) => {
       ...prev,
       [field]: value
     }));
+  };
+
+  const handleImageUpload = async (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    // Validar tipo de archivo
+    if (!file.type.startsWith('image/')) {
+      setSnackbarMessage('Por favor selecciona un archivo de imagen válido');
+      setSnackbarSeverity('error');
+      setSnackbarOpen(true);
+      return;
+    }
+
+    // Validar tamaño (máximo 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      setSnackbarMessage('La imagen es demasiado grande. Máximo 5MB');
+      setSnackbarSeverity('error');
+      setSnackbarOpen(true);
+      return;
+    }
+
+    setUploadingImage(true);
+    setSnackbarMessage('Subiendo imagen...');
+    setSnackbarSeverity('info');
+    setSnackbarOpen(true);
+
+    try {
+      // Crear referencia única para la imagen
+      const timestamp = new Date().getTime();
+      const fileName = `popup-hero-${timestamp}-${file.name}`;
+      const imageRef = ref(storage, `popup-hero/${fileName}`);
+
+      // Subir archivo
+      const snapshot = await uploadBytes(imageRef, file);
+      
+      // Obtener URL de descarga
+      const downloadURL = await getDownloadURL(snapshot.ref);
+      
+      // Actualizar el formulario con la nueva URL
+      handleInputChange('image', downloadURL);
+      setImagePreview(downloadURL);
+      
+      setSnackbarMessage('¡Imagen subida exitosamente!');
+      setSnackbarSeverity('success');
+      setSnackbarOpen(true);
+      
+    } catch (error) {
+      console.error('Error subiendo imagen:', error);
+      setSnackbarMessage('Error al subir la imagen: ' + error.message);
+      setSnackbarSeverity('error');
+      setSnackbarOpen(true);
+    } finally {
+      setUploadingImage(false);
+    }
   };
 
   const handleEdit = (offer) => {
@@ -498,14 +558,99 @@ const PopupHeroManager = ({ open, onClose }) => {
                     
                     <Grid container spacing={2}>
                       <Grid item xs={12}>
+                        <Box sx={{ mb: 2 }}>
+                          <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 600 }}>
+                            Subir Imagen desde Archivo
+                          </Typography>
+                          <input
+                            accept="image/*"
+                            style={{ display: 'none' }}
+                            id="image-upload"
+                            type="file"
+                            onChange={handleImageUpload}
+                            disabled={uploadingImage}
+                          />
+                          <label htmlFor="image-upload">
+                            <Button
+                              variant="outlined"
+                              component="span"
+                              startIcon={uploadingImage ? <CircularProgress size={20} /> : <CloudUpload />}
+                              disabled={uploadingImage}
+                              sx={{
+                                borderColor: '#C8626D',
+                                color: '#C8626D',
+                                '&:hover': { 
+                                  backgroundColor: '#C8626D20',
+                                  borderColor: '#C8626D'
+                                }
+                              }}
+                            >
+                              {uploadingImage ? 'Subiendo...' : 'Subir Imagen'}
+                            </Button>
+                          </label>
+                          <Typography variant="caption" sx={{ ml: 2, color: '#666' }}>
+                            Máximo 5MB. Formatos: JPG, PNG, GIF
+                          </Typography>
+                        </Box>
+                      </Grid>
+                      
+                      <Grid item xs={12}>
+                        <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 600 }}>
+                          O usar URL de Imagen
+                        </Typography>
                         <TextField
                           fullWidth
                           label="URL de Imagen"
                           value={formData.image}
                           onChange={(e) => handleInputChange('image', e.target.value)}
                           placeholder="URL de la imagen..."
+                          sx={{ mb: 2 }}
                         />
                       </Grid>
+                      
+                      {(formData.image || imagePreview) && (
+                        <Grid item xs={12}>
+                          <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 600 }}>
+                            Vista Previa de la Imagen
+                          </Typography>
+                          <Box sx={{ 
+                            width: '100%', 
+                            height: '200px', 
+                            border: '2px dashed #C8626D',
+                            borderRadius: '8px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            overflow: 'hidden',
+                            backgroundColor: '#f8f9fa'
+                          }}>
+                            <img
+                              src={formData.image || imagePreview}
+                              alt="Vista previa"
+                              style={{
+                                width: '100%',
+                                height: '100%',
+                                objectFit: 'cover'
+                              }}
+                              onError={(e) => {
+                                e.target.style.display = 'none';
+                                e.target.nextSibling.style.display = 'flex';
+                              }}
+                            />
+                            <Box sx={{ 
+                              display: 'none',
+                              flexDirection: 'column',
+                              alignItems: 'center',
+                              color: '#666'
+                            }}>
+                              <Image sx={{ fontSize: 48, mb: 1 }} />
+                              <Typography variant="body2">
+                                Error al cargar la imagen
+                              </Typography>
+                            </Box>
+                          </Box>
+                        </Grid>
+                      )}
                       <Grid item xs={12}>
                         <TextField
                           fullWidth
