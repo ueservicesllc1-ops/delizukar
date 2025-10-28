@@ -15,7 +15,10 @@
   },
   "home": {
     "viewAllCookies": "View All Cookies",
-    "viewDetails": "View Details"
+    "viewDetails": "View Details",
+    "featuredCookies": "Featured Cookies",
+    "featuredDescription": "Discover our most popular cookies, baked with premium ingredients and authentic New York flavor",
+    "viewAllCookiesButton": "View All Cookies"
   },
   "product": {
     "featured": "Featured",

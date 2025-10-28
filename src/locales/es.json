@@ -15,7 +15,10 @@
   },
   "home": {
     "viewAllCookies": "Ver Todas las Galletas",
-    "viewDetails": "Ver Detalles"
+    "viewDetails": "Ver Detalles",
+    "featuredCookies": "Galletas Destacadas",
+    "featuredDescription": "Descubre nuestras galletas más populares, horneadas con ingredientes premium y el sabor auténtico de Nueva York",
+    "viewAllCookiesButton": "Ver Todas las Galletas"
   },
   "product": {
     "featured": "Destacado",

@@ -77,7 +77,7 @@ const FeaturedProducts = () => {
                   fontFamily: 'Playfair Display, serif'
                 }}
               >
-                Galletas Destacadas
+                {t('home.featuredCookies', 'Galletas Destacadas')}
               </Typography>
               <Typography
                 variant="h6"
@@ -88,8 +88,7 @@ const FeaturedProducts = () => {
                   lineHeight: 1.6
                 }}
               >
-                Descubre nuestras galletas más populares, horneadas con ingredientes premium 
-                y el sabor auténtico de Nueva York
+                {t('home.featuredDescription', 'Descubre nuestras galletas más populares, horneadas con ingredientes premium y el sabor auténtico de Nueva York')}
               </Typography>
             </motion.div>
           </Box>
@@ -138,7 +137,7 @@ const FeaturedProducts = () => {
                       <Box sx={{ position: 'absolute', top: 12, left: 12, display: 'flex', flexDirection: 'column', gap: 1 }}>
                         {product.isNew && (
                           <Chip
-                            label="Nuevo"
+                            label={t('product.new', 'Nuevo')}
                             size="small"
                             sx={{
                               backgroundColor: '#4CAF50',
@@ -150,7 +149,7 @@ const FeaturedProducts = () => {
                         )}
                         {product.isBestSeller && (
                           <Chip
-                            label="Más Vendido"
+                            label={t('product.bestSeller', 'Más Vendido')}
                             size="small"
                             sx={{
                               backgroundColor: '#FF6B35',
@@ -295,7 +294,7 @@ const FeaturedProducts = () => {
                   transition: 'all 0.3s ease'
                 }}
               >
-                Ver Todas las Galletas
+                {t('home.viewAllCookiesButton', 'Ver Todas las Galletas')}
               </Button>
             </motion.div>
           </Box>
