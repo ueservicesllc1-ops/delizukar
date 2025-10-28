@@ -912,7 +912,7 @@ const PopupHeroManager = ({ open, onClose }) => {
                   left: 0,
                   right: 0,
                   height: '140px',
-                        background: 'linear-gradient(135deg, #ff6b6b 0%, #ff8e8e 100%)',
+                        background: 'linear-gradient(135deg, #C8626D 0%, #EB8B8B 100%)',
                   zIndex: 3,
                   boxShadow: '0 4px 20px rgba(255,107,107,0.3)',
                         display: 'flex',
@@ -1059,14 +1059,14 @@ const PopupHeroManager = ({ open, onClose }) => {
                     }}
                   />
 
-                  {/* Logo centrado con efecto dorado sutil */}
+                  {/* Logo centrado con efecto blanco */}
                   <motion.img
                     src="/LOGO.png"
                     alt="DeliZuKar Logo"
                     style={{
                       height: '90px',
                       width: 'auto',
-                      filter: 'sepia(1) saturate(1.5) hue-rotate(40deg) brightness(1.1) drop-shadow(0 2px 8px rgba(255,215,0,0.2))',
+                      filter: 'brightness(0) invert(1)',
                         position: 'relative',
                       zIndex: 2
                     }}
@@ -1135,7 +1135,7 @@ const PopupHeroManager = ({ open, onClose }) => {
                         <Typography
                           variant="h6"
                           sx={{
-                          color: '#ff6b6b', 
+                          color: '#C8626D', 
                           fontWeight: 700,
                             mb: 2,
                             fontFamily: 'Playfair Display, serif',
@@ -1163,7 +1163,7 @@ const PopupHeroManager = ({ open, onClose }) => {
                             fontWeight: 500
                           }}
                         >
-                          {formData.description || 'Descubre nuestras deliciosas galletas artesanales horneadas con ingredientes premium y mucho amor'}
+                          {formData.description || ''}
                         </Typography>
                       </motion.div>
 
