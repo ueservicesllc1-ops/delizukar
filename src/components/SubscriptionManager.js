@@ -86,14 +86,17 @@ const SubscriptionManager = ({ open, onClose }) => {
         try {
           await emailjs.send(
             'service_7biylnb',
-            'template_mass_email',
+            'template_8x9k2mj',
             {
               to_email: subscription.email,
-              subject: emailSubject,
-              message: emailMessage,
-              email_type: emailType.charAt(0).toUpperCase() + emailType.slice(1),
-              company_name: 'Delizukar',
-              unsubscribe_link: `https://delizukar.com/unsubscribe?email=${subscription.email}`
+              message: `Hola,
+
+${emailMessage}
+
+---
+${emailType.charAt(0).toUpperCase() + emailType.slice(1)} de Delizukar
+
+Para cancelar tu suscripción, visita: https://delizukar.com/unsubscribe?email=${subscription.email}`
             },
             'user_7biylnb'
           );
