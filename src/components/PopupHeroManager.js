@@ -72,7 +72,7 @@ const PopupHeroManager = ({ open, onClose }) => {
     title: '¡Ofertas Especiales!',
     welcomeTitle: '¡Bienvenido a DeliZuKar!',
     showWelcomeTitle: true,
-    description: 'Descubre nuestras deliciosas galletas artesanales horneadas con ingredientes premium y mucho amor',
+    description: '',
     image: 'https://images.unsplash.com/photo-1558961363-fa8fdf82db35?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80',
     originalPrice: '15.99',
     discountPrice: '12.99',
@@ -273,7 +273,7 @@ const PopupHeroManager = ({ open, onClose }) => {
     setEditingOffer(null);
     setFormData({
       title: '¡Ofertas Especiales!',
-      description: 'Descubre nuestras deliciosas galletas artesanales horneadas con ingredientes premium y mucho amor',
+      description: '',
       image: 'https://images.unsplash.com/photo-1558961363-fa8fdf82db35?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80',
       originalPrice: '15.99',
       discountPrice: '12.99',
