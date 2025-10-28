@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Box, Container, Typography, Grid, Card, CardContent, TextField, Button, Divider, Alert } from '@mui/material';
-import { CreditCard, LocalShipping, Security, ArrowBack } from '@mui/icons-material';
+import { CreditCard, LocalShipping, Security, ArrowBack, LocalOffer } from '@mui/icons-material';
 import { useStore } from '../context/StoreContext';
 import { useNavigate } from 'react-router-dom';
 import ShippingCalculator from '../components/ShippingCalculator';
@@ -10,8 +10,9 @@ import PayPalPaymentForm from '../components/PayPalPaymentForm';
 import ShippingConfirmationPopup from '../components/ShippingConfirmationPopup';
 import { useShipping } from '../hooks/useShipping';
 import { useTranslation } from 'react-i18next';
-import { db } from '../firebase/config';
-import { collection, addDoc } from 'firebase/firestore';
+import { db, auth } from '../firebase/config';
+import { collection, addDoc, query, where, getDocs, updateDoc, doc } from 'firebase/firestore';
+import { onAuthStateChanged } from 'firebase/auth';
 
 const Checkout = () => {
   const { t } = useTranslation();
@@ -49,8 +50,55 @@ const Checkout = () => {
   // Estados para popup de confirmación de envío
   const [shippingConfirmationOpen, setShippingConfirmationOpen] = useState(false);
 
+  // Estados para vouchers
+  const [user, setUser] = useState(null);
+  const [appliedVoucher, setAppliedVoucher] = useState(null);
+
   const cartTotal = getCartTotal();
   const cartItemsCount = getCartItemsCount();
+
+  // Calcular totales con descuento
+  const calculateSubtotal = () => {
+    return cart.reduce((total, item) => total + (item.price * item.quantity), 0);
+  };
+
+  const calculateTotal = () => {
+    const subtotal = calculateSubtotal();
+    if (appliedVoucher) {
+      const discount = subtotal * (appliedVoucher.discountPercentage / 100);
+      return subtotal - discount;
+    }
+    return subtotal;
+  };
+
+  const getDiscountAmount = () => {
+    if (!appliedVoucher) return 0;
+    const subtotal = calculateSubtotal();
+    return subtotal * (appliedVoucher.discountPercentage / 100);
+  };
+
+  // Detectar usuario logueado y voucher aplicado
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setUser({
+          uid: user.uid,
+          email: user.email,
+          displayName: user.displayName
+        });
+      } else {
+        setUser(null);
+      }
+    });
+
+    // Recuperar voucher aplicado del localStorage
+    const savedVoucher = localStorage.getItem('appliedVoucher');
+    if (savedVoucher) {
+      setAppliedVoucher(JSON.parse(savedVoucher));
+    }
+
+    return () => unsubscribe();
+  }, []);
 
   // Función para calcular fecha de entrega estimada
   const calculateDeliveryDate = () => {
@@ -517,15 +565,36 @@ const Checkout = () => {
                       {t('checkout.orderSummary', 'Order Summary')}
                     </Typography>
 
+                    {/* Voucher aplicado */}
+                    {appliedVoucher && (
+                      <Box sx={{ mb: 2, p: 2, backgroundColor: '#e8f5e8', borderRadius: '8px', border: '1px solid #4caf50' }}>
+                        <Typography variant="body2" sx={{ color: '#2e7d32', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 1 }}>
+                          <LocalOffer sx={{ fontSize: '1rem' }} />
+                          Voucher aplicado: {appliedVoucher.code} - {appliedVoucher.discountPercentage}% de descuento
+                        </Typography>
+                      </Box>
+                    )}
+
                     <Box sx={{ mb: 2 }}>
                       <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
                         <Typography variant="body2" sx={{ color: '#666', fontSize: '0.9rem' }}>
                           {t('checkout.subtotal', 'Subtotal')} ({cartItemsCount} {cartItemsCount === 1 ? t('checkout.item', 'item') : t('checkout.items', 'items')})
                         </Typography>
                         <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '0.9rem' }}>
-                          ${cartTotal.toFixed(2)}
+                          ${calculateSubtotal().toFixed(2)}
                         </Typography>
                       </Box>
+                      
+                      {appliedVoucher && (
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                          <Typography variant="body2" sx={{ color: '#4caf50', fontSize: '0.9rem' }}>
+                            Descuento ({appliedVoucher.code})
+                          </Typography>
+                          <Typography variant="body2" sx={{ fontWeight: 600, color: '#4caf50', fontSize: '0.9rem' }}>
+                            -${getDiscountAmount().toFixed(2)}
+                          </Typography>
+                        </Box>
+                      )}
                       
                       <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
                         <Typography variant="body2" sx={{ color: '#666', fontSize: '0.9rem' }}>
@@ -543,7 +612,7 @@ const Checkout = () => {
                           {t('checkout.total', 'Total')}
                         </Typography>
                         <Typography variant="h6" sx={{ fontWeight: 700, color: '#c8626d', fontSize: '1.1rem' }}>
-                          ${(cartTotal + (shippingInfo ? parseFloat(shippingInfo.cost || 0) : 0)).toFixed(2)}
+                          ${(calculateTotal() + (shippingInfo ? parseFloat(shippingInfo.cost || 0) : 0)).toFixed(2)}
                         </Typography>
                       </Box>
                     </Box>
@@ -661,12 +730,38 @@ const Checkout = () => {
                         key={`paypal-${formData.email}-${cartTotal}`}
                         cartItems={cart}
                         shippingInfo={shippingInfo}
-                        onPaymentSuccess={(paymentDetails) => {
+                        onPaymentSuccess={async (paymentDetails) => {
                           console.log('🚀🚀🚀 [Checkout] onPaymentSuccess LLAMADO');
                           console.log('✅ PayPal payment successful, clearing cart and navigating');
                           console.log('💰 Payment details:', paymentDetails);
                           console.log('🔍 paymentDetails.id:', paymentDetails.id);
                           console.log('🔍 paymentDetails.paymentId:', paymentDetails.paymentId);
+                          
+                          // Marcar voucher como usado si hay uno aplicado
+                          if (appliedVoucher && user) {
+                            try {
+                              const vouchersRef = collection(db, 'vouchers');
+                              const q = query(vouchersRef, where('code', '==', appliedVoucher.code));
+                              const querySnapshot = await getDocs(q);
+                              
+                              if (!querySnapshot.empty) {
+                                const voucherDoc = querySnapshot.docs[0];
+                                const currentUsedBy = voucherDoc.data().usedBy || [];
+                                
+                                if (!currentUsedBy.includes(user.uid)) {
+                                  await updateDoc(doc(db, 'vouchers', voucherDoc.id), {
+                                    usedBy: [...currentUsedBy, user.uid]
+                                  });
+                                  console.log('✅ Voucher marcado como usado:', appliedVoucher.code);
+                                }
+                              }
+                              
+                              // Limpiar voucher del localStorage
+                              localStorage.removeItem('appliedVoucher');
+                            } catch (error) {
+                              console.error('Error marcando voucher como usado:', error);
+                            }
+                          }
                           
                           // Guardar información de envío y pago en localStorage
                           if (shippingInfo) {

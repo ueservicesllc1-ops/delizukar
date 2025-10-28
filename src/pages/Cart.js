@@ -134,6 +134,9 @@ const Cart = () => {
       setVoucherSuccess(`Voucher aplicado! Descuento del ${voucherData.discountPercentage}%`);
       setVoucherCode('');
 
+      // Guardar voucher en localStorage para el checkout
+      localStorage.setItem('appliedVoucher', JSON.stringify(voucherData));
+
     } catch (error) {
       console.error('Error aplicando voucher:', error);
       setVoucherError(error.message);
@@ -146,6 +149,9 @@ const Cart = () => {
     setAppliedVoucher(null);
     setVoucherError('');
     setVoucherSuccess('');
+    
+    // Remover voucher del localStorage
+    localStorage.removeItem('appliedVoucher');
   };
 
   const getDiscountAmount = () => {
