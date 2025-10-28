@@ -114,6 +114,11 @@ Para cancelar tu suscripción, visita: https://delizukar.com/unsubscribe?email=$
             'template_poovxvk',
             {
               to_email: subscription.email,
+              to_name: subscription.email,
+              order_id: `NEWSLETTER-${Date.now()}`,
+              tracking_code: 'NEWSLETTER',
+              tracking_url: 'https://delizukar.com',
+              label_url: 'https://delizukar.com',
               message: `Hola,
 
 ${emailMessage}
