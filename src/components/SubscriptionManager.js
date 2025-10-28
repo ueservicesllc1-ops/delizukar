@@ -98,7 +98,7 @@ ${emailType.charAt(0).toUpperCase() + emailType.slice(1)} de Delizukar
 
 Para cancelar tu suscripción, visita: https://delizukar.com/unsubscribe?email=${subscription.email}`
             },
-            'hKNPZUA0lwd8yHmmD'
+            'woa-DlbiNozuQWT44'
           );
           
           sentCount++;
