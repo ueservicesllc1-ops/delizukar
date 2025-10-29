@@ -570,7 +570,7 @@ const Checkout = () => {
                       <Box sx={{ mb: 2, p: 2, backgroundColor: '#e8f5e8', borderRadius: '8px', border: '1px solid #4caf50' }}>
                         <Typography variant="body2" sx={{ color: '#2e7d32', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 1 }}>
                           <LocalOffer sx={{ fontSize: '1rem' }} />
-                          Voucher aplicado: {appliedVoucher.code} - {appliedVoucher.discountPercentage}% de descuento
+                          {t('voucher.appliedLabel', { code: appliedVoucher.code, percentage: appliedVoucher.discountPercentage })}
                         </Typography>
                       </Box>
                     )}
@@ -588,7 +588,7 @@ const Checkout = () => {
                       {appliedVoucher && (
                         <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
                           <Typography variant="body2" sx={{ color: '#4caf50', fontSize: '0.9rem' }}>
-                            Descuento ({appliedVoucher.code})
+                            {t('voucher.discount')} ({appliedVoucher.code})
                           </Typography>
                           <Typography variant="body2" sx={{ fontWeight: 600, color: '#4caf50', fontSize: '0.9rem' }}>
                             -${getDiscountAmount().toFixed(2)}

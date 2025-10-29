@@ -93,12 +93,12 @@ const Cart = () => {
   // Funciones para manejar vouchers
   const handleApplyVoucher = async () => {
     if (!user) {
-      setVoucherError('Debes estar logueado para usar vouchers');
+      setVoucherError(t('voucher.mustBeLoggedIn'));
       return;
     }
 
     if (!voucherCode.trim()) {
-      setVoucherError('Ingresa un código de voucher');
+      setVoucherError(t('voucher.enterCode'));
       return;
     }
 
@@ -113,7 +113,7 @@ const Cart = () => {
       const querySnapshot = await getDocs(q);
 
       if (querySnapshot.empty) {
-        throw new Error('Código de voucher no válido');
+        throw new Error(t('voucher.invalidCode'));
       }
 
       const voucherDoc = querySnapshot.docs[0];
@@ -121,7 +121,7 @@ const Cart = () => {
 
       // Verificar si el voucher está activo
       if (!voucherData.isActive) {
-        throw new Error('Este voucher no está activo');
+        throw new Error(t('voucher.notActive'));
       }
 
       // Verificar si el usuario ya usó este voucher en la colección voucherUsages
@@ -134,12 +134,12 @@ const Cart = () => {
       const usageSnapshot = await getDocs(usageQuery);
 
       if (!usageSnapshot.empty) {
-        throw new Error('Ya has usado este voucher anteriormente');
+        throw new Error(t('voucher.alreadyUsed'));
       }
 
       // Aplicar el voucher
       setAppliedVoucher(voucherData);
-      setVoucherSuccess(`Voucher aplicado! Descuento del ${voucherData.discountPercentage}%`);
+      setVoucherSuccess(t('voucher.applied', { percentage: voucherData.discountPercentage }));
       setVoucherCode('');
 
       // Guardar voucher en localStorage para el checkout
@@ -472,7 +472,7 @@ const Cart = () => {
                       <Box sx={{ mb: 3 }}>
                         <Typography variant="h6" sx={{ fontWeight: 600, color: '#333', mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
                           <LocalOffer sx={{ color: '#c8626d' }} />
-                          Código de Descuento
+                          {t('voucher.discountCode')}
                         </Typography>
                         
                         {appliedVoucher ? (
@@ -481,7 +481,7 @@ const Cart = () => {
                               {voucherSuccess}
                             </Alert>
                             <Chip
-                              label={`${appliedVoucher.code} - ${appliedVoucher.discountPercentage}% descuento`}
+                              label={t('voucher.discountLabel', { code: appliedVoucher.code, percentage: appliedVoucher.discountPercentage })}
                               onDelete={handleRemoveVoucher}
                               color="success"
                               sx={{ fontWeight: 600 }}
@@ -491,7 +491,7 @@ const Cart = () => {
                           <Box sx={{ display: 'flex', gap: 1, mb: 2 }}>
                             <TextField
                               fullWidth
-                              placeholder="Ingresa tu código de descuento"
+                              placeholder={t('voucher.enterDiscountCode')}
                               value={voucherCode}
                               onChange={(e) => setVoucherCode(e.target.value.toUpperCase())}
                               size="small"
@@ -510,7 +510,7 @@ const Cart = () => {
                                 }
                               }}
                             >
-                              {loadingVoucher ? 'Aplicando...' : 'Aplicar'}
+                              {loadingVoucher ? t('voucher.applying') : t('voucher.apply')}
                             </Button>
                           </Box>
                         )}
@@ -525,7 +525,7 @@ const Cart = () => {
                       <Box sx={{ mb: 3, p: 2, backgroundColor: '#f8f9fa', borderRadius: '8px' }}>
                         <Typography variant="body2" sx={{ color: '#666', textAlign: 'center' }}>
                           <LocalOffer sx={{ fontSize: '1rem', mr: 1, verticalAlign: 'middle' }} />
-                          Inicia sesión para usar códigos de descuento
+                          {t('voucher.loginToUse')}
                         </Typography>
                       </Box>
                     )}
@@ -543,7 +543,7 @@ const Cart = () => {
                       {appliedVoucher && (
                         <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
                           <Typography variant="body2" sx={{ color: '#4caf50', fontSize: '0.9rem' }}>
-                            Descuento ({appliedVoucher.code})
+                            {t('voucher.discount')} ({appliedVoucher.code})
                           </Typography>
                           <Typography variant="body2" sx={{ fontWeight: 600, color: '#4caf50', fontSize: '0.9rem' }}>
                             -${getDiscountAmount().toFixed(2)}

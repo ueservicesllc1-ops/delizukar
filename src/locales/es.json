@@ -5,7 +5,8 @@
     "services": "Productos",
     "order": "Ordenar Aquí",
     "contact": "Contacto",
-    "menu": "Menú"
+    "menu": "Menú",
+    "faq": "Preguntas Frecuentes"
   },
   "hero": {
     "title": "Bienvenido a Delizukar",
@@ -101,6 +102,34 @@
     "login": "Iniciar Sesión",
     "register": "Registrarse",
     "logout": "Cerrar Sesión"
+  },
+  "profile": {
+    "myProfile": "Mi Perfil",
+    "myOrders": "Mis Pedidos",
+    "settings": "Configuración"
+  },
+  "voucher": {
+    "mustBeLoggedIn": "Debes estar logueado para usar vouchers",
+    "enterCode": "Ingresa un código de voucher",
+    "invalidCode": "Código de voucher no válido",
+    "notActive": "Este voucher no está activo",
+    "alreadyUsed": "Ya has usado este voucher anteriormente",
+    "applied": "Voucher aplicado! Descuento del {percentage}%",
+    "applying": "Aplicando...",
+    "apply": "Aplicar",
+    "discount": "Descuento",
+    "appliedLabel": "Voucher aplicado: {code} - {percentage}% de descuento",
+    "discountCode": "Código de Descuento",
+    "enterDiscountCode": "Ingresa tu código de descuento",
+    "loginToUse": "Inicia sesión para usar códigos de descuento",
+    "discountLabel": "{code} - {percentage}% descuento"
+  },
+  "subscription": {
+    "enterEmail": "Por favor ingresa tu email",
+    "validEmail": "Por favor ingresa un email válido",
+    "alreadySubscribed": "Este email ya está suscrito",
+    "success": "¡Te has suscrito exitosamente!",
+    "error": "Error al suscribirse. Inténtalo de nuevo."
   },
   "language": {
     "english": "English",
@@ -200,5 +229,9 @@
     "delivery": "Entrega",
     "cancel": "Cancelar",
     "confirm": "Confirmar Envío"
+  },
+  "shipping": {
+    "title": "Política de Envíos",
+    "content": "Al realizar una compra, aceptas estos términos.\nDeliZuKar no se hace responsable de retrasos, pérdidas o daños\ncausados a los paquetes por la empresa de envío. Empacamos cada galleta\nindividualmente y la sellamos y empaquetamos correctamente para un envío seguro. Una vez\nque entregamos el paquete a la empresa de envío, está fuera de nuestras\nmanos y control, y no nos hacemos responsables del estado del\npaquete ni de los retrasos que puedan ocurrir. Cualquier envío devuelto\ndebido a una dirección incorrecta o incompleta resultará en un cargo adicional\nde envío, a determinar en el momento de la nueva entrega.\n\nEstos puntos son importantes:\n• Por favor asegúrate de que tu dirección sea correcta y completa para evitar retrasos\no cargos adicionales por nueva entrega.\n• Por favor permite tiempo adicional de envío para temporadas ocupadas o clima\nadverso.\n• Una vez que el pedido o envío se envía, es final. No podemos ofrecer\nreembolsos."
   }
 }

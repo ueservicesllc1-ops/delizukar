@@ -68,12 +68,12 @@ const Footer = () => {
 
   const handleSubscribe = async () => {
     if (!email.trim()) {
-      setSubscriptionMessage('Por favor ingresa tu email');
+      setSubscriptionMessage(t('subscription.enterEmail'));
       return;
     }
 
     if (!email.includes('@')) {
-      setSubscriptionMessage('Por favor ingresa un email válido');
+      setSubscriptionMessage(t('subscription.validEmail'));
       return;
     }
 
@@ -87,7 +87,7 @@ const Footer = () => {
       const querySnapshot = await getDocs(q);
 
       if (!querySnapshot.empty) {
-        setSubscriptionMessage('Este email ya está suscrito');
+        setSubscriptionMessage(t('subscription.alreadySubscribed'));
         setSubscriptionLoading(false);
         return;
       }
@@ -100,7 +100,7 @@ const Footer = () => {
         source: 'footer'
       });
 
-      setSubscriptionMessage('¡Te has suscrito exitosamente!');
+      setSubscriptionMessage(t('subscription.success'));
       setEmail('');
       
       // Limpiar mensaje después de 3 segundos
@@ -110,7 +110,7 @@ const Footer = () => {
 
     } catch (error) {
       console.error('Error suscribiendo email:', error);
-      setSubscriptionMessage('Error al suscribirse. Inténtalo de nuevo.');
+      setSubscriptionMessage(t('subscription.error'));
     } finally {
       setSubscriptionLoading(false);
     }

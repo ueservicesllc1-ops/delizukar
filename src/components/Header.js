@@ -190,7 +190,7 @@ const Header = () => {
     { label: t('navigation.services'), href: '/productos' },
     { label: t('navigation.about'), href: '/nosotros' },
     { label: t('navigation.contact'), href: '/contacto' },
-    { label: "FAQ's", href: '/faq' }
+    { label: t('navigation.faq'), href: '/faq' }
   ];
 
   const drawer = (
@@ -605,10 +605,10 @@ const Header = () => {
           zIndex: 10002
         }}
       >
-        <MenuItem onClick={handleProfileMenuClose}>My Profile</MenuItem>
-        <MenuItem onClick={handleProfileMenuClose}>My Orders</MenuItem>
-        <MenuItem onClick={handleProfileMenuClose}>Settings</MenuItem>
-        <MenuItem onClick={handleProfileMenuClose}>Logout</MenuItem>
+        <MenuItem onClick={handleProfileMenuClose}>{t('profile.myProfile')}</MenuItem>
+        <MenuItem onClick={handleProfileMenuClose}>{t('profile.myOrders')}</MenuItem>
+        <MenuItem onClick={handleProfileMenuClose}>{t('profile.settings')}</MenuItem>
+        <MenuItem onClick={handleLogout}>{t('common.logout')}</MenuItem>
       </Menu>
     </>
   );

@@ -2,20 +2,59 @@ import React, { useState, useEffect } from 'react';
 import { Box, Container, Typography } from '@mui/material';
 import { db } from '../firebase/config';
 import { doc, getDoc, collection, getDocs } from 'firebase/firestore';
+import { useTranslation } from 'react-i18next';
 
 const Shipping = () => {
+  const { t, i18n } = useTranslation();
   const [pageData, setPageData] = useState({
-    title: 'Política de Envíos',
-    content: 'Contenido de política de envíos estará disponible próximamente',
+    title: t('shipping.title'),
+    content: t('shipping.content'),
     titleFont: 'Playfair Display',
     contentFont: 'Roboto'
   });
 
   const [fontsReady, setFontsReady] = useState(false);
+  const [firestoreData, setFirestoreData] = useState(null);
 
   useEffect(() => {
     loadPageData();
   }, []);
+
+  // Actualizar traducciones cuando cambie el idioma
+  useEffect(() => {
+    // Si hay datos de Firestore con estructura multiidioma, usar esos
+    if (firestoreData) {
+      const lang = i18n.language === 'es' ? 'es' : 'en';
+      const titleKey = `title_${lang}`;
+      const contentKey = `content_${lang}`;
+      
+      if (firestoreData[titleKey] || firestoreData[contentKey]) {
+        setPageData(prev => ({
+          ...prev,
+          title: firestoreData[titleKey] || firestoreData.title || t('shipping.title'),
+          content: firestoreData[contentKey] || firestoreData.content || t('shipping.content'),
+          titleFont: firestoreData.titleFont || prev.titleFont,
+          contentFont: firestoreData.contentFont || prev.contentFont
+        }));
+      } else {
+        // Si no hay estructura multiidioma, siempre usar traducciones del sistema
+        setPageData(prev => ({
+          ...prev,
+          title: t('shipping.title'),
+          content: t('shipping.content'),
+          titleFont: firestoreData.titleFont || prev.titleFont,
+          contentFont: firestoreData.contentFont || prev.contentFont
+        }));
+      }
+    } else {
+      // Si no hay datos de Firestore, usar traducciones del sistema
+      setPageData(prev => ({
+        ...prev,
+        title: t('shipping.title'),
+        content: t('shipping.content')
+      }));
+    }
+  }, [i18n.language, t, firestoreData]);
 
   const loadPageData = async () => {
     try {
@@ -23,9 +62,10 @@ const Shipping = () => {
       
       if (pageDoc.exists()) {
         const data = pageDoc.data();
-        setPageData(data);
+        setFirestoreData(data);
         console.log('Datos cargados desde Firestore:', data);
       } else {
+        setFirestoreData(null);
         console.log('No se encontraron datos en Firestore, usando datos por defecto');
       }
       
@@ -34,6 +74,7 @@ const Shipping = () => {
       setFontsReady(true);
     } catch (error) {
       console.error('Error cargando datos desde Firestore:', error);
+      setFirestoreData(null);
     }
   };
 
@@ -87,12 +128,12 @@ const Shipping = () => {
             fontWeight: 800,
             color: '#EC8C8D',
             mb: 2,
-            mt: '-620px',
+            mt: '-160px',
             fontSize: { xs: '2rem', md: '3rem' },
             fontFamily: pageData.titleFont ? `"${pageData.titleFont}", serif` : 'Playfair Display, serif'
           }}
         >
-          {pageData.title}
+          {pageData.title ? pageData.title : t('shipping.title')}
         </Typography>
         
         {/* Contenido de la página */}
@@ -112,7 +153,7 @@ const Shipping = () => {
               whiteSpace: 'pre-line'
             }}
           >
-            {pageData.content}
+            {pageData.content ? pageData.content : t('shipping.content')}
           </Typography>
         </Box>
       </Container>

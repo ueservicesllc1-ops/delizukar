@@ -5,7 +5,8 @@
     "services": "Services",
     "order": "Order Here",
     "contact": "Contact",
-    "menu": "Menu"
+    "menu": "Menu",
+    "faq": "FAQ's"
   },
   "hero": {
     "title": "Welcome to Delizukar",
@@ -101,6 +102,34 @@
     "login": "Login",
     "register": "Register",
     "logout": "Logout"
+  },
+  "profile": {
+    "myProfile": "My Profile",
+    "myOrders": "My Orders",
+    "settings": "Settings"
+  },
+  "voucher": {
+    "mustBeLoggedIn": "You must be logged in to use vouchers",
+    "enterCode": "Enter a voucher code",
+    "invalidCode": "Invalid voucher code",
+    "notActive": "This voucher is not active",
+    "alreadyUsed": "You have already used this voucher before",
+    "applied": "Voucher applied! {percentage}% discount",
+    "applying": "Applying...",
+    "apply": "Apply",
+    "discount": "Discount",
+    "appliedLabel": "Voucher applied: {code} - {percentage}% discount",
+    "discountCode": "Discount Code",
+    "enterDiscountCode": "Enter your discount code",
+    "loginToUse": "Sign in to use discount codes",
+    "discountLabel": "{code} - {percentage}% discount"
+  },
+  "subscription": {
+    "enterEmail": "Please enter your email",
+    "validEmail": "Please enter a valid email",
+    "alreadySubscribed": "This email is already subscribed",
+    "success": "You have successfully subscribed!",
+    "error": "Error subscribing. Please try again."
   },
   "language": {
     "english": "English",
@@ -200,5 +229,9 @@
     "delivery": "Delivery",
     "cancel": "Cancel",
     "confirm": "Confirm Shipping"
+  },
+  "shipping": {
+    "title": "Shipping Policy",
+    "content": "By purchasing, you agree to these terms.\nDeliZuKar is not responsible for any delays, losses, or damages\ncaused to packages by the shipping company. We pack each cookie\nindividually and properly seal and package it for safe shipping. Once\nwe leave the package with the shipping company, it is out of our\nhands and control, and we are not responsible for the condition of\nthe package or any delays that may occur. Any shipment returned\ndue to an incorrect or incomplete address will result in an additional\nshipping charge, to be determined at the time of redelivery.\n\nThese points are important:\n• Please ensure your address is correct and complete to avoid delays\nor additional charges for redelivery.\n• Please allow extra shipping time for busy seasons or inclement\nweather.\n• Once the order or shipment ships, it is final. We cannot offer\nrefunds."
   }
 }
