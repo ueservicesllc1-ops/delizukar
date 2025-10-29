@@ -5,10 +5,34 @@
    Viewport: 412x915 (CSS pixels)
    Resolution: 1440x3200 (Physical pixels)
    ======================================== */
-@media (min-width: 410px) and (max-width: 414px) and (min-height: 910px) and (max-height: 920px) {
-  /* Estilos específicos para Galaxy S20 Ultra - Agrega aquí lo que necesites */
-  body {
-    /* Configuración específica S20 Ultra */
+/* ========================================
+   SAMSUNG GALAXY S20 ULTRA SPECIFIC STYLES
+   Viewport: 412x915 (CSS pixels)
+   Resolution: 1440x3200 (Physical pixels)
+   ======================================== */
+@media (min-width: 400px) and (max-width: 450px) and (min-height: 800px) and (max-height: 1000px) {
+  /* Galaxy S20 Ultra Footer - Color real */
+  .footer-mobile {
+    background-color: #C8626D !important;
+    color: white !important;
+  }
+  
+  /* Galaxy S20 Ultra Footer Logo - Ocultar */
+  .footer-logo-mobile {
+    display: none !important;
+  }
+  
+  /* Galaxy S20 Ultra Footer - Asegurar que el logo esté al final */
+  .footer-mobile .MuiGrid-container {
+    flex-direction: column !important;
+  }
+  
+  .footer-mobile .footer-section-mobile {
+    order: 1 !important;
+  }
+  
+  .footer-mobile .footer-logo-mobile {
+    order: 999 !important;
   }
 }
 

@@ -85,7 +85,7 @@ const Terms = () => {
   };
 
   return (
-    <Box sx={{ py: 8, pt: 35, opacity: fontsReady ? 1 : 0, transition: 'opacity 200ms ease' }}>
+    <Box sx={{ py: 8, pt: '500px', opacity: fontsReady ? 1 : 0, transition: 'opacity 200ms ease' }}>
       <Container maxWidth="lg">
 
         <Typography
@@ -95,6 +95,7 @@ const Terms = () => {
             fontWeight: 800,
             color: '#EC8C8D',
             mb: 2,
+            mt: '-750px',
             fontSize: { xs: '2rem', md: '3rem' },
             fontFamily: pageData.titleFont ? `"${pageData.titleFont}", serif` : 'Playfair Display, serif'
           }}

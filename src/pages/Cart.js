@@ -311,7 +311,8 @@ const Cart = () => {
                                 mb: 0.5,
                                 fontFamily: '"Asap", sans-serif',
                                 textTransform: 'uppercase',
-                                letterSpacing: '0.5px'
+                                letterSpacing: '0.5px',
+                                fontSize: '0.9rem'
                               }}
                             >
                               {item.name}
@@ -323,7 +324,7 @@ const Cart = () => {
                                 mb: 1,
                                 fontFamily: '"Asap", sans-serif',
                                 textTransform: 'uppercase',
-                                fontSize: '0.75rem',
+                                fontSize: '0.65rem',
                                 letterSpacing: '0.3px'
                               }}
                             >
@@ -334,7 +335,8 @@ const Cart = () => {
                                 variant="h6"
                                 sx={{
                                   fontWeight: 700,
-                                  color: '#c8626d'
+                                  color: '#c8626d',
+                                  fontSize: '0.9rem'
                                 }}
                               >
                                 ${item.price}
@@ -353,64 +355,77 @@ const Cart = () => {
                             </Box>
                           </Box>
 
-                          {/* Controles de cantidad - Alineados al borde derecho */}
-                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, ml: 'auto' }}>
-                            <IconButton
-                              onClick={() => handleUpdateQuantity(item.id, item.quantity - 1)}
-                              sx={{
-                                backgroundColor: '#FFFFFF',
-                                color: '#c8626d',
-                                '&:hover': {
-                                  backgroundColor: '#c8626d20'
-                                }
-                              }}
-                            >
-                              <Remove />
-                            </IconButton>
+                          {/* Controles de cantidad y eliminar - Layout vertical */}
+                          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1, ml: 'auto' }}>
+                            {/* Controles de cantidad arriba */}
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                              <IconButton
+                                onClick={() => handleUpdateQuantity(item.id, item.quantity - 1)}
+                                sx={{
+                                  backgroundColor: '#FFFFFF',
+                                  color: '#c8626d',
+                                  width: '32px',
+                                  height: '32px',
+                                  '&:hover': {
+                                    backgroundColor: '#c8626d20'
+                                  }
+                                }}
+                              >
+                                <Remove sx={{ fontSize: '1rem' }} />
+                              </IconButton>
+                              
+                              <TextField
+                                value={item.quantity}
+                                onChange={(e) => handleUpdateQuantity(item.id, parseInt(e.target.value) || 0)}
+                                size="small"
+                                sx={{
+                                  width: '45px !important',
+                                  maxWidth: '45px !important',
+                                  minWidth: '45px !important',
+                                  '& .MuiOutlinedInput-root': {
+                                    width: '45px !important',
+                                    textAlign: 'center',
+                                    height: '32px',
+                                    paddingLeft: '0 !important',
+                                    paddingRight: '0 !important'
+                                  },
+                                  '& .MuiInputBase-input': {
+                                    textAlign: 'center',
+                                    padding: '6px 0 !important',
+                                    fontSize: '0.85rem'
+                                  }
+                                }}
+                              />
+                              
+                              <IconButton
+                                onClick={() => handleUpdateQuantity(item.id, item.quantity + 1)}
+                                sx={{
+                                  backgroundColor: '#FFFFFF',
+                                  color: '#c8626d',
+                                  width: '32px',
+                                  height: '32px',
+                                  '&:hover': {
+                                    backgroundColor: '#c8626d20'
+                                  }
+                                }}
+                              >
+                                <Add sx={{ fontSize: '1rem' }} />
+                              </IconButton>
+                            </Box>
                             
-                            <TextField
-                              value={item.quantity}
-                              onChange={(e) => handleUpdateQuantity(item.id, parseInt(e.target.value) || 0)}
-                              size="small"
-                              sx={{
-                                width: '60px',
-                                '& .MuiOutlinedInput-root': {
-                                  textAlign: 'center',
-                                  display: 'flex',
-                                  alignItems: 'center',
-                                  justifyContent: 'center'
-                                },
-                                '& .MuiInputBase-input': {
-                                  textAlign: 'center',
-                                  padding: '8px 4px'
-                                }
-                              }}
-                            />
-                            
-                            <IconButton
-                              onClick={() => handleUpdateQuantity(item.id, item.quantity + 1)}
-                              sx={{
-                                backgroundColor: '#FFFFFF',
-                                color: '#c8626d',
-                                '&:hover': {
-                                  backgroundColor: '#c8626d20'
-                                }
-                              }}
-                            >
-                              <Add />
-                            </IconButton>
-                            
+                            {/* Botón eliminar abajo */}
                             <IconButton
                               onClick={() => handleRemoveItem(item.id)}
                               sx={{
                                 color: '#7C2815',
-                                ml: 1,
+                                width: '32px',
+                                height: '32px',
                                 '&:hover': {
                                   backgroundColor: '#ffebee'
                                 }
                               }}
                             >
-                              <Delete />
+                              <Delete sx={{ fontSize: '1rem' }} />
                             </IconButton>
                           </Box>
                         </Box>
