@@ -1151,12 +1151,106 @@
   
   /* Bajar todo el contenedor de la foto en iPad vertical */
   .popup-hero-mobile .MuiDialogContent-root > div > div:last-child {
-    margin-top: 110px !important;
+    margin-top: 0px !important;
   }
   
-  /* Bajar el contenido del lado izquierdo en iPad vertical */
+  /* Reducir todo el contenido del popup hero en iPad vertical */
+  .popup-hero-mobile .MuiDialog-paper {
+    transform: scale(0.85) !important;
+    transform-origin: center top !important;
+    max-height: 90vh !important;
+    overflow: visible !important;
+  }
+  
+  .popup-hero-mobile .MuiDialogContent-root {
+    overflow: visible !important;
+    max-height: none !important;
+  }
+  
+  /* Reducir el logo del header del popup hero en iPad vertical */
+  .popup-hero-mobile img[alt*="Logo"],
+  .popup-hero-mobile img[alt*="DeliZuKar"] {
+    height: 90px !important;
+    width: auto !important;
+  }
+  
+  /* Reducir altura del header rosa del popup hero en iPad vertical usando box con height 140px */
+  .popup-hero-mobile .MuiDialog-paper > div > div[style*="height: 140px"],
+  .popup-hero-mobile .MuiDialog-paper > div > div[style*="height: '140px'"] {
+    height: 90px !important;
+  }
+  
+  .popup-hero-mobile .MuiTypography-h4 {
+    font-size: 1.2rem !important;
+  }
+  
+  .popup-hero-mobile .MuiTypography-h6 {
+    font-size: 0.9rem !important;
+  }
+  
+  .popup-hero-mobile .MuiTypography-body1 {
+    font-size: 0.8rem !important;
+  }
+  
+  .popup-hero-mobile .MuiTypography-body2 {
+    font-size: 0.75rem !important;
+  }
+  
+  .popup-hero-mobile .MuiButton-root {
+    font-size: 0.75rem !important;
+    padding: 8px 16px !important;
+  }
+  
+  /* Layout del popup hero - contenido a la izquierda, foto a la derecha */
+  .popup-hero-mobile .MuiDialogContent-root > div {
+    flex-direction: row !important;
+    display: flex !important;
+  }
+  
+  /* Contenedor izquierdo (contenido) alineado a la izquierda */
   .popup-hero-mobile .MuiDialogContent-root > div > div:first-child {
+    flex: 1 !important;
+    align-self: flex-start !important;
+    text-align: left !important;
     margin-top: 110px !important;
+    padding: 15px 20px !important;
+  }
+  
+  /* Contenedor de la foto a la derecha - tamaño ajustado */
+  .popup-hero-mobile .MuiDialogContent-root > div > div:last-child {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    flex: 1 !important;
+    align-self: flex-start !important;
+    height: auto !important;
+    min-height: 500px !important;
+    max-height: 800px !important;
+    transform: none !important;
+    margin-top: 0px !important;
+  }
+  
+  /* Asegurar que el contenedor interno de la foto tenga altura y muestre la imagen */
+  .popup-hero-mobile .MuiDialogContent-root > div > div:last-child > div {
+    width: 100% !important;
+    height: 100% !important;
+    min-height: 500px !important;
+    background-color: #FFFFFF !important;
+  }
+  
+  /* Asegurar que la imagen dentro del contenedor sea visible y más grande y centrada */
+  .popup-hero-mobile .MuiDialogContent-root > div > div:last-child img {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    width: 150% !important;
+    height: 150% !important;
+    object-fit: cover !important;
+    position: absolute !important;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    z-index: 10 !important;
   }
   
   /* Franja rosada */
@@ -1359,6 +1453,12 @@
   /* Bajar el contenido del lado izquierdo en iPad landscape */
   .popup-hero-mobile .MuiDialogContent-root > div > div:first-child {
     margin-top: 110px !important;
+  }
+  
+  /* Logo del header del popup hero - tamaño original en landscape */
+  .popup-hero-mobile img[alt*="Logo"],
+  .popup-hero-mobile img[alt*="DeliZuKar"] {
+    height: 90px !important;
   }
   
   /* Testimonials Tablet Horizontal */

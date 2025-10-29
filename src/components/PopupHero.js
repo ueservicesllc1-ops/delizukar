@@ -114,27 +114,28 @@ const PopupHero = ({ open, onClose }) => {
   }, [open]);
 
   // Cuenta regresiva y cierre automático
-  useEffect(() => {
-    if (open && !loading && offers.length > 0) {
-      setTimeLeft(duration);
-      setIsClosing(false);
-      
-      const timer = setInterval(() => {
-        setTimeLeft(prev => {
-          if (prev <= 1) {
-            setIsClosing(true);
-            setTimeout(() => {
-              onClose();
-            }, 500); // Pequeño delay para la animación de salida
-            return 0;
-          }
-          return prev - 1;
-        });
-      }, 1000);
+  // TEMPORALMENTE DESHABILITADO: Cierre automático del popup para poder editarlo
+  // useEffect(() => {
+  //   if (open && !loading && offers.length > 0) {
+  //     setTimeLeft(duration);
+  //     setIsClosing(false);
+  //     
+  //     const timer = setInterval(() => {
+  //       setTimeLeft(prev => {
+  //         if (prev <= 1) {
+  //           setIsClosing(true);
+  //           setTimeout(() => {
+  //             onClose();
+  //           }, 500); // Pequeño delay para la animación de salida
+  //           return 0;
+  //         }
+  //         return prev - 1;
+  //       });
+  //     }, 1000);
 
-      return () => clearInterval(timer);
-    }
-  }, [open, loading, offers.length, duration, onClose]);
+  //     return () => clearInterval(timer);
+  //   }
+  // }, [open, loading, offers.length, duration, onClose]);
 
   // Cambiar oferta cada 4 segundos si hay múltiples ofertas
   useEffect(() => {
@@ -728,7 +729,7 @@ const PopupHero = ({ open, onClose }) => {
                     src="/LOGO.png"
                     alt="DeliZuKar Logo"
                     style={{
-                  height: '90px',
+                  height: '45px',
                       width: 'auto',
                   filter: 'brightness(0) invert(1)',
                   position: 'relative',
@@ -1076,20 +1077,21 @@ const PopupHero = ({ open, onClose }) => {
                       src={currentOfferData.image || "https://images.unsplash.com/photo-1558961363-fa8fdf82db35?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80"}
                       alt="Deliciosas Galletas"
                       style={{
-                        width: '120%',
-                        height: '120%',
+                        width: '150%',
+                        height: '150%',
                         objectFit: 'cover',
                         position: 'absolute',
-                        top: '-10%',
-                        left: '-10%'
+                        top: '50%',
+                        left: '50%',
+                        transform: 'translate(-50%, -50%)'
                       }}
                       animate={{
-                        x: [-20, 20, -20],
-                        y: [-15, 15, -15],
-                        scale: [1, 1.1, 1]
+                        x: [-5, 5, -5],
+                        y: [-3, 3, -3],
+                        scale: [1, 1.02, 1]
                       }}
                       transition={{
-                        duration: 15,
+                        duration: 20,
                         repeat: Infinity,
                         ease: "easeInOut"
                       }}
