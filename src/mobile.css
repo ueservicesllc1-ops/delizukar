@@ -392,7 +392,7 @@
   
   /* Popup Hero Mobile */
   .popup-hero-mobile .MuiDialog-paper {
-    transform: scale(0.95) !important;
+    transform: scale(0.9) !important;
     transform-origin: center !important;
     margin: 0 !important;
     max-height: calc(95vh) !important;
@@ -405,21 +405,45 @@
     padding: 12px !important;
     max-height: calc(85vh) !important;
     overflow-y: auto !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+  
+  /* Contenido del popup más pequeño para móviles */
+  .popup-hero-mobile * {
+    font-size: 0.7em !important;
   }
   
   .popup-hero-mobile .MuiTypography-h4 {
-    font-size: 1.4rem !important;
-    line-height: 1.4 !important;
-  }
-  
-  .popup-hero-mobile .MuiTypography-h6 {
-    font-size: 1.1rem !important;
+    font-size: 1rem !important;
     line-height: 1.3 !important;
   }
   
+  .popup-hero-mobile .MuiTypography-h6 {
+    font-size: 0.9rem !important;
+    line-height: 1.2 !important;
+  }
+  
+  .popup-hero-mobile .MuiTypography-body1 {
+    font-size: 0.8rem !important;
+  }
+  
   .popup-hero-mobile .MuiButton-root {
-    padding: 10px 20px !important;
-    font-size: 1rem !important;
+    padding: 8px 16px !important;
+    font-size: 0.8rem !important;
+  }
+  
+  .popup-hero-mobile img {
+    max-width: 70% !important;
+    height: auto !important;
+  }
+  
+  .popup-hero-mobile .MuiTextField-root {
+    font-size: 0.8rem !important;
+  }
+  
+  .popup-hero-mobile .MuiInputBase-input {
+    font-size: 0.8rem !important;
   }
   
   /* Product Detail Modals Mobile */

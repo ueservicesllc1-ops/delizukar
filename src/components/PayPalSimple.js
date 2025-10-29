@@ -51,26 +51,35 @@ const PayPalButtonContainer = ({
 
   console.log('🎯 [PayPal] PayPalButtonContainer renderizado, onSuccess:', typeof onSuccess);
 
-  const handleApprove = (data, actions) => {
-    console.log('PayPal Simple - Creating order for amount:', amount);
+  const handleCreateOrder = (data, actions) => {
+    console.log('🔵 [PayPal] Creating order for amount:', amount);
+    console.log('🔵 [PayPal] Currency:', currency);
+    console.log('🔵 [PayPal] Description:', description);
     
     return actions.order.create({
+      intent: 'CAPTURE', // Explicitly set intent
       purchase_units: [
         {
           amount: {
-            value: amount.toString(),
+            value: parseFloat(amount).toFixed(2), // Ensure proper formatting
             currency_code: currency,
           },
           description: description,
         },
       ],
+      application_context: {
+        shipping_preference: 'NO_SHIPPING' // We handle shipping separately
+      }
     }).then((orderId) => {
-      console.log('PayPal Simple - Order created:', orderId);
+      console.log('✅ [PayPal] Order created successfully:', orderId);
       return orderId;
+    }).catch((error) => {
+      console.error('❌ [PayPal] Error creating order:', error);
+      throw error;
     });
   };
 
-  const handleCapture = async (data, actions) => {
+  const handleApprove = async (data, actions) => {
     console.log('🔵🔵🔵 [PayPal] FUNCIÓN handleCapture LLAMADA');
     console.log('🔵 [PayPal] Iniciando captura de pago...');
     console.log('🔵 [PayPal] Data:', data);
@@ -81,25 +90,36 @@ const PayPalButtonContainer = ({
       const details = await actions.order.capture();
       console.log('✅ [PayPal] Pago capturado exitosamente:', details);
       
+      // Mostrar mensaje de éxito inmediatamente
+      toast.success('Payment completed successfully!');
+      
       // Llamar onSuccess directamente como funcionaba antes
       if (onSuccess) {
         console.log('🔵 [PayPal] Llamando onSuccess callback...');
-        onSuccess({
-          ...details,
-          paymentMethod: 'paypal',
-          amount: amount
-        });
-        console.log('✅ [PayPal] onSuccess ejecutado');
+        
+        // Usar setTimeout para asegurar que el callback se ejecute después de que PayPal cierre
+        setTimeout(() => {
+          onSuccess({
+            ...details,
+            paymentMethod: 'paypal',
+            amount: amount
+          });
+          console.log('✅ [PayPal] onSuccess ejecutado');
+        }, 100);
       }
       
-      toast.success('Payment completed successfully!');
       console.log('✅ [PayPal] Todo completado exitosamente');
+      
+      // Retornar para que PayPal sepa que el pago fue procesado exitosamente
+      return details;
     } catch (error) {
       console.error('❌ [PayPal] Error capturando pago:', error);
       console.error('❌ [PayPal] Stack:', error.stack);
+      toast.error('Payment processing failed. Please try again.');
       if (onError) {
         onError(error);
       }
+      throw error; // Re-throw para que PayPal maneje el error
     }
   };
 
@@ -129,8 +149,8 @@ const PayPalButtonContainer = ({
         label: 'pay',
         height: 45,
       }}
-      createOrder={handleApprove}
-      onApprove={handleCapture}
+      createOrder={handleCreateOrder}
+      onApprove={handleApprove}
       onError={handleError}
       onCancel={handleCancel}
     />
@@ -163,6 +183,15 @@ const PayPalSimple = ({
     );
   }
 
+  // Obtener el environment de las variables de entorno
+  const environment = process.env.REACT_APP_PAYPAL_ENVIRONMENT || 'sandbox';
+  
+  console.log('🔧 PayPal Configuration:', {
+    clientId: clientId.substring(0, 20) + '...',
+    environment: environment,
+    currency: currency
+  });
+
   return (
     <PayPalScriptProvider 
       options={{
@@ -171,6 +200,10 @@ const PayPalSimple = ({
         intent: 'capture',
         components: 'buttons',
         "enable-funding": 'card,credit,paypal',
+        "disable-funding": '',
+        vault: false,
+        commit: true, // Forzar que el botón diga "Pay Now" y cierre después del pago
+        "data-sdk-integration-source": "integrationbuilder_sc",
       }}
     >
       <Box sx={{ p: 3, textAlign: 'center' }}>

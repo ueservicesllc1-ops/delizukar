@@ -1,10 +1,17 @@
 // PayPal Service for backend operations
-const PAYPAL_BASE_URL = process.env.NODE_ENV === 'production' 
+// Use REACT_APP_PAYPAL_ENVIRONMENT to determine sandbox vs production
+const PAYPAL_ENVIRONMENT = process.env.REACT_APP_PAYPAL_ENVIRONMENT || 'sandbox';
+const PAYPAL_BASE_URL = PAYPAL_ENVIRONMENT === 'production' 
   ? 'https://api-m.paypal.com' 
   : 'https://api-m.sandbox.paypal.com';
 
 const PAYPAL_CLIENT_ID = process.env.REACT_APP_PAYPAL_CLIENT_ID || "sb";
 const PAYPAL_CLIENT_SECRET = process.env.PAYPAL_CLIENT_SECRET || "";
+
+console.log('🔍 PayPal Configuration:');
+console.log('  Environment:', PAYPAL_ENVIRONMENT);
+console.log('  Base URL:', PAYPAL_BASE_URL);
+console.log('  Client ID:', PAYPAL_CLIENT_ID ? 'SET' : 'NOT SET');
 
 // Supported currencies according to PayPal documentation
 const SUPPORTED_CURRENCIES = ['USD', 'EUR', 'GBP', 'CAD', 'AUD', 'JPY', 'MXN', 'BRL', 'INR', 'SGD', 'HKD', 'CNY', 'CHF', 'SEK', 'DKK', 'NOK', 'PLN', 'NZD', 'THB', 'PHP', 'MYR', 'IDR', 'KRW', 'TRY', 'RUB', 'SAR', 'AED', 'ZAR', 'ILS', 'HUF', 'CZK'];
