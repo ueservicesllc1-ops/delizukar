@@ -1032,13 +1032,13 @@
     color: black !important;
   }
   
-  /* Logo imagen del header - hacer más grande */
+  /* Logo imagen del header - tamaño normal para iPad vertical */
   .header-mobile img,
   .header-mobile [alt*="Delizukar"],
   .header-mobile [alt*="Logo"] {
-    height: 120px !important;
+    height: 80px !important;
     width: auto !important;
-    max-width: 200px !important;
+    max-width: 150px !important;
   }
   
   /* Menú hamburguesa - subir las líneas */
@@ -1142,59 +1142,21 @@
     z-index: 10 !important;
   }
   
-  /* Popup Hero adaptado para iPad vertical */
-  .popup-hero-mobile .MuiDialog-paper {
-    transform: scale(0.7) !important;
-    transform-origin: center !important;
-    margin: 0 !important;
-    max-height: calc(90vh) !important;
-    height: calc(90vh) !important;
-    width: calc(90vw) !important;
-    max-width: calc(90vw) !important;
-  }
+  /* Popup Hero - Usar estilos por defecto como desktop (sin cambios específicos iPad) */
   
+  /* Ajustar solo el padding-top del DialogContent para que el contenido no se ponga detrás del header */
   .popup-hero-mobile .MuiDialogContent-root {
-    padding: 15px !important;
-    max-height: calc(80vh) !important;
-    height: calc(80vh) !important;
-    overflow-y: auto !important;
-    display: flex !important;
-    flex-direction: column !important;
+    padding-top: 160px !important;
   }
   
-  /* Contenido del popup más pequeño */
-  .popup-hero-mobile * {
-    font-size: 0.6em !important;
+  /* Bajar todo el contenedor de la foto en iPad vertical */
+  .popup-hero-mobile .MuiDialogContent-root > div > div:last-child {
+    margin-top: 110px !important;
   }
   
-  .popup-hero-mobile .MuiTypography-h4 {
-    font-size: 0.9rem !important;
-  }
-  
-  .popup-hero-mobile .MuiTypography-h6 {
-    font-size: 0.8rem !important;
-  }
-  
-  .popup-hero-mobile .MuiTypography-body1 {
-    font-size: 0.7rem !important;
-  }
-  
-  .popup-hero-mobile img {
-    max-width: 60% !important;
-    height: auto !important;
-  }
-  
-  .popup-hero-mobile .MuiButton-root {
-    font-size: 0.7rem !important;
-    padding: 6px 12px !important;
-  }
-  
-  .popup-hero-mobile .MuiTextField-root {
-    font-size: 0.7rem !important;
-  }
-  
-  .popup-hero-mobile .MuiInputBase-input {
-    font-size: 0.7rem !important;
+  /* Bajar el contenido del lado izquierdo en iPad vertical */
+  .popup-hero-mobile .MuiDialogContent-root > div > div:first-child {
+    margin-top: 110px !important;
   }
   
   /* Franja rosada */
@@ -1225,6 +1187,15 @@
     top: 0 !important;
     width: 100% !important;
     z-index: 10000 !important;
+  }
+  
+  /* Logo imagen del header - tamaño normal para iPad landscape */
+  .header-mobile img,
+  .header-mobile [alt*="Delizukar"],
+  .header-mobile [alt*="Logo"] {
+    height: 90px !important;
+    width: auto !important;
+    max-width: 180px !important;
   }
   
   /* iPad Hero Banner - Subir 20px */
@@ -1371,6 +1342,23 @@
   
   .footer-mobile .footer-section-mobile {
     margin: 0 20px !important;
+  }
+  
+  /* Popup Hero - Usar estilos por defecto como desktop (sin cambios específicos iPad) */
+  
+  /* Ajustar solo el padding-top del DialogContent para que el contenido no se ponga detrás del header */
+  .popup-hero-mobile .MuiDialogContent-root {
+    padding-top: 160px !important;
+  }
+  
+  /* Bajar todo el contenedor de la foto en iPad landscape */
+  .popup-hero-mobile .MuiDialogContent-root > div > div:last-child {
+    margin-top: 110px !important;
+  }
+  
+  /* Bajar el contenido del lado izquierdo en iPad landscape */
+  .popup-hero-mobile .MuiDialogContent-root > div > div:first-child {
+    margin-top: 110px !important;
   }
   
   /* Testimonials Tablet Horizontal */

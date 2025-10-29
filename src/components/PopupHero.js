@@ -1056,7 +1056,7 @@ const PopupHero = ({ open, onClose }) => {
                   position: 'relative',
                   overflow: 'hidden',
                   backgroundColor: '#FFFFFF',
-                  minHeight: '100%'
+                  height: '120%'
                 }}>
                   {/* Contenedor máscara - ventana fija que ocupa todo el espacio */}
                   <Box

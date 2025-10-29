@@ -95,7 +95,7 @@ const Terms = () => {
             fontWeight: 800,
             color: '#EC8C8D',
             mb: 2,
-            mt: '-750px',
+            mt: '-350px',
             fontSize: { xs: '2rem', md: '3rem' },
             fontFamily: pageData.titleFont ? `"${pageData.titleFont}", serif` : 'Playfair Display, serif'
           }}
