@@ -114,28 +114,27 @@ const PopupHero = ({ open, onClose }) => {
   }, [open]);
 
   // Cuenta regresiva y cierre automático
-  // TEMPORALMENTE DESHABILITADO: Cierre automático del popup para poder editarlo
-  // useEffect(() => {
-  //   if (open && !loading && offers.length > 0) {
-  //     setTimeLeft(duration);
-  //     setIsClosing(false);
-  //     
-  //     const timer = setInterval(() => {
-  //       setTimeLeft(prev => {
-  //         if (prev <= 1) {
-  //           setIsClosing(true);
-  //           setTimeout(() => {
-  //             onClose();
-  //           }, 500); // Pequeño delay para la animación de salida
-  //           return 0;
-  //         }
-  //         return prev - 1;
-  //       });
-  //     }, 1000);
+  useEffect(() => {
+    if (open && !loading && offers.length > 0) {
+      setTimeLeft(duration);
+      setIsClosing(false);
+      
+      const timer = setInterval(() => {
+        setTimeLeft(prev => {
+          if (prev <= 1) {
+            setIsClosing(true);
+            setTimeout(() => {
+              onClose();
+            }, 500); // Pequeño delay para la animación de salida
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
 
-  //     return () => clearInterval(timer);
-  //   }
-  // }, [open, loading, offers.length, duration, onClose]);
+      return () => clearInterval(timer);
+    }
+  }, [open, loading, offers.length, duration, onClose]);
 
   // Cambiar oferta cada 4 segundos si hay múltiples ofertas
   useEffect(() => {

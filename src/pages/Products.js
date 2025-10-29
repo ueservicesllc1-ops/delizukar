@@ -33,12 +33,20 @@ const Products = () => {
         </Box>
 
         {/* Grid de productos */}
-        <Grid container spacing={3} justifyContent="center" className="products-grid-mobile">
+        <Grid container spacing={3} className="products-grid-mobile" sx={{ 
+          display: 'grid',
+          gridTemplateColumns: { 
+            xs: '1fr', 
+            sm: 'repeat(2, 1fr)', 
+            md: 'repeat(5, 1fr)' 
+          },
+          gap: 3
+        }}>
           {productsLoading ? (
             // Skeleton loading mientras cargan los productos
             Array.from({ length: 8 }).map((_, index) => (
-              <Grid size={{ xs: 12, sm: 6, md: 3 }} key={index}>
-                <Card sx={{ width: '280px', height: '320px', display: 'flex', flexDirection: 'column' }}>
+              <Box key={index}>
+                <Card sx={{ width: '100%', height: '320px', display: 'flex', flexDirection: 'column' }}>
                   <Skeleton variant="rectangular" height={280} />
                   <CardContent>
                     <Skeleton variant="text" height={30} />
@@ -49,11 +57,11 @@ const Products = () => {
                     <Skeleton variant="rectangular" height={40} width="100%" />
                   </CardActions>
                 </Card>
-              </Grid>
+              </Box>
             ))
           ) : (
             products.map((product, index) => (
-            <Grid size={{ xs: 12, sm: 6, md: 3 }} key={product.id}>
+            <Box key={product.id}>
               <motion.div
                 initial={{ opacity: 0, y: 50 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -69,7 +77,8 @@ const Products = () => {
                     console.log('Abriendo dialog, open:', true);
                   }}
                   sx={{
-                    width: '280px',
+                    width: '100%',
+                    maxWidth: '100%',
                     height: '320px',
                     display: 'flex',
                     flexDirection: 'column',
@@ -269,7 +278,7 @@ const Products = () => {
                   </CardActions>
                 </Card>
               </motion.div>
-            </Grid>
+            </Box>
             ))
           )}
         </Grid>
