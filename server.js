@@ -1020,6 +1020,80 @@ app.post('/api/translate', async (req, res) => {
   }
 });
 
+// ==================== BATCH PAGES TRANSLATION ====================
+// POST /api/translate-pages
+// Body: { pages: [ 'nosotros','terms','terms-service','faq','shipping','cookie-care' ], source: 'en', target: 'es' }
+app.post('/api/translate-pages', async (req, res) => {
+  try {
+    const { pages = [], source = 'en', target = 'es' } = req.body || {};
+
+    if (!Array.isArray(pages) || pages.length === 0) {
+      return res.status(400).json({ error: 'pages array is required' });
+    }
+
+    const results = [];
+
+    for (const pageId of pages) {
+      try {
+        const pageRef = doc(db, 'pages', pageId);
+        const snap = await getDoc(pageRef);
+
+        if (!snap.exists()) {
+          results.push({ pageId, status: 'not_found' });
+          continue;
+        }
+
+        const data = snap.data() || {};
+        const originalTitle = data.title || '';
+        const originalContent = data.content || '';
+
+        // Traducir solo si hay texto
+        const translateOne = async (q) => {
+          if (!q || !q.trim()) return q;
+          const resp = await fetch(`${process.env.FRONTEND_URL || ''}/api/translate`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ q, source, target, format: 'text' })
+          }).catch(async () => {
+            // fallback a localhost si FRONTEND_URL no está disponible en local
+            return await fetch(`http://localhost:${PORT}/api/translate`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ q, source, target, format: 'text' })
+            });
+          });
+          if (!resp || !resp.ok) {
+            return q; // fallback: dejar original
+          }
+          const json = await resp.json();
+          return json.translatedText || q;
+        };
+
+        const [translatedTitle, translatedContent] = await Promise.all([
+          translateOne(originalTitle),
+          translateOne(originalContent)
+        ]);
+
+        await updateDoc(pageRef, {
+          title: translatedTitle || originalTitle,
+          content: translatedContent || originalContent,
+          updatedAt: new Date()
+        });
+
+        results.push({ pageId, status: 'ok' });
+      } catch (e) {
+        console.error('❌ Error translating page', pageId, e);
+        results.push({ pageId, status: 'error', message: e.message });
+      }
+    }
+
+    res.json({ success: true, results });
+  } catch (error) {
+    console.error('❌ translate-pages error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
 // ==================== CATCH ALL HANDLER ====================
 // Handle all non-API GET routes (React SPA fallback)
 app.use((req, res, next) => {
