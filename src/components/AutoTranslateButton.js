@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Box, IconButton, CircularProgress, Snackbar, Alert } from '@mui/material';
-import TranslateIcon from Bid '@mui/icons-material/Translate';
+import TranslateIcon from '@mui/icons-material/Translate';
 
 // Diccionario de traducciones predefinidas (Español -> Inglés)
 // Estos textos se traducen instantáneamente sin llamar a la API

@@ -2,13 +2,12 @@ import React, { useEffect, useState } from 'react';
 import { Box, Container, Grid, Typography } from '@mui/material';
 import { db } from '../firebase/config';
 import { doc, getDoc, collection, getDocs } from 'firebase/firestore';
-import { useTranslation } from 'react-i18next';
+// i18n eliminado: priorizamos contenido de Firestore (español)
 
 const Nosotros = () => {
-  const { t } = useTranslation();
   const [pageData, setPageData] = useState({
-    title: 'Our History',
-    content: 'Write your story here. Share how DeliZuKar began...',
+    title: 'Nuestra Historia',
+    content: 'Comparte aquí tu historia. Cómo comenzó DeliZuKar, tu pasión por las galletas estilo Nueva York, los ingredientes que amas y los valores detrás de tu marca.',
     titleFont: 'Playfair Display',
     contentFont: 'Roboto'
   });
@@ -51,7 +50,7 @@ const Nosotros = () => {
   }, []);
 
   return (
-    <Box className="nosotros-mobile" sx={{ pt: 20, pb: 8, opacity: fontsReady ? 1 : 0, transition: 'opacity 200ms ease' }}>
+    <Box className="nosotros-mobile" sx={{ pt: 20, pb: 8 }}>
       <style>
         {`
           @keyframes slowFloat {
@@ -83,7 +82,7 @@ const Nosotros = () => {
             fontFamily: pageData.titleFont ? `"${pageData.titleFont}", serif` : 'Playfair Display, serif'
           }}
         >
-          {t('about.title', 'Our History')}
+          {pageData.title || 'Nuestra Historia'}
         </Typography>
 
         <Box sx={{ 
@@ -118,7 +117,7 @@ const Nosotros = () => {
                   fontSize: { xs: '0.95rem', md: '1.06rem' }
                 }}
               >
-                {t('about.content', 'Write your story here. Share how DeliZuKar began...')}
+                {pageData.content || 'Comparte aquí tu historia. Cómo comenzó DeliZuKar, tu pasión por las galletas estilo Nueva York, los ingredientes que amas y los valores detrás de tu marca.'}
               </Typography>
             </Box>
           </Box>
@@ -147,7 +146,7 @@ const Nosotros = () => {
               {pageData.imageUrl ? (
                 <img 
                   src={pageData.imageUrl} 
-                  alt="Our history" 
+                  alt="Nuestra historia" 
                   style={{ 
                     width: '100%', 
                     height: '100%', 
