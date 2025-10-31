@@ -1270,7 +1270,7 @@
     z-index: 10000 !important;
     width: 100% !important;
     height: 165px !important;
-    background: rgba(255, 255, 255, 0.95) !important;
+    background: rgba(255, 236, 229, 0.95) !important;
     backdrop-filter: blur(10px) !important;
   }
   
@@ -1789,9 +1789,9 @@
   }
 }
 
-/* iPhone 14 Pro Max Specific Optimizations - Viewport: 430px × 932px */
+/* iPhone 14 Pro Max & iPhone 15 Pro Max Specific Optimizations - Viewport: 430px × 932px */
 @supports (-webkit-touch-callout: none) {
-  @media screen and (max-width: 430px) and (max-height: 932px) {
+  @media screen and (max-width: 430px) and (maxiffany: 932px) {
     /* iPhone 14 Pro Max Hero Banner - Ajuste específico */
     .hero-mobile {
       margin-top: -500px !important;
@@ -1846,6 +1846,96 @@
       white-space: nowrap !important;
       padding: 0 8px !important;
       text-align: center !important;
+    }
+  }
+}
+
+/* iPhone 15 Pro Max Specific Optimizations - Viewport: 430px × 932px */
+@supports (-webkit-touch-callout: none) {
+  @media screen and (max-width: 430px) and (max-height: 932px) and (-webkit-min-device-pixel-ratio: 3) {
+    /* iPhone 15 Pro Max Header Optimizations */
+    .header-mobile {
+      padding: 2px 0 !important;
+      min-height: 50px !important;
+    }
+    
+    .header-logo {
+      font-size: 1rem !important;
+      font-weight: 600 !important;
+    }
+    
+    .header-actions {
+      gap: 6px !important;
+    }
+    
+    .header-cart-icon {
+      font-size: 1.1rem !important;
+    }
+    
+    .header-auth-buttons {
+      font-size: 0.7rem !important;
+      padding: 3px 6px !important;
+    }
+    
+    .header-user-avatar {
+      width: 24px !important;
+      height: 24px !important;
+    }
+    
+    /* iPhone 15 Pro Max Hero Banner */
+    .hero-mobile {
+      margin-top: -500px !important;
+      padding-top: 0 !important;
+      height: 60vh !important;
+      position: relative !important;
+      z-index: 10 !important;
+    }
+    
+    /* iPhone 15 Pro Max Terms Title - Subir el título */
+    .MuiContainer-root .MuiTypography-h2 {
+      margin-top: -800px !important;
+    }
+    
+    /* iPhone 15 Pro Max Page Spacing */
+    .products-page-mobile {
+      margin-top: -800px !important;
+      padding-top: 0 !important;
+      position: relative !important;
+      z-index: 5 !important;
+      display: flex !important;
+      flex-direction: column !important;
+    }
+    
+    .nosotros-mobile {
+      padding-top: 120px !important;
+      margin-top: -800px !important;
+      position: relative !important;
+      z-index: 5 !important;
+      display: flex !important;
+      flex-direction: column !important;
+    }
+    
+    .contacto-mobile {
+      padding-top: 130px !important;
+      margin-top: -800px !important;
+      position: relative !important;
+      z-index: 5 !important;
+      display: flex !important;
+      flex-direction: column !important;
+    }
+    
+    /* iPhone 14 Pro Max & iPhone 15 Pro Max Terms Page */
+    .terms-page-mobile {
+      margin-top: -500px !important;
+      padding-top: 0 !important;
+      position: relative !important;
+      z-index: 5 !important;
+      display: flex !important;
+      flex-direction: column !important;
+    }
+    
+    .terms-page-mobile .MuiContainer-root .MuiTypography-h2 {
+      margin-top: -800px !important;
     }
   }
 }
@@ -2200,6 +2290,18 @@
       transform: translateY(-700px) !important;
       position: relative !important;
       z-index: 5 !important;
+    }
+    
+    /* iPhone 15 Pro Allergy Title - Bajar el título */
+    .allergy-page-mobile .MuiContainer-root .allergy-title,
+    .allergy-page-mobile .MuiContainer-root .MuiTypography-h2 {
+      margin-top: -620px !important;
+    }
+    
+    /* iPhone 15 Pro Terms Service Title - Bajar el título */
+    .terms-service-page-mobile .MuiContainer-root .terms-service-title,
+    .terms-service-page-mobile .MuiContainer-root .MuiTypography-h2 {
+      margin-top: -620px !important;
     }
   }
 }
@@ -2649,8 +2751,20 @@
     }
     
     /* iPhone 16 Terms Title - Subir el título */
-    .MuiContainer-root .MuiTypography-h2 {
+    .MuiContainer-root .MuiTypography-h2[style*="#EC8C8D"]:not([style*="#ffece5"]) {
       margin-top: -800px !important;
+    }
+    
+    /* iPhone 16 Allergy Title - Bajar el título */
+    .allergy-page-mobile .MuiContainer-root .allergy-title,
+    .allergy-page-mobile .MuiContainer-root .MuiTypography-h2 {
+      margin-top: -620px !important;
+    }
+    
+    /* iPhone 16 Terms Service Title - Bajar el título */
+    .terms-service-page-mobile .MuiContainer-root .terms-service-title,
+    .terms-service-page-mobile .MuiContainer-root .MuiTypography-h2 {
+      margin-top: -620px !important;
     }
   }
 }

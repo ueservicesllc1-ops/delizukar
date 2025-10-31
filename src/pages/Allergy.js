@@ -80,10 +80,11 @@ const Allergy = () => {
   };
 
   return (
-    <Box sx={{ py: 8, pt: 35, opacity: fontsReady ? 1 : 0, transition: 'opacity 200ms ease' }}>
+    <Box className="allergy-page-mobile" sx={{ py: 8, pt: 35, opacity: fontsReady ? 1 : 0, transition: 'opacity 200ms ease' }}>
       <Container maxWidth="lg">
         <Typography
           variant="h2"
+          className="allergy-title"
           sx={{
             textAlign: 'center',
             fontWeight: 800,

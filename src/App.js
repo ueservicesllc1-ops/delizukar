@@ -54,7 +54,7 @@ const theme = createTheme({
       contrastText: '#fff'
     },
     background: {
-      default: '#fafafa',
+      default: '#ffffff',
       paper: '#ffffff'
     },
     text: {
@@ -118,6 +118,22 @@ const theme = createTheme({
           }
         }
       }
+    },
+    MuiCssBaseline: {
+      styleOverrides: {
+        body: {
+          backgroundColor: '#ffffff !important',
+          background: '#ffffff !important'
+        },
+        html: {
+          backgroundColor: '#ffffff !important',
+          background: '#ffffff !important'
+        },
+        '#root': {
+          backgroundColor: '#ffffff !important',
+          background: '#ffffff !important'
+        }
+      }
     }
   }
 });
@@ -146,6 +162,7 @@ function App() {
           <div className="App">
             <Box sx={{ 
               paddingTop: { xs: '500px', sm: '70px', md: '70px' },
+              backgroundColor: '#ffffff',
               '@media (min-width: 768px) and (max-width: 1200px) and (orientation: landscape)': {
                 paddingTop: '120px'
               }

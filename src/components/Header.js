@@ -242,7 +242,7 @@ const Header = () => {
           position="fixed"
           className="header-mobile"
           sx={{
-            backgroundColor: '#ffece5',
+            backgroundColor: '#ffffff',
             boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
             zIndex: 9999,
             top: 0,
