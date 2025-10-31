@@ -1094,6 +1094,28 @@ app.post('/api/translate-pages', async (req, res) => {
   }
 });
 
+// ==================== PAGES UPDATE (ADMIN UTILITY) ====================
+// POST /api/pages/update { id, title, content, titleFont?, contentFont? }
+app.post('/api/pages/update', async (req, res) => {
+  try {
+    const { id, title, content, titleFont, contentFont } = req.body || {};
+    if (!id) return res.status(400).json({ error: 'id is required' });
+
+    const pageRef = doc(db, 'pages', id);
+    const dataToUpdate = { updatedAt: new Date() };
+    if (typeof title === 'string') dataToUpdate.title = title;
+    if (typeof content === 'string') dataToUpdate.content = content;
+    if (typeof titleFont === 'string') dataToUpdate.titleFont = titleFont;
+    if (typeof contentFont === 'string') dataToUpdate.contentFont = contentFont;
+
+    await updateDoc(pageRef, dataToUpdate);
+    res.json({ success: true, id, updated: Object.keys(dataToUpdate) });
+  } catch (error) {
+    console.error('❌ Error updating page:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
 // ==================== CATCH ALL HANDLER ====================
 // Handle all non-API GET routes (React SPA fallback)
 app.use((req, res, next) => {
