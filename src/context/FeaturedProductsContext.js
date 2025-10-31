@@ -52,20 +52,28 @@ export const FeaturedProductsProvider = ({ children }) => {
               const fontData = customFont.data();
               console.log('✅ Fuente personalizada encontrada:', fontData);
               
-              const fontFace = `
-                @font-face {
-                  font-family: '${newConfig.titleFont}';
-                  src: url('${fontData.dataUrl || fontData.url}');
-                  font-display: swap;
-                }
-              `;
+              // Solo usar dataUrl para evitar problemas de CORS con Storage
+              const fontSource = fontData.dataUrl;
               
-              const style = document.createElement('style');
-              style.setAttribute('data-featured-title-font', newConfig.titleFont);
-              style.textContent = fontFace;
-              document.head.appendChild(style);
-              
-              console.log('✅ Fuente personalizada cargada:', newConfig.titleFont);
+              if (fontSource) {
+                const fontFace = `
+                  @font-face {
+                    font-family: '${newConfig.titleFont}';
+                    src: url('${fontSource}');
+                    font-display: swap;
+                  }
+                `;
+                
+                const style = document.createElement('style');
+                style.setAttribute('data-featured-title-font', newConfig.titleFont);
+                style.textContent = fontFace;
+                document.head.appendChild(style);
+                
+                console.log('✅ Fuente personalizada cargada:', newConfig.titleFont);
+              } else {
+                console.warn('⚠️ Fuente sin dataUrl - no se puede cargar (evita problemas de CORS). URL disponible:', fontData.url);
+                console.warn('💡 Solución: Re-subir la fuente desde el Font Manager para generar dataUrl automáticamente.');
+              }
             }
           } else {
             await fontUploader.loadFont(newConfig.titleFont);

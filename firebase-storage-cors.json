@@ -1,7 +1,16 @@
 [
   {
-    "origin": ["http://localhost:3000", "http://localhost:3001", "https://delizukar.web.app", "https://delizukar.firebaseapp.com"],
-    "method": ["GET"],
+    "origin": [
+      "http://localhost:3000",
+      "http://localhost:3001",
+      "https://delizukar.web.app",
+      "https://delizukar.firebaseapp.com",
+      "https://www.delizukar.com",
+      "https://delizukar.com",
+      "https://delizukar-production.up.railway.app"
+    ],
+    "method": ["GET", "HEAD", "OPTIONS"],
+    "responseHeader": ["Content-Type", "Access-Control-Allow-Origin"],
     "maxAgeSeconds": 3600
   }
 ]
