@@ -2647,6 +2647,11 @@
       position: relative !important;
       z-index: 5 !important;
     }
+    
+    /* iPhone 16 Terms Title - Subir el título */
+    .MuiContainer-root .MuiTypography-h2 {
+      margin-top: -800px !important;
+    }
   }
 }
 
