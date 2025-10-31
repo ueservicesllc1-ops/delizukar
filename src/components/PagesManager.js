@@ -160,8 +160,8 @@ const PagesManager = ({ open, onClose }) => {
     },
     {
       id: 'nosotros',
-      title: 'Our History',
-      content: 'Write your story here. Share how DeliZuKar began, your passion for New York-style cookies, the ingredients you love, and the values behind your brand.',
+      title: 'Nuestra Historia',
+      content: 'Escribe tu historia aquí. Comparte cómo comenzó DeliZuKar, tu pasión por las galletas estilo Nueva York, los ingredientes que amas y los valores detrás de tu marca.',
       route: '/nosotros',
       titleFont: 'Playfair Display',
       contentFont: 'Roboto',
@@ -169,8 +169,8 @@ const PagesManager = ({ open, onClose }) => {
     },
     {
       id: 'contacto',
-      title: 'Contact Us',
-      content: "We'd love to hear from you. Send us a message and we'll get back to you.",
+      title: 'Contáctanos',
+      content: 'Nos encantaría saber de ti. Envíanos un mensaje y te responderemos.',
       route: '/contacto',
       titleFont: 'Playfair Display',
       contentFont: 'Roboto'

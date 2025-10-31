@@ -1,6 +1,100 @@
 import React, { useState } from 'react';
 import { Box, IconButton, CircularProgress, Snackbar, Alert } from '@mui/material';
-import TranslateIcon from '@mui/icons-material/Translate';
+import TranslateIcon from Bid '@mui/icons-material/Translate';
+
+// Diccionario de traducciones predefinidas (Español -> Inglés)
+// Estos textos se traducen instantáneamente sin llamar a la API
+const TRANSLATION_DICTIONARY = {
+  // Botones comunes
+  'Suscríbete...': 'Subscribe...',
+  'Suscríbete': 'Subscribe',
+  'Ver Detalles': 'View Details',
+  'Ver Detalles...': 'View Details...',
+  'Agregar al Carrito': 'Add to Cart',
+  'Agregar al carrito': 'Add to cart',
+  'Ver Todas las Galletas': 'View All Cookies',
+  'Ver más': 'View more',
+  'Ver Más': 'View More',
+  'Cerrar': 'Close',
+  'Continuar': 'Continue',
+  'Atrás': 'Back',
+  'Siguiente': 'Next',
+  'Anterior': 'Previous',
+  'Enviar': 'Send',
+  'Buscar': 'Search',
+  'Filtrar': 'Filter',
+  
+  // Navegación
+  'Inicio': 'Home',
+  'Productos': 'Products',
+  'Nosotros': 'About Us',
+  'Contacto': 'Contact',
+  'Carrito': 'Cart',
+  'FAQ': 'FAQ',
+  'Preguntas Frecuentes': 'Frequently Asked Questions',
+  
+  // Secciones
+  'Galletas Destacadas': 'Featured Cookies',
+  'Productos Destacados': 'Featured Products',
+  'Testimonios': 'Testimonials',
+  'Galería': 'Gallery',
+  'Términos y Condiciones': 'Terms and Conditions',
+  'Política de Privacidad': 'Privacy Policy',
+  'Políticas de Envío': 'Shipping Policies',
+  'Instrucciones de Cuidados': 'Care Instructions',
+  'Información de Alergias': 'Allergy Information',
+  
+  // Producto
+  'Precio': 'Price',
+  'Disponible': 'Available',
+  'Agotado': 'Out of Stock',
+  'Stock bajo': 'Low Stock',
+  'Stock disponible': 'Stock available',
+  'Stock Bajo': 'Low Stock',
+  'Stock Medio': 'Medium Stock',
+  'En Stock': 'In Stock',
+  'unidades': 'units',
+  'Unidades': 'Units',
+  'Descripción': 'Description',
+  'Reseñas': 'Reviews',
+  'reseñas': 'reviews',
+  'Calificación': 'Rating',
+  'Destacado': 'Featured',
+  'Más Vendido': 'Best Seller',
+  'Nuevo': 'New',
+  
+  // Mensajes
+  'Producto agregado al carrito': 'Product added to cart',
+  'Error al agregar producto': 'Error adding product',
+  'Carrito vacío': 'Empty cart',
+  'Total': 'Total',
+  'Subtotal': 'Subtotal',
+  'Envío': 'Shipping',
+  'Impuestos': 'Taxes',
+  
+  // Formularios
+  'Nombre': 'Name',
+  'Email': 'Email',
+  'Teléfono': 'Phone',
+  'Mensaje': 'Message',
+  'Dirección': 'Address',
+  'Ciudad': 'City',
+  'Código Postal': 'Zip Code',
+  'País': 'Country',
+  
+  // General
+  'Cargando...': 'Loading...',
+  'No hay resultados': 'No results',
+  'Seleccionar': 'Select',
+  'Todos': 'All',
+  'Categorías': 'Categories',
+  
+  // Páginas
+  'Nuestra Historia': 'Our History',
+  'Contáctanos': 'Contact Us',
+  'Escribe tu historia aquí. Comparte cómo comenzó DeliZuKar, tu pasión por las galletas estilo Nueva York, los ingredientes que amas y los valores detrás de tu marca.': 'Write your story here. Share how DeliZuKar began, your passion for New York-style cookies, the ingredients you love, and the values behind your brand.',
+  'Nos encantaría saber de ti. Envíanos un mensaje y te responderemos.': "We'd love to hear from you. Send us a message and we'll get back to you.",
+};
 
 const AutoTranslateButton = ({ 
   sourceLang = 'es', 
@@ -39,6 +133,27 @@ const AutoTranslateButton = ({
   const translateText = async (text) => {
     if (!text || text.trim().length === 0) return text;
     
+    // Limpiar el texto (quitar espacios extra, normalizar)
+    const cleanText = text.trim();
+    
+    // 1. Verificar si hay traducción en el diccionario predefinido
+    if (sourceLang === 'es' && targetLang === 'en') {
+      // Buscar coincidencia exacta
+      if (TRANSLATION_DICTIONARY[cleanText]) {
+        console.log(`📚 Traducción del diccionario: "${cleanText}" -> "${TRANSLATION_DICTIONARY[cleanText]}"`);
+        return TRANSLATION_DICTIONARY[cleanText];
+      }
+      
+      // Buscar coincidencia parcial (para textos que terminan con "...")
+      const textWithoutEllipsis = cleanText.replace(/\.{3}$/, '');
+      if (textWithoutEllipsis !== cleanText && TRANSLATION_DICTIONARY[textWithoutEllipsis]) {
+        const translation = TRANSLATION_DICTIONARY[textWithoutEllipsis] + '...';
+        console.log(`📚 Traducción del diccionario (parcial): "${cleanText}" -> "${translation}"`);
+        return translation;
+      }
+    }
+    
+    // 2. Si no está en el diccionario, usar la API de traducción
     try {
       const backendUrl = getBackendUrl();
       const response = await fetch(`${backendUrl}/api/translate`, {
