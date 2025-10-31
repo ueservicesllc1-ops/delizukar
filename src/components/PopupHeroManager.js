@@ -302,6 +302,7 @@ const PopupHeroManager = ({ open, onClose }) => {
         discountText: formData.discountText || '¡APROVECHA ESTA OFERTA!',
         discountConditions: formData.discountConditions || 'A usuarios registrados en su primera compra',
         discountCode: formData.discountCode || 'BIENVENIDO20',
+        isActive: formData.isActive !== undefined ? formData.isActive : true, // Asegurar que isActive se guarde
         createdAt: new Date(),
         updatedAt: new Date()
       };

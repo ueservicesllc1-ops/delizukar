@@ -131,6 +131,7 @@ const Home = () => {
       >
         <Typography
           variant="body1"
+          data-no-translate
           sx={{
             color: '#ffffff',
             fontWeight: 700,

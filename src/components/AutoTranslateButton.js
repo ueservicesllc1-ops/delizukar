@@ -87,6 +87,16 @@ const AutoTranslateButton = ({
     selectors.forEach(selector => {
       const found = document.querySelectorAll(selector);
       found.forEach(el => {
+        // Excluir elementos dentro de la franja rosa (hero-color-strip-mobile)
+        if (el.closest('.hero-color-strip-mobile')) {
+          return;
+        }
+        
+        // Excluir elementos con atributo data-no-translate
+        if (el.hasAttribute('data-no-translate') || el.closest('[data-no-translate]')) {
+          return;
+        }
+        
         // Solo incluir elementos visibles y que no estén dentro de elementos que ya hemos incluido
         if (isElementVisible(el) && !isDescendantOfTranslated(el, elements)) {
           // Evitar elementos que contienen solo números o símbolos
@@ -206,66 +216,73 @@ const AutoTranslateButton = ({
 
       console.log(`Traduciendo ${uniqueTexts.size} textos únicos usando método optimizado (concatenación)...`);
 
-      // OPTIMIZACIÓN: Concatenar todos los textos únicos con un separador único
-      // y traducirlos en UNA sola petición para evitar error 429
+      // ESTRATEGIA: Traducir en lotes pequeños para evitar error 429 y asegurar calidad
+      // Traducir texto por texto puede ser lento pero más confiable que concatenar
       const textsArray = Array.from(uniqueTexts.keys());
+      const batchSize = 10; // Lotes de 10 textos (balance entre velocidad y confiabilidad)
       
-      // Separador único que no debería aparecer en el texto normal
-      const separator = ' |||SEP||| ';
-      const concatenatedText = textsArray.join(separator);
-
-      // Traducir todo el texto concatenado en UNA sola petición
-      let translatedConcatenated;
-      try {
-        translatedConcatenated = await translateText(concatenatedText);
+      console.log(`📦 Traduciendo ${textsArray.length} textos en lotes de ${batchSize}...`);
+      
+      for (let i = 0; i < textsArray.length; i += batchSize) {
+        const batch = textsArray.slice(i, i + batchSize);
+        const batchNumber = Math.floor(i / batchSize) + 1;
+        const totalBatches = Math.ceil(textsArray.length / batchSize);
         
-        // Si la traducción funcionó, dividir los resultados
-        if (translatedConcatenated && translatedConcatenated !== concatenatedText) {
-          const translatedArray = translatedConcatenated.split(separator);
-          textsArray.forEach((originalText, index) => {
-            if (translatedArray[index] && translatedArray[index].trim()) {
-              uniqueTexts.set(originalText, translatedArray[index].trim());
-            }
-          });
-        }
-      } catch (error) {
-        console.error('Error en traducción concatenada, intentando en lotes pequeños...', error);
-        // Fallback: si falla la traducción concatenada, intentar traducir en lotes pequeños
-        const batchSize = 3; // Lotes de 3 textos para evitar 429
-        for (let i = 0; i < textsArray.length; i += batchSize) {
-          const batch = textsArray.slice(i, i + batchSize);
-          const batchText = batch.join(separator);
+        console.log(`📤 Lote ${batchNumber}/${totalBatches}: Traduciendo ${batch.length} textos...`);
+        
+        // Traducir cada texto del lote en paralelo
+        const batchPromises = batch.map(async (text) => {
           try {
-            const batchTranslated = await translateText(batchText);
-            if (batchTranslated && batchTranslated !== batchText) {
-              const batchResults = batchTranslated.split(separator);
-              batch.forEach((text, idx) => {
-                if (batchResults[idx] && batchResults[idx].trim()) {
-                  uniqueTexts.set(text, batchResults[idx].trim());
-                }
-              });
+            const translated = await translateText(text);
+            if (translated && translated !== text && translated.trim().length > 0) {
+              uniqueTexts.set(text, translated.trim());
+              return true;
             }
-            // Esperar entre lotes para evitar 429
-            await new Promise(resolve => setTimeout(resolve, 1000));
-          } catch (batchError) {
-            console.error(`Error en lote ${Math.floor(i / batchSize) + 1}:`, batchError);
+            return false;
+          } catch (error) {
+            console.error(`Error traduciendo "${text.substring(0, 30)}...":`, error);
+            return false;
           }
+        });
+        
+        await Promise.all(batchPromises);
+        
+        // Pequeña pausa entre lotes para evitar saturar el servidor
+        if (i + batchSize < textsArray.length) {
+          await new Promise(resolve => setTimeout(resolve, 300)); // 300ms entre lotes
         }
       }
+      
+      console.log(`✅ Proceso de traducción completado. ${uniqueTexts.size} textos únicos procesados.`);
 
       // Aplicar traducciones a todos los elementos
       let translatedCount = 0;
+      let skippedCount = 0;
       textToElements.forEach((elements, originalText) => {
         const translatedText = uniqueTexts.get(originalText);
-        if (translatedText && translatedText !== originalText) {
+        if (translatedText && translatedText !== originalText && translatedText.trim().length > 0) {
           elements.forEach(({ element }) => {
-            setElementText(element, translatedText);
-            translatedCount++;
+            try {
+              setElementText(element, translatedText);
+              translatedCount++;
+            } catch (err) {
+              console.error(`Error aplicando traducción al elemento:`, err);
+            }
           });
+        } else {
+          skippedCount++;
+          if (!translatedText) {
+            console.warn(`⚠️ No se encontró traducción para: "${originalText.substring(0, 50)}..."`);
+          } else if (translatedText === originalText) {
+            console.warn(`⚠️ Traducción idéntica (probablemente error): "${originalText.substring(0, 50)}..."`);
+          }
         }
       });
 
       console.log(`✅ Traducidos ${translatedCount} elementos`);
+      if (skippedCount > 0) {
+        console.warn(`⚠️ ${skippedCount} textos no fueron traducidos`);
+      }
 
       setShowSuccess(true);
     } catch (error) {

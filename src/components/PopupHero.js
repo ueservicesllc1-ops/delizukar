@@ -52,6 +52,10 @@ const PopupHero = ({ open, onClose }) => {
         
         console.log('🔍 PopupHero - Ofertas cargadas:', offersData);
         console.log('🔍 PopupHero - Ofertas activas:', activeOffers);
+        // Log de imágenes para debug
+        activeOffers.forEach(offer => {
+          console.log(`🖼️ Oferta ${offer.id} - Imagen:`, offer.image);
+        });
         
         if (activeOffers.length === 0) {
           // Si no hay ofertas activas, no mostrar popup
@@ -159,8 +163,23 @@ const PopupHero = ({ open, onClose }) => {
   }
 
   console.log('PopupHero - Rendering popup with offers:', offers.length);
+  console.log('PopupHero - Current offer index:', currentOffer);
 
   const currentOfferData = offers[currentOffer];
+  
+  if (currentOfferData) {
+    console.log('🖼️ PopupHero - Current offer data:', {
+      id: currentOfferData.id,
+      title: currentOfferData.title,
+      image: currentOfferData.image,
+      isActive: currentOfferData.isActive
+    });
+  }
+
+  // Si no hay oferta activa o currentOfferData no existe, no renderizar
+  if (!open || loading || offers.length === 0 || !currentOfferData) {
+    return null;
+  }
 
   return (
     <AnimatePresence>
