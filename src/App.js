@@ -6,8 +6,8 @@ import { Toaster } from 'react-hot-toast';
 // import AOS from 'aos';
 // import 'aos/dist/aos.css';
 
-// Import i18n configuration
-import './i18n';
+// Sistema de traducción antiguo eliminado - usando traducción automática con LibreTranslate
+// import './i18n';
 
 // Context
 import { StoreProvider } from './context/StoreContext';
@@ -17,6 +17,7 @@ import { FeaturedProductsProvider } from './context/FeaturedProductsContext';
 // Components
 import Header from './components/Header';
 import Footer from './components/Footer';
+import AutoTranslateButton from './components/AutoTranslateButton';
 
 // Pages
 import Home from './pages/Home';
@@ -270,6 +271,15 @@ function App() {
             </Box>
             
             <Footer />
+            
+            {/* Botón de traducción automática */}
+            <AutoTranslateButton 
+              sourceLang="es" 
+              targetLang="en"
+              position={{ bottom: '20px', right: '20px' }}
+              buttonColor="#EC8C8D"
+              buttonHoverColor="#d47a7b"
+            />
             
             {/* Toast notifications */}
             <Toaster

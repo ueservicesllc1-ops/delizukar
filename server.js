@@ -948,6 +948,78 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'build', 'index.html'));
 });
 
+// ==================== TRANSLATE API (LibreTranslate Proxy) ====================
+
+// Endpoint para traducir texto usando LibreTranslate
+// Usa instancia propia si LIBRETRANSLATE_URL está configurada, sino usa la pública
+app.post('/api/translate', async (req, res) => {
+  try {
+    const { q, source, target, format = 'text' } = req.body;
+
+    if (!q || !source || !target) {
+      return res.status(400).json({ 
+        error: 'Missing required parameters: q, source, target' 
+      });
+    }
+
+    // URL de LibreTranslate: usar instancia propia si está configurada, sino la pública
+    const libretranslateUrl = process.env.LIBRETRANSLATE_URL || 'https://libretranslate.com';
+    const translateEndpoint = `${libretranslateUrl}/translate`;
+
+    console.log(`🌐 Traduciendo de ${source} a ${target} usando: ${libretranslateUrl}`);
+
+    const response = await fetch(translateEndpoint, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: JSON.stringify({
+        q: q,
+        source: source,
+        target: target,
+        format: format
+      }),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error(`❌ Error de LibreTranslate (${response.status}):`, errorText);
+      
+      if (response.status === 429) {
+        return res.status(429).json({ 
+          error: 'Too many requests. Please wait a moment and try again.',
+          code: 'RATE_LIMIT'
+        });
+      }
+      
+      return res.status(response.status).json({ 
+        error: `Translation failed: ${response.status}`,
+        details: errorText
+      });
+    }
+
+    const data = await response.json();
+    
+    if (data.translatedText) {
+      console.log(`✅ Traducción exitosa: ${q.substring(0, 50)}... -> ${data.translatedText.substring(0, 50)}...`);
+      return res.json({
+        translatedText: data.translatedText
+      });
+    } else {
+      return res.status(500).json({ 
+        error: 'No translation returned from service' 
+      });
+    }
+  } catch (error) {
+    console.error('❌ Error en endpoint de traducción:', error);
+    return res.status(500).json({ 
+      error: 'Translation service error',
+      message: error.message 
+    });
+  }
+});
+
 // ==================== CATCH ALL HANDLER ====================
 // Handle all non-API GET routes (React SPA fallback)
 app.use((req, res, next) => {

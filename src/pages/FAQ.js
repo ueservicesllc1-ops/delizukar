@@ -5,19 +5,54 @@ import { doc, getDoc, collection, getDocs } from 'firebase/firestore';
 import { useTranslation } from 'react-i18next';
 
 const FAQ = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [pageData, setPageData] = useState({
-    title: 'Preguntas Frecuentes',
-    content: 'Contenido de preguntas frecuentes estará disponible próximamente',
+    title: '',
+    content: '',
     titleFont: 'Playfair Display',
     contentFont: 'Roboto'
   });
 
   const [fontsReady, setFontsReady] = useState(false);
+  const [firestoreData, setFirestoreData] = useState(null);
 
   useEffect(() => {
     loadPageData();
   }, []);
+
+  // Actualizar traducciones cuando cambie el idioma
+  useEffect(() => {
+    if (firestoreData) {
+      const lang = i18n.language === 'es' ? 'es' : 'en';
+      const titleKey = `title_${lang}`;
+      const contentKey = `content_${lang}`;
+      
+      if (firestoreData[titleKey] || firestoreData[contentKey]) {
+        setPageData(prev => ({
+          ...prev,
+          title: firestoreData[titleKey] || firestoreData.title || t('faq.title'),
+          content: firestoreData[contentKey] || firestoreData.content || t('faq.content'),
+          titleFont: firestoreData.titleFont || prev.titleFont,
+          contentFont: firestoreData.contentFont || prev.contentFont
+        }));
+      } else {
+        // Si no hay estructura multiidioma, usar traducciones del sistema según el idioma
+        setPageData(prev => ({
+          ...prev,
+          title: t('faq.title'),
+          content: t('faq.content'),
+          titleFont: firestoreData.titleFont || prev.titleFont,
+          contentFont: firestoreData.contentFont || prev.contentFont
+        }));
+      }
+    } else {
+      setPageData(prev => ({
+        ...prev,
+        title: t('faq.title'),
+        content: t('faq.content')
+      }));
+    }
+  }, [i18n.language, t, firestoreData]);
 
   const loadPageData = async () => {
     try {
@@ -25,9 +60,10 @@ const FAQ = () => {
       
       if (pageDoc.exists()) {
         const data = pageDoc.data();
-        setPageData(data);
+        setFirestoreData(data);
         console.log('Datos cargados desde Firestore:', data);
       } else {
+        setFirestoreData(null);
         console.log('No se encontraron datos en Firestore, usando datos por defecto');
       }
       
@@ -36,6 +72,7 @@ const FAQ = () => {
       setFontsReady(true);
     } catch (error) {
       console.error('Error cargando datos desde Firestore:', error);
+      setFirestoreData(null);
     }
   };
 
@@ -89,6 +126,7 @@ const FAQ = () => {
       <Container maxWidth="lg">
         <Typography
           variant="h2"
+          className="faq-title"
           sx={{
             textAlign: 'center',
             fontWeight: 800,
@@ -98,16 +136,15 @@ const FAQ = () => {
             fontFamily: pageData.titleFont ? `"${pageData.titleFont}", serif` : 'Playfair Display, serif'
           }}
         >
-          {t('faq.title', 'FAQ\'s')}
+          {pageData.title || t('faq.title')}
         </Typography>
         
         {/* Contenido de la página */}
         <Box sx={{ mt: 3, display: 'flex', justifyContent: 'center' }}>
-          <Typography
-            variant="h6"
+          <Box
             sx={{
               color: '#666',
-              textAlign: 'center',
+              textAlign: 'left',
               fontStyle: 'normal',
               fontFamily: pageData.contentFont ? `"${pageData.contentFont}", sans-serif` : 'Roboto, sans-serif',
               lineHeight: 1.6,
@@ -115,11 +152,38 @@ const FAQ = () => {
               maxWidth: '800px',
               mx: 'auto',
               px: 2,
-              whiteSpace: 'pre-line'
+              '& p': {
+                margin: '0 0 16px 0',
+                '&:last-child': {
+                  marginBottom: 0
+                }
+              },
+              '& h2, & h3': {
+                margin: '24px 0 16px 0',
+                fontWeight: 700,
+                color: '#333'
+              },
+              '& hr': {
+                margin: '24px 0',
+                border: 'none',
+                borderTop: '1px solid #e0e0e0'
+              },
+              '& strong': {
+                fontWeight: 700
+              },
+              '& em': {
+                fontStyle: 'italic'
+              },
+              '& ul, & ol': {
+                margin: '16px 0',
+                paddingLeft: '24px'
+              },
+              '& li': {
+                margin: '8px 0'
+              }
             }}
-          >
-            {t('faq.content', 'FAQ content will be available soon')}
-          </Typography>
+            dangerouslySetInnerHTML={{ __html: pageData.content }}
+          />
         </Box>
       </Container>
     </Box>

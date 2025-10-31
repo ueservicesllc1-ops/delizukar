@@ -1,0 +1,7 @@
+FROM libretranslate/libretranslate:latest
+
+# Exponer el puerto por defecto
+EXPOSE 5000
+
+# Comando para iniciar LibreTranslate
+CMD ["libretranslate", "--host", "0.0.0.0", "--port", "5000"]

@@ -92,7 +92,7 @@ const AdminProducts = () => {
   });
 
   return (
-    <Box sx={{ py: 4, backgroundColor: '#f5f5f5', minHeight: '100vh' }}>
+    <Box className="admin-products-mobile" sx={{ py: 4, backgroundColor: '#f5f5f5', minHeight: '100vh' }}>
       <Container maxWidth="xl">
         {/* Header */}
         <motion.div
@@ -104,6 +104,7 @@ const AdminProducts = () => {
             <Box>
                   <Typography
                     variant="h2"
+                    className="admin-products-title"
                     sx={{
                       fontWeight: 800,
                       color: '#eb8b8b',

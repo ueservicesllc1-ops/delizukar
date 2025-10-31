@@ -2303,6 +2303,24 @@
     .terms-service-page-mobile .MuiContainer-root .MuiTypography-h2 {
       margin-top: -620px !important;
     }
+    
+    /* iPhone 15 Pro FAQ Title - Bajar el título */
+    .faq-page-mobile .MuiContainer-root .faq-title,
+    .faq-page-mobile .MuiContainer-root .MuiTypography-h2 {
+      margin-top: 400px !important;
+    }
+    
+    /* iPhone 15 Pro Shipping Title - Bajar el título */
+    .shipping-page-mobile .MuiContainer-root .shipping-title,
+    .shipping-page-mobile .MuiContainer-root .MuiTypography-h2 {
+      margin-top: -620px !important;
+    }
+    
+    /* iPhone 15 Pro Cookie Care Title - Bajar el título */
+    .cookie-care-page-mobile .MuiContainer-root .cookie-care-title,
+    .cookie-care-page-mobile .MuiContainer-root .MuiTypography-h2 {
+      margin-top: -290px !important;
+    }
   }
 }
 
@@ -2765,6 +2783,24 @@
     .terms-service-page-mobile .MuiContainer-root .terms-service-title,
     .terms-service-page-mobile .MuiContainer-root .MuiTypography-h2 {
       margin-top: -620px !important;
+    }
+    
+    /* iPhone 16 FAQ Title - Bajar el título */
+    .faq-page-mobile .MuiContainer-root .faq-title,
+    .faq-page-mobile .MuiContainer-root .MuiTypography-h2 {
+      margin-top: 400px !important;
+    }
+    
+    /* iPhone 16 Shipping Title - Bajar el título */
+    .shipping-page-mobile .MuiContainer-root .shipping-title,
+    .shipping-page-mobile .MuiContainer-root .MuiTypography-h2 {
+      margin-top: -620px !important;
+    }
+    
+    /* iPhone 16 Cookie Care Title - Bajar el título */
+    .cookie-care-page-mobile .MuiContainer-root .cookie-care-title,
+    .cookie-care-page-mobile .MuiContainer-root .MuiTypography-h2 {
+      margin-top: -290px !important;
     }
   }
 }

@@ -42,8 +42,7 @@ import {
   onAuthStateChanged 
 } from 'firebase/auth';
 import { collection, addDoc, getDocs, query, where } from 'firebase/firestore';
-import LanguageSwitcher from './LanguageSwitcher';
-import { useTranslation } from 'react-i18next';
+// Sistema de traducción antiguo eliminado - usando traducción automática con LibreTranslate
 import { responsiveComponents, getResponsiveValue } from '../utils/responsiveDesign';
 
 const Header = () => {
@@ -53,7 +52,6 @@ const Header = () => {
   const [user, setUser] = useState(null);
   const [authMenuOpen, setAuthMenuOpen] = useState(false);
   const { cart, getCartItemsCount } = useStore();
-  const { t } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
   const theme = useTheme();
@@ -186,11 +184,11 @@ const Header = () => {
   const cartItemsCount = getCartItemsCount();
 
   const menuItems = [
-    { label: t('navigation.home'), href: '/' },
-    { label: t('navigation.services'), href: '/productos' },
-    { label: t('navigation.about'), href: '/nosotros' },
-    { label: t('navigation.contact'), href: '/contacto' },
-    { label: t('navigation.faq'), href: '/faq' }
+    { label: 'Inicio', href: '/' },
+    { label: 'Productos', href: '/productos' },
+    { label: 'Nosotros', href: '/nosotros' },
+    { label: 'Contacto', href: '/contacto' },
+    { label: 'FAQ', href: '/faq' }
   ];
 
   const drawer = (
@@ -242,7 +240,7 @@ const Header = () => {
           position="fixed"
           className="header-mobile"
           sx={{
-            backgroundColor: '#ffffff',
+            backgroundColor: '#ffece5',
             boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
             zIndex: 9999,
             top: 0,
@@ -316,7 +314,7 @@ const Header = () => {
                       }
                     }}
                   >
-                    {t('common.logout', 'Salir')}
+                    Salir
                   </Button>
                 </Box>
               )}
@@ -351,7 +349,7 @@ const Header = () => {
                         }
                       }}
                     >
-                      {t('common.login', 'Iniciar Sesión')}
+                      Iniciar Sesión
                     </Button>
                   </Box>
                 </Box>
@@ -565,7 +563,7 @@ const Header = () => {
                   left: 16, 
                   zIndex: 10 
                 }}>
-                  <LanguageSwitcher />
+                  {/* LanguageSwitcher eliminado - usando traducción automática */}
                 </Box>
             </Toolbar>
           </Container>
@@ -605,10 +603,10 @@ const Header = () => {
           zIndex: 10002
         }}
       >
-        <MenuItem onClick={handleProfileMenuClose}>{t('profile.myProfile')}</MenuItem>
-        <MenuItem onClick={handleProfileMenuClose}>{t('profile.myOrders')}</MenuItem>
-        <MenuItem onClick={handleProfileMenuClose}>{t('profile.settings')}</MenuItem>
-        <MenuItem onClick={handleLogout}>{t('common.logout')}</MenuItem>
+        <MenuItem onClick={handleProfileMenuClose}>Mi Perfil</MenuItem>
+        <MenuItem onClick={handleProfileMenuClose}>Mis Pedidos</MenuItem>
+        <MenuItem onClick={handleProfileMenuClose}>Configuración</MenuItem>
+        <MenuItem onClick={handleLogout}>Salir</MenuItem>
       </Menu>
     </>
   );

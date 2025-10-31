@@ -95,16 +95,15 @@ const TermsService = () => {
             fontFamily: pageData.titleFont ? `"${pageData.titleFont}", serif` : 'Playfair Display, serif'
           }}
         >
-          {t('termsService.title', pageData.title)}
+          {pageData.title || t('termsService.title')}
         </Typography>
         
         {/* Contenido de la página */}
         <Box sx={{ mt: 3, display: 'flex', justifyContent: 'center' }}>
-          <Typography
-            variant="h6"
+          <Box
             sx={{
               color: '#666',
-              textAlign: 'center',
+              textAlign: 'left',
               fontStyle: 'normal',
               fontFamily: pageData.contentFont ? `"${pageData.contentFont}", sans-serif` : 'Roboto, sans-serif',
               lineHeight: 1.6,
@@ -112,11 +111,38 @@ const TermsService = () => {
               maxWidth: '800px',
               mx: 'auto',
               px: 2,
-              whiteSpace: 'pre-line'
+              '& p': {
+                margin: '0 0 16px 0',
+                '&:last-child': {
+                  marginBottom: 0
+                }
+              },
+              '& h2, & h3': {
+                margin: '24px 0 16px 0',
+                fontWeight: 700,
+                color: '#333'
+              },
+              '& hr': {
+                margin: '24px 0',
+                border: 'none',
+                borderTop: '1px solid #e0e0e0'
+              },
+              '& strong': {
+                fontWeight: 700
+              },
+              '& em': {
+                fontStyle: 'italic'
+              },
+              '& ul, & ol': {
+                margin: '16px 0',
+                paddingLeft: '24px'
+              },
+              '& li': {
+                margin: '8px 0'
+              }
             }}
-          >
-            {t('termsService.content', pageData.content)}
-          </Typography>
+            dangerouslySetInnerHTML={{ __html: pageData.content || t('termsService.content') }}
+          />
         </Box>
       </Container>
     </Box>

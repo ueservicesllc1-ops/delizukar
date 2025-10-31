@@ -14,26 +14,10 @@ const CookieCare = () => {
   });
 
   const [fontsReady, setFontsReady] = useState(false);
-  const [hasFirestoreData, setHasFirestoreData] = useState(false);
 
   useEffect(() => {
     loadPageData();
   }, []);
-
-  // Actualizar traducciones cuando cambie el idioma
-  useEffect(() => {
-    if (!hasFirestoreData) {
-      console.log('Actualizando traducciones:', {
-        title: t('cookieCare.title'),
-        content: t('cookieCare.content')
-      });
-      setPageData(prev => ({
-        ...prev,
-        title: t('cookieCare.title'),
-        content: t('cookieCare.content')
-      }));
-    }
-  }, [t, hasFirestoreData]);
 
   const loadPageData = async () => {
     try {
@@ -42,10 +26,8 @@ const CookieCare = () => {
       if (pageDoc.exists()) {
         const data = pageDoc.data();
         setPageData(data);
-        setHasFirestoreData(true);
         console.log('Datos cargados desde Firestore:', data);
       } else {
-        setHasFirestoreData(false);
         console.log('No se encontraron datos en Firestore, usando datos por defecto');
       }
       
@@ -106,10 +88,11 @@ const CookieCare = () => {
   });
 
   return (
-    <Box sx={{ py: 8, pt: 35, opacity: fontsReady ? 1 : 0, transition: 'opacity 200ms ease' }}>
+    <Box className="cookie-care-page-mobile" sx={{ py: 8, pt: 35, opacity: fontsReady ? 1 : 0, transition: 'opacity 200ms ease' }}>
       <Container maxWidth="lg">
         <Typography
           variant="h2"
+          className="cookie-care-title"
           sx={{
             textAlign: 'center',
             fontWeight: 800,
@@ -120,16 +103,15 @@ const CookieCare = () => {
             fontFamily: pageData.titleFont ? `"${pageData.titleFont}", serif` : 'Playfair Display, serif'
           }}
         >
-          {t('cookieCare.title')}
+          {pageData.title}
         </Typography>
         
         {/* Contenido de la página */}
         <Box sx={{ mt: 3, display: 'flex', justifyContent: 'center' }}>
-          <Typography
-            variant="h6"
+          <Box
             sx={{
               color: '#666',
-              textAlign: 'center',
+              textAlign: 'left',
               fontStyle: 'normal',
               fontFamily: pageData.contentFont ? `"${pageData.contentFont}", sans-serif` : 'Roboto, sans-serif',
               lineHeight: 1.6,
@@ -137,11 +119,38 @@ const CookieCare = () => {
               maxWidth: '800px',
               mx: 'auto',
               px: 2,
-              whiteSpace: 'pre-line'
+              '& p': {
+                margin: '0 0 16px 0',
+                '&:last-child': {
+                  marginBottom: 0
+                }
+              },
+              '& h2, & h3': {
+                margin: '24px 0 16px 0',
+                fontWeight: 700,
+                color: '#333'
+              },
+              '& hr': {
+                margin: '24px 0',
+                border: 'none',
+                borderTop: '1px solid #e0e0e0'
+              },
+              '& strong': {
+                fontWeight: 700
+              },
+              '& em': {
+                fontStyle: 'italic'
+              },
+              '& ul, & ol': {
+                margin: '16px 0',
+                paddingLeft: '24px'
+              },
+              '& li': {
+                margin: '8px 0'
+              }
             }}
-          >
-            {t('cookieCare.content')}
-          </Typography>
+            dangerouslySetInnerHTML={{ __html: pageData.content }}
+          />
         </Box>
       </Container>
     </Box>

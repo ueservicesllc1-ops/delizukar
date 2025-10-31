@@ -5,7 +5,7 @@ import { doc, getDoc, collection, getDocs } from 'firebase/firestore';
 import { useTranslation } from 'react-i18next';
 
 const Shipping = () => {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const [pageData, setPageData] = useState({
     title: t('shipping.title'),
     content: t('shipping.content'),
@@ -14,47 +14,10 @@ const Shipping = () => {
   });
 
   const [fontsReady, setFontsReady] = useState(false);
-  const [firestoreData, setFirestoreData] = useState(null);
 
   useEffect(() => {
     loadPageData();
   }, []);
-
-  // Actualizar traducciones cuando cambie el idioma
-  useEffect(() => {
-    // Si hay datos de Firestore con estructura multiidioma, usar esos
-    if (firestoreData) {
-      const lang = i18n.language === 'es' ? 'es' : 'en';
-      const titleKey = `title_${lang}`;
-      const contentKey = `content_${lang}`;
-      
-      if (firestoreData[titleKey] || firestoreData[contentKey]) {
-        setPageData(prev => ({
-          ...prev,
-          title: firestoreData[titleKey] || firestoreData.title || t('shipping.title'),
-          content: firestoreData[contentKey] || firestoreData.content || t('shipping.content'),
-          titleFont: firestoreData.titleFont || prev.titleFont,
-          contentFont: firestoreData.contentFont || prev.contentFont
-        }));
-      } else {
-        // Si no hay estructura multiidioma, siempre usar traducciones del sistema
-        setPageData(prev => ({
-          ...prev,
-          title: t('shipping.title'),
-          content: t('shipping.content'),
-          titleFont: firestoreData.titleFont || prev.titleFont,
-          contentFont: firestoreData.contentFont || prev.contentFont
-        }));
-      }
-    } else {
-      // Si no hay datos de Firestore, usar traducciones del sistema
-      setPageData(prev => ({
-        ...prev,
-        title: t('shipping.title'),
-        content: t('shipping.content')
-      }));
-    }
-  }, [i18n.language, t, firestoreData]);
 
   const loadPageData = async () => {
     try {
@@ -62,10 +25,9 @@ const Shipping = () => {
       
       if (pageDoc.exists()) {
         const data = pageDoc.data();
-        setFirestoreData(data);
+        setPageData(data);
         console.log('Datos cargados desde Firestore:', data);
       } else {
-        setFirestoreData(null);
         console.log('No se encontraron datos en Firestore, usando datos por defecto');
       }
       
@@ -74,7 +36,6 @@ const Shipping = () => {
       setFontsReady(true);
     } catch (error) {
       console.error('Error cargando datos desde Firestore:', error);
-      setFirestoreData(null);
     }
   };
 
@@ -119,10 +80,11 @@ const Shipping = () => {
   };
 
   return (
-    <Box sx={{ py: 8, pt: 35, opacity: fontsReady ? 1 : 0, transition: 'opacity 200ms ease' }}>
+    <Box className="shipping-page-mobile" sx={{ py: 8, pt: 35, opacity: fontsReady ? 1 : 0, transition: 'opacity 200ms ease' }}>
       <Container maxWidth="lg">
         <Typography
           variant="h2"
+          className="shipping-title"
           sx={{
             textAlign: 'center',
             fontWeight: 800,
@@ -138,11 +100,10 @@ const Shipping = () => {
         
         {/* Contenido de la página */}
         <Box sx={{ mt: 3, display: 'flex', justifyContent: 'center' }}>
-          <Typography
-            variant="h6"
+          <Box
             sx={{
               color: '#666',
-              textAlign: 'center',
+              textAlign: 'left',
               fontStyle: 'normal',
               fontFamily: pageData.contentFont ? `"${pageData.contentFont}", sans-serif` : 'Roboto, sans-serif',
               lineHeight: 1.6,
@@ -150,11 +111,38 @@ const Shipping = () => {
               maxWidth: '800px',
               mx: 'auto',
               px: 2,
-              whiteSpace: 'pre-line'
+              '& p': {
+                margin: '0 0 16px 0',
+                '&:last-child': {
+                  marginBottom: 0
+                }
+              },
+              '& h2, & h3': {
+                margin: '24px 0 16px 0',
+                fontWeight: 700,
+                color: '#333'
+              },
+              '& hr': {
+                margin: '24px 0',
+                border: 'none',
+                borderTop: '1px solid #e0e0e0'
+              },
+              '& strong': {
+                fontWeight: 700
+              },
+              '& em': {
+                fontStyle: 'italic'
+              },
+              '& ul, & ol': {
+                margin: '16px 0',
+                paddingLeft: '24px'
+              },
+              '& li': {
+                margin: '8px 0'
+              }
             }}
-          >
-            {pageData.content ? pageData.content : t('shipping.content')}
-          </Typography>
+            dangerouslySetInnerHTML={{ __html: pageData.content }}
+          />
         </Box>
       </Container>
     </Box>

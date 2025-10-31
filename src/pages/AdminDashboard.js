@@ -638,6 +638,7 @@ const AdminDashboard = () => {
             <Box>
                   <Typography
                     variant="h2"
+                    className="admin-dashboard-title"
                     sx={{
                       fontWeight: 800,
                       color: '#eb8b8b',
