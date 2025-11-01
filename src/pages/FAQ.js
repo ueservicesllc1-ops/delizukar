@@ -1,14 +1,31 @@
 import React, { useState, useEffect } from 'react';
 import { Box, Container, Typography } from '@mui/material';
 import { db } from '../firebase/config';
-import { doc, getDoc, collection, getDocs } from 'firebase/firestore';
-import { useTranslation } from 'react-i18next';
+import { doc, getDoc, setDoc, collection, getDocs } from 'firebase/firestore';
+// i18n no se usa aquí: priorizamos Firestore
 
 const FAQ = () => {
-  const { t, i18n } = useTranslation();
   const [pageData, setPageData] = useState({
-    title: '',
-    content: '',
+    title: 'Preguntas Frecuentes',
+    content: `
+<p>📦 <strong>¿Cuánto tiempo tardan en enviar sus galletas?</strong><br/>
+Todos los pedidos se envían los lunes y martes para garantizar frescura y calidad.</p>
+
+<p>❄️ <strong>¿Se envían las galletas en un paquete refrigerado?</strong><br/>
+Nuestras galletas no se envían con paquetes de hielo ni ningún tipo de empaque refrigerado. Están diseñadas para mantenerse frescas durante las condiciones normales de envío.</p>
+
+<p>🌾 <strong>¿Ofrecen productos sin gluten?</strong><br/>
+Aún no, pero estamos trabajando en una opción sin gluten y esperamos ofrecerla pronto.</p>
+
+<p>🍪 <strong>¿Cuál es el número mínimo de galletas que puedo pedir?</strong><br/>
+Nuestro pedido mínimo es de 6 galletas. Cada lote requiere tiempo y cuidado para elaborar, y esta política nos ayuda a mantener la eficiencia y asegurar la calidad para todos los pedidos.</p>
+
+<p>🛒 <strong>¿Cómo puedo hacer un pedido?</strong><br/>
+Puedes ordenar directamente desde nuestro sitio web: 👉 <a href="https://www.DeliZuKar.com" target="_blank" rel="noopener noreferrer">www.DeliZuKar.com</a></p>
+
+<p>🗓️ <strong>¿Puedo programar mi pedido?</strong><br/>
+No podemos programar fechas específicas de envío o entrega. Todos los pedidos se envían únicamente los lunes y martes.</p>
+`,
     titleFont: 'Playfair Display',
     contentFont: 'Roboto'
   });
@@ -20,48 +37,56 @@ const FAQ = () => {
     loadPageData();
   }, []);
 
-  // Actualizar traducciones cuando cambie el idioma
+  // Priorizar siempre Firestore; si no hay datos, dejar vacío para evitar falsos positivos
   useEffect(() => {
     if (firestoreData) {
-      const lang = i18n.language === 'es' ? 'es' : 'en';
-      const titleKey = `title_${lang}`;
-      const contentKey = `content_${lang}`;
-      
-      if (firestoreData[titleKey] || firestoreData[contentKey]) {
-        setPageData(prev => ({
-          ...prev,
-          title: firestoreData[titleKey] || firestoreData.title || t('faq.title'),
-          content: firestoreData[contentKey] || firestoreData.content || t('faq.content'),
-          titleFont: firestoreData.titleFont || prev.titleFont,
-          contentFont: firestoreData.contentFont || prev.contentFont
-        }));
-      } else {
-        // Si no hay estructura multiidioma, usar traducciones del sistema según el idioma
-        setPageData(prev => ({
-          ...prev,
-          title: t('faq.title'),
-          content: t('faq.content'),
-          titleFont: firestoreData.titleFont || prev.titleFont,
-          contentFont: firestoreData.contentFont || prev.contentFont
-        }));
-      }
-    } else {
       setPageData(prev => ({
         ...prev,
-        title: t('faq.title'),
-        content: t('faq.content')
+        // Solo usar español si existe; si no, mantener los defaults en español
+        title: firestoreData.title_es ? firestoreData.title_es : prev.title,
+        content: firestoreData.content_es ? firestoreData.content_es : prev.content,
+        titleFont: firestoreData.titleFont || prev.titleFont,
+        contentFont: firestoreData.contentFont || prev.contentFont
       }));
     }
-  }, [i18n.language, t, firestoreData]);
+  }, [firestoreData]);
 
   const loadPageData = async () => {
     try {
-      const pageDoc = await getDoc(doc(db, 'pages', 'faq'));
+      const pageRef = doc(db, 'pages', 'faq');
+      const pageDoc = await getDoc(pageRef);
       
       if (pageDoc.exists()) {
         const data = pageDoc.data();
         setFirestoreData(data);
         console.log('Datos cargados desde Firestore:', data);
+
+        // Migración: si faltan title_es/content_es, guardarlos con defaults en español
+        const updates = {};
+        if (!data.title_es) updates.title_es = 'Preguntas Frecuentes';
+        if (!data.content_es) updates.content_es = `
+<p>📦 <strong>¿Cuánto tiempo tardan en enviar sus galletas?</strong><br/>
+Todos los pedidos se envían los lunes y martes para garantizar frescura y calidad.</p>
+
+<p>❄️ <strong>¿Se envían las galletas en un paquete refrigerado?</strong><br/>
+Nuestras galletas no se envían con paquetes de hielo ni ningún tipo de empaque refrigerado. Están diseñadas para mantenerse frescas durante las condiciones normales de envío.</p>
+
+<p>🌾 <strong>¿Ofrecen productos sin gluten?</strong><br/>
+Aún no, pero estamos trabajando en una opción sin gluten y esperamos ofrecerla pronto.</p>
+
+<p>🍪 <strong>¿Cuál es el número mínimo de galletas que puedo pedir?</strong><br/>
+Nuestro pedido mínimo es de 6 galletas. Cada lote requiere tiempo y cuidado para elaborar, y esta política nos ayuda a mantener la eficiencia y asegurar la calidad para todos los pedidos.</p>
+
+<p>🛒 <strong>¿Cómo puedo hacer un pedido?</strong><br/>
+Puedes ordenar directamente desde nuestro sitio web: 👉 <a href="https://www.DeliZuKar.com" target="_blank" rel="noopener noreferrer">www.DeliZuKar.com</a></p>
+
+<p>🗓️ <strong>¿Puedo programar mi pedido?</strong><br/>
+No podemos programar fechas específicas de envío o entrega. Todos los pedidos se envían únicamente los lunes y martes.</p>
+`;
+        if (Object.keys(updates).length) {
+          updates.updatedAt = new Date().toISOString();
+          await setDoc(pageRef, updates, { merge: true });
+        }
       } else {
         setFirestoreData(null);
         console.log('No se encontraron datos en Firestore, usando datos por defecto');
@@ -136,7 +161,7 @@ const FAQ = () => {
             fontFamily: pageData.titleFont ? `"${pageData.titleFont}", serif` : 'Playfair Display, serif'
           }}
         >
-          {pageData.title || t('faq.title')}
+          {pageData.title}
         </Typography>
         
         {/* Contenido de la página */}
@@ -182,7 +207,7 @@ const FAQ = () => {
                 margin: '8px 0'
               }
             }}
-            dangerouslySetInnerHTML={{ __html: pageData.content }}
+            dangerouslySetInnerHTML={{ __html: pageData.content || '' }}
           />
         </Box>
       </Container>

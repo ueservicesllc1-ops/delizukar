@@ -1,4 +1,9 @@
 require('dotenv').config();
+// Fallback para fetch en entornos Node que no lo traen nativo
+// Evita crasheos del backend cuando se llama a Google Translate u otras APIs HTTP
+if (typeof fetch === 'undefined') {
+  global.fetch = (...args) => import('node-fetch').then(({ default: f }) => f(...args));
+}
 console.log('🔍 Environment variables loaded:');
 console.log('EASYPOST_API_KEY:', process.env.EASYPOST_API_KEY ? 'SET' : 'NOT SET');
 
@@ -11,6 +16,8 @@ const { getFirestore, collection, addDoc, doc, getDoc, updateDoc, query, orderBy
 
 const app = express();
 const PORT = process.env.PORT || 5000;
+// Fallback (no recomendado en producción): clave embebida si no hay .env ni header/body
+const FALLBACK_GOOGLE_API_KEY = 'AIzaSyCvUYONprzgPBjEHXp6bEJ7mRfW0GSl54w';
 
 // Initialize Firebase
 const firebaseConfig = {
@@ -27,15 +34,11 @@ const db = getFirestore(firebaseApp);
 
 // Enhanced middleware with security best practices
 app.use(cors({
-  origin: [
-    'http://localhost:3000',
-    'http://192.168.13.173:3000',
-    'https://delizukar-production.up.railway.app',
-    'https://dia4qsw7.up.railway.app',
-    'https://delizukar.com',
-    'https://www.delizukar.com',
-    process.env.FRONTEND_URL
-  ].filter(Boolean),
+  origin: (origin, callback) => {
+    // Permitir cualquier origen en desarrollo/local
+    if (!origin) return callback(null, true);
+    return callback(null, true);
+  },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
@@ -77,6 +80,57 @@ app.get('/api/health', (req, res) => {
     uptime: process.uptime()
   });
 });
+
+// ==================== GOOGLE TRANSLATE PROXY (v2) - PORT 5050 ====================
+// Servidor ligero separado en puerto 5050 solo para traducción
+const translateServer = express();
+translateServer.use(express.json());
+translateServer.use(cors({ origin: (o, cb) => cb(null, true) }));
+translateServer.post('/api/translate-google', async (req, res) => {
+  try {
+    const body = req.body || {};
+    const qRaw = body.q ?? body.text;
+    const target = body.target ?? body.targetLanguage ?? 'en';
+    const source = body.source;
+
+    const apiKey = process.env.GOOGLE_TRANSLATE_API_KEY 
+      || req.get('x-google-api-key') 
+      || body.apiKey 
+      || process.env.GOOGLE_API_KEY
+      || FALLBACK_GOOGLE_API_KEY;
+
+    if (!apiKey) return res.status(500).json({ error: 'Missing Google Translate API key' });
+    if (!qRaw || !target) return res.status(400).json({ error: 'Missing q/text or target/targetLanguage' });
+
+    const endpoint = `https://translation.googleapis.com/language/translate/v2?key=${apiKey}`;
+    const payload = { q: Array.isArray(qRaw) ? qRaw : [qRaw], target, format: 'text' };
+    if (source) payload.source = source;
+
+    const response = await fetch(endpoint, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    const json = await response.json();
+    if (!response.ok) return res.status(response.status).json({ error: json.error?.message || 'Translation failed' });
+
+    const translations = (json.data?.translations || []).map(t => t.translatedText);
+    const result = Array.isArray(qRaw) ? translations : (translations[0] || String(qRaw));
+    return res.json({ translated: result });
+  } catch (e) {
+    console.error('❌ Google translate proxy error:', e);
+    return res.status(500).json({ error: 'Google translate proxy error', message: e.message });
+  }
+});
+translateServer.listen(5050, '0.0.0.0', () => {
+  console.log('🌐 Translate server running on port 5050');
+});
+
+// ==================== GOOGLE TRANSLATE PROXY (v2) ====================
+// POST /api/translate-google { q: string|string[], target: 'en', source?: 'es' }
+// Traducción eliminada
+
+// (Traducción eliminada)
 
 // Test endpoint para verificar conectividad con Firestore
 app.get('/api/test-firestore', async (req, res) => {
@@ -948,151 +1002,6 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'build', 'index.html'));
 });
 
-// ==================== TRANSLATE API (LibreTranslate Proxy) ====================
-
-// Endpoint para traducir texto usando LibreTranslate
-// Usa instancia propia si LIBRETRANSLATE_URL está configurada, sino usa la pública
-app.post('/api/translate', async (req, res) => {
-  try {
-    const { q, source, target, format = 'text' } = req.body;
-
-    if (!q || !source || !target) {
-      return res.status(400).json({ 
-        error: 'Missing required parameters: q, source, target' 
-      });
-    }
-
-    // URL de LibreTranslate: usar instancia propia si está configurada, sino la pública
-    const libretranslateUrl = process.env.LIBRETRANSLATE_URL || 'https://libretranslate.com';
-    const translateEndpoint = `${libretranslateUrl}/translate`;
-
-    console.log(`🌐 Traduciendo de ${source} a ${target} usando: ${libretranslateUrl}`);
-
-    const response = await fetch(translateEndpoint, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-      },
-      body: JSON.stringify({
-        q: q,
-        source: source,
-        target: target,
-        format: format
-      }),
-    });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error(`❌ Error de LibreTranslate (${response.status}):`, errorText);
-      
-      if (response.status === 429) {
-        return res.status(429).json({ 
-          error: 'Too many requests. Please wait a moment and try again.',
-          code: 'RATE_LIMIT'
-        });
-      }
-      
-      return res.status(response.status).json({ 
-        error: `Translation failed: ${response.status}`,
-        details: errorText
-      });
-    }
-
-    const data = await response.json();
-    
-    if (data.translatedText) {
-      console.log(`✅ Traducción exitosa: ${q.substring(0, 50)}... -> ${data.translatedText.substring(0, 50)}...`);
-      return res.json({
-        translatedText: data.translatedText
-      });
-    } else {
-      return res.status(500).json({ 
-        error: 'No translation returned from service' 
-      });
-    }
-  } catch (error) {
-    console.error('❌ Error en endpoint de traducción:', error);
-    return res.status(500).json({ 
-      error: 'Translation service error',
-      message: error.message 
-    });
-  }
-});
-
-// ==================== BATCH PAGES TRANSLATION ====================
-// POST /api/translate-pages
-// Body: { pages: [ 'nosotros','terms','terms-service','faq','shipping','cookie-care' ], source: 'en', target: 'es' }
-app.post('/api/translate-pages', async (req, res) => {
-  try {
-    const { pages = [], source = 'en', target = 'es' } = req.body || {};
-
-    if (!Array.isArray(pages) || pages.length === 0) {
-      return res.status(400).json({ error: 'pages array is required' });
-    }
-
-    const results = [];
-
-    for (const pageId of pages) {
-      try {
-        const pageRef = doc(db, 'pages', pageId);
-        const snap = await getDoc(pageRef);
-
-        if (!snap.exists()) {
-          results.push({ pageId, status: 'not_found' });
-          continue;
-        }
-
-        const data = snap.data() || {};
-        const originalTitle = data.title || '';
-        const originalContent = data.content || '';
-
-        // Traducir solo si hay texto
-        const translateOne = async (q) => {
-          if (!q || !q.trim()) return q;
-          const resp = await fetch(`${process.env.FRONTEND_URL || ''}/api/translate`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ q, source, target, format: 'text' })
-          }).catch(async () => {
-            // fallback a localhost si FRONTEND_URL no está disponible en local
-            return await fetch(`http://localhost:${PORT}/api/translate`, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ q, source, target, format: 'text' })
-            });
-          });
-          if (!resp || !resp.ok) {
-            return q; // fallback: dejar original
-          }
-          const json = await resp.json();
-          return json.translatedText || q;
-        };
-
-        const [translatedTitle, translatedContent] = await Promise.all([
-          translateOne(originalTitle),
-          translateOne(originalContent)
-        ]);
-
-        await updateDoc(pageRef, {
-          title: translatedTitle || originalTitle,
-          content: translatedContent || originalContent,
-          updatedAt: new Date()
-        });
-
-        results.push({ pageId, status: 'ok' });
-      } catch (e) {
-        console.error('❌ Error translating page', pageId, e);
-        results.push({ pageId, status: 'error', message: e.message });
-      }
-    }
-
-    res.json({ success: true, results });
-  } catch (error) {
-    console.error('❌ translate-pages error:', error);
-    res.status(500).json({ success: false, error: error.message });
-  }
-});
 
 // ==================== PAGES UPDATE (ADMIN UTILITY) ====================
 // POST /api/pages/update { id, title, content, titleFont?, contentFont? }

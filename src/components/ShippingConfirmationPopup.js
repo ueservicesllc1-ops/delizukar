@@ -21,7 +21,7 @@ import {
   CreditCard,
   Payment
 } from '@mui/icons-material';
-import { useTranslation } from 'react-i18next';
+ 
 
 const ShippingConfirmationPopup = ({ 
   open, 
@@ -34,7 +34,7 @@ const ShippingConfirmationPopup = ({
   onPaymentSuccess,
   onPaymentError
 }) => {
-  const { t } = useTranslation();
+  const t = (k, fallback) => (typeof fallback === 'string' ? fallback : (typeof k === 'string' ? k : ''));
   const [showPayment, setShowPayment] = useState(false);
   const [paymentError, setPaymentError] = useState(null);
 

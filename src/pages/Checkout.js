@@ -9,13 +9,13 @@ import AddressCorrection from '../components/AddressCorrection';
 import PayPalPaymentForm from '../components/PayPalPaymentForm';
 import ShippingConfirmationPopup from '../components/ShippingConfirmationPopup';
 import { useShipping } from '../hooks/useShipping';
-import { useTranslation } from 'react-i18next';
+ 
 import { db, auth } from '../firebase/config';
 import { collection, addDoc, query, where, getDocs, updateDoc, doc } from 'firebase/firestore';
 import { onAuthStateChanged } from 'firebase/auth';
 
 const Checkout = () => {
-  const { t } = useTranslation();
+  const t = (k, fallback) => (typeof fallback === 'string' ? fallback : (typeof k === 'string' ? k : ''));
   const { getCartTotal, getCartItemsCount, clearCart, cart } = useStore();
   const navigate = useNavigate();
   const { createOrderData } = useShipping();

@@ -14,10 +14,10 @@ import {
   Facebook,
   Instagram
 } from '@mui/icons-material';
-import { useTranslation } from 'react-i18next';
 import { responsiveComponents } from '../utils/responsiveDesign';
 import { doc, getDoc, collection, addDoc, query, where, getDocs } from 'firebase/firestore';
 import { db } from '../firebase/config';
+import { useLanguage } from '../context/LanguageContext';
 
 // Componente TikTok personalizado
 const TikTokIcon = () => (
@@ -32,8 +32,34 @@ const TikTokIcon = () => (
 );
 
 const Footer = () => {
-  const { t } = useTranslation();
   const currentYear = new Date().getFullYear();
+  const { language } = useLanguage();
+  const text = {
+    es: {
+      quickLinks: 'Enlaces Rápidos', terms: 'Términos y Condiciones', termsService: 'Términos de Servicio',
+      faq: 'Preguntas Frecuentes', allergy: 'Avisos de Alergias', shipping: 'Política de Envío', cookie: 'Instrucciones de Cuidado de Galletas',
+      subscribe: 'Suscríbete a nuestros emails', emailPh: 'Correo electrónico', subscribing: 'Suscribiendo...', subscribeBtn: 'Suscribir',
+      followUs: 'Síguenos en', payments: 'Métodos de pago', copyright: 'Todos los derechos reservados.', madeWith: 'Hecho con amor', developed: 'Desarrollado por Freedom Labs.'
+    },
+    en: {
+      quickLinks: 'Quick Links', terms: 'Terms and Conditions', termsService: 'Terms of Service',
+      faq: 'Frequently Asked Questions', allergy: 'Allergy Notices', shipping: 'Shipping Policy', cookie: 'Cookie Care Instructions',
+      subscribe: 'Subscribe to our emails', emailPh: 'Email address', subscribing: 'Subscribing...', subscribeBtn: 'Subscribe',
+      followUs: 'Follow us', payments: 'Payment methods', copyright: 'All rights reserved.', madeWith: 'Made with love', developed: 'Developed by Freedom Labs.'
+    },
+    fr: {
+      quickLinks: 'Liens rapides', terms: 'Termes et conditions', termsService: 'Conditions d’utilisation',
+      faq: 'Questions fréquentes', allergy: 'Avis d’allergies', shipping: 'Politique d’expédition', cookie: 'Instructions de soin des cookies',
+      subscribe: 'Abonnez-vous à nos emails', emailPh: 'Adresse e-mail', subscribing: 'Abonnement...', subscribeBtn: 'S’abonner',
+      followUs: 'Suivez-nous', payments: 'Moyens de paiement', copyright: 'Tous droits réservés.', madeWith: 'Fait avec amour', developed: 'Développé par Freedom Labs.'
+    },
+    pt: {
+      quickLinks: 'Links Rápidos', terms: 'Termos e Condições', termsService: 'Termos de Serviço',
+      faq: 'Perguntas Frequentes', allergy: 'Avisos de Alergias', shipping: 'Política de Envio', cookie: 'Instruções de Cuidado de Cookies',
+      subscribe: 'Assine nossos emails', emailPh: 'Email', subscribing: 'Assinando...', subscribeBtn: 'Assinar',
+      followUs: 'Siga-nos', payments: 'Métodos de pagamento', copyright: 'Todos os direitos reservados.', madeWith: 'Feito com amor', developed: 'Desenvolvido por Freedom Labs.'
+    }
+  }[language] || {};
   const [socialLinks, setSocialLinks] = useState({
     facebook: '',
     instagram: '',
@@ -68,12 +94,12 @@ const Footer = () => {
 
   const handleSubscribe = async () => {
     if (!email.trim()) {
-      setSubscriptionMessage(t('subscription.enterEmail'));
+      setSubscriptionMessage('Ingresa tu correo');
       return;
     }
 
     if (!email.includes('@')) {
-      setSubscriptionMessage(t('subscription.validEmail'));
+      setSubscriptionMessage('Ingresa un correo válido');
       return;
     }
 
@@ -87,7 +113,7 @@ const Footer = () => {
       const querySnapshot = await getDocs(q);
 
       if (!querySnapshot.empty) {
-        setSubscriptionMessage(t('subscription.alreadySubscribed'));
+        setSubscriptionMessage('Ya estás suscrito');
         setSubscriptionLoading(false);
         return;
       }
@@ -100,7 +126,7 @@ const Footer = () => {
         source: 'footer'
       });
 
-      setSubscriptionMessage(t('subscription.success'));
+      setSubscriptionMessage('Suscripción exitosa');
       setEmail('');
       
       // Limpiar mensaje después de 3 segundos
@@ -110,7 +136,7 @@ const Footer = () => {
 
     } catch (error) {
       console.error('Error suscribiendo email:', error);
-      setSubscriptionMessage(t('subscription.error'));
+      setSubscriptionMessage('Error al suscribirte');
     } finally {
       setSubscriptionLoading(false);
     }
@@ -118,6 +144,7 @@ const Footer = () => {
 
   return (
     <Box
+      data-no-translate
       component="footer"
       className="footer-mobile"
       sx={{
@@ -156,27 +183,27 @@ const Footer = () => {
                   textAlign: 'center'
                 }}
               >
-{t('footer.quickLinks', 'Enlaces Rápidos')}
+{text.quickLinks || 'Enlaces Rápidos'}
               </Typography>
               
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, alignItems: 'center' }}>
                 <Link href="/terms" className="footer-link-mobile" sx={{ color: 'white', textDecoration: 'none', fontSize: '0.95rem', '&:hover': { color: '#EB8B8B' } }}>
-                  {t('footer.termsConditions', 'Términos y Condiciones')}
+                  {text.terms || 'Términos y Condiciones'}
                 </Link>
                 <Link href="/terms-service" sx={{ color: 'white', textDecoration: 'none', fontSize: '0.95rem', '&:hover': { color: '#EB8B8B' } }}>
-                  {t('footer.termsService', 'Términos de Servicio')}
+                  {text.termsService || 'Términos de Servicio'}
                 </Link>
                 <Link href="/faq" sx={{ color: 'white', textDecoration: 'none', fontSize: '0.95rem', '&:hover': { color: '#EB8B8B' } }}>
-                  {t('footer.faq', 'Preguntas Frecuentes')}
+                  {text.faq || 'Preguntas Frecuentes'}
                 </Link>
                 <Link href="/allergy" sx={{ color: 'white', textDecoration: 'none', fontSize: '0.95rem', '&:hover': { color: '#EB8B8B' } }}>
-                  {t('footer.allergyNotices', 'Avisos de Alergias')}
+                  {text.allergy || 'Avisos de Alergias'}
                 </Link>
                 <Link href="/shipping" sx={{ color: 'white', textDecoration: 'none', fontSize: '0.95rem', '&:hover': { color: '#EB8B8B' } }}>
-                  {t('footer.shippingPolicy', 'Política de Envío')}
+                  {text.shipping || 'Política de Envío'}
                 </Link>
                 <Link href="/cookie-care" sx={{ color: 'white', textDecoration: 'none', fontSize: '0.95rem', '&:hover': { color: '#EB8B8B' } }}>
-                  {t('footer.cookieCare', 'Instrucciones de Cuidado de Galletas')}
+                  {text.cookie || 'Instrucciones de Cuidado de Galletas'}
                 </Link>
               </Box>
             </motion.div>
@@ -204,21 +231,21 @@ const Footer = () => {
                   textAlign: 'center'
                 }}
               >
-{t('footer.navigation', 'Navegación')}
+Navegación
               </Typography>
               
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, alignItems: 'center' }}>
                 <Link href="/" sx={{ color: 'white', textDecoration: 'none', fontSize: '0.95rem', '&:hover': { color: '#EB8B8B' } }}>
-                  {t('footer.home', 'Inicio')}
+                  Inicio
                 </Link>
                 <Link href="/productos" sx={{ color: 'white', textDecoration: 'none', fontSize: '0.95rem', '&:hover': { color: '#EB8B8B' } }}>
-                  {t('footer.products', 'Productos')}
+                  Productos
                 </Link>
                 <Link href="/contacto" sx={{ color: 'white', textDecoration: 'none', fontSize: '0.95rem', '&:hover': { color: '#EB8B8B' } }}>
-                  {t('footer.contact', 'Contacto')}
+                  Contacto
                 </Link>
                 <Link href="/nosotros" sx={{ color: 'white', textDecoration: 'none', fontSize: '0.95rem', '&:hover': { color: '#EB8B8B' } }}>
-                  {t('footer.about', 'Nosotros')}
+                  Nosotros
                 </Link>
               </Box>
             </motion.div>
@@ -246,12 +273,12 @@ const Footer = () => {
                   textAlign: 'center'
                 }}
               >
-{t('footer.subscribe', 'Suscríbete a nuestros emails')}
+{text.subscribe || 'Suscríbete a nuestros emails'}
               </Typography>
               
               <Box sx={{ display: 'flex', gap: 1, mb: 1, justifyContent: 'center' }}>
                 <TextField
-                  placeholder={t('footer.emailPlaceholder', 'Correo electrónico')}
+                  placeholder={text.emailPh || 'Correo electrónico'}
                   variant="outlined"
                   size="small"
                   value={email}
@@ -297,7 +324,7 @@ const Footer = () => {
                     }
                   }}
                 >
-                  {subscriptionLoading ? 'Suscribiendo...' : 'Suscribir'}
+                  {subscriptionLoading ? (text.subscribing || 'Suscribiendo...') : (text.subscribeBtn || 'Suscribir')}
                 </Button>
               </Box>
 
@@ -325,7 +352,7 @@ const Footer = () => {
                   textAlign: 'center'
                 }}
               >
-{t('footer.followOn', 'Síguenos en')}
+{text.followUs || 'Síguenos en'}
               </Typography>
               
               <Box sx={{ display: 'flex', gap: 1, mb: 1, justifyContent: 'center' }}>
@@ -387,7 +414,7 @@ const Footer = () => {
                   textAlign: 'center'
                 }}
               >
-                Métodos de pago
+                {text.payments || 'Métodos de pago'}
               </Typography>
             </motion.div>
           </Grid>
@@ -408,10 +435,10 @@ const Footer = () => {
                 fontSize: '0.9rem'
               }}
             >
-              © {currentYear} Delizukar. {t('footer.rights', 'All rights reserved')}. 
-              {t('footer.madeWith', 'Made with')} love
+              © {currentYear} Delizukar. {text.copyright || 'Todos los derechos reservados.'} 
+              {text.madeWith || 'Hecho con amor'}
               <br />
-              {t('footer.poweredBy', 'Powered by Freedom Labs')}.
+              {text.developed || 'Desarrollado por Freedom Labs.'}
             </Typography>
           </motion.div>
         </Box>

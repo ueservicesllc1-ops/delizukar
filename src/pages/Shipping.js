@@ -2,13 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { Box, Container, Typography } from '@mui/material';
 import { db } from '../firebase/config';
 import { doc, getDoc, collection, getDocs } from 'firebase/firestore';
-import { useTranslation } from 'react-i18next';
 
 const Shipping = () => {
-  const { t } = useTranslation();
+  
   const [pageData, setPageData] = useState({
-    title: t('shipping.title'),
-    content: t('shipping.content'),
+    title: 'Política de Envíos',
+    content: 'Al realizar una compra, aceptas estos términos... ',
     titleFont: 'Playfair Display',
     contentFont: 'Roboto'
   });
@@ -21,15 +20,16 @@ const Shipping = () => {
 
   const loadPageData = async () => {
     try {
-      const pageDoc = await getDoc(doc(db, 'pages', 'shipping'));
-      
-      if (pageDoc.exists()) {
-        const data = pageDoc.data();
-        setPageData(data);
-        console.log('Datos cargados desde Firestore:', data);
-      } else {
-        console.log('No se encontraron datos en Firestore, usando datos por defecto');
-      }
+      const ref = doc(db, 'pages', 'shipping');
+      const snap = await getDoc(ref);
+      const data = snap.exists() ? snap.data() : {};
+      setPageData(prev => ({
+        ...prev,
+        title: data.title_es || data.title || 'Política de Envíos',
+        content: data.content_es || data.content || 'Al realizar una compra, aceptas estos términos...',
+        titleFont: data.titleFont || prev.titleFont,
+        contentFont: data.contentFont || prev.contentFont
+      }));
       
       // Cargar fuentes desde Firestore
       await loadFontsFromFirestore();
@@ -79,8 +79,10 @@ const Shipping = () => {
     }
   };
 
+  // Eliminado: sistema de auto-traducción
+
   return (
-    <Box className="shipping-page-mobile" sx={{ py: 8, pt: 35, opacity: fontsReady ? 1 : 0, transition: 'opacity 200ms ease' }}>
+    <Box className="shipping-page-mobile" sx={{ py: 8, pt: 35, opacity: fontsReady ? 1 : 0, transition: 'opacity 0.01s ease' }}>
       <Container maxWidth="lg">
         <Typography
           variant="h2"
@@ -95,7 +97,7 @@ const Shipping = () => {
             fontFamily: pageData.titleFont ? `"${pageData.titleFont}", serif` : 'Playfair Display, serif'
           }}
         >
-          {pageData.title ? pageData.title : t('shipping.title')}
+          {pageData.title}
         </Typography>
         
         {/* Contenido de la página */}

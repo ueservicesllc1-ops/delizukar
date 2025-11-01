@@ -11,11 +11,9 @@ import { useTitleConfig } from '../context/TitleConfigContext';
 import { useFeaturedProducts } from '../context/FeaturedProductsContext';
 import { useStore } from '../context/StoreContext';
 import AfterpayMessaging from '../components/AfterpayMessaging';
-import { useTranslation } from 'react-i18next';
 import { responsiveComponents } from '../utils/responsiveDesign';
 
 const Home = () => {
-  const { t } = useTranslation();
   const { titleConfig, loading } = useTitleConfig();
   const { featuredConfig, featuredProducts, loading: featuredLoading } = useFeaturedProducts();
   const { addToCart } = useStore();
@@ -195,7 +193,7 @@ const Home = () => {
                     '&::after': { display: 'none' }
                   }}
                 >
-                  {t('home.featuredCookies', 'Galletas Destacadas')}
+                  Galletas Destacadas
                 </Typography>
               )}
             </Box>
@@ -239,9 +237,9 @@ const Home = () => {
                             />
                             {/* Chips en la esquina superior izquierda */}
                             <Box sx={{ position: 'absolute', top: 8, left: 8, display: 'flex', flexDirection: 'column', gap: 0.5 }}>
-                              {product.featured && <Chip label={t('product.featured', 'Destacado')} size="small" color="primary" sx={{ fontSize: '0.7rem', height: '24px' }} />}
-                              {product.bestSeller && <Chip label={t('product.bestSeller', 'Más Vendido')} size="small" color="success" sx={{ fontSize: '0.7rem', height: '24px' }} />}
-                              {product.isNew && <Chip label={t('product.new', 'Nuevo')} size="small" color="warning" sx={{ fontSize: '0.7rem', height: '24px' }} />}
+                              {product.featured && <Chip label={'Destacado'} size="small" color="primary" sx={{ fontSize: '0.7rem', height: '24px' }} />}
+                              {product.bestSeller && <Chip label={'Más Vendido'} size="small" color="success" sx={{ fontSize: '0.7rem', height: '24px' }} />}
+                              {product.isNew && <Chip label={'Nuevo'} size="small" color="warning" sx={{ fontSize: '0.7rem', height: '24px' }} />}
                             </Box>
                           </Box>
                           <Typography
@@ -257,7 +255,7 @@ const Home = () => {
                           >
                             {product.name}
                           </Typography>
-                          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
                             <Typography
                               variant="h5"
                               sx={{
@@ -300,7 +298,7 @@ const Home = () => {
                               minHeight: '32px'
                             }}
                           >
-                            {t('home.viewDetails', 'Ver Detalles')}
+                            Ver Detalles
                           </Button>
                         </CardContent>
                       </Card>
@@ -341,7 +339,7 @@ const Home = () => {
                     transition: 'all 0.3s ease'
                   }}
                 >
-                  {t('home.viewAllCookies', 'Ver Todas las Galletas')}
+                  Ver Todas las Galletas
                 </Button>
               </motion.div>
             </Box>
@@ -478,37 +476,37 @@ const Home = () => {
                   )}
                   
                   <Box sx={{ display: 'flex', gap: 1, mb: 3 }}>
-                    {selectedProduct.featured && <Chip label={t('product.featured', 'Destacado')} color="primary" />}
-                    {selectedProduct.bestSeller && <Chip label={t('product.bestSeller', 'Más Vendido')} color="success" />}
-                    {selectedProduct.isNew && <Chip label={t('product.new', 'Nuevo')} color="warning" />}
+                    {selectedProduct.featured && <Chip label={'Destacado'} color="primary" />}
+                    {selectedProduct.bestSeller && <Chip label={'Más Vendido'} color="success" />}
+                    {selectedProduct.isNew && <Chip label={'Nuevo'} color="warning" />}
                   </Box>
                   
                   {selectedProduct.rating && (
                     <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
                       <Rating value={selectedProduct.rating} readOnly sx={{ mr: 1 }} />
-                      <Typography variant="body2" sx={{ color: '#666' }}>
-                        ({selectedProduct.reviews} {t('cart.reviews', 'reseñas')})
+                          <Typography variant="body2" sx={{ color: '#666' }}>
+                        ({selectedProduct.reviews} reseñas)
                       </Typography>
                     </Box>
                   )}
                   
                   <Typography variant="body1" sx={{ color: '#666', lineHeight: 1.6, mb: 3, flex: 1 }}>
                     {selectedProduct.name && selectedProduct.name.toLowerCase().includes('ferrero') 
-                      ? t('product.ferreroDescription', 'NY-style cookie with Ferrero Rocher...')
-                      : t('product.defaultDescription', 'Delicious {name} with premium ingredients...', { name: selectedProduct.name })
+                      ? 'Galleta estilo NY con Ferrero Rocher, chips de chocolate oscuro y avellanas tostadas—intensa, elegante y adictiva.'
+                      : `Deliciosas ${selectedProduct.name} con ingredientes premium. Galletas estilo Nueva York perfectamente horneadas para disfrutar o compartir.`
                     }
                   </Typography>
                   
                   {selectedProduct.inventory !== undefined && (
                     <Box sx={{ mb: 3 }}>
                       <Typography variant="body2" sx={{ color: '#666', mb: 1 }}>
-                        {t('product.stockAvailable', 'Stock disponible')}: {selectedProduct.inventory} {t('product.units', 'unidades')}
+                        Stock disponible: {selectedProduct.inventory} unidades
                       </Typography>
                       <Chip
                         label={
-                          selectedProduct.inventory === 0 ? t('product.outOfStock', 'Agotado') :
-                          selectedProduct.inventory < 10 ? t('product.lowStock', 'Stock Bajo') :
-                          selectedProduct.inventory < 50 ? t('product.mediumStock', 'Stock Medio') : t('product.inStock', 'En Stock')
+                          selectedProduct.inventory === 0 ? 'Agotado' :
+                          selectedProduct.inventory < 10 ? 'Stock Bajo' :
+                          selectedProduct.inventory < 50 ? 'Stock Medio' : 'En Stock'
                         }
                         color={
                           selectedProduct.inventory === 0 ? 'error' :
@@ -547,7 +545,7 @@ const Home = () => {
                   fontWeight: 600
                 }}
               >
-                {t('product.addToCart', 'Agregar al Carrito')}
+                Agregar al Carrito
               </Button>
             </DialogActions>
           </>

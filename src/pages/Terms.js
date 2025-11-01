@@ -2,10 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Box, Container, Typography } from '@mui/material';
 import { db } from '../firebase/config';
 import { doc, getDoc, collection, getDocs } from 'firebase/firestore';
-import { useTranslation } from 'react-i18next';
 
 const Terms = () => {
-  const { t } = useTranslation();
   const [pageData, setPageData] = useState({
     title: 'Términos y Condiciones',
     content: 'Contenido de términos y condiciones estará disponible próximamente',
@@ -19,18 +17,20 @@ const Terms = () => {
     loadPageData();
   }, []);
 
+  // Eliminado: sistema de auto-traducción
+
   const loadPageData = async () => {
     try {
-      // Cargar datos de la página desde Firestore
-      const pageDoc = await getDoc(doc(db, 'pages', 'terms'));
-      
-      if (pageDoc.exists()) {
-        const data = pageDoc.data();
-        setPageData(data);
-        console.log('Datos cargados desde Firestore:', data);
-      } else {
-        console.log('No se encontraron datos en Firestore, usando datos por defecto');
-      }
+      const ref = doc(db, 'pages', 'terms');
+      const snap = await getDoc(ref);
+      const data = snap.exists() ? snap.data() : {};
+      setPageData(prev => ({
+        ...prev,
+        title: data.title_es || data.title || 'Términos y Condiciones',
+        content: data.content_es || data.content || 'Contenido de términos y condiciones estará disponible próximamente',
+        titleFont: data.titleFont || prev.titleFont,
+        contentFont: data.contentFont || prev.contentFont
+      }));
       
       // Siempre cargar fuentes desde Firestore
       await loadFontsFromFirestore();
@@ -85,7 +85,7 @@ const Terms = () => {
   };
 
   return (
-    <Box sx={{ py: 8, pt: '500px', opacity: fontsReady ? 1 : 0, transition: 'opacity 200ms ease' }}>
+    <Box sx={{ py: 8, pt: '500px', opacity: fontsReady ? 1 : 0, transition: 'opacity 0.01s ease' }}>
       <Container maxWidth="lg">
 
         <Typography
@@ -100,7 +100,7 @@ const Terms = () => {
             fontFamily: pageData.titleFont ? `"${pageData.titleFont}", serif` : 'Playfair Display, serif'
           }}
         >
-          {pageData.title || t('terms.title')}
+          {pageData.title}
         </Typography>
         
         {/* Contenido de la página */}
@@ -146,7 +146,7 @@ const Terms = () => {
                 margin: '8px 0'
               }
             }}
-            dangerouslySetInnerHTML={{ __html: pageData.content || t('terms.content') }}
+            dangerouslySetInnerHTML={{ __html: pageData.content }}
           />
         </Box>
       </Container>

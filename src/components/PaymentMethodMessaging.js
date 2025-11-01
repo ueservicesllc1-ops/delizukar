@@ -3,7 +3,7 @@ import { Box, Typography } from '@mui/material';
 import { Payment } from '@mui/icons-material';
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements, PaymentMethodMessagingElement } from '@stripe/react-stripe-js';
-import { useTranslation } from 'react-i18next';
+ 
 
 const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY || 'pk_test_51234567890abcdef...', {
   locale: 'es'
@@ -14,7 +14,7 @@ const PaymentMethodMessaging = ({ amount, currency = 'USD', countryCode = 'US' }
   return null;
   
   /* DISABLED - Stripe not in use
-  const { t } = useTranslation();
+  const t = (k, fallback) => (typeof fallback === 'string' ? fallback : (typeof k === 'string' ? k : ''));
   // Convert amount to cents for Stripe
   const amountInCents = amount ? Math.round(amount * 100) : 0;
   

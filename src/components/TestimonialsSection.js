@@ -5,10 +5,10 @@ import { Star } from '@mui/icons-material';
 import { collection, getDocs } from 'firebase/firestore';
 import { db } from '../firebase/config';
 import { useTitleConfig } from '../context/TitleConfigContext';
-import { useTranslation } from 'react-i18next';
+ 
 
 const TestimonialsSection = () => {
-  const { t, i18n } = useTranslation();
+  const t = (k, fallback) => (typeof fallback === 'string' ? fallback : (typeof k === 'string' ? k : ''));
   const { titleConfig, loading } = useTitleConfig();
   const [testimonials, setTestimonials] = useState([]);
   const [testimonialsLoading, setTestimonialsLoading] = useState(true);
@@ -39,8 +39,10 @@ const TestimonialsSection = () => {
       try {
         console.log('🔄 Cargando testimonios desde Firebase...');
         
-        // Determinar qué colección cargar según el idioma
-        const collectionName = i18n.language === 'es' ? 'testimonials_es' : 'testimonials';
+        // Determinar qué colección cargar según el idioma (sin i18n)
+        let currentLang = 'es';
+        try { currentLang = localStorage.getItem('selectedLanguage') || 'es'; } catch {}
+        const collectionName = currentLang === 'es' ? 'testimonials_es' : 'testimonials';
         console.log('🌍 Cargando desde colección:', collectionName);
         
         const testimonialsRef = collection(db, collectionName);
@@ -69,7 +71,7 @@ const TestimonialsSection = () => {
     };
 
     loadTestimonials();
-  }, [i18n.language]); // Dependencia en el idioma para que se recargue cuando cambie
+  }, []);
 
   if (testimonialsLoading) {
     return (

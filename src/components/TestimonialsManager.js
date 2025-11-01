@@ -42,7 +42,7 @@ import {
   Star,
   Person
 } from '@mui/icons-material';
-import { collection, getDocs, doc, updateDoc, addDoc, deleteDoc, query, orderBy } from 'firebase/firestore';
+import { collection, getDocs, doc, updateDoc, addDoc, deleteDoc } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { db, storage } from '../firebase/config';
 import { fontUploader } from '../utils/fontUploader';
@@ -179,7 +179,9 @@ const TestimonialsManager = ({ open, onClose }) => {
         });
         return {
           id: doc.id,
-          ...data
+          ...data,
+          name: data.name_es || data.name || '',
+          comment: data.comment_es || data.comment || ''
         };
       });
       
@@ -233,8 +235,6 @@ const TestimonialsManager = ({ open, onClose }) => {
 
     try {
       const testimonialData = {
-        name: formData.name,
-        comment: formData.comment,
         rating: formData.rating,
         photoUrl: formData.photoUrl,
         isActive: formData.isActive,
@@ -247,14 +247,26 @@ const TestimonialsManager = ({ open, onClose }) => {
       console.log('Guardando testimonio:', testimonialData);
 
       if (editingTestimonial) {
-        // Actualizar testimonio existente
+        // Actualizar testimonio existente y traducibles (ES+EN)
         const testimonialRef = doc(db, 'testimonials', editingTestimonial.id);
-        await updateDoc(testimonialRef, testimonialData);
+        await updateDoc(testimonialRef, {
+          ...testimonialData,
+          name_es: formData.name,
+          comment_es: formData.comment,
+          name: formData.name,
+          comment: formData.comment
+        });
         console.log('Testimonio actualizado exitosamente');
         showSnackbar('Testimonio actualizado exitosamente', 'success');
       } else {
-        // Crear nuevo testimonio
-        const docRef = await addDoc(collection(db, 'testimonials'), testimonialData);
+        // Crear nuevo testimonio (metadatos) y traducibles ES+EN
+        const docRef = await addDoc(collection(db, 'testimonials'), {
+          ...testimonialData,
+          name_es: formData.name,
+          comment_es: formData.comment,
+          name: formData.name,
+          comment: formData.comment
+        });
         console.log('Testimonio creado con ID:', docRef.id);
         showSnackbar('Testimonio creado exitosamente', 'success');
       }

@@ -33,10 +33,10 @@ import {
 } from '@mui/icons-material';
 import { collection, getDocs, doc, updateDoc, query, orderBy } from 'firebase/firestore';
 import { db } from '../firebase/config';
-import { useTranslation } from 'react-i18next';
+ 
 
 const InventoryManager = ({ open, onClose }) => {
-  const { t } = useTranslation();
+  const t = (k, fallback) => (typeof fallback === 'string' ? fallback : (typeof k === 'string' ? k : ''));
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [editingProduct, setEditingProduct] = useState(null);

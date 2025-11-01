@@ -2,14 +2,15 @@ import React, { useEffect, useState } from 'react';
 import { Box, Container, Grid, Typography } from '@mui/material';
 import { db } from '../firebase/config';
 import { doc, getDoc, collection, getDocs } from 'firebase/firestore';
-// i18n eliminado: priorizamos contenido de Firestore (español)
+// Solo Firestore (español)
 
 const Nosotros = () => {
   const [pageData, setPageData] = useState({
     title: 'Nuestra Historia',
     content: 'Comparte aquí tu historia. Cómo comenzó DeliZuKar, tu pasión por las galletas estilo Nueva York, los ingredientes que amas y los valores detrás de tu marca.',
     titleFont: 'Playfair Display',
-    contentFont: 'Roboto'
+    contentFont: 'Roboto',
+    imageUrl: ''
   });
   const [fontsReady, setFontsReady] = useState(false);
 
@@ -25,10 +26,17 @@ const Nosotros = () => {
 
     const load = async () => {
       try {
-        const docRef = await getDoc(doc(db, 'pages', 'nosotros'));
-        if (docRef.exists()) {
-          setPageData(docRef.data());
-        }
+        const ref = doc(db, 'pages', 'nosotros');
+        const pageSnap = await getDoc(ref);
+        const raw = pageSnap.exists() ? pageSnap.data() : {};
+        setPageData(prev => ({
+          ...prev,
+          title: raw.title_es || raw.title || 'Nuestra Historia',
+          content: raw.content_es || raw.content || 'Comparte aquí tu historia. Cómo comenzó DeliZuKar, tu pasión por las galletas estilo Nueva York, los ingredientes que amas y los valores detrás de tu marca.',
+          titleFont: raw.titleFont || prev.titleFont,
+          contentFont: raw.contentFont || prev.contentFont,
+          imageUrl: raw.imageUrl || prev.imageUrl
+        }));
         try {
           const uploadedFonts = JSON.parse(localStorage.getItem('uploadedFonts') || '[]');
           uploadedFonts.forEach(f => injectFont(f.name, f.url));
@@ -49,8 +57,10 @@ const Nosotros = () => {
     load();
   }, []);
 
+  // Eliminado: sistema de auto-traducción
+
   return (
-    <Box className="nosotros-mobile" sx={{ pt: 20, pb: 8 }}>
+    <Box className="nosotros-mobile" sx={{ pt: 20, pb: 8, opacity: fontsReady ? 1 : 0, transition: 'opacity 0.01s ease' }}>
       <style>
         {`
           @keyframes slowFloat {

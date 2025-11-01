@@ -4,10 +4,10 @@ import { Box, Grid, Card, CardContent, CardActions, Button, Chip, Rating, IconBu
 import { Close, AddShoppingCart, FavoriteBorder, AccountBalanceWallet, ShoppingBag } from '@mui/icons-material';
 import { useStore } from '../context/StoreContext';
 import ProductImage from './ProductImage';
-import { useTranslation } from 'react-i18next';
+ 
 
 const ProductCards = ({ products: propProducts, showAll = false }) => {
-  const { t } = useTranslation();
+  const t = (k, fallback) => (typeof fallback === 'string' ? fallback : (typeof k === 'string' ? k : ''));
   const [open, setOpen] = useState(false);
   const [selected, setSelected] = useState(null);
   const { addToCart, products } = useStore();

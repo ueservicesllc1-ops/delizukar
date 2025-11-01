@@ -36,7 +36,7 @@ import {
   Cancel
 } from '@mui/icons-material';
 import { db, storage } from '../firebase/config';
-import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc } from 'firebase/firestore';
+import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, setDoc } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
 
 const ProductsManager = ({ open, onClose }) => {
@@ -86,10 +86,15 @@ const ProductsManager = ({ open, onClose }) => {
     setError('');
     try {
       const productsSnapshot = await getDocs(collection(db, 'products'));
-      const productsData = productsSnapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      }));
+      const productsData = productsSnapshot.docs.map(d => {
+        const data = d.data();
+        return {
+          id: d.id,
+          ...data,
+          name: data.name_es || data.name || '',
+          description: data.description_es || data.description || ''
+        };
+      });
       setProducts(productsData);
     } catch (err) {
       setError('Error al cargar productos: ' + err.message);
@@ -238,11 +243,16 @@ const ProductsManager = ({ open, onClose }) => {
       }
 
       const productData = {
-        ...formData,
+        // Campos neutrales/no traducibles
         price: parseFloat(formData.price),
         rating: parseFloat(formData.rating),
         images: imageUrls,
-        image: imageUrls[0] || '', // Mantener compatibilidad con el campo image
+        image: imageUrls[0] || '',
+        category: formData.category,
+        isNew: formData.isNew,
+        isBestSeller: formData.isBestSeller,
+        featured: formData.featured,
+        active: formData.active !== false,
         updatedAt: new Date().toISOString()
       };
 
@@ -252,12 +262,26 @@ const ProductsManager = ({ open, onClose }) => {
       }
 
       if (editingProduct) {
-        // Actualizar producto existente
-        await updateDoc(doc(db, 'products', editingProduct.id), productData);
+        // Actualizar producto existente (metadatos) y ES+EN para campos traducibles
+        const productRef = doc(db, 'products', editingProduct.id);
+        await updateDoc(productRef, {
+          ...productData,
+          name_es: formData.name,
+          description_es: formData.description,
+          name: formData.name,
+          description: formData.description
+        });
         setSuccess('Producto actualizado exitosamente');
       } else {
-        // Crear nuevo producto
-        const docRef = await addDoc(collection(db, 'products'), productData);
+        // Crear nuevo producto (ES)
+        const collectionRef = collection(db, 'products');
+        const docRef = await addDoc(collectionRef, {
+          ...productData,
+          name_es: formData.name,
+          description_es: formData.description,
+          name: formData.name,
+          description: formData.description
+        });
         
         // Si hay imágenes seleccionadas, subirlas y actualizar el producto
         if (selectedImages.length > 0) {

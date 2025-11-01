@@ -5,8 +5,8 @@ import { collection, addDoc, serverTimestamp, doc, getDoc, collection as fsColle
 
 const Contacto = () => {
   const [pageData, setPageData] = useState({
-    title: 'Contact Us',
-    content: "We'd love to hear from you. Send us a message and we'll get back to you.",
+    title: 'Contáctanos',
+    content: 'Nos encantaría saber de ti. Envíanos un mensaje y te responderemos pronto.',
     titleFont: 'Playfair Display',
     contentFont: 'Roboto'
   });
@@ -29,10 +29,17 @@ const Contacto = () => {
     const load = async () => {
       try {
         // Datos de la página
-        const docRef = await getDoc(doc(db, 'pages', 'contacto'));
-        if (docRef.exists()) {
-          setPageData(docRef.data());
-        }
+        const ref = doc(db, 'pages', 'contacto');
+        const snap = await getDoc(ref);
+        const data = snap.exists() ? snap.data() : {};
+        setPageData(prev => ({
+          ...prev,
+          // Forzar español siempre
+          title: 'Contáctanos',
+          content: data.content_es || prev.content,
+          titleFont: data.titleFont || prev.titleFont,
+          contentFont: data.contentFont || prev.contentFont
+        }));
 
         // Fuentes desde localStorage (dataURL) para evitar CORS
         try {
@@ -42,8 +49,8 @@ const Contacto = () => {
 
         // Fuentes desde Firestore
         const fontsCol = fsCollection(db, 'fonts');
-        const snap = await getDocs(fontsCol);
-        snap.forEach(d => {
+        const fontsSnap = await getDocs(fontsCol);
+        fontsSnap.forEach(d => {
           const f = d.data();
           injectFont(f.name, f.dataUrl || f.url);
         });
@@ -55,6 +62,8 @@ const Contacto = () => {
     };
     load();
   }, []);
+
+  // Eliminado: sistema de auto-traducción
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -107,7 +116,7 @@ const Contacto = () => {
   };
 
   return (
-    <Box className="contacto-mobile" sx={{ py: 8, pt: 25, opacity: fontsReady ? 1 : 0, transition: 'opacity 200ms ease' }}>
+    <Box className="contacto-mobile" sx={{ py: 8, pt: 25, opacity: fontsReady ? 1 : 0, transition: 'opacity 0.01s ease' }}>
       <Container maxWidth="lg">
         <Typography
           className="contacto-title-mobile"
@@ -121,13 +130,13 @@ const Contacto = () => {
             fontFamily: pageData.titleFont ? `"${pageData.titleFont}", serif` : 'Playfair Display, serif'
           }}
         >
-          {pageData.title}
+          Contáctanos
         </Typography>
 
 
         {sent && (
           <Alert severity="success" sx={{ mb: 3 }}>
-            Your message has been sent. We'll reply shortly.
+            Tu mensaje ha sido enviado. Te responderemos pronto.
           </Alert>
         )}
 
@@ -136,7 +145,7 @@ const Contacto = () => {
             <Grid item xs={12} md={6}>
               <TextField
                 fullWidth
-                label="Name"
+                label="Nombre"
                 name="nombre"
                 value={form.nombre}
                 onChange={handleChange}
@@ -158,7 +167,7 @@ const Contacto = () => {
           
           <Box sx={{ mt: 2, width: '100%', display: 'flex', justifyContent: 'center' }}>
             <TextField
-              label="Message"
+              label="Mensaje"
               name="mensaje"
               value={form.mensaje}
               onChange={handleChange}
@@ -197,7 +206,7 @@ const Contacto = () => {
                 '&:hover': { backgroundColor: '#b5555a' }
               }}
             >
-              {sending ? 'Sending...' : 'Send Message'}
+              {sending ? 'Enviando...' : 'Enviar Mensaje'}
             </Button>
           </Box>
         </Box>

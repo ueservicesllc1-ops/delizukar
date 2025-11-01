@@ -1,14 +1,15 @@
-import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import React, { useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import { CssBaseline, Box } from '@mui/material';
 import { Toaster } from 'react-hot-toast';
 // import AOS from 'aos';
 // import 'aos/dist/aos.css';
-
-// Sistema de traducción antiguo eliminado - usando traducción automática con LibreTranslate
-// import './i18n';
-
+ 
+ 
+import { applyTranslations, startAutoTranslate } from './utils/applyTranslations';
+import { LanguageProvider } from './context/LanguageContext';
+import { useLanguage } from './context/LanguageContext';
 // Context
 import { StoreProvider } from './context/StoreContext';
 import { TitleConfigProvider } from './context/TitleConfigContext';
@@ -17,7 +18,7 @@ import { FeaturedProductsProvider } from './context/FeaturedProductsContext';
 // Components
 import Header from './components/Header';
 import Footer from './components/Footer';
-import AutoTranslateButton from './components/AutoTranslateButton';
+// import AutoTranslateButton from './components/AutoTranslateButton';
 
 // Pages
 import Home from './pages/Home';
@@ -148,9 +149,26 @@ const theme = createTheme({
 // });
 
 function App() {
+  const RouteWatcher = () => {
+    const location = useLocation();
+    const { language } = useLanguage();
+    useEffect(() => {
+      try {
+        if (language !== 'es') {
+          setTimeout(() => {
+            applyTranslations(language, 'es');
+            startAutoTranslate(language, 'es');
+          }, 50);
+        }
+      } catch {}
+    }, [location.pathname, language]);
+    return null;
+  };
+
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
+            <LanguageProvider>
             <StoreProvider>
               <TitleConfigProvider>
                 <FeaturedProductsProvider>
@@ -161,6 +179,7 @@ function App() {
           }}
         >
           <div className="App">
+            <RouteWatcher />
             <Box sx={{ 
               paddingTop: { xs: '500px', sm: '70px', md: '70px' },
               backgroundColor: '#ffffff',
@@ -272,14 +291,7 @@ function App() {
             
             <Footer />
             
-            {/* Botón de traducción automática */}
-            <AutoTranslateButton 
-              sourceLang="es" 
-              targetLang="en"
-              position={{ bottom: '20px', right: '20px' }}
-              buttonColor="#EC8C8D"
-              buttonHoverColor="#d47a7b"
-            />
+            {/* Traducción del DOM desactivada */}
             
             {/* Toast notifications */}
             <Toaster
@@ -311,6 +323,7 @@ function App() {
                 </FeaturedProductsProvider>
               </TitleConfigProvider>
             </StoreProvider>
+            </LanguageProvider>
     </ThemeProvider>
   );
 }

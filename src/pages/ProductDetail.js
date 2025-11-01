@@ -3,10 +3,10 @@ import { motion } from 'framer-motion';
 import { Box, Container, Typography, Grid, Card, CardMedia, CardContent, Button, Rating, Chip, IconButton } from '@mui/material';
 import { AddShoppingCart, Favorite, Share, ArrowBack, AccountBalanceWallet, ShoppingBag } from '@mui/icons-material';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
+ 
 
 const ProductDetail = () => {
-  const { t } = useTranslation();
+  const t = (k, fallback) => (typeof fallback === 'string' ? fallback : (typeof k === 'string' ? k : ''));
   const { id } = useParams();
   const navigate = useNavigate();
 

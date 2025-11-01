@@ -42,20 +42,31 @@ import {
   onAuthStateChanged 
 } from 'firebase/auth';
 import { collection, addDoc, getDocs, query, where } from 'firebase/firestore';
-// Sistema de traducción antiguo eliminado - usando traducción automática con LibreTranslate
 import { responsiveComponents, getResponsiveValue } from '../utils/responsiveDesign';
-
+import { applyTranslations, startAutoTranslate } from '../utils/applyTranslations';
+import { translateText } from '../services/translateService';
+import { useLanguage } from '../context/LanguageContext';
 const Header = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
   const [user, setUser] = useState(null);
   const [authMenuOpen, setAuthMenuOpen] = useState(false);
+  const [translatingLang, setTranslatingLang] = useState(false);
   const { cart, getCartItemsCount } = useStore();
+  const { language, setLanguage } = useLanguage();
+  
   const navigate = useNavigate();
   const location = useLocation();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+
+  // Aplicar idioma guardado y activar auto-traducción para contenido dinámico
+  useEffect(() => {
+    try {
+      if (language !== 'es') setTimeout(() => startAutoTranslate(language, 'es'), 100);
+    } catch {}
+  }, []);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -64,6 +75,8 @@ const Header = () => {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  
 
   // Escuchar cambios de autenticación
   useEffect(() => {
@@ -183,12 +196,19 @@ const Header = () => {
 
   const cartItemsCount = getCartItemsCount();
 
+  const labels = {
+    es: { home: 'Inicio', products: 'Productos', about: 'Nosotros', contact: 'Contacto', faq: 'FAQ' },
+    en: { home: 'Home', products: 'Products', about: 'About Us', contact: 'Contact', faq: 'FAQ' },
+    fr: { home: 'Accueil', products: 'Produits', about: 'À propos', contact: 'Contact', faq: 'FAQ' },
+    pt: { home: 'Início', products: 'Produtos', about: 'Sobre nós', contact: 'Contato', faq: 'FAQ' }
+  };
+  const L = labels[language] || labels.es;
   const menuItems = [
-    { label: 'Inicio', href: '/' },
-    { label: 'Productos', href: '/productos' },
-    { label: 'Nosotros', href: '/nosotros' },
-    { label: 'Contacto', href: '/contacto' },
-    { label: 'FAQ', href: '/faq' }
+    { label: L.home, href: '/' },
+    { label: L.products, href: '/productos' },
+    { label: L.about, href: '/nosotros' },
+    { label: L.contact, href: '/contacto' },
+    { label: L.faq, href: '/faq' }
   ];
 
   const drawer = (
@@ -230,7 +250,7 @@ const Header = () => {
   );
 
   return (
-    <>
+    <div data-no-translate>
       <motion.div
         initial={{ y: -100 }}
         animate={{ y: 0 }}
@@ -242,7 +262,7 @@ const Header = () => {
           sx={{
             backgroundColor: '#ffece5',
             boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
-            zIndex: 9999,
+            zIndex: 100000,
             top: 0,
             // Sistema responsivo universal
             height: responsiveComponents.header.height,
@@ -387,7 +407,46 @@ const Header = () => {
                     </IconButton>
                   </Box>
                 )}
-                
+                {/* Selector de idioma */}
+                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                  <select
+                    aria-label="Seleccionar idioma"
+                    value={language}
+                    onChange={async (e) => {
+                      const lang = e.target.value;
+                      try { localStorage.setItem('selectedLanguage', lang); } catch {}
+                      setLanguage(lang);
+                      if (lang === 'es') {
+                        window.location.reload();
+                      } else {
+                        try {
+                          setTranslatingLang(true);
+                          await translateText('Hola', lang, 'es');
+                          startAutoTranslate(lang, 'es');
+                        } catch {
+                          alert('No se pudo traducir. Verifica backend y API key.');
+                        } finally {
+                          setTranslatingLang(false);
+                        }
+                      }
+                    }}
+                    style={{
+                      padding: '6px 10px',
+                      borderRadius: '16px',
+                      border: '1px solid #c8626d',
+                      color: '#c8626d',
+                      background: 'white',
+                      outline: 'none',
+                      opacity: translatingLang ? 0.6 : 1,
+                      pointerEvents: translatingLang ? 'none' : 'auto'
+                    }}
+                  >
+                    <option value="es">Español</option>
+                    <option value="en">English</option>
+                    <option value="fr">Français</option>
+                    <option value="pt">Português</option>
+                  </select>
+                </Box>
                   {/* Search Icon - Left (desktop only) */}
                   {!isMobile && (
                     <Box sx={{ 
@@ -524,7 +583,7 @@ const Header = () => {
               }}>
                 {/* Desktop Navigation - Centered */}
                 {!isMobile && (
-                  <Box sx={{ display: 'flex', gap: 1, justifyContent: 'center', alignItems: 'center' }}>
+                  <Box sx={{ display: 'flex', gap: 1, justifyContent: 'center', alignItems: 'center', flex: 1 }}>
                     {menuItems.map((item) => (
                         <Button
                           key={item.label}
@@ -550,21 +609,15 @@ const Header = () => {
                   </Box>
                 )}
 
+                
+
                 {/* Actions - Hidden on desktop, shown on mobile */}
                 <Box sx={{ display: { xs: 'flex', md: 'none' }, alignItems: 'center', gap: 1 }}>
                   {/* Mobile actions can go here if needed */}
                 </Box>
               </Box>
 
-                {/* Language Switcher - Bottom Left */}
-                <Box sx={{ 
-                  position: 'absolute', 
-                  bottom: 8, 
-                  left: 16, 
-                  zIndex: 10 
-                }}>
-                  {/* LanguageSwitcher eliminado - usando traducción automática */}
-                </Box>
+                
             </Toolbar>
           </Container>
         </AppBar>
@@ -608,7 +661,7 @@ const Header = () => {
         <MenuItem onClick={handleProfileMenuClose}>Configuración</MenuItem>
         <MenuItem onClick={handleLogout}>Salir</MenuItem>
       </Menu>
-    </>
+    </div>
   );
 };
 

@@ -15,7 +15,7 @@ import {
   Grid
 } from '@mui/material';
 import { LocalShipping, CheckCircle, Close } from '@mui/icons-material';
-import { useTranslation } from 'react-i18next';
+ 
 // Eliminado shippoService - ahora usamos EasyPost
 import easypostService from '../services/easypostService';
 
@@ -25,7 +25,7 @@ const ShippingCalculator = ({
   orderData, 
   onShippingSelected 
 }) => {
-  const { t } = useTranslation();
+  const t = (k, fallback) => (typeof fallback === 'string' ? fallback : (typeof k === 'string' ? k : ''));
   const [loading, setLoading] = useState(false);
   const [rates, setRates] = useState([]);
   const [selectedRate, setSelectedRate] = useState(null);

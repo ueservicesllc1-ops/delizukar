@@ -7,10 +7,8 @@ import { useStore } from '../context/StoreContext';
 import ProductImageCarousel from '../components/ProductImageCarousel';
 import ProductImage from '../components/ProductImage';
 import AfterpayMessaging from '../components/AfterpayMessaging';
-import { useTranslation } from 'react-i18next';
 
 const Products = () => {
-  const { t } = useTranslation();
   const { categories, products, addToCart, productsLoading } = useStore();
   const [open, setOpen] = useState(false);
   const [selected, setSelected] = useState(null);
@@ -112,7 +110,7 @@ const Products = () => {
                     <Box sx={{ position: 'absolute', top: 12, left: 12, display: 'flex', flexDirection: 'column', gap: 1 }}>
                       {product.isNew && (
                         <Chip
-                          label={t('product.new', 'New')}
+                          label={'Nuevo'}
                           size="small"
                           sx={{
                             backgroundColor: '#4CAF50',
@@ -124,7 +122,7 @@ const Products = () => {
                       )}
                       {product.isBestSeller && (
                         <Chip
-                          label={t('product.bestSeller', 'Best Seller')}
+                          label={'Más Vendido'}
                           size="small"
                           sx={{
                             backgroundColor: '#FF6B35',
@@ -208,7 +206,7 @@ const Products = () => {
                           variant="body2"
                           sx={{ ml: 0.5, color: '#666', fontSize: '0.8rem' }}
                         >
-                          ({product.reviews} {t('cart.reviews', 'reviews')})
+                          ({product.reviews} reseñas)
                         </Typography>
                       </Box>
                     </Box>
@@ -227,9 +225,9 @@ const Products = () => {
                       </Typography>
                       <Chip
                         label={
-                          (product.inventory || 0) === 0 ? t('product.outOfStock', 'Out of Stock') :
-                          (product.inventory || 0) < 10 ? t('product.lowStock', 'Low Stock') :
-                          (product.inventory || 0) < 50 ? t('product.mediumStock', 'Medium Stock') : t('product.inStock', 'In Stock')
+                          (product.inventory || 0) === 0 ? 'Agotado' :
+                          (product.inventory || 0) < 10 ? 'Stock Bajo' :
+                          (product.inventory || 0) < 50 ? 'Stock Medio' : 'En Stock'
                         }
                         size="small"
                         sx={{
@@ -273,7 +271,7 @@ const Products = () => {
                         addToCart(product);
                       }}
                     >
-                      {t('product.addToCart', 'Add to Cart')}
+                      Agregar al Carrito
                     </Button>
                   </CardActions>
                 </Card>
@@ -308,7 +306,7 @@ const Products = () => {
         >
           <DialogContent sx={{ p: 0, position: 'relative' }}>
             <IconButton
-              aria-label={t('cart.close', 'Close')}
+              aria-label={'Cerrar'}
               onClick={() => setOpen(false)}
               sx={{ 
                 position: 'absolute', 
@@ -353,7 +351,7 @@ const Products = () => {
                     </Typography>
                     <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
                       <Rating value={selected.rating} precision={0.1} readOnly size="small" sx={{ color: '#FFD700' }} />
-                      <Typography variant="body2" sx={{ ml: 1, color: '#666' }}>({selected.reviews} {t('cart.reviews', 'reviews')})</Typography>
+                      <Typography variant="body2" sx={{ ml: 1, color: '#666' }}>({selected.reviews} reseñas)</Typography>
                     </Box>
                     <Typography variant="h6" sx={{ fontWeight: 700, color: '#c8626d', mb: 2 }}>
                       ${selected.price}
@@ -374,13 +372,13 @@ const Products = () => {
                           fontWeight: 500
                         }}
                       >
-                        {t('product.stockAvailable', 'Stock available')}: {selected.inventory || 0} {t('product.units', 'units')}
+                        Stock disponible: {selected.inventory || 0} unidades
                       </Typography>
                       <Chip
                         label={
-                          (selected.inventory || 0) === 0 ? t('product.outOfStock', 'Out of Stock') :
-                          (selected.inventory || 0) < 10 ? t('product.lowStock', 'Low Stock') :
-                          (selected.inventory || 0) < 50 ? t('product.mediumStock', 'Medium Stock') : t('product.inStock', 'In Stock')
+                          (selected.inventory || 0) === 0 ? 'Agotado' :
+                          (selected.inventory || 0) < 10 ? 'Stock Bajo' :
+                          (selected.inventory || 0) < 50 ? 'Stock Medio' : 'En Stock'
                         }
                         size="small"
                         sx={{
@@ -401,8 +399,8 @@ const Products = () => {
                     <Typography variant="body2" sx={{ color: '#666', lineHeight: 1.6, mb: 3 }}>
                       {selected.description || 
                         (selected.name && selected.name.toLowerCase().includes('ferrero') 
-                          ? t('product.ferreroDescription', 'NY-style cookie with Ferrero Rocher...')
-                          : t('product.defaultDescription', 'Delicious {name} with premium ingredients...', { name: selected.name })
+                          ? 'Galleta estilo NY con Ferrero Rocher, chips de chocolate oscuro y avellanas tostadas—intensa, elegante y adictiva.'
+                          : `Deliciosas ${selected.name} con ingredientes premium. Galletas estilo Nueva York perfectamente horneadas para disfrutar o compartir.`
                         )
                       }
                     </Typography>
@@ -422,7 +420,7 @@ const Products = () => {
                         setOpen(false);
                       }}
                     >
-                      {t('product.addToCart', 'Add to Cart')}
+                      Agregar al Carrito
                     </Button>
                 </Box>
               </Box>

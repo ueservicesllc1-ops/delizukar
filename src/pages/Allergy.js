@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Box, Container, Typography } from '@mui/material';
 import { db } from '../firebase/config';
-import { useTranslation } from 'react-i18next';
 import { doc, getDoc, collection, getDocs } from 'firebase/firestore';
 
 const Allergy = () => {
-  const { t, i18n } = useTranslation();
+  
   const [pageData, setPageData] = useState({
     title: '',
     content: '',
@@ -20,52 +19,31 @@ const Allergy = () => {
     loadPageData();
   }, []);
 
-  // Actualizar traducciones cuando cambie el idioma
+  // Priorizar siempre Firestore; si no hay datos, usar defaults en español
   useEffect(() => {
     if (firestoreData) {
-      const lang = i18n.language === 'es' ? 'es' : 'en';
-      const titleKey = `title_${lang}`;
-      const contentKey = `content_${lang}`;
-      
-      if (firestoreData[titleKey] || firestoreData[contentKey]) {
-        setPageData(prev => ({
-          ...prev,
-          title: firestoreData[titleKey] || firestoreData.title || t('allergy.title'),
-          content: firestoreData[contentKey] || firestoreData.content || t('allergy.content'),
-          titleFont: firestoreData.titleFont || prev.titleFont,
-          contentFont: firestoreData.contentFont || prev.contentFont
-        }));
-      } else {
-        // Si no hay estructura multiidioma, usar traducciones del sistema según el idioma
-        setPageData(prev => ({
-          ...prev,
-          title: t('allergy.title'),
-          content: t('allergy.content'),
-          titleFont: firestoreData.titleFont || prev.titleFont,
-          contentFont: firestoreData.contentFont || prev.contentFont
-        }));
-      }
+      setPageData(prev => ({
+        ...prev,
+        title: firestoreData.title_es || firestoreData.title || 'Avisos de Alergias',
+        content: firestoreData.content_es || firestoreData.content || '',
+        titleFont: firestoreData.titleFont || prev.titleFont,
+        contentFont: firestoreData.contentFont || prev.contentFont
+      }));
     } else {
       setPageData(prev => ({
         ...prev,
-        title: t('allergy.title'),
-        content: t('allergy.content')
+        title: 'Avisos de Alergias',
+        content: ''
       }));
     }
-  }, [i18n.language, t, firestoreData]);
+  }, [firestoreData]);
 
   const loadPageData = async () => {
     try {
-      const pageDoc = await getDoc(doc(db, 'pages', 'allergy'));
-      
-      if (pageDoc.exists()) {
-        const data = pageDoc.data();
-        setFirestoreData(data);
-        console.log('Datos cargados desde Firestore:', data);
-      } else {
-        setFirestoreData(null);
-        console.log('No se encontraron datos en Firestore, usando datos por defecto');
-      }
+      const ref = doc(db, 'pages', 'allergy');
+      const snap = await getDoc(ref);
+      const data = snap.exists() ? snap.data() : {};
+      setFirestoreData(data);
       
       // Cargar fuentes desde Firestore
       await loadFontsFromFirestore();
@@ -117,7 +95,7 @@ const Allergy = () => {
   };
 
   return (
-    <Box className="allergy-page-mobile" sx={{ py: 8, pt: 35, opacity: fontsReady ? 1 : 0, transition: 'opacity 200ms ease' }}>
+    <Box className="allergy-page-mobile" sx={{ py: 8, pt: 35, opacity: fontsReady ? 1 : 0, transition: 'opacity 0.01s ease' }}>
       <Container maxWidth="lg">
         <Typography
           variant="h2"
@@ -132,7 +110,7 @@ const Allergy = () => {
             fontFamily: pageData.titleFont ? `"${pageData.titleFont}", serif` : 'Playfair Display, serif'
           }}
         >
-          {pageData.title || t('allergy.title')}
+          {pageData.title}
         </Typography>
         
         {/* Contenido de la página */}
@@ -178,7 +156,7 @@ const Allergy = () => {
                 margin: '8px 0'
               }
             }}
-            dangerouslySetInnerHTML={{ __html: pageData.content || t('allergy.content') }}
+            dangerouslySetInnerHTML={{ __html: pageData.content }}
           />
         </Box>
       </Container>

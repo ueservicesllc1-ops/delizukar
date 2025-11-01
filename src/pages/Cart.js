@@ -7,13 +7,13 @@ import { useStore } from '../context/StoreContext';
 import { useNavigate } from 'react-router-dom';
 import AfterpayMessaging from '../components/AfterpayMessaging';
 import { useMinProducts } from '../hooks/useMinProducts';
-import { useTranslation } from 'react-i18next';
+ 
 import { auth, db } from '../firebase/config';
 import { onAuthStateChanged } from 'firebase/auth';
 import { doc, getDoc, updateDoc, collection, query, where, getDocs } from 'firebase/firestore';
 
 const Cart = () => {
-  const { t } = useTranslation();
+  const t = (k, fallback) => (typeof fallback === 'string' ? fallback : (typeof k === 'string' ? k : ''));
   const { cart, updateCartQuantity, removeFromCart, getCartTotal, getCartItemsCount } = useStore();
 
   // Función para mapear categorías

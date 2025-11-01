@@ -2,10 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { Box, Container, Typography } from '@mui/material';
 import { db } from '../firebase/config';
 import { doc, getDoc, collection, getDocs } from 'firebase/firestore';
-import { useTranslation } from 'react-i18next';
 
 const TermsService = () => {
-  const { t } = useTranslation();
+  
   const [pageData, setPageData] = useState({
     title: 'Términos de Servicio',
     content: 'Contenido de términos de servicio estará disponible próximamente',
@@ -19,17 +18,20 @@ const TermsService = () => {
     loadPageData();
   }, []);
 
+  // Eliminado: sistema de traducción automático
+
   const loadPageData = async () => {
     try {
-      const pageDoc = await getDoc(doc(db, 'pages', 'terms-service'));
-      
-      if (pageDoc.exists()) {
-        const data = pageDoc.data();
-        setPageData(data);
-        console.log('Datos cargados desde Firestore:', data);
-      } else {
-        console.log('No se encontraron datos en Firestore, usando datos por defecto');
-      }
+      const ref = doc(db, 'pages', 'terms-service');
+      const snap = await getDoc(ref);
+      const data = snap.exists() ? snap.data() : {};
+      setPageData(prev => ({
+        ...prev,
+        title: data.title_es || data.title || 'Términos de Servicio',
+        content: data.content_es || data.content || 'Contenido de términos de servicio estará disponible próximamente',
+        titleFont: data.titleFont || prev.titleFont,
+        contentFont: data.contentFont || prev.contentFont
+      }));
       
       // Cargar fuentes desde Firestore
       await loadFontsFromFirestore();
@@ -80,7 +82,7 @@ const TermsService = () => {
   };
 
   return (
-    <Box className="terms-service-page-mobile" sx={{ py: 8, pt: 35, opacity: fontsReady ? 1 : 0, transition: 'opacity 200ms ease' }}>
+    <Box className="terms-service-page-mobile" sx={{ py: 8, pt: 35, opacity: fontsReady ? 1 : 0, transition: 'opacity 0.01s ease' }}>
       <Container maxWidth="lg">
         <Typography
           variant="h2"
@@ -95,7 +97,7 @@ const TermsService = () => {
             fontFamily: pageData.titleFont ? `"${pageData.titleFont}", serif` : 'Playfair Display, serif'
           }}
         >
-          {pageData.title || t('termsService.title')}
+          {pageData.title}
         </Typography>
         
         {/* Contenido de la página */}
@@ -141,7 +143,7 @@ const TermsService = () => {
                 margin: '8px 0'
               }
             }}
-            dangerouslySetInnerHTML={{ __html: pageData.content || t('termsService.content') }}
+            dangerouslySetInnerHTML={{ __html: pageData.content }}
           />
         </Box>
       </Container>

@@ -25,35 +25,12 @@ import {
   ShoppingBag
 } from '@mui/icons-material';
 import { useStore } from '../context/StoreContext';
-import { useTranslation } from 'react-i18next';
 
 const FeaturedProducts = () => {
-  const { t, i18n } = useTranslation();
   const { featuredProducts, addToCart } = useStore();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
-  const [currentLanguage, setCurrentLanguage] = useState(i18n.language);
-
-  // Forzar re-render cuando cambie el idioma
-  useEffect(() => {
-    const handleLanguageChange = (lng) => {
-      console.log('🌍 Idioma cambiado a:', lng);
-      setCurrentLanguage(lng);
-    };
-
-    i18n.on('languageChanged', handleLanguageChange);
-    
-    return () => {
-      i18n.off('languageChanged', handleLanguageChange);
-    };
-  }, [i18n]);
-
-  // Debug: verificar traducciones
-  useEffect(() => {
-    console.log('🔍 Idioma actual:', i18n.language);
-    console.log('🔍 Traducción featuredCookies:', t('home.featuredCookies'));
-    console.log('🔍 Traducción featuredDescription:', t('home.featuredDescription'));
-  }, [i18n.language, t]);
+  const [currentLanguage, setCurrentLanguage] = useState('es');
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -98,7 +75,7 @@ const FeaturedProducts = () => {
                   fontFamily: 'Playfair Display, serif'
                 }}
               >
-                {t('home.featuredCookies', 'Galletas Destacadas')}
+                Galletas Destacadas
               </Typography>
               <Typography
                 variant="h6"
@@ -109,7 +86,7 @@ const FeaturedProducts = () => {
                   lineHeight: 1.6
                 }}
               >
-                {t('home.featuredDescription', 'Descubre nuestras galletas más populares, horneadas con ingredientes premium y el sabor auténtico de Nueva York')}
+                Descubre nuestras galletas más populares, horneadas con ingredientes premium y el sabor auténtico de Nueva York
               </Typography>
             </motion.div>
           </Box>
@@ -158,7 +135,7 @@ const FeaturedProducts = () => {
                       <Box sx={{ position: 'absolute', top: 12, left: 12, display: 'flex', flexDirection: 'column', gap: 1 }}>
                         {product.isNew && (
                           <Chip
-                            label={t('product.new', 'Nuevo')}
+                            label={'Nuevo'}
                             size="small"
                             sx={{
                               backgroundColor: '#4CAF50',
@@ -170,7 +147,7 @@ const FeaturedProducts = () => {
                         )}
                         {product.isBestSeller && (
                           <Chip
-                            label={t('product.bestSeller', 'Más Vendido')}
+                            label={'Más Vendido'}
                             size="small"
                             sx={{
                               backgroundColor: '#FF6B35',
@@ -277,7 +254,7 @@ const FeaturedProducts = () => {
                           transition: 'all 0.3s ease'
                         }}
                       >
-                        {t('product.addToCart', 'Add to Cart')}
+                        Añadir al carrito
                       </Button>
                     </CardActions>
                   </Card>
@@ -315,7 +292,7 @@ const FeaturedProducts = () => {
                   transition: 'all 0.3s ease'
                 }}
               >
-                {t('home.viewAllCookiesButton', 'Ver Todas las Galletas')}
+                Ver Todas las Galletas
               </Button>
             </motion.div>
           </Box>

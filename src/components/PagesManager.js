@@ -80,8 +80,9 @@ const PagesManager = ({ open, onClose }) => {
       const snapshot = await getDocs(pagesCollection);
       const savedPagesData = {};
       
-      snapshot.forEach((doc) => {
-        savedPagesData[doc.id] = doc.data();
+      snapshot.forEach((docSnap) => {
+        const d = docSnap.data();
+        savedPagesData[docSnap.id] = d;
       });
       
       if (Object.keys(savedPagesData).length > 0) {
@@ -91,8 +92,8 @@ const PagesManager = ({ open, onClose }) => {
             if (savedData) {
               return {
                 ...page,
-                title: savedData.title,
-                content: savedData.content,
+                title: savedData.title_es || savedData.title || page.title,
+                content: savedData.content_es || savedData.content || page.content,
                 titleFont: savedData.titleFont,
                 contentFont: savedData.contentFont,
                 imageUrl: savedData.imageUrl || ''
@@ -227,18 +228,19 @@ const PagesManager = ({ open, onClose }) => {
         
         setPages(updatedPages);
         
-        // Guardar en Firestore
-        const pageData = {
-          title: editTitle,
-          content: editContent,
+        // Guardar solo español en Firestore
+        const pageRef = doc(db, 'pages', editingPage.id);
+        await setDoc(pageRef, {
+          title_es: editTitle,
+          content_es: editContent,
+          title: editTitle, // compatibilidad
+          content: editContent, // compatibilidad
           titleFont: editTitleFont,
           contentFont: editContentFont,
           imageUrl: editImageUrl || '',
-          updatedAt: new Date()
-        };
-        
-        await setDoc(doc(db, 'pages', editingPage.id), pageData);
-        console.log('Página guardada en Firestore:', editingPage.id, pageData);
+          updatedAt: new Date().toISOString()
+        }, { merge: true });
+        console.log('Página guardada (ES) en Firestore:', editingPage.id);
         
         setEditingPage(null);
         setEditTitle('');
