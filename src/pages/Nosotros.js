@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { Box, Container, Grid, Typography } from '@mui/material';
 import { db } from '../firebase/config';
 import { doc, getDoc, collection, getDocs } from 'firebase/firestore';
+import { useLanguage } from '../context/LanguageContext';
+import { translateBatch } from '../services/translateService';
 // Solo Firestore (español)
 
 const Nosotros = () => {
@@ -13,6 +15,8 @@ const Nosotros = () => {
     imageUrl: ''
   });
   const [fontsReady, setFontsReady] = useState(false);
+  const { language } = useLanguage();
+  const [display, setDisplay] = useState({ title: 'Nuestra Historia', content: '' });
 
   useEffect(() => {
     const injectFont = (name, url) => {
@@ -37,6 +41,26 @@ const Nosotros = () => {
           contentFont: raw.contentFont || prev.contentFont,
           imageUrl: raw.imageUrl || prev.imageUrl
         }));
+        // Establecer contenido mostrado según idioma actual (usar campos por idioma si existen)
+        const initialLang = language || 'es';
+        const titleByLang = raw[`title_${initialLang}`];
+        const contentByLang = raw[`content_${initialLang}`];
+        if (initialLang === 'es') {
+          setDisplay({ title: raw.title_es || raw.title || 'Nuestra Historia', content: raw.content_es || raw.content || '' });
+        } else if (titleByLang || contentByLang) {
+          setDisplay({ title: titleByLang || raw.title || 'Nuestra Historia', content: contentByLang || raw.content || '' });
+        } else {
+          // Traducir desde ES a idioma destino
+          try {
+            const [trTitle, trContent] = await translateBatch([
+              raw.title_es || raw.title || 'Nuestra Historia',
+              raw.content_es || raw.content || ''
+            ], initialLang, 'es');
+            setDisplay({ title: trTitle || (raw.title_es || raw.title), content: trContent || (raw.content_es || raw.content) });
+          } catch {
+            setDisplay({ title: raw.title_es || raw.title || 'Nuestra Historia', content: raw.content_es || raw.content || '' });
+          }
+        }
         try {
           const uploadedFonts = JSON.parse(localStorage.getItem('uploadedFonts') || '[]');
           uploadedFonts.forEach(f => injectFont(f.name, f.url));
@@ -57,7 +81,27 @@ const Nosotros = () => {
     load();
   }, []);
 
-  // Eliminado: sistema de auto-traducción
+  // Actualizar cuando cambie el idioma (usar campos por idioma si existen o traducir)
+  useEffect(() => {
+    const updateForLang = async () => {
+      const lang = language || 'es';
+      if (lang === 'es') {
+        setDisplay({ title: pageData.title, content: pageData.content });
+        return;
+      }
+      try {
+        // Intentar traducir usando el servicio
+        const [trTitle, trContent] = await translateBatch([
+          pageData.title || 'Nuestra Historia',
+          pageData.content || ''
+        ], lang, 'es');
+        setDisplay({ title: trTitle || pageData.title, content: trContent || pageData.content });
+      } catch {
+        setDisplay({ title: pageData.title, content: pageData.content });
+      }
+    };
+    updateForLang();
+  }, [language, pageData.title, pageData.content]);
 
   return (
     <Box className="nosotros-mobile" sx={{ pt: 20, pb: 8, opacity: fontsReady ? 1 : 0, transition: 'opacity 0.01s ease' }}>
@@ -92,7 +136,7 @@ const Nosotros = () => {
             fontFamily: pageData.titleFont ? `"${pageData.titleFont}", serif` : 'Playfair Display, serif'
           }}
         >
-          {pageData.title || 'Nuestra Historia'}
+          {display.title || 'Nuestra Historia'}
         </Typography>
 
         <Box sx={{ 
@@ -127,7 +171,7 @@ const Nosotros = () => {
                   fontSize: { xs: '0.95rem', md: '1.06rem' }
                 }}
               >
-                {pageData.content || 'Comparte aquí tu historia. Cómo comenzó DeliZuKar, tu pasión por las galletas estilo Nueva York, los ingredientes que amas y los valores detrás de tu marca.'}
+                {display.content || 'Comparte aquí tu historia. Cómo comenzó DeliZuKar, tu pasión por las galletas estilo Nueva York, los ingredientes que amas y los valores detrás de tu marca.'}
               </Typography>
             </Box>
           </Box>
