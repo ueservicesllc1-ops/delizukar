@@ -252,12 +252,14 @@ const PopupHero = ({ open, onClose }) => {
     }
   }, [open]);
 
-  // Cuenta regresiva y cierre automático
+  // Cuenta regresiva y cierre automático - DESACTIVADO para edición
   useEffect(() => {
     if (open && !loading && offers.length > 0) {
       setTimeLeft(duration);
       setIsClosing(false);
       
+      // BLOQUEADO: timer desactivado para edición
+      /*
       const timer = setInterval(() => {
         setTimeLeft(prev => {
           if (prev <= 1) {
@@ -272,11 +274,14 @@ const PopupHero = ({ open, onClose }) => {
       }, 1000);
 
       return () => clearInterval(timer);
+      */
     }
   }, [open, loading, offers.length, duration, onClose]);
 
-  // Cambiar oferta cada 4 segundos si hay múltiples ofertas
+  // Cambiar oferta cada 4 segundos si hay múltiples ofertas - DESACTIVADO para edición
   useEffect(() => {
+    // BLOQUEADO: cambio automático de ofertas desactivado para edición
+    /*
     if (offers.length > 1) {
       const interval = setInterval(() => {
         setCurrentOffer((prev) => (prev + 1) % offers.length);
@@ -284,6 +289,7 @@ const PopupHero = ({ open, onClose }) => {
 
       return () => clearInterval(interval);
     }
+    */
   }, [offers.length]);
 
   if (loading) {

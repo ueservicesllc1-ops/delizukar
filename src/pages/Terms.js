@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Box, Container, Typography } from '@mui/material';
 import { db } from '../firebase/config';
 import { doc, getDoc, collection, getDocs } from 'firebase/firestore';
+import { useLanguage } from '../context/LanguageContext';
+import { translateBatch } from '../services/translateService';
 
 const Terms = () => {
   const [pageData, setPageData] = useState({
@@ -12,10 +14,12 @@ const Terms = () => {
   });
 
   const [fontsReady, setFontsReady] = useState(false);
+  const { language } = useLanguage();
+  const [display, setDisplay] = useState({ title: 'Términos y Condiciones', content: '' });
 
   useEffect(() => {
     loadPageData();
-  }, []);
+  }, [language]);
 
   // Eliminado: sistema de auto-traducción
 
@@ -24,13 +28,53 @@ const Terms = () => {
       const ref = doc(db, 'pages', 'terms');
       const snap = await getDoc(ref);
       const data = snap.exists() ? snap.data() : {};
-      setPageData(prev => ({
-        ...prev,
+      
+      const rawData = {
         title: data.title_es || data.title || 'Términos y Condiciones',
         content: data.content_es || data.content || 'Contenido de términos y condiciones estará disponible próximamente',
-        titleFont: data.titleFont || prev.titleFont,
-        contentFont: data.contentFont || prev.contentFont
+        titleFont: data.titleFont || 'Playfair Display',
+        contentFont: data.contentFont || 'Roboto'
+      };
+      
+      setPageData(prev => ({
+        ...prev,
+        ...rawData
       }));
+      
+      // Establecer contenido mostrado según idioma actual
+      const currentLang = language || 'es';
+      const titleByLang = data[`title_${currentLang}`];
+      const contentByLang = data[`content_${currentLang}`];
+      
+      if (currentLang === 'es') {
+        setDisplay({ 
+          title: data.title_es || data.title || 'Términos y Condiciones', 
+          content: data.content_es || data.content || '' 
+        });
+      } else if (titleByLang || contentByLang) {
+        setDisplay({ 
+          title: titleByLang || data.title || 'Términos y Condiciones', 
+          content: contentByLang || data.content || '' 
+        });
+      } else {
+        // Traducir desde ES a idioma destino
+        try {
+          const [trTitle, trContent] = await translateBatch([
+            data.title_es || data.title || 'Términos y Condiciones',
+            data.content_es || data.content || ''
+          ], currentLang, 'es');
+          setDisplay({ 
+            title: trTitle || (data.title_es || data.title || 'Términos y Condiciones'), 
+            content: trContent || (data.content_es || data.content || '') 
+          });
+        } catch (error) {
+          console.error('Error traduciendo:', error);
+          setDisplay({ 
+            title: data.title_es || data.title || 'Términos y Condiciones', 
+            content: data.content_es || data.content || '' 
+          });
+        }
+      }
       
       // Siempre cargar fuentes desde Firestore
       await loadFontsFromFirestore();
@@ -100,7 +144,7 @@ const Terms = () => {
             fontFamily: pageData.titleFont ? `"${pageData.titleFont}", serif` : 'Playfair Display, serif'
           }}
         >
-          {pageData.title}
+          {display.title}
         </Typography>
         
         {/* Contenido de la página */}
@@ -146,7 +190,7 @@ const Terms = () => {
                 margin: '8px 0'
               }
             }}
-            dangerouslySetInnerHTML={{ __html: pageData.content }}
+            dangerouslySetInnerHTML={{ __html: display.content }}
           />
         </Box>
       </Container>

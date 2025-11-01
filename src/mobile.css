@@ -3072,3 +3072,102 @@
   }
 }
 */
+
+/* ========================================
+   DESKTOP ONLY - Popup Hero Styles
+   Solo para desktop (min-width: 1367px)
+   No afecta iPhone 16, iPhone 15, iPad
+   ======================================== */
+@media (min-width: 1367px) {
+  /* Animación de movimiento horizontal para la foto */
+  @keyframes moveHorizontal {
+    0%, 100% {
+      transform: translate(-50%, -50%) scale(0.85) translateX(-15px);
+    }
+    50% {
+      transform: translate(-50%, -50%) scale(0.85) translateX(15px);
+    }
+  }
+  /* Desktop Popup Hero - Layout flex row */
+  .popup-hero-mobile .MuiDialogContent-root > div {
+    display: flex !important;
+    flex-direction: row !important;
+    gap: 0 !important;
+  }
+  
+  /* Desktop Popup Hero - Contenedor de foto derecho */
+  .popup-hero-mobile .MuiDialogContent-root > div > div:last-child {
+    flex: 1 !important;
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    padding: 0 !important;
+    height: 100% !important;
+    min-height: 420px !important;
+    position: relative !important;
+    overflow: visible !important;
+    background-color: transparent !important;
+    margin-top: 0 !important;
+    align-self: flex-start !important;
+  }
+  
+  /* Desktop Popup Hero - Contenedor interno de imagen (Box con fondo negro) */
+  .popup-hero-mobile .MuiDialogContent-root > div > div:last-child > div {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    width: 100% !important;
+    height: 100% !important;
+    min-height: 420px !important;
+    position: relative !important;
+    overflow: hidden !important;
+    background: #000 !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+  
+  /* Desktop Popup Hero - Imagen visible (motion.img) */
+  .popup-hero-mobile .MuiDialogContent-root > div > div:last-child > div > img,
+  .popup-hero-mobile .MuiDialogContent-root > div > div:last-child > div img,
+  .popup-hero-mobile .MuiDialogContent-root > div > div:last-child img,
+  .popup-hero-mobile img[src*="unsplash"],
+  .popup-hero-mobile img[alt*="Galletas"],
+  .popup-hero-mobile img[alt="Deliciosas Galletas"],
+  .popup-hero-mobile img[src*="firebase"],
+  .popup-hero-mobile img[src*="http"],
+  .popup-hero-mobile img[src*="https"],
+  .popup-hero-mobile img:not([alt*="Logo"]):not([alt*="DeliZuKar"]) {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    width: 150% !important;
+    height: 150% !important;
+    object-fit: cover !important;
+    objectFit: cover !important;
+    position: absolute !important;
+    top: 50% !important;
+    left: 50% !important;
+    z-index: 2 !important;
+    min-width: 100% !important;
+    min-height: 100% !important;
+    animation: moveHorizontal 8s ease-in-out infinite !important;
+    will-change: transform !important;
+  }
+  
+  /* Desktop Popup Hero - Capturar motion.img específicamente */
+  .popup-hero-mobile .MuiDialogContent-root > div > div:last-child > div > [style*="objectFit"],
+  .popup-hero-mobile .MuiDialogContent-root > div > div:last-child > div > [style*="object-fit"] {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    animation: moveHorizontal 8s ease-in-out infinite !important;
+    will-change: transform !important;
+  }
+  
+  /* Desktop Popup Hero - Contenido izquierdo */
+  .popup-hero-mobile .MuiDialogContent-root > div > div:first-child {
+    flex: 1 !important;
+    display: flex !important;
+    visibility: visible !important;
+  }
+}
