@@ -21,9 +21,10 @@ const SimpleStripeCheckout = ({ cartItems, total, customerInfo, onSuccess, onErr
       console.log('👤 Cliente:', customerInfo.email);
 
       // 1. Crear sesión de pago en el backend
+      // En desarrollo usa proxy (string vacío), en producción usa window.location.origin
       const baseUrl = process.env.NODE_ENV === 'production' 
         ? window.location.origin 
-        : 'http://localhost:5000';
+        : '';
       const response = await fetch(`${baseUrl}/api/create-checkout-session`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

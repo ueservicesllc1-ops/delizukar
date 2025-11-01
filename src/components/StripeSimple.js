@@ -15,7 +15,9 @@ const StripeSimple = ({ cartItems, total, customerInfo, onSuccess, onError }) =>
 
     try {
       // 1. Crear sesión en backend
-      const response = await fetch('http://localhost:5001/api/create-checkout-session', {
+      // En desarrollo usa proxy (string vacío), en producción usa window.location.origin
+      const baseUrl = process.env.NODE_ENV === 'production' ? window.location.origin : '';
+      const response = await fetch(`${baseUrl}/api/create-checkout-session`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ cartItems, total, customerInfo }),

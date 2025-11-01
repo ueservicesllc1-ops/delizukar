@@ -15,7 +15,9 @@ const { initializeApp } = require('firebase/app');
 const { getFirestore, collection, addDoc, doc, getDoc, updateDoc, query, orderBy } = require('firebase/firestore');
 
 const app = express();
-const PORT = process.env.PORT || 5000;
+// En Railway usa PORT de la variable de entorno (Railway la configura automáticamente)
+// En desarrollo local usa 5001 para evitar conflictos
+const PORT = process.env.PORT || 5001;
 // Fallback (no recomendado en producción): clave embebida si no hay .env ni header/body
 const FALLBACK_GOOGLE_API_KEY = 'AIzaSyCvUYONprzgPBjEHXp6bEJ7mRfW0GSl54w';
 
@@ -261,14 +263,28 @@ app.post('/api/easypost/buy-label', async (req, res) => {
 
 // 4. Calcular tarifas de envío con EasyPost
 app.post('/api/easypost/rates', async (req, res) => {
+  console.log('🚨 ENDPOINT /api/easypost/rates LLAMADO');
+  console.log('🚨 Method:', req.method);
+  console.log('🚨 URL:', req.url);
+  console.log('🚨 Path:', req.path);
   try {
     console.log('🔍 DEBUG: Calculating shipping rates with EasyPost');
     console.log('🔍 DEBUG: Request body:', JSON.stringify(req.body, null, 2));
     
     const apiKey = process.env.EASYPOST_API_KEY;
     
+    if (!apiKey) {
+      console.error('❌ EASYPOST_API_KEY no está configurada');
+      return res.status(500).json({ error: 'EASYPOST_API_KEY no está configurada' });
+    }
+    
     // Convertir el formato de Shippo a EasyPost
     const { address_from, address_to, parcels } = req.body;
+    
+    if (!address_from || !address_to || !parcels || !Array.isArray(parcels) || parcels.length === 0) {
+      console.error('❌ Datos inválidos en la solicitud');
+      return res.status(400).json({ error: 'Datos inválidos: se requieren address_from, address_to y parcels' });
+    }
     
     const shipmentData = {
       shipment: {

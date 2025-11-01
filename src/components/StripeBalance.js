@@ -27,9 +27,10 @@ const StripeBalance = ({ open, onClose }) => {
       setLoading(true);
       setError(null);
       
+      // En desarrollo usa proxy (string vacío), en producción usa window.location.origin
       const baseUrl = process.env.NODE_ENV === 'production' 
         ? window.location.origin 
-        : 'http://localhost:5000';
+        : '';
       const response = await fetch(`${baseUrl}/api/balance`);
       const data = await response.json();
       

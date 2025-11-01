@@ -212,7 +212,7 @@ const Header = () => {
   ];
 
   const drawer = (
-    <Box sx={{ width: 250, backgroundColor: '#c8626d', height: '100%' }}>
+    <Box sx={{ width: 250, backgroundColor: '#c8626d', height: '100%', position: 'relative' }}>
       <Box sx={{ p: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <Typography variant="h6" sx={{ fontWeight: 700, color: 'white' }}>
           Delizukar
@@ -246,6 +246,48 @@ const Header = () => {
           </ListItem>
         ))}
       </List>
+      
+      {/* Selector de idioma para móvil */}
+      <Box sx={{ p: 2, position: 'absolute', bottom: 16, left: 0, right: 0 }}>
+        <select
+          aria-label="Seleccionar idioma"
+          value={language}
+          onChange={async (e) => {
+            const lang = e.target.value;
+            try { localStorage.setItem('selectedLanguage', lang); } catch {}
+            setLanguage(lang);
+            if (lang === 'es') {
+              window.location.reload();
+            } else {
+              try {
+                setTranslatingLang(true);
+                await translateText('Hola', lang, 'es');
+                startAutoTranslate(lang, 'es');
+              } catch {
+                alert('No se pudo traducir. Verifica backend y API key.');
+              } finally {
+                setTranslatingLang(false);
+              }
+            }
+          }}
+          style={{
+            width: '100%',
+            padding: '8px 12px',
+            borderRadius: '8px',
+            border: '1px solid white',
+            color: '#c8626d',
+            background: 'white',
+            outline: 'none',
+            opacity: translatingLang ? 0.6 : 1,
+            pointerEvents: translatingLang ? 'none' : 'auto'
+          }}
+        >
+          <option value="es">ES</option>
+          <option value="en">EN</option>
+          <option value="fr">FR</option>
+          <option value="pt">PT</option>
+        </select>
+      </Box>
     </Box>
   );
 
@@ -262,8 +304,10 @@ const Header = () => {
           sx={{
             backgroundColor: '#ffece5',
             boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
-            zIndex: 100000,
+            zIndex: (theme) => isMobile ? 1000 : theme.zIndex.appBar,
             top: 0,
+            left: 0,
+            right: 0,
             // Sistema responsivo universal
             height: responsiveComponents.header.height,
             width: '100%',
@@ -278,7 +322,9 @@ const Header = () => {
               flexDirection: 'column', 
               py: 0.5, // reduce padding vertical aún más
               minHeight: '70px', // reduce altura total significativamente
-              justifyContent: 'center'
+              justifyContent: 'center',
+              position: 'relative', // Necesario para posicionar el selector de idioma
+              overflow: 'visible' // Asegurar que el selector sea visible
             }}>
               {/* User Info - Top Right */}
               {user && (
@@ -407,46 +453,6 @@ const Header = () => {
                     </IconButton>
                   </Box>
                 )}
-                {/* Selector de idioma */}
-                <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                  <select
-                    aria-label="Seleccionar idioma"
-                    value={language}
-                    onChange={async (e) => {
-                      const lang = e.target.value;
-                      try { localStorage.setItem('selectedLanguage', lang); } catch {}
-                      setLanguage(lang);
-                      if (lang === 'es') {
-                        window.location.reload();
-                      } else {
-                        try {
-                          setTranslatingLang(true);
-                          await translateText('Hola', lang, 'es');
-                          startAutoTranslate(lang, 'es');
-                        } catch {
-                          alert('No se pudo traducir. Verifica backend y API key.');
-                        } finally {
-                          setTranslatingLang(false);
-                        }
-                      }
-                    }}
-                    style={{
-                      padding: '6px 10px',
-                      borderRadius: '16px',
-                      border: '1px solid #c8626d',
-                      color: '#c8626d',
-                      background: 'white',
-                      outline: 'none',
-                      opacity: translatingLang ? 0.6 : 1,
-                      pointerEvents: translatingLang ? 'none' : 'auto'
-                    }}
-                  >
-                    <option value="es">Español</option>
-                    <option value="en">English</option>
-                    <option value="fr">Français</option>
-                    <option value="pt">Português</option>
-                  </select>
-                </Box>
                   {/* Search Icon - Left (desktop only) */}
                   {!isMobile && (
                     <Box sx={{ 
@@ -617,6 +623,56 @@ const Header = () => {
                 </Box>
               </Box>
 
+              {/* Selector de idioma - borde inferior derecho del header (todos los dispositivos) */}
+              <Box sx={{ 
+                  position: 'absolute',
+                  right: 16,
+                  bottom: 0,
+                  zIndex: 10000
+                }}>
+                  <select
+                    aria-label="Seleccionar idioma"
+                    value={language}
+                    onChange={async (e) => {
+                      const lang = e.target.value;
+                      try { localStorage.setItem('selectedLanguage', lang); } catch {}
+                      setLanguage(lang);
+                      if (lang === 'es') {
+                        window.location.reload();
+                      } else {
+                        try {
+                          setTranslatingLang(true);
+                          await translateText('Hola', lang, 'es');
+                          startAutoTranslate(lang, 'es');
+                        } catch {
+                          alert('No se pudo traducir. Verifica backend y API key.');
+                        } finally {
+                          setTranslatingLang(false);
+                        }
+                      }
+                    }}
+                    style={{
+                      padding: '4px 8px',
+                      borderRadius: '16px',
+                      border: '1px solid #c8626d',
+                      color: '#c8626d',
+                      background: 'white',
+                      outline: 'none',
+                      opacity: translatingLang ? 0.6 : 1,
+                      pointerEvents: translatingLang ? 'none' : 'auto',
+                      fontSize: '0.75rem',
+                      fontWeight: 600,
+                      zIndex: 10000,
+                      position: 'relative',
+                      boxShadow: '0 2px 8px rgba(0,0,0,0.2)'
+                    }}
+                  >
+                    <option value="es">ES</option>
+                    <option value="en">EN</option>
+                    <option value="fr">FR</option>
+                    <option value="pt">PT</option>
+                  </select>
+                </Box>
                 
             </Toolbar>
           </Container>
@@ -630,15 +686,23 @@ const Header = () => {
         open={mobileOpen}
         onClose={handleDrawerToggle}
         ModalProps={{
-          keepMounted: true
+          keepMounted: true,
+          style: { zIndex: 999999 }
         }}
         sx={{
           display: { xs: 'block', md: 'none' },
-          zIndex: 10001,
+          zIndex: 999999,
           '& .MuiDrawer-paper': {
             boxSizing: 'border-box',
             width: 250,
-            zIndex: 10001
+            zIndex: 999999,
+            position: 'relative',
+            top: 0,
+            backgroundColor: '#c8626d !important',
+            background: '#c8626d !important'
+          },
+          '& .MuiBackdrop-root': {
+            zIndex: 999998
           }
         }}
       >

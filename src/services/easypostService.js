@@ -8,9 +8,11 @@ class EasyPostService {
 
   // Método helper para hacer requests
   async makeRequest(endpoint, options = {}) {
+    // En producción usa window.location.origin
+    // En desarrollo usa string vacío para que el proxy de React (package.json) redirija a localhost:5001
     const baseUrl = process.env.NODE_ENV === 'production' 
       ? window.location.origin 
-      : 'http://localhost:5000';
+      : ''; // Usa proxy de React en desarrollo (configurado en package.json)
     
     const url = `${baseUrl}${endpoint}`;
     

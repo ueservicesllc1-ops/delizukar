@@ -111,7 +111,8 @@ const OrdersManager = ({ open, onClose }) => {
       setSendingTestEmail(true);
       
       // 1. Obtener datos del email del backend
-      const response = await fetch('http://localhost:5000/api/send-test-email', {
+      const baseUrl = process.env.NODE_ENV === 'production' ? window.location.origin : '';
+      const response = await fetch(`${baseUrl}/api/send-test-email`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -168,7 +169,8 @@ const OrdersManager = ({ open, onClose }) => {
       console.log('🔵 [OrdersManager] Order data being sent:', JSON.stringify(order, null, 2));
       
       // Enviar datos completos del pedido al backend
-      const response = await fetch('http://localhost:5000/api/create-shipment-complete', {
+      const baseUrl = process.env.NODE_ENV === 'production' ? window.location.origin : '';
+      const response = await fetch(`${baseUrl}/api/create-shipment-complete`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'

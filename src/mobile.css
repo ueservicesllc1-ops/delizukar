@@ -1621,10 +1621,13 @@
   .terms-page-mobile h1,
   .terms-page-mobile .MuiTypography-h1,
   .terms-page-mobile .MuiTypography-h2 {
-    margin-top: 0 !important;
+    margin-top: -200px !important;
     padding-top: 0 !important;
     position: relative !important;
-    z-index: 1 !important;
+    z-index: 10 !important;
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
   }
   
   /* Force main content to start after fixed header in Terms */
@@ -1893,12 +1896,12 @@
     
     /* iPhone 15 Pro Max Terms Title - Subir el título */
     .MuiContainer-root .MuiTypography-h2 {
-      margin-top: -800px !important;
+      margin-top: -900px !important;
     }
     
     /* iPhone 15 Pro Max Page Spacing */
     .products-page-mobile {
-      margin-top: -800px !important;
+      margin-top: -900px !important;
       padding-top: 0 !important;
       position: relative !important;
       z-index: 5 !important;
@@ -1908,7 +1911,7 @@
     
     .nosotros-mobile {
       padding-top: 120px !important;
-      margin-top: -800px !important;
+      margin-top: -900px !important;
       position: relative !important;
       z-index: 5 !important;
       display: flex !important;
@@ -1917,7 +1920,7 @@
     
     .contacto-mobile {
       padding-top: 130px !important;
-      margin-top: -800px !important;
+      margin-top: -600px !important;
       position: relative !important;
       z-index: 5 !important;
       display: flex !important;
@@ -1926,7 +1929,7 @@
     
     /* iPhone 14 Pro Max & iPhone 15 Pro Max Terms Page */
     .terms-page-mobile {
-      margin-top: -500px !important;
+      margin-top: -540px !important;
       padding-top: 0 !important;
       position: relative !important;
       z-index: 5 !important;
@@ -1935,7 +1938,7 @@
     }
     
     .terms-page-mobile .MuiContainer-root .MuiTypography-h2 {
-      margin-top: -800px !important;
+      margin-top: -200px !important;
     }
   }
 }
@@ -2029,7 +2032,7 @@
     
     /* iPhone 16 Page Spacing - Flex y posicionamiento */
     .products-page-mobile {
-      margin-top: -800px !important;
+      margin-top: -900px !important;
       padding-top: 0 !important;
       position: relative !important;
       z-index: 5 !important;
@@ -2039,7 +2042,7 @@
     
     .nosotros-mobile {
       padding-top: 120px !important;
-      margin-top: -800px !important;
+      margin-top: -900px !important;
       position: relative !important;
       z-index: 5 !important;
       display: flex !important;
@@ -2048,7 +2051,7 @@
     
     .contacto-mobile {
       padding-top: 130px !important;
-      margin-top: -800px !important;
+      margin-top: -600px !important;
       position: relative !important;
       z-index: 5 !important;
       display: flex !important;
@@ -2065,7 +2068,7 @@
     }
     
     .cart-page-mobile {
-      margin-top: -800px !important;
+      margin-top: -900px !important;
       padding-top: 0 !important;
       position: relative !important;
       z-index: 5 !important;
@@ -2316,21 +2319,147 @@
       margin-top: -620px !important;
     }
     
-    /* iPhone 15 Pro Cookie Care Title - Bajar el título */
+    /* iPhone 15 Pro Cookie Care Title - Subir el título */
     .cookie-care-page-mobile .MuiContainer-root .cookie-care-title,
     .cookie-care-page-mobile .MuiContainer-root .MuiTypography-h2 {
-      margin-top: -290px !important;
+      margin-top: -580px !important;
     }
   }
 }
 
+/* ========================================
+   IPHONE 16 ONLY - DESKTOP AND IPAD DISABLED
+   Viewport: 393px × 852px (CSS pixels)
+   Resolution: 1179 x 2556 (Physical pixels)
+   ======================================== */
+
+/* DESBLOQUEADO - Desktop e iPad ahora son visibles */
+/*
+@media (min-width: 768px) {
+  #root {
+    display: none !important;
+  }
+  
+  body::after {
+    content: "Esta aplicación está diseñada solo para iPhone 16. Por favor, accede desde un iPhone 16." !important;
+    display: block !important;
+    padding: 40px 20px !important;
+    text-align: center !important;
+    font-size: 18px !important;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+    position: fixed !important;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    width: 90% !important;
+    max-width: 500px !important;
+    background: white !important;
+    border: 2px solid #c8626d !important;
+    border-radius: 10px !important;
+    z-index: 99999 !important;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.2) !important;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1024px) {
+  #root {
+    display: none !important;
+  }
+}
+*/
+
 /* iPhone 16 Specific Optimizations - Viewport: 393px × 852px */
 @supports (-webkit-touch-callout: none) {
-  @media screen and (max-width: 393px) and (max-height: 852px) {
+  @media screen and (max-width: 393px) and (max-height: 852px) and (-webkit-min-device-pixel-ratio: 3) {
     /* iPhone 16 Header Optimizations */
     .header-mobile {
       padding: 2px 0 !important;
       min-height: 50px !important;
+      z-index: 1000 !important;
+      position: fixed !important;
+      top: 0 !important;
+      left: 0 !important;
+      right: 0 !important;
+      width: 100% !important;
+      overflow: visible !important;
+    }
+    
+    /* iPhone 16 Toolbar - Asegurar visibilidad */
+    .header-mobile .MuiToolbar-root {
+      overflow: visible !important;
+      position: relative !important;
+    }
+    
+    /* iPhone 16 Popup Hero - Asegurar que esté por encima y visible */
+    .popup-hero-mobile {
+      z-index: 999999 !important;
+    }
+    
+    .popup-hero-mobile .MuiDialog-root {
+      z-index: 999999 !important;
+    }
+    
+    .popup-hero-mobile .MuiDialog-paper {
+      z-index: 999999 !important;
+      background-color: transparent !important;
+      position: relative !important;
+    }
+    
+    .popup-hero-mobile .MuiBackdrop-root {
+      z-index: 999998 !important;
+      background-color: rgba(0, 0, 0, 0.3) !important;
+      opacity: 0.3 !important;
+    }
+    
+    /* iPhone 16 Logo del Popup Hero - Más pequeño */
+    .popup-hero-mobile img[alt*="Logo"],
+    .popup-hero-mobile img[alt*="DeliZuKar"],
+    .popup-hero-mobile img[src*="LOGO"] {
+      height: 60px !important;
+      width: auto !important;
+      max-width: 120px !important;
+    }
+    
+    /* iPhone 16 Drawer - Por encima del header */
+    .MuiDrawer-root {
+      z-index: 999999 !important;
+    }
+    
+    .MuiDrawer-paper {
+      z-index: 999999 !important;
+      position: fixed !important;
+      top: 0 !important;
+      height: 100vh !important;
+      background-color: #c8626d !important;
+      background: #c8626d !important;
+    }
+    
+    .MuiBackdrop-root {
+      z-index: 999998 !important;
+    }
+    
+    /* iPhone 16 Selector de idioma - Hacer visible y más pequeño */
+    select[aria-label*="idioma"],
+    select[aria-label*="Seleccionar"],
+    .header-mobile select {
+      z-index: 10000 !important;
+      position: relative !important;
+      font-size: 0.75rem !important;
+      padding: 3px 6px !important;
+      min-width: 45px !important;
+      max-width: 60px !important;
+      display: block !important;
+      visibility: visible !important;
+      opacity: 1 !important;
+    }
+    
+    /* iPhone 16 Box del selector de idioma */
+    .header-mobile .MuiToolbar-root > div:last-child,
+    .header-mobile [style*="position: absolute"][style*="right"],
+    .header-mobile [style*="position: absolute"] {
+      z-index: 10000 !important;
+      display: block !important;
+      visibility: visible !important;
     }
     
     .header-logo {
@@ -2380,12 +2509,14 @@
     [style*="background: #c8626d"] {
       margin-top: -200px !important;
       position: relative !important;
-      z-index: 10 !important;
+      z-index: 100 !important;
       display: block !important;
       visibility: visible !important;
       opacity: 1 !important;
       height: 40px !important;
       padding: 8px 0 !important;
+      background-color: #c8626d !important;
+      background: #c8626d !important;
     }
     
     /* iPhone 16 Texto en la franja rosa - Más pequeño y al frente de todo */
@@ -2471,7 +2602,7 @@
     
     /* iPhone 16 Page Spacing - Flex y posicionamiento */
     .products-page-mobile {
-      margin-top: -800px !important;
+      margin-top: -900px !important;
       padding-top: 0 !important;
       position: relative !important;
       z-index: 5 !important;
@@ -2481,7 +2612,7 @@
     
     .nosotros-mobile {
       padding-top: 120px !important;
-      margin-top: -800px !important;
+      margin-top: -900px !important;
       position: relative !important;
       z-index: 5 !important;
       display: flex !important;
@@ -2490,7 +2621,7 @@
     
     .contacto-mobile {
       padding-top: 130px !important;
-      margin-top: -800px !important;
+      margin-top: -600px !important;
       position: relative !important;
       z-index: 5 !important;
       display: flex !important;
@@ -2507,7 +2638,7 @@
     }
     
     .cart-page-mobile {
-      margin-top: -800px !important;
+      margin-top: -900px !important;
       padding-top: 0 !important;
       position: relative !important;
       z-index: 5 !important;
@@ -2679,18 +2810,40 @@
     
     /* iPhone 16 Nosotros Page - Bajar contenido para que no esté debajo del header */
     .nosotros-mobile {
-      margin-top: -320px !important;
+      margin-top: -200px !important;
       padding-top: 0 !important;
       position: relative !important;
       z-index: 5 !important;
     }
     
+    /* iPhone 16 Nosotros Title - Bajar el título */
+    .nosotros-mobile .nosotros-title-mobile,
+    .nosotros-mobile .MuiTypography-h2 {
+      margin-top: -160px !important;
+      position: relative !important;
+      z-index: 10 !important;
+      display: block !important;
+      visibility: visible !important;
+      opacity: 1 !important;
+    }
+    
     /* iPhone 16 Contacto Page - Bajar contenido para que no esté debajo del header */
     .contacto-mobile {
-      margin-top: -320px !important;
-      padding-top: 0 !important;
+      margin-top: -200px !important;
+      padding-top: 40px !important;
       position: relative !important;
       z-index: 5 !important;
+    }
+    
+    /* iPhone 16 Contacto Title - Bajar el título */
+    .contacto-mobile .contacto-title-mobile,
+    .contacto-mobile .MuiTypography-h2 {
+      margin-top: -200px !important;
+      position: relative !important;
+      z-index: 10 !important;
+      display: block !important;
+      visibility: visible !important;
+      opacity: 1 !important;
     }
     
     /* iPhone 16 Cart Page - Bajar contenido para que no esté debajo del header */
@@ -2727,8 +2880,8 @@
     
     /* iPhone 16 Terms Page - Bajar contenido para que no esté debajo del header */
     .terms-page-mobile {
-      margin-top: -500px !important;
-      padding-top: 0 !important;
+      margin-top: -400px !important;
+      padding-top: 100px !important;
       position: relative !important;
       z-index: 5 !important;
       display: flex !important;
@@ -2737,8 +2890,8 @@
     
     /* iPhone 16 Terms Box - Ajustar el padding-top específico */
     .terms-page-mobile .MuiBox-root {
-      padding-top: 0 !important;
-      margin-top: -500px !important;
+      padding-top: 100px !important;
+      margin-top: -400px !important;
       position: relative !important;
       z-index: 5 !important;
       display: flex !important;
@@ -2747,10 +2900,22 @@
     
     /* iPhone 16 Terms Container - Ajustar el contenedor */
     .terms-page-mobile .MuiContainer-root {
-      margin-top: -500px !important;
+      margin-top: 0 !important;
+      padding-top: 150px !important;
+      position: relative !important;
+      z-index: 5 !important;
+    }
+    
+    /* iPhone 16 Terms - Contenido después del título (debe estar abajo del título) */
+    .terms-page-mobile .MuiContainer-root > .MuiBox-root[style*="mt"],
+    .terms-page-mobile .MuiContainer-root > .MuiBox-root:not(.MuiTypography-h2) {
+      margin-top: 320px !important;
       padding-top: 0 !important;
       position: relative !important;
       z-index: 5 !important;
+      display: block !important;
+      visibility: visible !important;
+      opacity: 1 !important;
     }
     
     /* iPhone 16 Terms Header Override - Anular reglas del header que bloquean */
@@ -2762,27 +2927,95 @@
     
     /* iPhone 16 Terms Content Override - Anular contenido que está bloqueado */
     .terms-page-mobile .terms-content {
-      margin-top: -500px !important;
+      margin-top: 0 !important;
       padding-top: 0 !important;
       position: relative !important;
       z-index: 5 !important;
+      display: block !important;
+      visibility: visible !important;
+      opacity: 1 !important;
     }
     
-    /* iPhone 16 Terms Title - Subir el título */
-    .MuiContainer-root .MuiTypography-h2[style*="#EC8C8D"]:not([style*="#ffece5"]) {
-      margin-top: -800px !important;
+    /* iPhone 16 Terms - Asegurar que el contenido después del título sea visible */
+    .terms-page-mobile .MuiContainer-root > .MuiBox-root:not(.MuiTypography-h2),
+    .terms-page-mobile .MuiContainer-root > div:not(.MuiTypography-h2) {
+      margin-top: 320px !important;
+      padding-top: 0 !important;
+      position: relative !important;
+      z-index: 4 !important;
+      display: block !important;
+      visibility: visible !important;
+      opacity: 1 !important;
     }
     
-    /* iPhone 16 Allergy Title - Bajar el título */
+    /* iPhone 16 Terms Title - Bajar el título (página Terms, no TermsService) */
+    .terms-page-mobile .MuiTypography-h2,
+    .terms-page-mobile .MuiContainer-root .MuiTypography-h2 {
+      margin-top: -200px !important;
+      position: relative !important;
+      z-index: 10 !important;
+      display: block !important;
+      visibility: visible !important;
+      opacity: 1 !important;
+      color: #EC8C8D !important;
+    }
+    
+    /* iPhone 16 Terms Title - Sobrescribir estilo inline - Selector específico para página Terms */
+    .terms-page-mobile .MuiContainer-root .MuiTypography-h2[style*="#EC8C8D"],
+    .MuiContainer-root .MuiTypography-h2[style*="#EC8C8D"][style*="-350px"],
+    .MuiContainer-root .MuiTypography-h2[style*="-350px"],
+    /* Selector más general para cualquier Typography h2 con color #EC8C8D en página terms */
+    body:has([href="/terms"]) .MuiContainer-root .MuiTypography-h2[style*="#EC8C8D"],
+    /* Selector directo para Typography h2 con el color específico */
+    .MuiTypography-h2[style*="#EC8C8D"][style*="mt"] {
+      margin-top: -200px !important;
+      display: block !important;
+      visibility: visible !important;
+      opacity: 1 !important;
+    }
+    
+    /* iPhone 16 Allergy Title - Subir el título */
     .allergy-page-mobile .MuiContainer-root .allergy-title,
     .allergy-page-mobile .MuiContainer-root .MuiTypography-h2 {
       margin-top: -620px !important;
+      position: relative !important;
+      z-index: 10 !important;
+      display: block !important;
+      visibility: visible !important;
+      opacity: 1 !important;
+      color: #EC8C8D !important;
+    }
+    
+    /* iPhone 16 Allergy - Bajar el contenido */
+    .allergy-page-mobile .MuiContainer-root > .MuiBox-root:not(.MuiTypography-h2),
+    .allergy-page-mobile .MuiContainer-root > .MuiBox-root[style*="mt"],
+    .allergy-page-mobile .MuiContainer-root > div:not(.allergy-title):not(.MuiTypography-h2) {
+      margin-top: 50px !important;
+      padding-top: 0 !important;
+      position: relative !important;
+      z-index: 4 !important;
+      display: block !important;
+      visibility: visible !important;
+      opacity: 1 !important;
     }
     
     /* iPhone 16 Terms Service Title - Bajar el título */
     .terms-service-page-mobile .MuiContainer-root .terms-service-title,
     .terms-service-page-mobile .MuiContainer-root .MuiTypography-h2 {
       margin-top: -620px !important;
+    }
+    
+    /* iPhone 16 Terms Service - Subir el contenido */
+    .terms-service-page-mobile .MuiContainer-root > .MuiBox-root:not(.MuiTypography-h2),
+    .terms-service-page-mobile .MuiContainer-root > .MuiBox-root[style*="mt"],
+    .terms-service-page-mobile .MuiContainer-root > div:not(.terms-service-title):not(.MuiTypography-h2) {
+      margin-top: -50px !important;
+      padding-top: 0 !important;
+      position: relative !important;
+      z-index: 4 !important;
+      display: block !important;
+      visibility: visible !important;
+      opacity: 1 !important;
     }
     
     /* iPhone 16 FAQ Title - Bajar el título */
@@ -2797,31 +3030,45 @@
       margin-top: -620px !important;
     }
     
-    /* iPhone 16 Cookie Care Title - Bajar el título */
+    /* iPhone 16 Cookie Care Title - Subir el título */
     .cookie-care-page-mobile .MuiContainer-root .cookie-care-title,
     .cookie-care-page-mobile .MuiContainer-root .MuiTypography-h2 {
-      margin-top: -290px !important;
+      margin-top: -580px !important;
+      position: relative !important;
+      z-index: 10 !important;
+      display: block !important;
+      visibility: visible !important;
+      opacity: 1 !important;
+      color: #EC8C8D !important;
     }
   }
 }
 
-/* Ensure desktop version is unchanged - BLOQUEADO - No modificar */
+/* DESBLOQUEADO - Desktop ahora es visible */
+/*
 @media (min-width: 1367px) {
-  .mobile-only {
+  #root {
     display: none !important;
   }
   
-  .desktop-only {
+  body::after {
+    content: "Esta aplicación está diseñada solo para iPhone 16. Por favor, accede desde un iPhone 16." !important;
     display: block !important;
-  }
-  
-  /* Desktop Footer - Más separación horizontal entre columnas */
-  .footer-mobile .MuiGrid-container {
-    gap: 40px !important;
-    justify-content: space-around !important;
-  }
-  
-  .footer-mobile .footer-section-mobile {
-    margin: 0 20px !important;
+    padding: 40px 20px !important;
+    text-align: center !important;
+    font-size: 18px !important;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+    position: fixed !important;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    width: 90% !important;
+    max-width: 500px !important;
+    background: white !important;
+    border: 2px solid #c8626d !important;
+    border-radius: 10px !important;
+    z-index: 99999 !important;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.2) !important;
   }
 }
+*/

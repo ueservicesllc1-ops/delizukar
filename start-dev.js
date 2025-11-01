@@ -86,7 +86,7 @@ setTimeout(() => {
 }, 2000);
 
 console.log('📱 Aplicación disponible en: http://localhost:3000');
-console.log('🔧 API disponible en: http://localhost:5000');
+console.log('🔧 API disponible en: http://localhost:5001');
 console.log('📦 EasyPost Dashboard: https://app.easypost.com/');
 console.log('');
 console.log('Presiona Ctrl+C para detener la aplicación');

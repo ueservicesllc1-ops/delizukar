@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Box, Container, Typography, Grid, Card, CardContent, CardActions, Button, Chip, Rating, IconButton, TextField, InputAdornment, Dialog, DialogContent, Skeleton } from '@mui/material';
 import { Close } from '@mui/icons-material';
@@ -7,11 +7,89 @@ import { useStore } from '../context/StoreContext';
 import ProductImageCarousel from '../components/ProductImageCarousel';
 import ProductImage from '../components/ProductImage';
 import AfterpayMessaging from '../components/AfterpayMessaging';
+import { useLanguage } from '../context/LanguageContext';
+import { translateBatch } from '../services/translateService';
 
 const Products = () => {
+  const { language } = useLanguage();
   const { categories, products, addToCart, productsLoading } = useStore();
   const [open, setOpen] = useState(false);
   const [selected, setSelected] = useState(null);
+  const [translatedTexts, setTranslatedTexts] = useState({
+    addToCart: 'Agregar al Carrito',
+    nuevo: 'Nuevo',
+    masVendido: 'Más Vendido',
+    stock: 'Stock:',
+    units: 'units',
+    agotado: 'Agotado',
+    stockBajo: 'Stock Bajo',
+    stockMedio: 'Stock Medio',
+    enStock: 'En Stock',
+    reseñas: 'reseñas',
+    cerrar: 'Cerrar',
+    stockDisponible: 'Stock disponible:',
+    unidades: 'unidades'
+  });
+
+  // Traducir textos cuando cambia el idioma
+  useEffect(() => {
+    const translateTexts = async () => {
+      if (language === 'es') {
+        setTranslatedTexts({
+          addToCart: 'Agregar al Carrito',
+          nuevo: 'Nuevo',
+          masVendido: 'Más Vendido',
+          stock: 'Stock:',
+          units: 'units',
+          agotado: 'Agotado',
+          stockBajo: 'Stock Bajo',
+          stockMedio: 'Stock Medio',
+          enStock: 'En Stock',
+          reseñas: 'reseñas',
+          cerrar: 'Cerrar',
+          stockDisponible: 'Stock disponible:',
+          unidades: 'unidades'
+        });
+      } else {
+        try {
+          const textsToTranslate = [
+            'Agregar al Carrito',
+            'Nuevo',
+            'Más Vendido',
+            'Stock:',
+            'units',
+            'Agotado',
+            'Stock Bajo',
+            'Stock Medio',
+            'En Stock',
+            'reseñas',
+            'Cerrar',
+            'Stock disponible:',
+            'unidades'
+          ];
+          const translated = await translateBatch(textsToTranslate, language, 'es');
+          setTranslatedTexts({
+            addToCart: translated[0] || 'Agregar al Carrito',
+            nuevo: translated[1] || 'Nuevo',
+            masVendido: translated[2] || 'Más Vendido',
+            stock: translated[3] || 'Stock:',
+            units: translated[4] || 'units',
+            agotado: translated[5] || 'Agotado',
+            stockBajo: translated[6] || 'Stock Bajo',
+            stockMedio: translated[7] || 'Stock Medio',
+            enStock: translated[8] || 'En Stock',
+            reseñas: translated[9] || 'reseñas',
+            cerrar: translated[10] || 'Cerrar',
+            stockDisponible: translated[11] || 'Stock disponible:',
+            unidades: translated[12] || 'unidades'
+          });
+        } catch (error) {
+          console.error('Error translating texts:', error);
+        }
+      }
+    };
+    translateTexts();
+  }, [language]);
 
   return (
     <Box className="products-page-mobile" sx={{ 
@@ -110,7 +188,7 @@ const Products = () => {
                     <Box sx={{ position: 'absolute', top: 12, left: 12, display: 'flex', flexDirection: 'column', gap: 1 }}>
                       {product.isNew && (
                         <Chip
-                          label={'Nuevo'}
+                          label={translatedTexts.nuevo}
                           size="small"
                           sx={{
                             backgroundColor: '#4CAF50',
@@ -122,7 +200,7 @@ const Products = () => {
                       )}
                       {product.isBestSeller && (
                         <Chip
-                          label={'Más Vendido'}
+                          label={translatedTexts.masVendido}
                           size="small"
                           sx={{
                             backgroundColor: '#FF6B35',
@@ -206,7 +284,7 @@ const Products = () => {
                           variant="body2"
                           sx={{ ml: 0.5, color: '#666', fontSize: '0.8rem' }}
                         >
-                          ({product.reviews} reseñas)
+                          ({product.reviews} {translatedTexts.reseñas})
                         </Typography>
                       </Box>
                     </Box>
@@ -221,13 +299,13 @@ const Products = () => {
                           fontWeight: 500
                         }}
                       >
-                        Stock: {product.inventory || 0} units
+                        {translatedTexts.stock} {product.inventory || 0} {translatedTexts.units}
                       </Typography>
                       <Chip
                         label={
-                          (product.inventory || 0) === 0 ? 'Agotado' :
-                          (product.inventory || 0) < 10 ? 'Stock Bajo' :
-                          (product.inventory || 0) < 50 ? 'Stock Medio' : 'En Stock'
+                          (product.inventory || 0) === 0 ? translatedTexts.agotado :
+                          (product.inventory || 0) < 10 ? translatedTexts.stockBajo :
+                          (product.inventory || 0) < 50 ? translatedTexts.stockMedio : translatedTexts.enStock
                         }
                         size="small"
                         sx={{
@@ -271,7 +349,7 @@ const Products = () => {
                         addToCart(product);
                       }}
                     >
-                      Agregar al Carrito
+                      {translatedTexts.addToCart}
                     </Button>
                   </CardActions>
                 </Card>
@@ -306,7 +384,7 @@ const Products = () => {
         >
           <DialogContent sx={{ p: 0, position: 'relative' }}>
             <IconButton
-              aria-label={'Cerrar'}
+              aria-label={translatedTexts.cerrar}
               onClick={() => setOpen(false)}
               sx={{ 
                 position: 'absolute', 
@@ -351,7 +429,7 @@ const Products = () => {
                     </Typography>
                     <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
                       <Rating value={selected.rating} precision={0.1} readOnly size="small" sx={{ color: '#FFD700' }} />
-                      <Typography variant="body2" sx={{ ml: 1, color: '#666' }}>({selected.reviews} reseñas)</Typography>
+                      <Typography variant="body2" sx={{ ml: 1, color: '#666' }}>({selected.reviews} {translatedTexts.reseñas})</Typography>
                     </Box>
                     <Typography variant="h6" sx={{ fontWeight: 700, color: '#c8626d', mb: 2 }}>
                       ${selected.price}
@@ -372,13 +450,13 @@ const Products = () => {
                           fontWeight: 500
                         }}
                       >
-                        Stock disponible: {selected.inventory || 0} unidades
+                        {translatedTexts.stockDisponible} {selected.inventory || 0} {translatedTexts.unidades}
                       </Typography>
                       <Chip
                         label={
-                          (selected.inventory || 0) === 0 ? 'Agotado' :
-                          (selected.inventory || 0) < 10 ? 'Stock Bajo' :
-                          (selected.inventory || 0) < 50 ? 'Stock Medio' : 'En Stock'
+                          (selected.inventory || 0) === 0 ? translatedTexts.agotado :
+                          (selected.inventory || 0) < 10 ? translatedTexts.stockBajo :
+                          (selected.inventory || 0) < 50 ? translatedTexts.stockMedio : translatedTexts.enStock
                         }
                         size="small"
                         sx={{
@@ -420,7 +498,7 @@ const Products = () => {
                         setOpen(false);
                       }}
                     >
-                      Agregar al Carrito
+                      {translatedTexts.addToCart}
                     </Button>
                 </Box>
               </Box>

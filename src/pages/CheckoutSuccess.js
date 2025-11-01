@@ -54,9 +54,10 @@ const CheckoutSuccess = () => {
           console.log('💰 Saved payment amount:', savedPaymentAmount);
           
           // Consultar datos reales desde el backend
+          // En desarrollo usa proxy (string vacío), en producción usa window.location.origin
           const baseUrl = process.env.NODE_ENV === 'production' 
             ? window.location.origin 
-            : 'http://localhost:5000';
+            : '';
           const response = await fetch(`${baseUrl}/api/payment-intent/${paymentIntentId}`);
           console.log('🔍 Backend response status:', response.status);
           

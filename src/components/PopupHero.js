@@ -21,9 +21,13 @@ import {
 } from '@mui/icons-material';
 import { collection, getDocs } from 'firebase/firestore';
 import { db } from '../firebase/config';
+import { useLanguage } from '../context/LanguageContext';
+import { translateBatch } from '../services/translateService';
 
 const PopupHero = ({ open, onClose }) => {
+  const { language } = useLanguage();
   const [offers, setOffers] = useState([]);
+  const [originalOffers, setOriginalOffers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [currentOffer, setCurrentOffer] = useState(0);
   const [duration, setDuration] = useState(8); // Duración por defecto: 8 segundos
@@ -33,8 +37,134 @@ const PopupHero = ({ open, onClose }) => {
     showWelcomeTitle: false,
     welcomeTitle: ''
   });
+  const [originalPopupConfig, setOriginalPopupConfig] = useState({
+    showWelcomeTitle: false,
+    welcomeTitle: ''
+  });
+  const [translatedTexts, setTranslatedTexts] = useState({
+    seg: 'seg',
+    discount: 'DESCUENTO',
+    codeLabel: 'Código:',
+    defaultTitle: '¡Ofertas Especiales!',
+    defaultButton: 'Ver Productos',
+    defaultDiscountText: '¡APROVECHA ESTA OFERTA!',
+    defaultDiscountConditions: 'A usuarios registrados en su primera compra'
+  });
 
   console.log('PopupHero - open:', open, 'loading:', loading, 'offers:', offers.length);
+
+  // Traducir textos estáticos cuando cambia el idioma
+  useEffect(() => {
+    const translateStaticTexts = async () => {
+      if (language === 'es') {
+        setTranslatedTexts({
+          seg: 'seg',
+          discount: 'DESCUENTO',
+          codeLabel: 'Código:',
+          defaultTitle: '¡Ofertas Especiales!',
+          defaultButton: 'Ver Productos',
+          defaultDiscountText: '¡APROVECHA ESTA OFERTA!',
+          defaultDiscountConditions: 'A usuarios registrados en su primera compra'
+        });
+      } else {
+        try {
+          const textsToTranslate = [
+            'seg',
+            'DESCUENTO',
+            'Código:',
+            '¡Ofertas Especiales!',
+            'Ver Productos',
+            '¡APROVECHA ESTA OFERTA!',
+            'A usuarios registrados en su primera compra'
+          ];
+          const translated = await translateBatch(textsToTranslate, language, 'es');
+          setTranslatedTexts({
+            seg: translated[0] || 'seg',
+            discount: translated[1] || 'DESCUENTO',
+            codeLabel: translated[2] || 'Código:',
+            defaultTitle: translated[3] || '¡Ofertas Especiales!',
+            defaultButton: translated[4] || 'Ver Productos',
+            defaultDiscountText: translated[5] || '¡APROVECHA ESTA OFERTA!',
+            defaultDiscountConditions: translated[6] || 'A usuarios registrados en su primera compra'
+          });
+        } catch (error) {
+          console.error('Error translating static texts:', error);
+        }
+      }
+    };
+    translateStaticTexts();
+  }, [language]);
+
+  // Traducir ofertas dinámicas cuando cambia el idioma
+  useEffect(() => {
+    const translateOffers = async () => {
+      if (language === 'es' || originalOffers.length === 0) {
+        setOffers(originalOffers);
+        setPopupConfig(originalPopupConfig);
+        return;
+      }
+
+      try {
+        // Traducir welcomeTitle
+        let translatedWelcomeTitle = originalPopupConfig.welcomeTitle;
+        if (originalPopupConfig.welcomeTitle) {
+          try {
+            const [translated] = await translateBatch([originalPopupConfig.welcomeTitle], language, 'es');
+            translatedWelcomeTitle = translated || originalPopupConfig.welcomeTitle;
+          } catch (error) {
+            console.error('Error translating welcomeTitle:', error);
+          }
+        }
+
+        // Traducir cada oferta
+        const translatedOffers = await Promise.all(
+          originalOffers.map(async (offer) => {
+            const textsToTranslate = [];
+            const keys = ['title', 'description', 'discountText', 'discountConditions', 'buttonText'];
+            keys.forEach(key => {
+              if (offer[key]) {
+                textsToTranslate.push(offer[key]);
+              }
+            });
+
+            if (textsToTranslate.length === 0) {
+              return offer;
+            }
+
+            try {
+              const translated = await translateBatch(textsToTranslate, language, 'es');
+              const translatedOffer = { ...offer };
+              let translatedIndex = 0;
+              keys.forEach(key => {
+                if (offer[key]) {
+                  translatedOffer[key] = translated[translatedIndex] || offer[key];
+                  translatedIndex++;
+                }
+              });
+              return translatedOffer;
+            } catch (error) {
+              console.error('Error translating offer:', error);
+              return offer;
+            }
+          })
+        );
+
+        setOffers(translatedOffers);
+        setPopupConfig({
+          ...originalPopupConfig,
+          welcomeTitle: translatedWelcomeTitle
+        });
+      } catch (error) {
+        console.error('Error translating offers:', error);
+        setOffers(originalOffers);
+        setPopupConfig(originalPopupConfig);
+      }
+    };
+
+    if (!loading && originalOffers.length > 0) {
+      translateOffers();
+    }
+  }, [language, originalOffers, originalPopupConfig, loading]);
 
   // Cargar ofertas y configuración desde Firebase solo una vez
   useEffect(() => {
@@ -63,6 +193,7 @@ const PopupHero = ({ open, onClose }) => {
           setOffers([]);
         } else {
           console.log('✅ PopupHero - Ofertas activas encontradas:', activeOffers.length);
+          setOriginalOffers(activeOffers);
           setOffers(activeOffers);
         }
 
@@ -75,10 +206,12 @@ const PopupHero = ({ open, onClose }) => {
           const popupDuration = config.duration || 8; // Duración por defecto: 8 segundos
           setDuration(popupDuration);
           setTimeLeft(popupDuration);
-          setPopupConfig({
+          const configData = {
             showWelcomeTitle: config.showWelcomeTitle === true,
             welcomeTitle: config.welcomeTitle || ''
-          });
+          };
+          setOriginalPopupConfig(configData);
+          setPopupConfig(configData);
           console.log('🔍 PopupHero - Estado configurado:', {
             showWelcomeTitle: config.showWelcomeTitle === true,
             welcomeTitle: config.welcomeTitle || ''
@@ -87,10 +220,12 @@ const PopupHero = ({ open, onClose }) => {
           console.log('⚠️ PopupHero - No se encontró mainOffer en Firestore');
           setDuration(8);
           setTimeLeft(8);
-          setPopupConfig({
+          const defaultConfig = {
             showWelcomeTitle: false,
             welcomeTitle: ''
-          });
+          };
+          setOriginalPopupConfig(defaultConfig);
+          setPopupConfig(defaultConfig);
         }
         
         setLoading(false);
@@ -189,12 +324,19 @@ const PopupHero = ({ open, onClose }) => {
           open={open}
           onClose={onClose}
           sx={{
-            zIndex: 10000,
+            zIndex: 999999,
             '& .MuiDialog-paper': {
-              zIndex: 10000
+              zIndex: 999999
             },
             '& .MuiBackdrop-root': {
-              zIndex: 9999
+              zIndex: 999998,
+              backgroundColor: 'rgba(0, 0, 0, 0.3) !important'
+            }
+          }}
+          BackdropProps={{
+            sx: {
+              zIndex: 999998,
+              backgroundColor: 'rgba(0, 0, 0, 0.3) !important'
             }
           }}
           PaperProps={{
@@ -209,7 +351,7 @@ const PopupHero = ({ open, onClose }) => {
               backgroundColor: 'transparent',
               position: 'relative',
               backdropFilter: 'blur(20px)',
-              zIndex: 10000
+              zIndex: 999999
             }
           }}
         >
@@ -286,7 +428,7 @@ const PopupHero = ({ open, onClose }) => {
                   fontSize: '0.8rem'
                 }}
               >
-                seg
+                {translatedTexts.seg}
               </Typography>
             </Box>
 
@@ -827,7 +969,7 @@ const PopupHero = ({ open, onClose }) => {
                         fontSize: '1.2rem'
                       }}
                     >
-                      {currentOfferData.title || '¡Ofertas Especiales!'}
+                      {currentOfferData.title || translatedTexts.defaultTitle}
                     </Typography>
                   </motion.div>
 
@@ -919,7 +1061,7 @@ const PopupHero = ({ open, onClose }) => {
                             fontFamily: 'Playfair Display, serif'
                           }}
                         >
-                          {currentOfferData.discountPercent || '20'}% DESCUENTO
+                          {currentOfferData.discountPercent || '20'}% {translatedTexts.discount}
                         </Typography>
                         
                         <Typography
@@ -935,7 +1077,7 @@ const PopupHero = ({ open, onClose }) => {
                             mt: 0.3
                           }}
                         >
-                          {currentOfferData.discountText || '¡APROVECHA ESTA OFERTA!'}
+                          {currentOfferData.discountText || translatedTexts.defaultDiscountText}
                         </Typography>
                         
                         <Typography
@@ -952,7 +1094,7 @@ const PopupHero = ({ open, onClose }) => {
                             fontStyle: 'italic'
                           }}
                         >
-                          *{currentOfferData.discountConditions || 'A usuarios registrados en su primera compra'}
+                          *{currentOfferData.discountConditions || translatedTexts.defaultDiscountConditions}
                         </Typography>
                         
                         {currentOfferData.discountCode && (
@@ -977,7 +1119,7 @@ const PopupHero = ({ open, onClose }) => {
                                 letterSpacing: '0.1em'
                               }}
                             >
-                              Código: {currentOfferData.discountCode}
+                              {translatedTexts.codeLabel} {currentOfferData.discountCode}
                             </Typography>
                           </Box>
                         )}
@@ -1058,7 +1200,7 @@ const PopupHero = ({ open, onClose }) => {
                             window.location.href = currentOfferData.actionUrl || '/productos';
                           }}
                         >
-                          {currentOfferData.buttonText || '¡Aceptar la Oferta!'}
+                          {currentOfferData.buttonText || translatedTexts.defaultButton}
                         </Button>
                       </motion.div>
                     </Box>

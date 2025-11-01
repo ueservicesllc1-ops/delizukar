@@ -12,8 +12,11 @@ import { useFeaturedProducts } from '../context/FeaturedProductsContext';
 import { useStore } from '../context/StoreContext';
 import AfterpayMessaging from '../components/AfterpayMessaging';
 import { responsiveComponents } from '../utils/responsiveDesign';
+import { useLanguage } from '../context/LanguageContext';
+import { translateBatch } from '../services/translateService';
 
 const Home = () => {
+  const { language } = useLanguage();
   const { titleConfig, loading } = useTitleConfig();
   const { featuredConfig, featuredProducts, loading: featuredLoading } = useFeaturedProducts();
   const { addToCart } = useStore();
@@ -21,6 +24,85 @@ const Home = () => {
   const [productDetailOpen, setProductDetailOpen] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [popupOpen, setPopupOpen] = useState(false);
+  const [translatedTexts, setTranslatedTexts] = useState({
+    verDetalles: 'Ver Detalles',
+    verTodasLasGalletas: 'Ver Todas las Galletas',
+    agregarAlCarrito: 'Agregar al Carrito',
+    cerrar: 'Cerrar',
+    destacado: 'Destacado',
+    masVendido: 'Más Vendido',
+    nuevo: 'Nuevo',
+    reseñas: 'reseñas',
+    stockDisponible: 'Stock disponible:',
+    unidades: 'unidades',
+    agotado: 'Agotado',
+    stockBajo: 'Stock Bajo',
+    stockMedio: 'Stock Medio',
+    enStock: 'En Stock'
+  });
+
+  // Traducir textos cuando cambia el idioma
+  useEffect(() => {
+    const translateTexts = async () => {
+      if (language === 'es') {
+        setTranslatedTexts({
+          verDetalles: 'Ver Detalles',
+          verTodasLasGalletas: 'Ver Todas las Galletas',
+          agregarAlCarrito: 'Agregar al Carrito',
+          cerrar: 'Cerrar',
+          destacado: 'Destacado',
+          masVendido: 'Más Vendido',
+          nuevo: 'Nuevo',
+          reseñas: 'reseñas',
+          stockDisponible: 'Stock disponible:',
+          unidades: 'unidades',
+          agotado: 'Agotado',
+          stockBajo: 'Stock Bajo',
+          stockMedio: 'Stock Medio',
+          enStock: 'En Stock'
+        });
+      } else {
+        try {
+          const textsToTranslate = [
+            'Ver Detalles',
+            'Ver Todas las Galletas',
+            'Agregar al Carrito',
+            'Cerrar',
+            'Destacado',
+            'Más Vendido',
+            'Nuevo',
+            'reseñas',
+            'Stock disponible:',
+            'unidades',
+            'Agotado',
+            'Stock Bajo',
+            'Stock Medio',
+            'En Stock'
+          ];
+          const translated = await translateBatch(textsToTranslate, language, 'es');
+          setTranslatedTexts({
+            verDetalles: translated[0] || 'Ver Detalles',
+            verTodasLasGalletas: translated[1] || 'Ver Todas las Galletas',
+            agregarAlCarrito: translated[2] || 'Agregar al Carrito',
+            cerrar: translated[3] || 'Cerrar',
+            destacado: translated[4] || 'Destacado',
+            masVendido: translated[5] || 'Más Vendido',
+            nuevo: translated[6] || 'Nuevo',
+            reseñas: translated[7] || 'reseñas',
+            stockDisponible: translated[8] || 'Stock disponible:',
+            unidades: translated[9] || 'unidades',
+            agotado: translated[10] || 'Agotado',
+            stockBajo: translated[11] || 'Stock Bajo',
+            stockMedio: translated[12] || 'Stock Medio',
+            enStock: translated[13] || 'En Stock'
+          });
+        } catch (error) {
+          console.error('Error translating texts:', error);
+        }
+      }
+    };
+    translateTexts();
+  }, [language]);
 
   // Funciones para el carrusel del popup
   const getProductImages = () => {
@@ -237,9 +319,9 @@ const Home = () => {
                             />
                             {/* Chips en la esquina superior izquierda */}
                             <Box sx={{ position: 'absolute', top: 8, left: 8, display: 'flex', flexDirection: 'column', gap: 0.5 }}>
-                              {product.featured && <Chip label={'Destacado'} size="small" color="primary" sx={{ fontSize: '0.7rem', height: '24px' }} />}
-                              {product.bestSeller && <Chip label={'Más Vendido'} size="small" color="success" sx={{ fontSize: '0.7rem', height: '24px' }} />}
-                              {product.isNew && <Chip label={'Nuevo'} size="small" color="warning" sx={{ fontSize: '0.7rem', height: '24px' }} />}
+                              {product.featured && <Chip label={translatedTexts.destacado} size="small" color="primary" sx={{ fontSize: '0.7rem', height: '24px' }} />}
+                              {product.bestSeller && <Chip label={translatedTexts.masVendido} size="small" color="success" sx={{ fontSize: '0.7rem', height: '24px' }} />}
+                              {product.isNew && <Chip label={translatedTexts.nuevo} size="small" color="warning" sx={{ fontSize: '0.7rem', height: '24px' }} />}
                             </Box>
                           </Box>
                           <Typography
@@ -298,7 +380,7 @@ const Home = () => {
                               minHeight: '32px'
                             }}
                           >
-                            Ver Detalles
+                            {translatedTexts.verDetalles}
                           </Button>
                         </CardContent>
                       </Card>
@@ -339,7 +421,7 @@ const Home = () => {
                     transition: 'all 0.3s ease'
                   }}
                 >
-                  Ver Todas las Galletas
+                  {translatedTexts.verTodasLasGalletas}
                 </Button>
               </motion.div>
             </Box>
@@ -476,16 +558,16 @@ const Home = () => {
                   )}
                   
                   <Box sx={{ display: 'flex', gap: 1, mb: 3 }}>
-                    {selectedProduct.featured && <Chip label={'Destacado'} color="primary" />}
-                    {selectedProduct.bestSeller && <Chip label={'Más Vendido'} color="success" />}
-                    {selectedProduct.isNew && <Chip label={'Nuevo'} color="warning" />}
+                    {selectedProduct.featured && <Chip label={translatedTexts.destacado} color="primary" />}
+                    {selectedProduct.bestSeller && <Chip label={translatedTexts.masVendido} color="success" />}
+                    {selectedProduct.isNew && <Chip label={translatedTexts.nuevo} color="warning" />}
                   </Box>
                   
                   {selectedProduct.rating && (
                     <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
                       <Rating value={selectedProduct.rating} readOnly sx={{ mr: 1 }} />
                           <Typography variant="body2" sx={{ color: '#666' }}>
-                        ({selectedProduct.reviews} reseñas)
+                        ({selectedProduct.reviews} {translatedTexts.reseñas})
                       </Typography>
                     </Box>
                   )}
@@ -500,13 +582,13 @@ const Home = () => {
                   {selectedProduct.inventory !== undefined && (
                     <Box sx={{ mb: 3 }}>
                       <Typography variant="body2" sx={{ color: '#666', mb: 1 }}>
-                        Stock disponible: {selectedProduct.inventory} unidades
+                        {translatedTexts.stockDisponible} {selectedProduct.inventory} {translatedTexts.unidades}
                       </Typography>
                       <Chip
                         label={
-                          selectedProduct.inventory === 0 ? 'Agotado' :
-                          selectedProduct.inventory < 10 ? 'Stock Bajo' :
-                          selectedProduct.inventory < 50 ? 'Stock Medio' : 'En Stock'
+                          selectedProduct.inventory === 0 ? translatedTexts.agotado :
+                          selectedProduct.inventory < 10 ? translatedTexts.stockBajo :
+                          selectedProduct.inventory < 50 ? translatedTexts.stockMedio : translatedTexts.enStock
                         }
                         color={
                           selectedProduct.inventory === 0 ? 'error' :
@@ -525,7 +607,7 @@ const Home = () => {
                 onClick={() => setProductDetailOpen(false)}
                 sx={{ color: '#c8626d' }}
               >
-                Cerrar
+                {translatedTexts.cerrar}
               </Button>
               <Button
                 variant="contained"
@@ -545,7 +627,7 @@ const Home = () => {
                   fontWeight: 600
                 }}
               >
-                Agregar al Carrito
+                {translatedTexts.agregarAlCarrito}
               </Button>
             </DialogActions>
           </>

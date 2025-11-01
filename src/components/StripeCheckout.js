@@ -114,9 +114,10 @@ const CheckoutForm = ({ cartItems, total, customerInfo, onSuccess, onError }) =>
             updatedAt: new Date().toISOString()
           };
           
+          // En desarrollo usa proxy (string vacío), en producción usa window.location.origin
           const baseUrl = process.env.NODE_ENV === 'production' 
             ? window.location.origin 
-            : 'http://localhost:5000';
+            : '';
           const response = await fetch(`${baseUrl}/api/create-order`, {
             method: 'POST',
             headers: {

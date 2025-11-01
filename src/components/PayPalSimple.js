@@ -19,9 +19,12 @@ const PayPalButtonContainer = ({
   shippingAddress,
   shippingInfo
 }) => {
-  const [{ isResolved, isRejected }] = usePayPalScriptReducer();
+  const [{ isResolved, isRejected, isPending }] = usePayPalScriptReducer();
+
+  console.log('🔄 [PayPal] SDK State:', { isResolved, isRejected, isPending });
 
   if (isRejected) {
+    console.error('❌ [PayPal] SDK Rejected - PayPal no está disponible');
     return (
       <Box sx={{ textAlign: 'center', py: 4 }}>
         <Alert severity="error" sx={{ mb: 2 }}>
@@ -38,7 +41,8 @@ const PayPalButtonContainer = ({
     );
   }
 
-  if (!isResolved) {
+  if (!isResolved || isPending) {
+    console.log('⏳ [PayPal] SDK Loading...', { isResolved, isPending });
     return (
       <Box display="flex" flexDirection="column" alignItems="center" py={4}>
         <CircularProgress />
@@ -48,6 +52,8 @@ const PayPalButtonContainer = ({
       </Box>
     );
   }
+
+  console.log('✅ [PayPal] SDK Resolved - Botones listos para renderizar');
 
   console.log('🎯 [PayPal] PayPalButtonContainer renderizado, onSuccess:', typeof onSuccess);
 
@@ -124,13 +130,16 @@ const PayPalButtonContainer = ({
   };
 
   const handleError = (error) => {
-    console.error('PayPal Simple - Error:', error);
+    console.error('❌ [PayPal] Error:', error);
+    console.error('❌ [PayPal] Error details:', JSON.stringify(error, null, 2));
+    console.error('❌ [PayPal] Error message:', error?.message);
+    console.error('❌ [PayPal] Error stack:', error?.stack);
     
     if (onError) {
       onError(error);
     }
     
-    toast.error('Payment failed. Please try again.');
+    toast.error(`Payment failed: ${error?.message || 'Unknown error'}. Please try again.`);
   };
 
   const handleCancel = (data) => {
@@ -139,6 +148,8 @@ const PayPalButtonContainer = ({
   };
 
   console.log('🎯🎯 [PayPal] Renderizando PayPalButtons, onSuccess es:', typeof onSuccess);
+  console.log('🎯🎯 [PayPal] Amount:', amount);
+  console.log('🎯🎯 [PayPal] Currency:', currency);
 
   return (
     <PayPalButtons
@@ -153,6 +164,11 @@ const PayPalButtonContainer = ({
       onApprove={handleApprove}
       onError={handleError}
       onCancel={handleCancel}
+      onClick={(data, actions) => {
+        console.log('🖱️ [PayPal] Button clicked!', data, actions);
+        // Permitir que continúe con el flujo normal
+        return actions.resolve();
+      }}
     />
   );
 };
@@ -187,24 +203,41 @@ const PayPalSimple = ({
   const environment = process.env.REACT_APP_PAYPAL_ENVIRONMENT || 'sandbox';
   
   console.log('🔧 PayPal Configuration:', {
-    clientId: clientId.substring(0, 20) + '...',
+    clientId: clientId ? clientId.substring(0, 20) + '...' : 'NOT SET',
     environment: environment,
-    currency: currency
+    currency: currency,
+    isProduction: environment === 'production',
+    fullClientId: clientId
   });
+
+  // Configurar opciones del SDK de PayPal
+  const paypalOptions = {
+    "client-id": clientId,
+    currency: currency,
+    intent: 'capture',
+    components: 'buttons',
+    "enable-funding": 'card,credit,paypal',
+    vault: false,
+    commit: true,
+    "data-sdk-integration-source": "buttonfactory",
+    "buyer-country": "US",
+    "locale": "en_US",
+  };
+
+  // En modo production, agregar configuración adicional si es necesario
+  if (environment === 'production') {
+    console.log('✅ Configurando PayPal en modo PRODUCTION (LIVE)');
+    // El SDK detecta automáticamente el environment basándose en el Client ID
+    // Pero podemos asegurarnos de que no hay opciones de sandbox
+  } else {
+    console.log('🧪 Configurando PayPal en modo SANDBOX');
+  }
+
+  console.log('📦 PayPal Options:', paypalOptions);
 
   return (
     <PayPalScriptProvider 
-      options={{
-        "client-id": clientId,
-        currency: currency,
-        intent: 'capture',
-        components: 'buttons',
-        "enable-funding": 'card,credit,paypal',
-        "disable-funding": '',
-        vault: false,
-        commit: true, // Forzar que el botón diga "Pay Now" y cierre después del pago
-        "data-sdk-integration-source": "integrationbuilder_sc",
-      }}
+      options={paypalOptions}
     >
       <Box sx={{ p: 3, textAlign: 'center' }}>
         <Typography variant="h6" sx={{ mb: 2 }}>
