@@ -83,3 +83,36 @@ export const responsiveComponents = {
     spacing: { xs: 2, sm: 3, md: 4, lg: 5 }
   }
 };
+
+// Detectar si es iPad
+export const isIPad = () => {
+  if (typeof window === 'undefined') return false;
+  
+  const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+  const isIOS = /iPad|iPhone|iPod/.test(userAgent) && !window.MSStream;
+  
+  // Detectar iPad específicamente
+  // iPad tiene user agent con "iPad" o es un dispositivo iOS con ancho > 768px
+  const isIPadUA = /iPad/.test(userAgent);
+  const isIOSDevice = /iPhone|iPod/.test(userAgent);
+  const isMacOS = /Macintosh/.test(userAgent) && navigator.maxTouchPoints > 1;
+  
+  // iPad tiene ancho mínimo de 768px en portrait o 1024px en landscape
+  const width = window.innerWidth || screen.width;
+  const height = window.innerHeight || screen.height;
+  const isTabletSize = (width >= 768 && width <= 1024) || (height >= 768 && height <= 1024);
+  
+  // Detectar iPhone 16 específicamente (393px x 852px)
+  const isIPhone16 = width === 393 && height === 852;
+  
+  // Es iPad si:
+  // 1. User agent dice "iPad"
+  // 2. Es macOS con touch (iPadOS 13+)
+  // 3. Es tamaño tablet Y NO es iPhone 16
+  return (isIPadUA || isMacOS || (isTabletSize && !isIOSDevice)) && !isIPhone16;
+};
+
+// Verificar si la edición está permitida (solo en iPad)
+export const isEditAllowed = () => {
+  return isIPad();
+};

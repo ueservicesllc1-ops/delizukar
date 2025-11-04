@@ -38,6 +38,7 @@ import {
 import { db, storage } from '../firebase/config';
 import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, setDoc } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
+import { isEditAllowed } from '../utils/responsiveDesign';
 
 const ProductsManager = ({ open, onClose }) => {
   const [products, setProducts] = useState([]);
@@ -50,6 +51,14 @@ const ProductsManager = ({ open, onClose }) => {
   const [selectedImages, setSelectedImages] = useState([]);
   const [imagePreviews, setImagePreviews] = useState([]);
   const [uploadingImage, setUploadingImage] = useState(false);
+
+  // Bloquear edición si no es iPad
+  useEffect(() => {
+    if (open && !isEditAllowed()) {
+      alert('La edición solo está disponible en iPad. Por favor, accede desde un iPad para editar contenido.');
+      onClose();
+    }
+  }, [open, onClose]);
 
   // Form state
   const [formData, setFormData] = useState({

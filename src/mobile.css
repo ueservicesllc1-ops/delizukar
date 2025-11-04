@@ -986,14 +986,22 @@
     font-size: 1rem !important;
   }
   
-  /* Franja rosada para iPad vertical - medida invertida */
+  /* Franja rosada para iPad vertical - medida invertida - Subida */
   .hero-color-strip-mobile {
-    margin-top: 200px !important;
+    margin-top: -160px !important;
+    padding-top: 0px !important;
     position: relative !important;
-    z-index: 1 !important;
+    z-index: 100 !important;
     transform: none !important;
     top: 0 !important;
     display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    width: 100vw !important;
+    margin-left: calc(-50vw + 50%) !important;
+    margin-right: calc(-50vw + 50%) !important;
+    background-color: #C8626D !important;
+    height: 50px !important;
     cursor: default !important;
     pointer-events: none !important;
     user-select: none !important;
@@ -1049,10 +1057,10 @@
     transform: translateY(-10px) !important;
   }
   
-  /* Hero Banner - Ajustar para vertical */
+  /* Hero Banner - Ajustar para vertical - Subido más */
   .hero-mobile {
-    margin-top: -120px !important;
-    padding-top: 0 !important;
+    margin-top: -80px !important;
+    padding-top: 40px !important;
     position: relative !important;
     top: 0 !important;
     height: 60vh !important;
@@ -1065,10 +1073,12 @@
     color: black !important;
   }
   
-  /* Título "Galletas Destacadas" más grande */
+  /* Título "Galletas Destacadas" más grande - Subido 40px */
   .featured-products-title {
     font-size: 2.5rem !important;
     color: #EC8C8D !important;
+    margin-top: -40px !important;
+    position: relative !important;
   }
   
   /* Cartillas de galletas - z-index 1 */
@@ -1253,11 +1263,20 @@
     z-index: 10 !important;
   }
   
-  /* Franja rosada */
+  /* Franja rosada - VISIBLE en iPad vertical - Subida */
   .hero-color-strip-mobile {
-    margin-top: -300px !important;
+    margin-top: -160px !important;
+    padding-top: 0px !important;
     position: relative !important;
-    z-index: 1 !important;
+    z-index: 100 !important;
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    width: 100vw !important;
+    margin-left: calc(-50vw + 50%) !important;
+    margin-right: calc(-50vw + 50%) !important;
+    background-color: #C8626D !important;
+    height: 50px !important;
   }
 }
 
@@ -1292,9 +1311,9 @@
     max-width: 180px !important;
   }
   
-  /* iPad Hero Banner - Subir 20px */
+  /* iPad Hero Banner - Subido más */
   .hero-mobile {
-    margin-top: 40px !important;
+    margin-top: 0px !important;
     padding-top: 0 !important;
     position: relative !important;
     top: 0 !important;
@@ -1302,14 +1321,22 @@
     z-index: 1 !important;
   }
   
-  /* FIX: Pink strip - MUST go exactly after the hero banner */
+  /* FIX: Pink strip - MUST go exactly after the hero banner - VISIBLE en iPad - Subida */
   .hero-color-strip-mobile {
-    margin-top: -150px !important;
+    margin-top: -160px !important;
+    padding-top: 0px !important;
     position: relative !important;
-    z-index: 1 !important;
+    z-index: 100 !important;
     transform: none !important;
     top: 0 !important;
     display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    width: 100vw !important;
+    margin-left: calc(-50vw + 50%) !important;
+    margin-right: calc(-50vw + 50%) !important;
+    background-color: #C8626D !important;
+    height: 50px !important;
     cursor: default !important;
     pointer-events: none !important;
     user-select: none !important;
@@ -1328,6 +1355,12 @@
     margin-top: 0 !important;
   } */
   
+  /* Título "Galletas Destacadas" - Subido 40px en iPad horizontal */
+  .featured-products-title {
+    margin-top: -40px !important;
+    position: relative !important;
+  }
+
   /* Adjust main content so it does not overlap with header */
   .home-mobile {
     padding-top: 0 !important;

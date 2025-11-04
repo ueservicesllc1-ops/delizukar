@@ -638,7 +638,6 @@ const AdminDashboard = () => {
             <Box>
                   <Typography
                     variant="h2"
-                    className="admin-dashboard-title"
                     sx={{
                       fontWeight: 800,
                       color: '#eb8b8b',
@@ -710,28 +709,32 @@ const AdminDashboard = () => {
                     >
                       <Button
                             onClick={
-                              index === 15 ? () => setFontManagerOpen(true) :
-                              index === 0 ? () => setProductsManagerOpen(true) :
-                              index === 1 ? () => setBannerPhotoManagerOpen(true) :
-                              index === 2 ? () => setBanner2PhotoManagerOpen(true) :
-                              index === 3 ? () => setInventoryManagerOpen(true) :
-                              index === 4 ? () => setPagesManagerOpen(true) :
-                              index === 5 ? () => setTestimonialsManagerOpen(true) :
-                              index === 6 ? () => setFeaturedProductsManagerOpen(true) :
-                              index === 7 ? () => setSocialMediaManagerOpen(true) :
-                              index === 8 ? () => setPopupHeroManagerOpen(true) :
-                              index === 9 ? () => setPaypalBalanceOpen(true) :
-                              index === 10 ? () => setSalesReportOpen(true) :
-                              index === 11 ? () => setUserManagementOpen(true) :
-                              index === 12 ? () => setMinProductsManagerOpen(true) :
-                              index === 13 ? () => setMessagingSystemOpen(true) :
-                              index === 14 ? handleCostAnalysisClick :
-                              index === 16 ? () => setColorPaletteOpen(true) :
-                              index === 17 ? () => setOrdersManagerOpen(true) :
-                              index === 18 ? () => setSubscriptionManagerOpen(true) :
-                              index === 19 ? () => setVoucherManagerOpen(true) :
-                              undefined
+                              // Bloquear edición si no es iPad (índices 0-8, 12, 15-19 son de edición)
+                              (!editAllowed && [0, 1, 2, 3, 4, 5, 6, 7, 8, 12, 15, 16, 17, 18, 19].includes(index)) 
+                                ? () => alert('La edición solo está disponible en iPad. Por favor, accede desde un iPad para editar contenido.')
+                                : index === 15 ? () => setFontManagerOpen(true) :
+                                index === 0 ? () => setProductsManagerOpen(true) :
+                                index === 1 ? () => setBannerPhotoManagerOpen(true) :
+                                index === 2 ? () => setBanner2PhotoManagerOpen(true) :
+                                index === 3 ? () => setInventoryManagerOpen(true) :
+                                index === 4 ? () => setPagesManagerOpen(true) :
+                                index === 5 ? () => setTestimonialsManagerOpen(true) :
+                                index === 6 ? () => setFeaturedProductsManagerOpen(true) :
+                                index === 7 ? () => setSocialMediaManagerOpen(true) :
+                                index === 8 ? () => setPopupHeroManagerOpen(true) :
+                                index === 9 ? () => setPaypalBalanceOpen(true) :
+                                index === 10 ? () => setSalesReportOpen(true) :
+                                index === 11 ? () => setUserManagementOpen(true) :
+                                index === 12 ? () => setMinProductsManagerOpen(true) :
+                                index === 13 ? () => setMessagingSystemOpen(true) :
+                                index === 14 ? handleCostAnalysisClick :
+                                index === 16 ? () => setColorPaletteOpen(true) :
+                                index === 17 ? () => setOrdersManagerOpen(true) :
+                                index === 18 ? () => setSubscriptionManagerOpen(true) :
+                                index === 19 ? () => setVoucherManagerOpen(true) :
+                                undefined
                             }
+                            disabled={!editAllowed && [0, 1, 2, 3, 4, 5, 6, 7, 8, 12, 15, 16, 17, 18, 19].includes(index)}
                         sx={{
                           width: '250px',
                           height: '120px',

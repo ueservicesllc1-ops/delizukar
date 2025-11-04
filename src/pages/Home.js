@@ -174,7 +174,9 @@ const Home = () => {
       <Box
         className="hero-color-strip-mobile"
         sx={{
-          width: '100%',
+          width: '100vw',
+          marginLeft: 'calc(-50vw + 50%)',
+          marginRight: 'calc(-50vw + 50%)',
           height: '50px',
           backgroundColor: '#C8626D',
           position: 'relative',
@@ -248,7 +250,7 @@ const Home = () => {
         pt: 6, 
         backgroundColor: '#fafafa',
         '@media (min-width: 768px) and (max-width: 1200px) and (orientation: landscape)': {
-          marginTop: '100px'
+          marginTop: '30px'
         }
       }}>
         <Container maxWidth="lg">

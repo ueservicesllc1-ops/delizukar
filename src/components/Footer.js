@@ -148,7 +148,8 @@ const Footer = () => {
       component="footer"
       className="footer-mobile"
       sx={{
-        backgroundColor: '#C8626D',
+        backgroundColor: '#C8626D !important',
+        background: '#C8626D !important',
         color: 'white',
         pt: 0,
         pb: 0,

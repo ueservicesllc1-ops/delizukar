@@ -252,14 +252,13 @@ const PopupHero = ({ open, onClose }) => {
     }
   }, [open]);
 
-  // Cuenta regresiva y cierre automático - DESACTIVADO para edición
+  // Cuenta regresiva y cierre automático - HABILITADO
   useEffect(() => {
     if (open && !loading && offers.length > 0) {
       setTimeLeft(duration);
       setIsClosing(false);
       
-      // BLOQUEADO: timer desactivado para edición
-      /*
+      // Timer habilitado para cierre automático
       const timer = setInterval(() => {
         setTimeLeft(prev => {
           if (prev <= 1) {
@@ -274,14 +273,12 @@ const PopupHero = ({ open, onClose }) => {
       }, 1000);
 
       return () => clearInterval(timer);
-      */
     }
   }, [open, loading, offers.length, duration, onClose]);
 
-  // Cambiar oferta cada 4 segundos si hay múltiples ofertas - DESACTIVADO para edición
+  // Cambiar oferta cada 4 segundos si hay múltiples ofertas - HABILITADO
   useEffect(() => {
-    // BLOQUEADO: cambio automático de ofertas desactivado para edición
-    /*
+    // Cambio automático de ofertas habilitado
     if (offers.length > 1) {
       const interval = setInterval(() => {
         setCurrentOffer((prev) => (prev + 1) % offers.length);
@@ -289,7 +286,6 @@ const PopupHero = ({ open, onClose }) => {
 
       return () => clearInterval(interval);
     }
-    */
   }, [offers.length]);
 
   if (loading) {
@@ -1222,8 +1218,9 @@ const PopupHero = ({ open, onClose }) => {
                   justifyContent: 'stretch',
                   position: 'relative',
                   overflow: 'hidden',
-                  backgroundColor: '#FFFFFF',
-                  height: '120%'
+                  backgroundColor: '#000',
+                  height: '100%',
+                  minHeight: '350px'
                 }}>
                   {/* Contenedor máscara - ventana fija que ocupa todo el espacio */}
                   <Box
@@ -1235,7 +1232,8 @@ const PopupHero = ({ open, onClose }) => {
                       background: '#000',
                       display: 'flex',
                       alignItems: 'center',
-                      justifyContent: 'center'
+                      justifyContent: 'center',
+                      minHeight: '350px'
                     }}
                   >
                     {/* Imagen que se mueve detrás de la máscara */}
@@ -1243,18 +1241,22 @@ const PopupHero = ({ open, onClose }) => {
                       src={currentOfferData.image || "https://images.unsplash.com/photo-1558961363-fa8fdf82db35?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80"}
                       alt="Deliciosas Galletas"
                       style={{
-                        width: '150%',
-                        height: '150%',
+                        width: '100%',
+                        height: '100%',
+                        minWidth: '100%',
+                        minHeight: '100%',
                         objectFit: 'cover',
+                        objectPosition: 'center',
                         position: 'absolute',
-                        top: '50%',
-                        left: '50%',
-                        transform: 'translate(-50%, -50%)'
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        bottom: 0
                       }}
                       animate={{
-                        x: [-5, 5, -5],
-                        y: [-3, 3, -3],
-                        scale: [1, 1.02, 1]
+                        scale: [1, 1.05, 1],
+                        x: [-10, 10, -10],
+                        y: [-5, 5, -5]
                       }}
                       transition={{
                         duration: 20,
