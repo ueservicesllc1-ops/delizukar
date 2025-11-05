@@ -121,11 +121,23 @@ const AdminDashboard = () => {
   const navigate = useNavigate();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  
+  // Estado para errores
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     // Quitar autenticación - admin funciona sin login
-    setUser({ email: 'admin@delizukar.com' }); // Usuario dummy
-    setLoading(false);
+    try {
+      setUser({ email: 'admin@delizukar.com' }); // Usuario dummy
+      setLoading(false);
+      setError(null);
+    } catch (error) {
+      console.error('Error initializing admin dashboard:', error);
+      // Asegurar que siempre haya un usuario por defecto
+      setUser({ email: 'admin@delizukar.com' });
+      setLoading(false);
+      setError('Error al inicializar el panel. Por favor, recarga la página.');
+    }
   }, []);
 
   // Cargar usuarios cuando se abre el modal de gestión
@@ -356,7 +368,7 @@ const AdminDashboard = () => {
         body: messageBody,
         type: messageType,
         createdAt: new Date().toISOString(),
-        sentBy: user.email,
+        sentBy: user?.email || 'admin@delizukar.com',
         status: 'sent',
         targetUsers: targetAllUsers ? 'all' : selectedUsers,
         targetUserCount: targetAllUsers ? registeredUsers.length : selectedUsers.length
@@ -561,8 +573,38 @@ const AdminDashboard = () => {
 
   if (loading) {
     return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
-        <LinearProgress sx={{ width: '200px' }} />
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', backgroundColor: '#f5f5f5' }}>
+        <Box sx={{ textAlign: 'center' }}>
+          <CircularProgress sx={{ color: '#c8626d', mb: 2 }} />
+          <Typography variant="body2" sx={{ color: '#666' }}>
+            Cargando panel de administración...
+          </Typography>
+        </Box>
+      </Box>
+    );
+  }
+
+  // Asegurar que user siempre tenga un valor por defecto
+  const currentUser = user || { email: 'admin@delizukar.com' };
+
+  // Si hay un error, mostrarlo
+  if (error) {
+    return (
+      <Box sx={{ py: 4, backgroundColor: '#f5f5f5', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <Container maxWidth="md">
+          <Card sx={{ p: 4, textAlign: 'center' }}>
+            <Alert severity="error" sx={{ mb: 2 }}>
+              {error}
+            </Alert>
+            <Button
+              variant="contained"
+              onClick={() => window.location.reload()}
+              sx={{ backgroundColor: '#c8626d', '&:hover': { backgroundColor: '#b5555a' } }}
+            >
+              Recargar página
+            </Button>
+          </Card>
+        </Container>
       </Box>
     );
   }
@@ -657,7 +699,7 @@ const AdminDashboard = () => {
             
             <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
               <Typography variant="body2" sx={{ color: '#666' }}>
-                {user.email}
+                {currentUser?.email || 'admin@delizukar.com'}
               </Typography>
               <Button
                 onClick={handleSignOut}
@@ -709,32 +751,28 @@ const AdminDashboard = () => {
                     >
                       <Button
                             onClick={
-                              // Bloquear edición si no es iPad (índices 0-8, 12, 15-19 son de edición)
-                              (!editAllowed && [0, 1, 2, 3, 4, 5, 6, 7, 8, 12, 15, 16, 17, 18, 19].includes(index)) 
-                                ? () => alert('La edición solo está disponible en iPad. Por favor, accede desde un iPad para editar contenido.')
-                                : index === 15 ? () => setFontManagerOpen(true) :
-                                index === 0 ? () => setProductsManagerOpen(true) :
-                                index === 1 ? () => setBannerPhotoManagerOpen(true) :
-                                index === 2 ? () => setBanner2PhotoManagerOpen(true) :
-                                index === 3 ? () => setInventoryManagerOpen(true) :
-                                index === 4 ? () => setPagesManagerOpen(true) :
-                                index === 5 ? () => setTestimonialsManagerOpen(true) :
-                                index === 6 ? () => setFeaturedProductsManagerOpen(true) :
-                                index === 7 ? () => setSocialMediaManagerOpen(true) :
-                                index === 8 ? () => setPopupHeroManagerOpen(true) :
-                                index === 9 ? () => setPaypalBalanceOpen(true) :
-                                index === 10 ? () => setSalesReportOpen(true) :
-                                index === 11 ? () => setUserManagementOpen(true) :
-                                index === 12 ? () => setMinProductsManagerOpen(true) :
-                                index === 13 ? () => setMessagingSystemOpen(true) :
-                                index === 14 ? handleCostAnalysisClick :
-                                index === 16 ? () => setColorPaletteOpen(true) :
-                                index === 17 ? () => setOrdersManagerOpen(true) :
-                                index === 18 ? () => setSubscriptionManagerOpen(true) :
-                                index === 19 ? () => setVoucherManagerOpen(true) :
-                                undefined
+                              index === 15 ? () => setFontManagerOpen(true) :
+                              index === 0 ? () => setProductsManagerOpen(true) :
+                              index === 1 ? () => setBannerPhotoManagerOpen(true) :
+                              index === 2 ? () => setBanner2PhotoManagerOpen(true) :
+                              index === 3 ? () => setInventoryManagerOpen(true) :
+                              index === 4 ? () => setPagesManagerOpen(true) :
+                              index === 5 ? () => setTestimonialsManagerOpen(true) :
+                              index === 6 ? () => setFeaturedProductsManagerOpen(true) :
+                              index === 7 ? () => setSocialMediaManagerOpen(true) :
+                              index === 8 ? () => setPopupHeroManagerOpen(true) :
+                              index === 9 ? () => setPaypalBalanceOpen(true) :
+                              index === 10 ? () => setSalesReportOpen(true) :
+                              index === 11 ? () => setUserManagementOpen(true) :
+                              index === 12 ? () => setMinProductsManagerOpen(true) :
+                              index === 13 ? () => setMessagingSystemOpen(true) :
+                              index === 14 ? handleCostAnalysisClick :
+                              index === 16 ? () => setColorPaletteOpen(true) :
+                              index === 17 ? () => setOrdersManagerOpen(true) :
+                              index === 18 ? () => setSubscriptionManagerOpen(true) :
+                              index === 19 ? () => setVoucherManagerOpen(true) :
+                              undefined
                             }
-                            disabled={!editAllowed && [0, 1, 2, 3, 4, 5, 6, 7, 8, 12, 15, 16, 17, 18, 19].includes(index)}
                         sx={{
                           width: '250px',
                           height: '120px',
@@ -1050,6 +1088,8 @@ const AdminDashboard = () => {
         </motion.div>
       </Container>
 
+      {/* Todos los componentes de gestión y diálogos están aquí fuera del Container */}
+      
       {/* Gestor de Fuentes */}
       <FontManager
         open={fontManagerOpen}
@@ -1060,100 +1100,101 @@ const AdminDashboard = () => {
         }}
       />
 
-          {/* Gestor de Fotos del Banner */}
-          <BannerPhotoManager
-            open={bannerPhotoManagerOpen}
-            onClose={() => setBannerPhotoManagerOpen(false)}
-          />
+      {/* Gestor de Fotos del Banner */}
+      <BannerPhotoManager
+        open={bannerPhotoManagerOpen}
+        onClose={() => setBannerPhotoManagerOpen(false)}
+      />
 
-          {/* Gestor de Fotos del Banner 2 */}
-          <Banner2PhotoManager
-            open={banner2PhotoManagerOpen}
-            onClose={() => setBanner2PhotoManagerOpen(false)}
-          />
+      {/* Gestor de Fotos del Banner 2 */}
+      <Banner2PhotoManager
+        open={banner2PhotoManagerOpen}
+        onClose={() => setBanner2PhotoManagerOpen(false)}
+      />
 
-          {/* Gestor de Páginas */}
-          <PagesManager
-            open={pagesManagerOpen}
-            onClose={() => setPagesManagerOpen(false)}
-          />
+      {/* Gestor de Páginas */}
+      <PagesManager
+        open={pagesManagerOpen}
+        onClose={() => setPagesManagerOpen(false)}
+      />
 
-          {/* Gestor de Mínimo de Productos */}
-          <MinProductsManager
-            open={minProductsManagerOpen}
-            onClose={() => setMinProductsManagerOpen(false)}
-          />
+      {/* Gestor de Mínimo de Productos */}
+      <MinProductsManager
+        open={minProductsManagerOpen}
+        onClose={() => setMinProductsManagerOpen(false)}
+      />
 
-          {/* Gestor de Productos */}
-          <ProductsManager
-            open={productsManagerOpen}
-            onClose={() => setProductsManagerOpen(false)}
-          />
+      {/* Gestor de Productos */}
+      <ProductsManager
+        open={productsManagerOpen}
+        onClose={() => setProductsManagerOpen(false)}
+      />
 
-          {/* Gestor de Inventario */}
-          <InventoryManager
-            open={inventoryManagerOpen}
-            onClose={() => setInventoryManagerOpen(false)}
-          />
+      {/* Gestor de Inventario */}
+      <InventoryManager
+        open={inventoryManagerOpen}
+        onClose={() => setInventoryManagerOpen(false)}
+      />
 
-          {/* Gestor de Testimonios */}
-        <TestimonialsManager
-          open={testimonialsManagerOpen}
-          onClose={() => setTestimonialsManagerOpen(false)}
-        />
-        <FeaturedProductsManager
-          open={featuredProductsManagerOpen}
-          onClose={() => setFeaturedProductsManagerOpen(false)}
-        />
+      {/* Gestor de Testimonios */}
+      <TestimonialsManager
+        open={testimonialsManagerOpen}
+        onClose={() => setTestimonialsManagerOpen(false)}
+      />
+      
+      <FeaturedProductsManager
+        open={featuredProductsManagerOpen}
+        onClose={() => setFeaturedProductsManagerOpen(false)}
+      />
 
-        {/* Gestor de Redes Sociales */}
-        <SocialMediaManager
-          open={socialMediaManagerOpen}
-          onClose={() => setSocialMediaManagerOpen(false)}
-        />
+      {/* Gestor de Redes Sociales */}
+      <SocialMediaManager
+        open={socialMediaManagerOpen}
+        onClose={() => setSocialMediaManagerOpen(false)}
+      />
 
-        {/* Gestor de Popup Hero */}
-        <PopupHeroManager
-          open={popupHeroManagerOpen}
-          onClose={() => setPopupHeroManagerOpen(false)}
-        />
+      {/* Gestor de Popup Hero */}
+      <PopupHeroManager
+        open={popupHeroManagerOpen}
+        onClose={() => setPopupHeroManagerOpen(false)}
+      />
 
-        <PayPalBalance
-          open={paypalBalanceOpen}
-          onClose={() => setPaypalBalanceOpen(false)}
-        />
+      <PayPalBalance
+        open={paypalBalanceOpen}
+        onClose={() => setPaypalBalanceOpen(false)}
+      />
 
-        {/* Gestor de Pedidos y Envíos */}
-        <OrdersManager
-          open={ordersManagerOpen}
-          onClose={() => setOrdersManagerOpen(false)}
-        />
+      {/* Gestor de Pedidos y Envíos */}
+      <OrdersManager
+        open={ordersManagerOpen}
+        onClose={() => setOrdersManagerOpen(false)}
+      />
 
-        {/* Gestor de Vouchers */}
-        <VoucherManager
-          open={voucherManagerOpen}
-          onClose={() => setVoucherManagerOpen(false)}
-        />
+      {/* Gestor de Vouchers */}
+      <VoucherManager
+        open={voucherManagerOpen}
+        onClose={() => setVoucherManagerOpen(false)}
+      />
 
-        {/* Gestor de Suscriptores */}
-        <SubscriptionManager
-          open={subscriptionManagerOpen}
-          onClose={() => setSubscriptionManagerOpen(false)}
-        />
+      {/* Gestor de Suscriptores */}
+      <SubscriptionManager
+        open={subscriptionManagerOpen}
+        onClose={() => setSubscriptionManagerOpen(false)}
+      />
 
-        {/* Reporte de Ventas */}
-        <Dialog
-          open={salesReportOpen}
-          onClose={() => setSalesReportOpen(false)}
-          maxWidth="md"
-          fullWidth
-          PaperProps={{
-            sx: {
-              borderRadius: '12px',
-              boxShadow: '0 4px 20px rgba(0,0,0,0.1)'
-            }
-          }}
-        >
+      {/* Reporte de Ventas */}
+      <Dialog
+        open={salesReportOpen}
+        onClose={() => setSalesReportOpen(false)}
+        maxWidth="md"
+        fullWidth
+        PaperProps={{
+          sx: {
+            borderRadius: '12px',
+            boxShadow: '0 4px 20px rgba(0,0,0,0.1)'
+          }
+        }}
+      >
           <DialogTitle sx={{ 
             backgroundColor: '#c8626d', 
             color: 'white', 
@@ -2201,9 +2242,8 @@ const AdminDashboard = () => {
             </Button>
           </DialogActions>
         </Dialog>
+    </Box>
+  );
+};
 
-        </Box>
-      );
-    };
-
-    export default AdminDashboard;
+export default AdminDashboard;

@@ -53,6 +53,10 @@ const Checkout = () => {
   // Estados para vouchers
   const [user, setUser] = useState(null);
   const [appliedVoucher, setAppliedVoucher] = useState(null);
+  const [voucherCode, setVoucherCode] = useState('');
+  const [voucherError, setVoucherError] = useState('');
+  const [voucherSuccess, setVoucherSuccess] = useState('');
+  const [loadingVoucher, setLoadingVoucher] = useState(false);
 
   const cartTotal = getCartTotal();
   const cartItemsCount = getCartItemsCount();
@@ -77,7 +81,80 @@ const Checkout = () => {
     return subtotal * (appliedVoucher.discountPercentage / 100);
   };
 
-  // Detectar usuario logueado y voucher aplicado
+  // Funciones para manejar vouchers
+  const handleApplyVoucher = async () => {
+    if (!user) {
+      setVoucherError(t('voucher.mustBeLoggedIn', 'You must be logged in to use a voucher'));
+      return;
+    }
+
+    if (!voucherCode.trim()) {
+      setVoucherError(t('voucher.enterCode', 'Please enter a voucher code'));
+      return;
+    }
+
+    setLoadingVoucher(true);
+    setVoucherError('');
+    setVoucherSuccess('');
+
+    try {
+      // Buscar el voucher en Firestore
+      const vouchersRef = collection(db, 'vouchers');
+      const q = query(vouchersRef, where('code', '==', voucherCode.trim().toUpperCase()));
+      const querySnapshot = await getDocs(q);
+
+      if (querySnapshot.empty) {
+        throw new Error(t('voucher.invalidCode', 'Invalid voucher code'));
+      }
+
+      const voucherDoc = querySnapshot.docs[0];
+      const voucherData = { id: voucherDoc.id, ...voucherDoc.data() };
+
+      // Verificar si el voucher está activo
+      if (!voucherData.isActive) {
+        throw new Error(t('voucher.notActive', 'This voucher is not active'));
+      }
+
+      // Verificar si el usuario ya usó este voucher en la colección voucherUsages
+      const voucherUsagesRef = collection(db, 'voucherUsages');
+      const usageQuery = query(
+        voucherUsagesRef, 
+        where('voucherCode', '==', voucherData.code),
+        where('userId', '==', user.uid)
+      );
+      const usageSnapshot = await getDocs(usageQuery);
+
+      if (!usageSnapshot.empty) {
+        throw new Error(t('voucher.alreadyUsed', 'You have already used this voucher'));
+      }
+
+      // Aplicar el voucher
+      setAppliedVoucher(voucherData);
+      setVoucherSuccess(t('voucher.applied', `Voucher applied! ${voucherData.discountPercentage}% discount`));
+      setVoucherCode('');
+
+      // Guardar voucher en localStorage para persistencia
+      localStorage.setItem('appliedVoucher', JSON.stringify(voucherData));
+
+    } catch (error) {
+      console.error('Error aplicando voucher:', error);
+      setVoucherError(error.message);
+    } finally {
+      setLoadingVoucher(false);
+    }
+  };
+
+  const handleRemoveVoucher = () => {
+    setAppliedVoucher(null);
+    setVoucherError('');
+    setVoucherSuccess('');
+    setVoucherCode('');
+    
+    // Remover voucher del localStorage
+    localStorage.removeItem('appliedVoucher');
+  };
+
+  // Detectar usuario logueado
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
@@ -90,12 +167,6 @@ const Checkout = () => {
         setUser(null);
       }
     });
-
-    // Recuperar voucher aplicado del localStorage
-    const savedVoucher = localStorage.getItem('appliedVoucher');
-    if (savedVoucher) {
-      setAppliedVoucher(JSON.parse(savedVoucher));
-    }
 
     return () => unsubscribe();
   }, []);
@@ -565,15 +636,79 @@ const Checkout = () => {
                       {t('checkout.orderSummary', 'Order Summary')}
                     </Typography>
 
-                    {/* Voucher aplicado */}
-                    {appliedVoucher && (
-                      <Box sx={{ mb: 2, p: 2, backgroundColor: '#e8f5e8', borderRadius: '8px', border: '1px solid #4caf50' }}>
-                        <Typography variant="body2" sx={{ color: '#2e7d32', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 1 }}>
-                          <LocalOffer sx={{ fontSize: '1rem' }} />
-                          {t('voucher.appliedLabel', { code: appliedVoucher.code, percentage: appliedVoucher.discountPercentage })}
-                        </Typography>
-                      </Box>
-                    )}
+                    {/* Sección de Voucher */}
+                    <Box sx={{ mb: 2 }}>
+                      {user ? (
+                        <Box>
+                          {appliedVoucher ? (
+                            <Box>
+                              {voucherSuccess && (
+                                <Alert severity="success" sx={{ mb: 1 }}>
+                                  {voucherSuccess}
+                                </Alert>
+                              )}
+                              <Box sx={{ p: 1.5, backgroundColor: '#e8f5e8', borderRadius: '8px', border: '1px solid #4caf50', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                <Typography variant="body2" sx={{ color: '#2e7d32', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 1 }}>
+                                  <LocalOffer sx={{ fontSize: '1rem' }} />
+                                  {t('voucher.appliedLabel', `${appliedVoucher.code} - ${appliedVoucher.discountPercentage}% OFF`)}
+                                </Typography>
+                                <Button
+                                  size="small"
+                                  onClick={handleRemoveVoucher}
+                                  sx={{ 
+                                    color: '#d32f2f', 
+                                    textTransform: 'none',
+                                    minWidth: 'auto',
+                                    fontSize: '0.75rem'
+                                  }}
+                                >
+                                  Remove
+                                </Button>
+                              </Box>
+                            </Box>
+                          ) : (
+                            <Box sx={{ display: 'flex', gap: 1 }}>
+                              <TextField
+                                fullWidth
+                                placeholder={t('voucher.enterDiscountCode', 'Enter discount code')}
+                                value={voucherCode}
+                                onChange={(e) => setVoucherCode(e.target.value.toUpperCase())}
+                                size="small"
+                                sx={{ flex: 1 }}
+                              />
+                              <Button
+                                variant="contained"
+                                onClick={handleApplyVoucher}
+                                disabled={loadingVoucher || !voucherCode.trim()}
+                                sx={{
+                                  backgroundColor: '#c8626d',
+                                  color: 'white',
+                                  px: 2,
+                                  '&:hover': {
+                                    backgroundColor: '#b5555a'
+                                  }
+                                }}
+                              >
+                                {loadingVoucher ? t('voucher.applying', 'Applying...') : t('voucher.apply', 'Apply')}
+                              </Button>
+                            </Box>
+                          )}
+                          
+                          {voucherError && (
+                            <Alert severity="error" sx={{ mt: 1 }}>
+                              {voucherError}
+                            </Alert>
+                          )}
+                        </Box>
+                      ) : (
+                        <Box sx={{ mb: 2, p: 1.5, backgroundColor: '#f8f9fa', borderRadius: '8px' }}>
+                          <Typography variant="body2" sx={{ color: '#666', textAlign: 'center' }}>
+                            <LocalOffer sx={{ fontSize: '1rem', mr: 1, verticalAlign: 'middle' }} />
+                            {t('voucher.loginToUse', 'Log in to use a discount code')}
+                          </Typography>
+                        </Box>
+                      )}
+                    </Box>
 
                     <Box sx={{ mb: 2 }}>
                       <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
