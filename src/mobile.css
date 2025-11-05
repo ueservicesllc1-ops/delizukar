@@ -1,4 +1,4 @@
-/* Mobile-specific styles - BLOCKED - Do not modify */
+/* Mobile-specific styles */
 
 /* ========================================
    SAMSUNG GALAXY S20 ULTRA SPECIFIC STYLES
@@ -1280,7 +1280,7 @@
   }
 }
 
-/* ONLY HORIZONTAL TABLET (iPad landscape) - ONLY SECTION TO MODIFY */
+/* ONLY HORIZONTAL TABLET (iPad landscape) */
 @media (min-width: 768px) and (max-width: 1200px) and (orientation: landscape) {
   /* Fixed header for horizontal tablet */
   .header-mobile {

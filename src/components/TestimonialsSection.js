@@ -5,14 +5,58 @@ import { Star } from '@mui/icons-material';
 import { collection, getDocs } from 'firebase/firestore';
 import { db } from '../firebase/config';
 import { useTitleConfig } from '../context/TitleConfigContext';
- 
+import { useLanguage } from '../context/LanguageContext';
+import { translateBatch } from '../services/translateService';
 
 const TestimonialsSection = () => {
-  const t = (k, fallback) => (typeof fallback === 'string' ? fallback : (typeof k === 'string' ? k : ''));
+  const { language } = useLanguage();
   const { titleConfig, loading } = useTitleConfig();
   const [testimonials, setTestimonials] = useState([]);
   const [testimonialsLoading, setTestimonialsLoading] = useState(true);
+  const [translatedTexts, setTranslatedTexts] = useState({
+    title: 'Nuestros Clientes Felices',
+    loading: 'Cargando testimonios...',
+    noTestimonials: 'No hay testimonios activos para mostrar',
+    adminNote: 'Los testimonios deben estar marcados como activos en el admin',
+    verifiedClient: 'Cliente Verificado'
+  });
 
+
+  // Traducir textos cuando cambia el idioma
+  useEffect(() => {
+    const translateTexts = async () => {
+      if (language === 'es') {
+        setTranslatedTexts({
+          title: 'Nuestros Clientes Felices',
+          loading: 'Cargando testimonios...',
+          noTestimonials: 'No hay testimonios activos para mostrar',
+          adminNote: 'Los testimonios deben estar marcados como activos en el admin',
+          verifiedClient: 'Cliente Verificado'
+        });
+      } else {
+        try {
+          const textsToTranslate = [
+            'Nuestros Clientes Felices',
+            'Cargando testimonios...',
+            'No hay testimonios activos para mostrar',
+            'Los testimonios deben estar marcados como activos en el admin',
+            'Cliente Verificado'
+          ];
+          const translated = await translateBatch(textsToTranslate, language, 'es');
+          setTranslatedTexts({
+            title: translated[0] || 'Nuestros Clientes Felices',
+            loading: translated[1] || 'Cargando testimonios...',
+            noTestimonials: translated[2] || 'No hay testimonios activos para mostrar',
+            adminNote: translated[3] || 'Los testimonios deben estar marcados como activos en el admin',
+            verifiedClient: translated[4] || 'Cliente Verificado'
+          });
+        } catch (error) {
+          console.error('Error translating texts:', error);
+        }
+      }
+    };
+    translateTexts();
+  }, [language]);
 
   // Efecto para aplicar la fuente cuando cambie
   useEffect(() => {
@@ -78,7 +122,7 @@ const TestimonialsSection = () => {
       <Box sx={{ py: 8, backgroundColor: '#f8f9fa' }}>
         <Container maxWidth="lg">
           <Typography variant="h6" sx={{ textAlign: 'center', color: '#666' }}>
-            {t('testimonials.loading', 'Cargando testimonios...')}
+            {translatedTexts.loading}
           </Typography>
         </Container>
       </Box>
@@ -90,10 +134,10 @@ const TestimonialsSection = () => {
       <Box sx={{ py: 8, backgroundColor: '#f8f9fa' }}>
         <Container maxWidth="lg">
           <Typography variant="h6" sx={{ textAlign: 'center', color: '#666' }}>
-            {t('testimonials.noTestimonials', 'No hay testimonios activos para mostrar')}
+            {translatedTexts.noTestimonials}
           </Typography>
           <Typography variant="body2" sx={{ textAlign: 'center', color: '#999', mt: 1 }}>
-            {t('testimonials.adminNote', 'Los testimonios deben estar marcados como activos en el admin')}
+            {translatedTexts.adminNote}
           </Typography>
         </Container>
       </Box>
@@ -121,7 +165,7 @@ const TestimonialsSection = () => {
               fontFamily: loading ? 'Playfair Display, serif' : `"${titleConfig.font}", serif !important`
             }}
           >
-            {t('testimonials.title', 'Nuestros Clientes Felices')}
+            {translatedTexts.title}
           </Typography>
           
 
@@ -190,7 +234,7 @@ const TestimonialsSection = () => {
                             variant="body2"
                             sx={{ color: '#666' }}
                           >
-                            {t('testimonials.verifiedClient', 'Cliente Verificado')}
+                            {translatedTexts.verifiedClient}
                           </Typography>
                         </Box>
                       </Box>

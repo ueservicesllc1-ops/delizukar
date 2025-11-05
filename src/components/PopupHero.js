@@ -41,6 +41,31 @@ const PopupHero = ({ open, onClose }) => {
     showWelcomeTitle: false,
     welcomeTitle: ''
   });
+  const [isIPhone16, setIsIPhone16] = useState(false);
+
+  // Detectar si estamos en iPhone 16 (393px × 852px) - Reactivo
+  useEffect(() => {
+    const checkIPhone16 = () => {
+      if (typeof window === 'undefined') return;
+      
+      // iPhone 16: 393px × 852px con pixel ratio 3
+      const mediaQuery = window.matchMedia('(max-width: 393px) and (max-height: 852px) and (-webkit-min-device-pixel-ratio: 3)');
+      
+      // También verificar por viewport exacto
+      const isExactMatch = window.innerWidth <= 393 && window.innerHeight <= 852 && window.devicePixelRatio >= 3;
+      
+      setIsIPhone16(mediaQuery.matches || isExactMatch);
+    };
+
+    checkIPhone16();
+    window.addEventListener('resize', checkIPhone16);
+    window.addEventListener('orientationchange', checkIPhone16);
+
+    return () => {
+      window.removeEventListener('resize', checkIPhone16);
+      window.removeEventListener('orientationchange', checkIPhone16);
+    };
+  }, []);
   const [translatedTexts, setTranslatedTexts] = useState({
     seg: 'seg',
     discount: 'DESCUENTO',
@@ -308,8 +333,14 @@ const PopupHero = ({ open, onClose }) => {
     console.log('🖼️ PopupHero - Current offer data:', {
       id: currentOfferData.id,
       title: currentOfferData.title,
+      description: currentOfferData.description,
+      welcomeTitle: currentOfferData.welcomeTitle,
       image: currentOfferData.image,
       isActive: currentOfferData.isActive
+    });
+    console.log('📝 PopupHero - Popup config:', {
+      showWelcomeTitle: popupConfig.showWelcomeTitle,
+      welcomeTitle: popupConfig.welcomeTitle
     });
   }
 
@@ -346,7 +377,8 @@ const PopupHero = ({ open, onClose }) => {
               width: '90vw',
               maxWidth: '700px',
               height: 'auto',
-              maxHeight: '70vh',
+              maxHeight: isIPhone16 ? '95vh' : '85vh',
+              minHeight: isIPhone16 ? '85vh' : '50vh',
               borderRadius: '32px',
               overflow: 'hidden',
               boxShadow: '0 32px 100px rgba(0,0,0,0.25)',
@@ -577,7 +609,7 @@ const PopupHero = ({ open, onClose }) => {
                 top: 0,
                 left: 0,
                 right: 0,
-                height: '140px',
+                height: '100px',
                 background: 'linear-gradient(135deg, #C8626D 0%, #EB8B8B 100%)',
                 zIndex: 3,
                 boxShadow: '0 4px 20px rgba(255,107,107,0.3)',
@@ -891,7 +923,7 @@ const PopupHero = ({ open, onClose }) => {
                     src="/LOGO.png"
                     alt="DeliZuKar Logo"
                     style={{
-                  height: '45px',
+                  height: '35px',
                       width: 'auto',
                   filter: 'brightness(0) invert(1)',
                   position: 'relative',
@@ -909,30 +941,34 @@ const PopupHero = ({ open, onClose }) => {
             </Box>
 
             {/* Contenido principal */}
-            <DialogContent sx={{ p: 0, position: 'relative', zIndex: 2, pt: '140px' }}>
+            <DialogContent sx={{ p: 0, position: 'relative', zIndex: 2, pt: '100px', minHeight: isIPhone16 ? '75vh' : '350px', maxHeight: isIPhone16 ? '85vh' : 'auto' }}>
               <Box sx={{ 
                 display: 'flex', 
                 flexDirection: { xs: 'column', md: 'row' },
-                minHeight: '350px'
+                minHeight: isIPhone16 ? '50vh' : '350px'
               }}>
                 {/* LADO IZQUIERDO - CONTENIDO */}
                     <Box sx={{
-                      flex: 1, 
-                      padding: '30px 25px',
+                      flex: isIPhone16 ? 1 : 1, 
+                      padding: isIPhone16 ? '20px 15px' : '30px 25px',
+                      paddingTop: isIPhone16 ? '40px' : '30px',
                       display: 'flex',
                       flexDirection: 'column',
-                      justifyContent: 'center',
+                      justifyContent: 'flex-start',
                       position: 'relative',
                       minHeight: '100%',
-                      overflow: 'auto'
+                      overflow: 'visible',
+                      width: isIPhone16 ? '100%' : 'auto',
+                      zIndex: 10
                     }}>
 
-                  {/* Título de bienvenida condicional */}
-                  {popupConfig.showWelcomeTitle && (
+                  {/* Título de bienvenida condicional - SIEMPRE MOSTRAR si existe */}
+                  {(popupConfig.showWelcomeTitle || popupConfig.welcomeTitle || currentOfferData?.welcomeTitle) && (
                     <motion.div
                       initial={{ opacity: 0, x: -30 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ duration: 0.8, delay: 0.4 }}
+                      style={{ position: 'relative', top: '70px', zIndex: 15, marginBottom: '10px' }}
                     >
                       <Typography
                         variant="h4"
@@ -946,10 +982,14 @@ const PopupHero = ({ open, onClose }) => {
                           backgroundClip: 'text',
                           WebkitBackgroundClip: 'text',
                           WebkitTextFillColor: 'transparent',
-                          fontSize: '1.8rem'
+                          fontSize: isIPhone16 ? '1.5rem' : '1.8rem',
+                          display: 'block',
+                          visibility: 'visible',
+                          opacity: 1,
+                          width: '100%'
                         }}
                       >
-                        {popupConfig.welcomeTitle}
+                        {popupConfig.welcomeTitle || currentOfferData?.welcomeTitle || ''}
                       </Typography>
                     </motion.div>
                   )}
@@ -959,6 +999,7 @@ const PopupHero = ({ open, onClose }) => {
                     initial={{ opacity: 0, x: -30 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ duration: 0.8, delay: 0.6 }}
+                    style={{ position: 'relative', top: '50px', zIndex: 15, marginBottom: '15px' }}
                   >
                     <Typography
                       variant="h6"
@@ -968,38 +1009,50 @@ const PopupHero = ({ open, onClose }) => {
                         mb: 2,
                         fontFamily: 'Playfair Display, serif',
                         textShadow: '0 1px 5px rgba(255,107,107,0.2)',
-                        fontSize: '1.2rem'
+                        fontSize: isIPhone16 ? '1rem' : '1.2rem',
+                        display: 'block',
+                        visibility: 'visible',
+                        opacity: 1,
+                        width: '100%'
                       }}
                     >
-                      {currentOfferData.title || translatedTexts.defaultTitle}
+                      {currentOfferData?.title || translatedTexts.defaultTitle}
                     </Typography>
                   </motion.div>
 
                   {/* Descripción */}
-                  <motion.div
-                    initial={{ opacity: 0, x: -30 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ duration: 0.8, delay: 0.8 }}
-                  >
-                    <Typography
-                      variant="body2"
-                      sx={{
-                        color: '#666',
-                        mb: 3,
-                        lineHeight: 1.6,
-                        fontSize: '0.95rem',
-                        fontWeight: 500
-                      }}
+                  {(currentOfferData?.description) && (
+                    <motion.div
+                      initial={{ opacity: 0, x: -30 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ duration: 0.8, delay: 0.8 }}
+                      style={{ position: 'relative', top: '70px', zIndex: 15, marginBottom: '20px' }}
                     >
-                      {currentOfferData.description || ''}
-                    </Typography>
-                  </motion.div>
+                      <Typography
+                        variant="body2"
+                        sx={{
+                          color: '#666',
+                          mb: 3,
+                          lineHeight: 1.6,
+                          fontSize: isIPhone16 ? '0.85rem' : '0.95rem',
+                          fontWeight: 500,
+                          display: 'block',
+                          visibility: 'visible',
+                          opacity: 1,
+                          width: '100%'
+                        }}
+                      >
+                        {currentOfferData.description}
+                      </Typography>
+                    </motion.div>
+                  )}
 
                   {/* Descuento Grande con Efectos */}
                   <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.8, delay: 1.0 }}
+                    style={{ position: 'relative', top: '30px' }}
                   >
                         <Box sx={{ display: 'flex', justifyContent: 'center', mb: 3 }}>
                       <motion.div
@@ -1129,85 +1182,7 @@ const PopupHero = ({ open, onClose }) => {
                     </Box>
                   </motion.div>
 
-                  {/* Botón principal con efectos espectaculares */}
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.8, delay: 1.2 }}
-                  >
-                    <Box sx={{ display: 'flex', justifyContent: 'center' }}>
-                      <motion.div
-                        whileHover={{ 
-                          scale: 1.05, 
-                          y: -5,
-                          rotate: [0, -1, 1, 0]
-                        }}
-                        whileTap={{ scale: 0.95 }}
-                        animate={{
-                          y: [-2, 2, -2],
-                          boxShadow: [
-                            '0 8px 32px rgba(255,107,107,0.3)',
-                            '0 12px 40px rgba(255,107,107,0.4)',
-                            '0 8px 32px rgba(255,107,107,0.3)'
-                          ]
-                        }}
-                        transition={{
-                          duration: 4,
-                          repeat: Infinity,
-                          ease: "easeInOut"
-                        }}
-                      >
-                        <Button
-                          variant="contained"
-                          size="medium"
-                          startIcon={<motion.div
-                            animate={{ rotate: 360 }}
-                            transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-                          >
-                            <FlashOn />
-                          </motion.div>}
-                          sx={{
-                            background: 'linear-gradient(135deg, #C8626D 0%, #EB8B8B 100%)',
-                            color: 'white',
-                            fontWeight: 800,
-                            fontSize: '0.9rem',
-                            px: 3,
-                            py: 1,
-                            borderRadius: '50px',
-                            textTransform: 'none',
-                            border: '2px solid #C8626D',
-                            boxShadow: '0 8px 32px rgba(255,107,107,0.3)',
-                            position: 'relative',
-                            overflow: 'hidden',
-                            '&:hover': {
-                              background: 'linear-gradient(135deg, #EB8B8B 0%, #C8626D 100%)',
-                              border: '2px solid #EB8B8B'
-                            },
-                            transition: 'all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
-                            '&::before': {
-                              content: '""',
-                              position: 'absolute',
-                              top: 0,
-                              left: '-100%',
-                              width: '100%',
-                              height: '100%',
-                              background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent)',
-                              transition: 'left 0.5s'
-                            },
-                            '&:hover::before': {
-                              left: '100%'
-                            }
-                          }}
-                          onClick={() => {
-                            window.location.href = currentOfferData.actionUrl || '/productos';
-                          }}
-                        >
-                          {currentOfferData.buttonText || translatedTexts.defaultButton}
-                        </Button>
-                      </motion.div>
                     </Box>
-                  </motion.div>
-              </Box>
 
                 {/* LADO DERECHO - CONTENEDOR DE FOTO */}
                 <Box sx={{ 
@@ -1264,6 +1239,94 @@ const PopupHero = ({ open, onClose }) => {
                         ease: "easeInOut"
                       }}
                     />
+                    
+                    {/* Botón principal sobre la foto - parte inferior */}
+                    <Box sx={{
+                      position: 'absolute',
+                      bottom: 20,
+                      left: '50%',
+                      transform: 'translateX(-50%)',
+                      zIndex: 10,
+                      width: '90%',
+                      display: 'flex',
+                      justifyContent: 'center'
+                    }}>
+                      <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ 
+                          opacity: 1, 
+                          y: [-2, 2, -2]
+                        }}
+                        transition={{ 
+                          duration: 0.8, 
+                          delay: 1.2,
+                          y: {
+                            duration: 4,
+                            repeat: Infinity,
+                            ease: "easeInOut"
+                          }
+                        }}
+                        whileHover={{ 
+                          scale: 1.05, 
+                          y: -5,
+                          rotate: [0, -1, 1, 0]
+                        }}
+                        whileTap={{ scale: 0.95 }}
+                      >
+                        <Button
+                          variant="contained"
+                          size="medium"
+                          startIcon={<motion.div
+                            animate={{ rotate: 360 }}
+                            transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+                          >
+                            <FlashOn />
+                          </motion.div>}
+                          sx={{
+                            background: 'linear-gradient(135deg, #C8626D 0%, #EB8B8B 100%)',
+                            color: 'white',
+                            fontWeight: 800,
+                            fontSize: '0.9rem',
+                            px: 3,
+                            py: 1.5,
+                            borderRadius: '50px',
+                            textTransform: 'none',
+                            border: '2px solid #C8626D',
+                            boxShadow: '0 8px 32px rgba(255,107,107,0.5)',
+                            position: 'relative',
+                            overflow: 'hidden',
+                            width: '100%',
+                            maxWidth: '300px',
+                            backdropFilter: 'blur(10px)',
+                            backgroundColor: 'rgba(200, 98, 109, 0.95)',
+                            '&:hover': {
+                              background: 'linear-gradient(135deg, #EB8B8B 0%, #C8626D 100%)',
+                              border: '2px solid #EB8B8B',
+                              boxShadow: '0 12px 48px rgba(255,107,107,0.6)'
+                            },
+                            transition: 'all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+                            '&::before': {
+                              content: '""',
+                              position: 'absolute',
+                              top: 0,
+                              left: '-100%',
+                              width: '100%',
+                              height: '100%',
+                              background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent)',
+                              transition: 'left 0.5s'
+                            },
+                            '&:hover::before': {
+                              left: '100%'
+                            }
+                          }}
+                          onClick={() => {
+                            window.location.href = currentOfferData.actionUrl || '/productos';
+                          }}
+                        >
+                          {currentOfferData.buttonText || translatedTexts.defaultButton}
+                        </Button>
+                      </motion.div>
+                    </Box>
                   </Box>
                 </Box>
               </Box>

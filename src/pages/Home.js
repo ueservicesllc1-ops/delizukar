@@ -38,7 +38,11 @@ const Home = () => {
     agotado: 'Agotado',
     stockBajo: 'Stock Bajo',
     stockMedio: 'Stock Medio',
-    enStock: 'En Stock'
+    enStock: 'En Stock',
+    galletasDestacadas: 'Galletas Destacadas',
+    vistaImagen: 'Vista',
+    descripcionFerrero: 'Galleta estilo NY con Ferrero Rocher, chips de chocolate oscuro y avellanas tostadas—intensa, elegante y adictiva.',
+    descripcionGeneral: 'Deliciosas {productName} con ingredientes premium. Galletas estilo Nueva York perfectamente horneadas para disfrutar o compartir.'
   });
 
   // Traducir textos cuando cambia el idioma
@@ -59,7 +63,11 @@ const Home = () => {
           agotado: 'Agotado',
           stockBajo: 'Stock Bajo',
           stockMedio: 'Stock Medio',
-          enStock: 'En Stock'
+          enStock: 'En Stock',
+          galletasDestacadas: 'Galletas Destacadas',
+          vistaImagen: 'Vista',
+          descripcionFerrero: 'Galleta estilo NY con Ferrero Rocher, chips de chocolate oscuro y avellanas tostadas—intensa, elegante y adictiva.',
+          descripcionGeneral: 'Deliciosas {productName} con ingredientes premium. Galletas estilo Nueva York perfectamente horneadas para disfrutar o compartir.'
         });
       } else {
         try {
@@ -77,7 +85,11 @@ const Home = () => {
             'Agotado',
             'Stock Bajo',
             'Stock Medio',
-            'En Stock'
+            'En Stock',
+            'Galletas Destacadas',
+            'Vista',
+            'Galleta estilo NY con Ferrero Rocher, chips de chocolate oscuro y avellanas tostadas—intensa, elegante y adictiva.',
+            'Deliciosas {productName} con ingredientes premium. Galletas estilo Nueva York perfectamente horneadas para disfrutar o compartir.'
           ];
           const translated = await translateBatch(textsToTranslate, language, 'es');
           setTranslatedTexts({
@@ -94,7 +106,11 @@ const Home = () => {
             agotado: translated[10] || 'Agotado',
             stockBajo: translated[11] || 'Stock Bajo',
             stockMedio: translated[12] || 'Stock Medio',
-            enStock: translated[13] || 'En Stock'
+            enStock: translated[13] || 'En Stock',
+            galletasDestacadas: translated[14] || 'Galletas Destacadas',
+            vistaImagen: translated[15] || 'Vista',
+            descripcionFerrero: translated[16] || 'Galleta estilo NY con Ferrero Rocher, chips de chocolate oscuro y avellanas tostadas—intensa, elegante y adictiva.',
+            descripcionGeneral: translated[17] || 'Deliciosas {productName} con ingredientes premium. Galletas estilo Nueva York perfectamente horneadas para disfrutar o compartir.'
           });
         } catch (error) {
           console.error('Error translating texts:', error);
@@ -277,7 +293,7 @@ const Home = () => {
                     '&::after': { display: 'none' }
                   }}
                 >
-                  Galletas Destacadas
+                  {translatedTexts.galletasDestacadas}
                 </Typography>
               )}
             </Box>
@@ -535,7 +551,7 @@ const Home = () => {
                           <Box
                             component="img"
                             src={image}
-                            alt={`Vista ${index + 1}`}
+                            alt={`${translatedTexts.vistaImagen} ${index + 1}`}
                             sx={{
                               width: '100%',
                               height: '100%',
@@ -576,8 +592,8 @@ const Home = () => {
                   
                   <Typography variant="body1" sx={{ color: '#666', lineHeight: 1.6, mb: 3, flex: 1 }}>
                     {selectedProduct.name && selectedProduct.name.toLowerCase().includes('ferrero') 
-                      ? 'Galleta estilo NY con Ferrero Rocher, chips de chocolate oscuro y avellanas tostadas—intensa, elegante y adictiva.'
-                      : `Deliciosas ${selectedProduct.name} con ingredientes premium. Galletas estilo Nueva York perfectamente horneadas para disfrutar o compartir.`
+                      ? translatedTexts.descripcionFerrero
+                      : translatedTexts.descripcionGeneral.replace('{productName}', selectedProduct.name)
                     }
                   </Typography>
                   
