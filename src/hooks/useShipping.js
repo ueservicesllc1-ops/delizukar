@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import easypostService from '../services/easypostService';
+import shippoService from '../services/shippoService';
 
 export const useShipping = () => {
   const [shippingRates, setShippingRates] = useState([]);
@@ -13,7 +13,7 @@ export const useShipping = () => {
       setLoading(true);
       setError(null);
       
-      const rates = await easypostService.getShippingRates(fromAddress, toAddress, parcel);
+      const rates = await shippoService.getShippingRates(fromAddress, toAddress, Array.isArray(parcel) ? parcel : [parcel]);
       setShippingRates(rates);
       
       return rates;
@@ -32,7 +32,7 @@ export const useShipping = () => {
       setLoading(true);
       setError(null);
       
-      const address = await easypostService.createAddress(addressData);
+      const address = await shippoService.createAddress(addressData);
       return address;
     } catch (err) {
       console.error('Error creating shipping address:', err);
@@ -49,7 +49,7 @@ export const useShipping = () => {
       setLoading(true);
       setError(null);
       
-      const validatedAddress = await easypostService.validateAddress(addressData);
+      const validatedAddress = await shippoService.validateAddress(addressData);
       return validatedAddress;
     } catch (err) {
       console.error('Error validating address:', err);
@@ -62,10 +62,17 @@ export const useShipping = () => {
 
   // Crear parcel desde datos del carrito
   const createParcelFromCart = useCallback((cartItems) => {
-    // Calcular peso total (asumiendo 0.2 lb por galleta)
+    // Calcular peso total (100 gramos = 0.22 lb por galleta)
     const totalWeight = cartItems.reduce((total, item) => {
-      return total + (item.quantity * 0.2);
+      return total + (item.quantity * 0.22); // 0.22 lb por galleta (100g)
     }, 0);
+    
+    // Redondear el peso a máximo 2 decimales para evitar problemas con precision
+    // Shippo requiere máximo 10 dígitos en total, así que 2 decimales es seguro
+    const roundedWeight = Math.round(totalWeight * 100) / 100;
+    
+    // Asegurar peso mínimo de 0.22 lb (1 galleta)
+    const finalWeight = Math.max(0.22, roundedWeight);
 
     // Dimensiones estándar para una caja de galletas
     const baseDimensions = {
@@ -77,16 +84,30 @@ export const useShipping = () => {
     // Ajustar dimensiones según cantidad de productos
     const itemCount = cartItems.reduce((total, item) => total + item.quantity, 0);
     const heightMultiplier = Math.ceil(itemCount / 6); // 6 galletas por nivel
+    const finalHeight = Math.max(4, baseDimensions.height * heightMultiplier);
 
-    return easypostService.createParcel(
-      totalWeight,
-      baseDimensions.length,
-      baseDimensions.width,
-      baseDimensions.height * heightMultiplier
-    );
+    const parcel = shippoService.createParcel({
+      weight: finalWeight.toFixed(2), // Asegurar 2 decimales
+      mass_unit: 'lb',
+      length: baseDimensions.length.toString(),
+      width: baseDimensions.width.toString(),
+      height: finalHeight.toString(),
+      distance_unit: 'in'
+    });
+
+    // Log detallado para verificar datos
+    console.log('📦 [useShipping] Parcel creado desde carrito:');
+    console.log('   Cantidad de galletas:', itemCount);
+    console.log('   Peso calculado:', finalWeight.toFixed(2), 'lb');
+    console.log('   Dimensiones:', `${baseDimensions.length}" x ${baseDimensions.width}" x ${finalHeight}"`);
+    console.log('   Parcel completo:', JSON.stringify(parcel, null, 2));
+    console.log('   ⚠️ ESTOS son los datos que se enviarán a Shippo para calcular los rates');
+    console.log('   ⚠️ Estos mismos datos DEBEN guardarse en packageInfo para usar después');
+
+    return parcel;
   }, []);
 
-  // Crear datos de orden para EasyPost
+  // Crear datos de orden para Shippo
   const createOrderData = useCallback((cartItems, fromAddress, toAddress) => {
     const parcel = createParcelFromCart(cartItems);
     
@@ -125,7 +146,7 @@ export const useShipping = () => {
     console.log('Order created:', orderData);
     
     // Guardar el order_id para futuras referencias
-    localStorage.setItem('easypostOrderId', orderData.order_id);
+    localStorage.setItem('shippoOrderId', orderData.order_id);
     
     return orderData;
   }, []);

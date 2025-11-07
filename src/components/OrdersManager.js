@@ -18,7 +18,9 @@ import {
   IconButton,
   CircularProgress,
   Alert,
-  TextField
+  TextField,
+  Tabs,
+  Tab
 } from '@mui/material';
 import {
   Close,
@@ -27,13 +29,15 @@ import {
   LocalShipping,
   CheckCircle,
   Pending,
-  Email
+  Email,
+  Receipt
 } from '@mui/icons-material';
 import { collection, getDocs, updateDoc, deleteDoc, doc, query, orderBy, where } from 'firebase/firestore';
 import { db } from '../firebase/config';
 import emailjs from '@emailjs/browser';
+import ShippoShippingElements from './ShippoShippingElements';
 
-const OrdersManager = ({ open, onClose }) => {
+const OrdersManager = ({ open, onClose, initialTab = 'all' }) => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
@@ -46,12 +50,16 @@ const OrdersManager = ({ open, onClose }) => {
   const [sendingTestEmail, setSendingTestEmail] = useState(false);
   const [addressDetailsDialog, setAddressDetailsDialog] = useState(false);
   const [addressDetails, setAddressDetails] = useState(null);
+  const [shippoElementsOpen, setShippoElementsOpen] = useState(false);
+  const [shippoOrderData, setShippoOrderData] = useState(null);
+  const [currentTab, setCurrentTab] = useState(initialTab);
 
   useEffect(() => {
     if (open) {
       loadOrders();
+      setCurrentTab(initialTab);
     }
-  }, [open]);
+  }, [open, initialTab]);
 
   // Inicializar EmailJS
   useEffect(() => {
@@ -70,20 +78,34 @@ const OrdersManager = ({ open, onClose }) => {
       
       // Filtrar solo los pagados
       const paidOrders = [];
-      allOrdersSnapshot.forEach((doc) => {
-        const orderData = doc.data();
-        console.log(`📋 Pedido ${doc.id}: paymentStatus = ${orderData.paymentStatus}, status = ${orderData.status}`);
+      const allOrders = [];
+      allOrdersSnapshot.forEach((docSnap) => {
+        const orderData = docSnap.data();
+        allOrders.push({ id: docSnap.id, ...orderData });
+        console.log(`📋 Pedido ${docSnap.id}:`, {
+          paymentStatus: orderData.paymentStatus,
+          status: orderData.status,
+          total: orderData.total,
+          customerEmail: orderData.customerInfo?.email,
+          createdAt: orderData.createdAt
+        });
+        
         if (orderData.paymentStatus === 'paid') {
           paidOrders.push({
-            id: doc.id,
+            id: docSnap.id,
             ...orderData
           });
+          console.log(`✅ Pedido ${docSnap.id} agregado (paymentStatus = paid)`);
         } else {
           // Eliminar pedidos de prueba (no pagados)
-          console.log(`🗑️ Eliminando pedido de prueba: ${doc.id}`);
-          deleteDoc(doc(db, 'orders', doc.id));
+          console.log(`🗑️ Eliminando pedido de prueba: ${docSnap.id} (paymentStatus = ${orderData.paymentStatus})`);
+          deleteDoc(doc(db, 'orders', docSnap.id)).catch(err => {
+            console.error(`❌ Error eliminando pedido ${docSnap.id}:`, err);
+          });
         }
       });
+      
+      console.log(`📊 Resumen: ${allOrders.length} pedidos totales, ${paidOrders.length} pedidos pagados`);
       
       // Ordenar por fecha descendente
       paidOrders.sort((a, b) => {
@@ -153,6 +175,79 @@ const OrdersManager = ({ open, onClose }) => {
     }
   };
 
+  // Preparar datos del pedido para Shippo Shipping Elements
+  // Formato según: https://docs.goshippo.com/docs/shippingelements/install/
+  const prepareOrderDataForShippo = (order) => {
+    const customerInfo = order.customerInfo || {};
+    const address = customerInfo.address || {};
+    const cartItems = order.cartItems || [];
+    
+    // Calcular peso total basado en los productos (100 gramos = 0.22 lb por galleta)
+    const totalWeight = cartItems.reduce((total, item) => {
+      return total + ((item.quantity || 1) * 0.22); // 0.22 lb por galleta (100g)
+    }, 0);
+    const finalWeight = Math.max(0.22, Math.round(totalWeight * 100) / 100); // Mínimo 0.22 lb (1 galleta), redondeado a 2 decimales
+    
+    // Calcular total del pedido
+    const orderTotal = cartItems.reduce((total, item) => {
+      return total + ((parseFloat(item.price) || 0) * (item.quantity || 1));
+    }, 0);
+    
+    return {
+      address_from: {
+        name: 'Delizukar',
+        street1: '123 Delizukar St',
+        city: 'Miami',
+        state: 'FL',
+        zip: '33101',
+        country: 'US',
+        email: 'envios@delizukar.com',
+        phone: ''
+      },
+      address_to: {
+        name: `${customerInfo.firstName || ''} ${customerInfo.lastName || ''}`.trim(),
+        street1: address.line1 || '',
+        city: address.city || '',
+        state: address.state || '',
+        zip: address.postal_code || '',
+        country: address.country || 'US',
+        email: customerInfo.email || '',
+        phone: customerInfo.phone || ''
+      },
+      parcels: [{
+        length: '10',
+        width: '10',
+        height: '10',
+        distance_unit: 'in',
+        weight: String(finalWeight),
+        mass_unit: 'lb'
+      }],
+      cartItems: cartItems, // Incluir cartItems para que el widget use datos reales
+      orderTotal: orderTotal, // Incluir total para referencia
+      order_number: order.id || order.sessionId || undefined
+    };
+  };
+
+  // Abrir widget de Shippo Shipping Elements
+  const handleOpenShippoElements = (order) => {
+    const orderData = prepareOrderDataForShippo(order);
+    setShippoOrderData(orderData);
+    setShippoElementsOpen(true);
+  };
+
+  // Callback cuando se cierra el widget de Shippo
+  const handleShippoElementsClose = (labelData) => {
+    setShippoElementsOpen(false);
+    setShippoOrderData(null);
+    
+    if (labelData) {
+      // Si se compró una etiqueta, actualizar el pedido
+      console.log('✅ Etiqueta comprada desde Shippo Elements:', labelData);
+      // Recargar órdenes para ver los cambios
+      loadOrders();
+    }
+  };
+
   const handleCreateShipment = async (order) => {
     // Prevenir múltiples clics
     if (creatingLabel || creatingForOrderId === order.id) {
@@ -186,32 +281,73 @@ const OrdersManager = ({ open, onClose }) => {
       const result = await response.json();
       console.log('🔵 [OrdersManager] Response data:', result);
 
-      // Si hay error, mostrar detalles de la dirección
+      // Si hay error, verificar si es error de método de pago
       if (!response.ok || !result.success) {
-        console.log('❌ Error creando shipment, mostrando detalles de dirección...');
+        console.log('❌ Error creando shipment:', result);
+        console.log('🔍 Verificando si es error de método de pago...');
+        console.log('   result.data:', result.data);
+        console.log('   result.data?.pendingPayment:', result.data?.pendingPayment);
+        console.log('   result.error:', result.error);
+        console.log('   result.message:', result.message);
         
-        // Extraer datos de la dirección del pedido
-        const customerInfo = order.customerInfo || {};
-        const address = customerInfo.address || {};
+        // Si es error de método de pago, mostrar modal con información del shipment
+        // Verificar tanto result.data.pendingPayment como el mensaje de error
+        const errorText = (result.error || result.message || '').toLowerCase();
+        const isPaymentMethodError = (result.data && result.data.pendingPayment) || 
+                                     errorText.includes('payment method') || 
+                                     errorText.includes('método de pago') ||
+                                     errorText.includes('billing') ||
+                                     errorText.includes('no se pudo procesar el pago') ||
+                                     errorText.includes('transacción se creó pero no se obtuvo información') ||
+                                     errorText.includes('you are required to have a valid payment method');
         
-        // Mostrar diálogo con detalles
-        setAddressDetails({
-          original: {
-            name: `${customerInfo.firstName || ''} ${customerInfo.lastName || ''}`,
-            street: address.line1 || '',
-            city: address.city || '',
-            state: address.state || '',
-            zip: address.postal_code || '',
-            country: address.country || 'US'
-          },
-          error: result.error || 'Error desconocido',
-          orderId: order.id
-        });
-        setAddressDetailsDialog(true);
+        console.log('🔍 isPaymentMethodError:', isPaymentMethodError);
+        console.log('🔍 result.data?.shipmentId:', result.data?.shipmentId);
+        
+        // Si es error de método de pago Y tiene información del shipment, mostrar modal
+        if (isPaymentMethodError && result.data && result.data.shipmentId) {
+          console.log('⚠️ Shipment creado pero falló el pago por falta de método de pago');
+          console.log('📋 Mostrando modal con información del shipment');
+          
+          setLabelData({
+            id: order.id,
+            shipmentId: result.data.shipmentId,
+            rateId: result.data.rateId,
+            shippoUrl: result.data.shippoUrl,
+            carrier: result.data.carrier,
+            service: result.data.service,
+            shippingCost: result.data.shippingCost,
+            pendingPayment: true,
+            error: result.error || result.message || 'Error al pagar la etiqueta',
+            message: result.message || 'No se pudo procesar el pago porque no hay un método de pago válido en Shippo. Ve a Shippo para agregar un método de pago y pagar la etiqueta manualmente.'
+          });
+          setLabelDialogOpen(true);
+          
+          // Guardar información del shipment en Firestore
+          const orderRef = doc(db, 'orders', order.id);
+          await updateDoc(orderRef, {
+            shippoShipmentId: result.data.shipmentId,
+            shippoRateId: result.data.rateId,
+            shippoUrl: result.data.shippoUrl,
+            selectedCarrier: result.data.carrier,
+            selectedService: result.data.service,
+            shippingCost: result.data.shippingCost,
+            status: 'pending',
+            updatedAt: new Date().toISOString()
+          });
+          
+          return;
+        }
+        
+        // Si no es error de método de pago, mostrar error genérico
+        const errorMessage = result.message || result.error || 'Error al crear la etiqueta';
+        console.error('❌ Error genérico (no es de método de pago):', errorMessage);
+        alert('❌ Error: ' + errorMessage);
         return;
       }
 
       if (response.ok && result.success) {
+        // Etiqueta pagada exitosamente
         setLabelData({
           tracking_code: result.data.trackingCode,
           id: result.data.orderId,
@@ -299,6 +435,20 @@ const OrdersManager = ({ open, onClose }) => {
     }
   };
 
+  // Filtrar órdenes según la pestaña activa
+  const getFilteredOrders = () => {
+    if (currentTab === 'labels') {
+      // Solo órdenes con etiquetas compradas (status: 'shipped' y trackingCode)
+      return orders.filter(order => 
+        order.status === 'shipped' && 
+        (order.trackingCode || order.labelUrl)
+      );
+    }
+    return orders; // Todas las órdenes
+  };
+
+  const filteredOrders = getFilteredOrders();
+
   return (
     <>
       <Dialog
@@ -361,37 +511,88 @@ const OrdersManager = ({ open, onClose }) => {
           </Box>
         </DialogTitle>
         
-        <DialogContent sx={{ p: 3, backgroundColor: '#fafafa' }}>
-          {loading ? (
-            <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
-              <CircularProgress sx={{ color: '#C8626D' }} />
-            </Box>
-          ) : orders.length === 0 ? (
-            <Box sx={{ textAlign: 'center', py: 4 }}>
-              <LocalShipping sx={{ fontSize: 64, color: '#C8626D', mb: 2 }} />
-              <Typography variant="h6" sx={{ color: '#C8626D', mb: 2, fontWeight: 600 }}>
-                No hay pedidos registrados
-              </Typography>
-              <Typography variant="body1" sx={{ color: '#666' }}>
-                Los pedidos aparecerán aquí cuando se completen las compras.
-              </Typography>
-            </Box>
-          ) : (
-            <TableContainer component={Paper} sx={{ maxHeight: 600 }}>
-              <Table stickyHeader>
-                <TableHead>
-                  <TableRow>
-                    <TableCell>Pedido ID</TableCell>
-                    <TableCell>Cliente</TableCell>
-                    <TableCell>Fecha</TableCell>
-                    <TableCell>Total</TableCell>
-                    <TableCell>Estado</TableCell>
-                    <TableCell>Seguimiento</TableCell>
-                    <TableCell align="center">Acciones</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {orders.map((order) => (
+        <DialogContent sx={{ p: 0, backgroundColor: '#fafafa' }}>
+          {/* Pestañas */}
+          <Box sx={{ borderBottom: 1, borderColor: 'divider', backgroundColor: 'white' }}>
+            <Tabs 
+              value={currentTab} 
+              onChange={(e, newValue) => setCurrentTab(newValue)}
+              sx={{
+                '& .MuiTab-root': {
+                  textTransform: 'none',
+                  fontWeight: 600,
+                  minHeight: 64
+                },
+                '& .Mui-selected': {
+                  color: '#C8626D'
+                }
+              }}
+              indicatorColor="primary"
+              textColor="primary"
+            >
+              <Tab 
+                icon={<LocalShipping />} 
+                iconPosition="start"
+                label="Todas las Órdenes" 
+                value="all"
+                sx={{ color: currentTab === 'all' ? '#C8626D' : '#666' }}
+              />
+              <Tab 
+                icon={<Receipt />} 
+                iconPosition="start"
+                label={`Etiquetas Compradas (${orders.filter(o => o.status === 'shipped' && (o.trackingCode || o.labelUrl)).length})`} 
+                value="labels"
+                sx={{ color: currentTab === 'labels' ? '#C8626D' : '#666' }}
+              />
+            </Tabs>
+          </Box>
+
+          <Box sx={{ p: 3 }}>
+            {loading ? (
+              <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
+                <CircularProgress sx={{ color: '#C8626D' }} />
+              </Box>
+            ) : filteredOrders.length === 0 ? (
+              <Box sx={{ textAlign: 'center', py: 4 }}>
+                {currentTab === 'labels' ? (
+                  <>
+                    <Receipt sx={{ fontSize: 64, color: '#C8626D', mb: 2 }} />
+                    <Typography variant="h6" sx={{ color: '#C8626D', mb: 2, fontWeight: 600 }}>
+                      No hay etiquetas compradas
+                    </Typography>
+                    <Typography variant="body1" sx={{ color: '#666' }}>
+                      Las etiquetas compradas aparecerán aquí cuando uses el botón "Auto" para crear envíos.
+                    </Typography>
+                  </>
+                ) : (
+                  <>
+                    <LocalShipping sx={{ fontSize: 64, color: '#C8626D', mb: 2 }} />
+                    <Typography variant="h6" sx={{ color: '#C8626D', mb: 2, fontWeight: 600 }}>
+                      No hay pedidos registrados
+                    </Typography>
+                    <Typography variant="body1" sx={{ color: '#666' }}>
+                      Los pedidos aparecerán aquí cuando se completen las compras.
+                    </Typography>
+                  </>
+                )}
+              </Box>
+            ) : (
+              <TableContainer component={Paper} sx={{ maxHeight: 600 }}>
+                <Table stickyHeader>
+                  <TableHead>
+                    <TableRow>
+                      <TableCell>Pedido ID</TableCell>
+                      <TableCell>Cliente</TableCell>
+                      <TableCell>Fecha</TableCell>
+                      <TableCell>Total</TableCell>
+                      <TableCell>Estado</TableCell>
+                      <TableCell>Seguimiento</TableCell>
+                      {currentTab === 'labels' && <TableCell>Etiqueta</TableCell>}
+                      <TableCell align="center">Acciones</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {filteredOrders.map((order) => (
                     <TableRow key={order.id}>
                       <TableCell>{order.id.substring(0, 8)}...</TableCell>
                       <TableCell>
@@ -412,23 +613,119 @@ const OrdersManager = ({ open, onClose }) => {
                         />
                       </TableCell>
                       <TableCell>
-                        {order.trackingCode || '-'}
+                        {order.trackingCode ? (
+                          <Box>
+                            <Typography variant="body2" sx={{ fontFamily: 'monospace', fontWeight: 600 }}>
+                              {order.trackingCode}
+                            </Typography>
+                            {order.trackingUrl && (
+                              <Button
+                                size="small"
+                                href={order.trackingUrl}
+                                target="_blank"
+                                sx={{ mt: 0.5, fontSize: '0.7rem', p: 0 }}
+                              >
+                                Rastrear
+                              </Button>
+                            )}
+                          </Box>
+                        ) : '-'}
                       </TableCell>
+                      {currentTab === 'labels' && (
+                        <TableCell>
+                          {order.labelUrl ? (
+                            <Box sx={{ display: 'flex', gap: 1 }}>
+                              <Button
+                                size="small"
+                                variant="outlined"
+                                startIcon={<Print />}
+                                onClick={() => {
+                                  setLabelData({
+                                    tracking_code: order.trackingCode,
+                                    id: order.id,
+                                    postage_label: {
+                                      label_url: order.labelUrl
+                                    }
+                                  });
+                                  setLabelDialogOpen(true);
+                                }}
+                                sx={{
+                                  borderColor: '#C8626D',
+                                  color: '#C8626D',
+                                  '&:hover': {
+                                    borderColor: '#b8555a',
+                                    backgroundColor: '#C8626D10'
+                                  }
+                                }}
+                              >
+                                Ver/Imprimir
+                              </Button>
+                            </Box>
+                          ) : '-'}
+                        </TableCell>
+                      )}
                       <TableCell align="center">
-                        {(order.status === 'pending' || !order.status || order.status === 'processing') && (
-                          <Button
-                            variant="contained"
-                            size="small"
-                            startIcon={<LocalShipping />}
-                            onClick={() => handleCreateShipment(order)}
-                            disabled={creatingLabel || creatingForOrderId === order.id}
-                            sx={{
-                              backgroundColor: '#C8626D',
-                              '&:hover': { backgroundColor: '#b8555a' }
-                            }}
-                          >
-                            {creatingForOrderId === order.id ? 'Creando...' : 'Crear Envío'}
-                          </Button>
+                        {currentTab === 'labels' ? (
+                          // En la pestaña de etiquetas, mostrar botón para ver/imprimir
+                          order.labelUrl && (
+                            <Button
+                              variant="contained"
+                              size="small"
+                              startIcon={<Print />}
+                              onClick={() => {
+                                setLabelData({
+                                  tracking_code: order.trackingCode,
+                                  id: order.id,
+                                  postage_label: {
+                                    label_url: order.labelUrl
+                                  }
+                                });
+                                setLabelDialogOpen(true);
+                              }}
+                              sx={{
+                                backgroundColor: '#C8626D',
+                                '&:hover': { backgroundColor: '#b8555a' }
+                              }}
+                            >
+                              Ver Etiqueta
+                            </Button>
+                          )
+                        ) : (
+                          // En la pestaña de todas las órdenes, mostrar botones Auto/Widget
+                          (order.status === 'pending' || !order.status || order.status === 'processing') && (
+                            <Box sx={{ display: 'flex', gap: 1, justifyContent: 'center' }}>
+                              <Button
+                                variant="contained"
+                                size="small"
+                                startIcon={<LocalShipping />}
+                                onClick={() => handleCreateShipment(order)}
+                                disabled={creatingLabel || creatingForOrderId === order.id}
+                                sx={{
+                                  backgroundColor: '#C8626D',
+                                  '&:hover': { backgroundColor: '#b8555a' }
+                                }}
+                              >
+                                {creatingForOrderId === order.id ? 'Creando...' : 'Auto'}
+                              </Button>
+                              <Button
+                                variant="outlined"
+                                size="small"
+                                startIcon={<LocalShipping />}
+                                onClick={() => handleOpenShippoElements(order)}
+                                disabled={shippoElementsOpen}
+                                sx={{
+                                  borderColor: '#C8626D',
+                                  color: '#C8626D',
+                                  '&:hover': { 
+                                    borderColor: '#b8555a',
+                                    backgroundColor: '#C8626D10'
+                                  }
+                                }}
+                              >
+                                Widget
+                              </Button>
+                            </Box>
+                          )
                         )}
                       </TableCell>
                     </TableRow>
@@ -436,7 +733,8 @@ const OrdersManager = ({ open, onClose }) => {
                 </TableBody>
               </Table>
             </TableContainer>
-          )}
+            )}
+          </Box>
         </DialogContent>
       </Dialog>
 
@@ -444,55 +742,231 @@ const OrdersManager = ({ open, onClose }) => {
       <Dialog
         open={labelDialogOpen}
         onClose={() => setLabelDialogOpen(false)}
-        maxWidth="sm"
+        maxWidth="md"
         fullWidth
         sx={{
-          zIndex: 1500 // Asegurar que esté por encima del modal de pedidos
+          zIndex: 17001, // Muy alto para estar por encima de todo
+          '& .MuiDialog-paper': {
+            zIndex: 17001
+          },
+          '& .MuiBackdrop-root': {
+            zIndex: 17000
+          }
+        }}
+        BackdropProps={{
+          sx: {
+            zIndex: 17000
+          }
         }}
       >
-        <DialogTitle sx={{ backgroundColor: '#C8626D', color: 'white' }}>
-          Etiqueta de Envío Generada
+        <DialogTitle sx={{ backgroundColor: '#C8626D', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <LocalShipping />
+            <Typography variant="h6" sx={{ fontWeight: 600 }}>
+              {labelData?.pendingPayment ? '⚠️ Shipment Creado - Pendiente de Pago' : '✅ Etiqueta de Envío Generada'}
+            </Typography>
+          </Box>
+          <IconButton
+            onClick={() => setLabelDialogOpen(false)}
+            sx={{ color: 'white' }}
+          >
+            <Close />
+          </IconButton>
         </DialogTitle>
         <DialogContent sx={{ p: 3 }}>
-          {labelData && (
-            <Box>
-              <Alert severity="success" sx={{ mb: 2 }}>
-                Etiqueta generada exitosamente
-              </Alert>
-              <Typography variant="body1" sx={{ mb: 1 }}>
-                <strong>Código de seguimiento:</strong> {labelData.tracking_code}
-              </Typography>
-              <Typography variant="body1" sx={{ mb: 2 }}>
-                <strong>ID de etiqueta:</strong> {labelData.id}
-              </Typography>
-            </Box>
-          )}
-        </DialogContent>
-        <DialogActions sx={{ p: 2, gap: 1 }}>
-          <Button
-            variant="outlined"
-            startIcon={<Print />}
-            onClick={handlePrintLabel}
-            sx={{ borderColor: '#C8626D', color: '#C8626D' }}
-          >
-            Imprimir
-          </Button>
-          <Button
-            variant="outlined"
-            startIcon={<GetApp />}
-            onClick={handleDownloadLabel}
-            sx={{ borderColor: '#C8626D', color: '#C8626D' }}
-          >
-            Descargar PDF
-          </Button>
-          <Button
-            variant="contained"
-            onClick={() => setLabelDialogOpen(false)}
-            sx={{ backgroundColor: '#C8626D', '&:hover': { backgroundColor: '#b8555a' } }}
-          >
-            Cerrar
-          </Button>
-        </DialogActions>
+        {labelData && (
+          <Box>
+            {labelData.pendingPayment ? (
+              // Shipment creado, pendiente de pago
+              <>
+                <Alert severity="error" sx={{ mb: 3 }}>
+                  <Typography variant="body1" sx={{ fontWeight: 600, mb: 1 }}>
+                    ❌ Error: Falta método de pago en Shippo
+                  </Typography>
+                  <Typography variant="body2" sx={{ mb: 1 }}>
+                    <strong>El pago no pudo realizarse porque falta un método de pago válido en tu cuenta de Shippo.</strong>
+                  </Typography>
+                  <Typography variant="body2">
+                    El shipment se creó correctamente, pero necesitas agregar un método de pago en Shippo para poder pagar la etiqueta de envío. Haz clic en el botón "Ir a Shippo" para agregar tu método de pago y completar el pago manualmente.
+                  </Typography>
+                </Alert>
+                
+                <Box sx={{ 
+                  backgroundColor: '#f5f5f5', 
+                  p: 2, 
+                  borderRadius: '8px', 
+                  mb: 3,
+                  border: '1px solid #e0e0e0'
+                }}>
+                  <Typography variant="body2" sx={{ mb: 1, color: '#666' }}>
+                    <strong>Información del Shipment:</strong>
+                  </Typography>
+                  <Typography variant="body2" sx={{ color: '#666', mb: 0.5 }}>
+                    <strong>Shipment ID:</strong> {labelData.shipmentId}
+                  </Typography>
+                  <Typography variant="body2" sx={{ color: '#666', mb: 0.5 }}>
+                    <strong>Carrier:</strong> {labelData.carrier}
+                  </Typography>
+                  <Typography variant="body2" sx={{ color: '#666', mb: 0.5 }}>
+                    <strong>Servicio:</strong> {labelData.service}
+                  </Typography>
+                  <Typography variant="body2" sx={{ color: '#666', mb: 0.5 }}>
+                    <strong>Costo:</strong> ${labelData.shippingCost}
+                  </Typography>
+                  <Typography variant="body2" sx={{ color: '#666' }}>
+                    <strong>ID de pedido:</strong> {labelData.id}
+                  </Typography>
+                </Box>
+
+                <Box sx={{ 
+                  backgroundColor: '#fff3cd', 
+                  p: 2, 
+                  borderRadius: '8px',
+                  border: '1px solid #ffc107',
+                  mb: 3
+                }}>
+                  <Typography variant="body2" sx={{ color: '#856404', mb: 1, fontWeight: 600 }}>
+                    📋 Instrucciones para completar el pago:
+                  </Typography>
+                  <Typography variant="body2" sx={{ color: '#856404', fontSize: '0.9rem', mb: 1 }}>
+                    <strong>Paso 1:</strong> Haz clic en el botón <strong>"Ir a Shippo"</strong> que aparece abajo
+                  </Typography>
+                  <Typography variant="body2" sx={{ color: '#856404', fontSize: '0.9rem', mb: 1 }}>
+                    <strong>Paso 2:</strong> En Shippo, ve a la sección de <strong>"Billing"</strong> o <strong>"Payment Methods"</strong>
+                  </Typography>
+                  <Typography variant="body2" sx={{ color: '#856404', fontSize: '0.9rem', mb: 1 }}>
+                    <strong>Paso 3:</strong> Agrega tu tarjeta de crédito o método de pago
+                  </Typography>
+                  <Typography variant="body2" sx={{ color: '#856404', fontSize: '0.9rem', mb: 1 }}>
+                    <strong>Paso 4:</strong> Regresa al shipment y selecciona el rate para pagar la etiqueta
+                  </Typography>
+                  <Typography variant="body2" sx={{ color: '#856404', fontSize: '0.9rem' }}>
+                    <strong>Paso 5:</strong> Una vez pagada, la etiqueta estará disponible para imprimir
+                  </Typography>
+                </Box>
+              </>
+            ) : (
+              // Etiqueta ya pagada
+              <>
+                <Alert severity="success" sx={{ mb: 3 }}>
+                  <Typography variant="body1" sx={{ fontWeight: 600, mb: 1 }}>
+                    ¡Etiqueta creada exitosamente!
+                  </Typography>
+                  <Typography variant="body2">
+                    La etiqueta está lista para imprimir. El cliente recibirá un email con el código de seguimiento.
+                  </Typography>
+                </Alert>
+                
+                <Box sx={{ 
+                  backgroundColor: '#f5f5f5', 
+                  p: 2, 
+                  borderRadius: '8px', 
+                  mb: 3,
+                  border: '1px solid #e0e0e0'
+                }}>
+                  <Typography variant="body2" sx={{ mb: 1, color: '#666' }}>
+                    <strong>Código de seguimiento:</strong>
+                  </Typography>
+                  <Typography variant="h6" sx={{ mb: 2, color: '#C8626D', fontFamily: 'monospace', fontWeight: 600 }}>
+                    {labelData.tracking_code}
+                  </Typography>
+                  <Typography variant="body2" sx={{ color: '#666' }}>
+                    <strong>ID de pedido:</strong> {labelData.id}
+                  </Typography>
+                </Box>
+
+                <Box sx={{ 
+                  backgroundColor: '#e8f4fd', 
+                  p: 2, 
+                  borderRadius: '8px',
+                  border: '1px solid #b3d9ff'
+                }}>
+                  <Typography variant="body2" sx={{ color: '#666', mb: 1 }}>
+                    <strong>📋 Instrucciones:</strong>
+                  </Typography>
+                  <Typography variant="body2" sx={{ color: '#666', fontSize: '0.9rem' }}>
+                    1. Haz clic en <strong>"Imprimir"</strong> para abrir la etiqueta en una nueva ventana<br/>
+                    2. O haz clic en <strong>"Descargar PDF"</strong> para guardarla en tu computadora<br/>
+                    3. Imprime la etiqueta y pégala en el paquete
+                  </Typography>
+                </Box>
+              </>
+            )}
+          </Box>
+        )}
+      </DialogContent>
+      <DialogActions sx={{ p: 2, gap: 1, justifyContent: 'center', flexWrap: 'wrap' }}>
+        {labelData?.pendingPayment ? (
+          // Botones para shipment pendiente de pago
+          <>
+            <Button
+              variant="contained"
+              startIcon={<LocalShipping />}
+              onClick={() => {
+                if (labelData.shippoUrl) {
+                  window.open(labelData.shippoUrl, '_blank');
+                }
+              }}
+              size="large"
+              sx={{ 
+                backgroundColor: '#C8626D', 
+                '&:hover': { backgroundColor: '#b8555a' },
+                minWidth: '150px'
+              }}
+            >
+              🔗 Ir a Shippo
+            </Button>
+            <Button
+              variant="text"
+              onClick={() => setLabelDialogOpen(false)}
+              sx={{ color: '#666' }}
+            >
+              Cerrar
+            </Button>
+          </>
+        ) : (
+          // Botones para etiqueta pagada
+          <>
+            <Button
+              variant="contained"
+              startIcon={<Print />}
+              onClick={handlePrintLabel}
+              size="large"
+              sx={{ 
+                backgroundColor: '#C8626D', 
+                '&:hover': { backgroundColor: '#b8555a' },
+                minWidth: '150px'
+              }}
+            >
+              🖨️ Imprimir Etiqueta
+            </Button>
+            <Button
+              variant="outlined"
+              startIcon={<GetApp />}
+              onClick={handleDownloadLabel}
+              size="large"
+              sx={{ 
+                borderColor: '#C8626D', 
+                color: '#C8626D',
+                '&:hover': { 
+                  borderColor: '#b8555a',
+                  backgroundColor: '#C8626D10'
+                },
+                minWidth: '150px'
+              }}
+            >
+              📥 Descargar PDF
+            </Button>
+            <Button
+              variant="text"
+              onClick={() => setLabelDialogOpen(false)}
+              sx={{ color: '#666' }}
+            >
+              Cerrar
+            </Button>
+          </>
+        )}
+      </DialogActions>
       </Dialog>
 
       {/* Dialog para enviar email de prueba */}
@@ -598,24 +1072,24 @@ const OrdersManager = ({ open, onClose }) => {
               </Box>
 
               <Typography variant="subtitle1" sx={{ mt: 2, mb: 1, fontWeight: 700, color: '#1976d2' }}>
-                ℹ️ Información para EasyPost:
+                ℹ️ Información para Shippo:
               </Typography>
               <Alert severity="info" sx={{ mb: 2 }}>
                 <Typography variant="body2">
-                  Esta es la dirección exacta que estamos enviando a EasyPost.
+                  Esta es la dirección exacta que estamos enviando a Shippo.
                   Revisa los logs del servidor (consola de terminal) para ver:
                 </Typography>
                 <Typography variant="body2" sx={{ mt: 1 }}>
-                  • Dirección corregida por EasyPost (si aplica)<br/>
+                  • Dirección corregida por Shippo (si aplica)<br/>
                   • Código de estado de verificación<br/>
-                  • Respuesta completa de la API de EasyPost
+                  • Respuesta completa de la API de Shippo
                 </Typography>
               </Alert>
 
               <Typography variant="body2" sx={{ mt: 2, fontStyle: 'italic', color: '#666' }}>
                 💡 <strong>Sugerencia:</strong> Abre la consola de terminal donde corre el servidor Node.js 
                 para ver los logs detallados con el prefijo <code>🔍 [Address Debug]</code> y 
-                <code>📍 DIRECCIÓN EXACTA A ENVIAR A EASYPOST:</code>
+                <code>📍 DIRECCIÓN EXACTA A ENVIAR A SHIPPO:</code>
               </Typography>
             </Box>
           )}
@@ -633,6 +1107,13 @@ const OrdersManager = ({ open, onClose }) => {
           </Button>
         </DialogActions>
       </Dialog>
+
+      {/* Widget de Shippo Shipping Elements */}
+      <ShippoShippingElements
+        open={shippoElementsOpen}
+        onClose={handleShippoElementsClose}
+        orderData={shippoOrderData}
+      />
     </>
   );
 };

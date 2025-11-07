@@ -21,6 +21,10 @@ NODE_ENV=development
 FRONTEND_URL=http://localhost:3000
 
 # ==================== SHIPPO CONFIGURATION ====================
+# Obtén tu API token desde: https://apps.goshippo.com/
+# Para desarrollo usa: shippo_test_... (test mode)
+# Para producción usa: shippo_live_... (live mode)
+SHIPPO_API_TOKEN=shippo_test_placeholder
 REACT_APP_SHIPPO_API_TOKEN=shippo_test_placeholder
 `;
 
@@ -35,13 +39,15 @@ try {
   console.log('   2. Copia tu STRIPE_SECRET_KEY (sk_test_...)');
   console.log('   3. Copia tu REACT_APP_STRIPE_PUBLISHABLE_KEY (pk_test_...)');
   console.log('   4. Edita el archivo .env con tus claves reales');
-  console.log('\n🔑 Claves de Stripe necesarias:');
-  console.log('   - STRIPE_SECRET_KEY=sk_test_...');
-  console.log('   - REACT_APP_STRIPE_PUBLISHABLE_KEY=pk_test_...');
-  console.log('\n🚀 Para iniciar la aplicación:');
-  console.log('   npm run dev');
-  console.log('\n🧪 Para probar la integración:');
-  console.log('   npm run test-stripe');
+    console.log('\n🔑 Claves necesarias:');
+    console.log('   - STRIPE_SECRET_KEY=sk_test_...');
+    console.log('   - REACT_APP_STRIPE_PUBLISHABLE_KEY=pk_test_...');
+    console.log('   - SHIPPO_API_TOKEN=shippo_test_... (obtén desde https://apps.goshippo.com/)');
+    console.log('\n🚀 Para iniciar la aplicación:');
+    console.log('   npm run dev');
+    console.log('\n🧪 Para probar las integraciones:');
+    console.log('   npm run test-stripe');
+    console.log('   npm run setup-shippo');
 } catch (error) {
   console.error('❌ Error al crear el archivo .env:', error);
 }

@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * Script de inicio para desarrollo con EasyPost
+ * Script de inicio para desarrollo con Shippo
  * Inicia tanto el servidor backend como el frontend
  */
 
@@ -9,26 +9,19 @@ const { spawn } = require('child_process');
 const path = require('path');
 require('dotenv').config();
 
-console.log('🚀 Iniciando aplicación con EasyPost...\n');
+console.log('🚀 Iniciando aplicación con Shippo...\n');
 
-// Verificar variables de entorno
-const requiredEnvVars = [
-  'EASYPOST_API_KEY'
-];
+// Verificar variables de entorno (opcional - Shippo tiene un token por defecto)
+const shippoToken = process.env.SHIPPO_API_TOKEN || process.env.REACT_APP_SHIPPO_API_TOKEN;
 
-const missingVars = requiredEnvVars.filter(varName => !process.env[varName]);
-
-if (missingVars.length > 0) {
-  console.error('❌ Variables de entorno faltantes:');
-  missingVars.forEach(varName => {
-    console.error(`   - ${varName}`);
-  });
-  console.error('\n📝 Crea un archivo .env con EASYPOST_API_KEY');
-  process.exit(1);
+if (!shippoToken) {
+  console.warn('⚠️ SHIPPO_API_TOKEN no está configurada, usando token por defecto');
+  console.warn('📝 Para configurar tu token, crea un archivo .env con SHIPPO_API_TOKEN');
+} else {
+  console.log('✅ Variables de entorno configuradas correctamente');
+  console.log('📦 Shippo API Token configurada');
 }
 
-console.log('✅ Variables de entorno configuradas correctamente');
-console.log('📦 EasyPost API Key configurada');
 console.log('');
 
 // Iniciar servidor backend
@@ -86,7 +79,7 @@ setTimeout(() => {
 }, 2000);
 
 console.log('📱 Aplicación disponible en: http://localhost:3000');
-console.log('🔧 API disponible en: http://localhost:5001');
-console.log('📦 EasyPost Dashboard: https://app.easypost.com/');
+console.log('🔧 API disponible en: http://localhost:5000');
+console.log('📦 Shippo Dashboard: https://apps.goshippo.com/');
 console.log('');
 console.log('Presiona Ctrl+C para detener la aplicación');

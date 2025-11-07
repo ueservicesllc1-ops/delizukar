@@ -14,7 +14,7 @@ import {
   CircularProgress
 } from '@mui/material';
 import { LocationOn, CheckCircle, Warning, Edit } from '@mui/icons-material';
-import easypostService from '../services/easypostService';
+import shippoService from '../services/shippoService';
 
 const AddressCorrection = ({ 
   open, 
@@ -45,12 +45,37 @@ const AddressCorrection = ({
         console.log('🔧 Auto-correcting Paterson from NY to NJ');
       }
       
-      // Deprecated - AddressCorrection ahora usa EasyPost
-const result = { success: true, address: correctedAddress };
-      setCorrectionResult(result);
+      // Validar dirección con Shippo
+      const result = await shippoService.validateAddress(correctedAddress);
+      
+      if (result.isValid || result.is_valid) {
+        setCorrectionResult({
+          success: true,
+          address: result.validated_address || result.corrected_address || correctedAddress,
+          corrected: result.was_corrected || result.corrected || false,
+          original: correctedAddress,
+          messages: result.validation_messages || []
+        });
+      } else {
+        setCorrectionResult({
+          success: false,
+          address: correctedAddress,
+          messages: result.validation_messages || ['Dirección no pudo ser validada']
+        });
+      }
     } catch (err) {
-      console.error('Error validating address:', err);
-      setError('Error al validar la dirección');
+      console.error('❌ [AddressCorrection] Error validating address:', err);
+      console.error('   Error message:', err.message);
+      console.error('   Original error:', err.originalError);
+      
+      // Mostrar mensaje de error más descriptivo
+      const errorMessage = err.message || 'Error al validar la dirección';
+      setError(errorMessage);
+      
+      // También mostrar en la consola para debugging
+      if (err.originalError) {
+        console.error('   Detalles del error original:', err.originalError);
+      }
     } finally {
       setLoading(false);
     }

@@ -62,7 +62,8 @@ import {
   Group,
   AdminPanelSettings,
   Palette,
-  Email
+  Email,
+  Receipt
 } from '@mui/icons-material';
 import FontManager from '../components/FontManager';
 import BannerPhotoManager from '../components/BannerPhotoManager';
@@ -116,6 +117,7 @@ const AdminDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [selectedFont, setSelectedFont] = useState(null);
   const [ordersManagerOpen, setOrdersManagerOpen] = useState(false);
+  const [ordersManagerTab, setOrdersManagerTab] = useState('all');
   const [voucherManagerOpen, setVoucherManagerOpen] = useState(false);
   const [subscriptionManagerOpen, setSubscriptionManagerOpen] = useState(false);
   const navigate = useNavigate();
@@ -730,13 +732,13 @@ const AdminDashboard = () => {
         >
           <Box sx={{ mt: 12, pt: 6 }}>
             <Grid container spacing={0} sx={{ maxWidth: '1000px', mx: 'auto' }}>
-              {Array.from({ length: 20 }, (_, index) => {
+              {Array.from({ length: 21 }, (_, index) => {
                 const colors = [
                   '#c8626d', '#be8782', '#b5555a', '#c8626d',
                   '#c8626d', '#c8626d', '#c8626d', '#c8626d',
                   '#BC8F8F', '#F5DEB3', '#DDA0DD', '#98FB98',
                   '#F0E68C', '#FFB6C1', '#87CEEB', '#FFA07A',
-                  '#C8626D', '#7C2815', '#EB8B8B', '#8D9A7D'
+                  '#C8626D', '#7C2815', '#EB8B8B', '#8D9A7D', '#C8626D'
                 ];
                 const color = colors[index];
                 
@@ -768,9 +770,16 @@ const AdminDashboard = () => {
                               index === 13 ? () => setMessagingSystemOpen(true) :
                               index === 14 ? handleCostAnalysisClick :
                               index === 16 ? () => setColorPaletteOpen(true) :
-                              index === 17 ? () => setOrdersManagerOpen(true) :
+                              index === 17 ? () => {
+                                setOrdersManagerTab('all');
+                                setOrdersManagerOpen(true);
+                              } :
                               index === 18 ? () => setSubscriptionManagerOpen(true) :
                               index === 19 ? () => setVoucherManagerOpen(true) :
+                              index === 20 ? () => {
+                                setOrdersManagerTab('labels');
+                                setOrdersManagerOpen(true);
+                              } :
                               undefined
                             }
                         sx={{
@@ -1066,6 +1075,20 @@ const AdminDashboard = () => {
                                   Crear Voucher
                                 </Typography>
                               </Box>
+                            ) : index === 20 ? (
+                              <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1 }}>
+                                <Receipt sx={{ color: 'white', fontSize: '2rem' }} />
+                                <Typography
+                                  variant="body2"
+                                  sx={{
+                                    color: 'white',
+                                    fontWeight: 600,
+                                    textShadow: '1px 1px 2px rgba(0,0,0,0.5)'
+                                  }}
+                                >
+                                  Etiquetas Compradas
+                                </Typography>
+                              </Box>
                             ) : (
                           <Typography
                             variant="h6"
@@ -1167,7 +1190,11 @@ const AdminDashboard = () => {
       {/* Gestor de Pedidos y Envíos */}
       <OrdersManager
         open={ordersManagerOpen}
-        onClose={() => setOrdersManagerOpen(false)}
+        onClose={() => {
+          setOrdersManagerOpen(false);
+          setOrdersManagerTab('all');
+        }}
+        initialTab={ordersManagerTab}
       />
 
       {/* Gestor de Vouchers */}

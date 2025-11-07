@@ -16,8 +16,7 @@ import {
 } from '@mui/material';
 import { LocalShipping, CheckCircle, Close } from '@mui/icons-material';
  
-// Eliminado shippoService - ahora usamos EasyPost
-import easypostService from '../services/easypostService';
+import shippoService from '../services/shippoService';
 
 const ShippingCalculator = ({ 
   open, 
@@ -32,10 +31,20 @@ const ShippingCalculator = ({
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    console.log('ShippingCalculator useEffect triggered:', { open, orderData });
+    console.log('🔍 [ShippingCalculator] useEffect triggered:', { open, hasOrderData: !!orderData });
     if (open && orderData) {
-      console.log('Opening shipping calculator with order data:', orderData);
+      console.log('✅ [ShippingCalculator] Opening shipping calculator');
+      console.log('📦 [ShippingCalculator] orderData completo:', JSON.stringify(orderData, null, 2));
+      console.log('📦 [ShippingCalculator] Verificando estructura:');
+      console.log('   - address_from:', !!orderData.address_from);
+      console.log('   - address_to:', !!orderData.address_to);
+      console.log('   - parcels:', !!orderData.parcels, Array.isArray(orderData.parcels) ? orderData.parcels.length : 'no es array');
+      if (orderData.parcels && Array.isArray(orderData.parcels) && orderData.parcels.length > 0) {
+        console.log('   - Primer parcel:', JSON.stringify(orderData.parcels[0], null, 2));
+      }
       calculateRates();
+    } else {
+      console.warn('⚠️ [ShippingCalculator] No se puede calcular rates:', { open, hasOrderData: !!orderData });
     }
   }, [open, orderData]);
 
@@ -44,43 +53,172 @@ const ShippingCalculator = ({
       setLoading(true);
       setError(null);
       
-      console.log('Starting calculateRates with order data:', orderData);
+      console.log('📦 [Calculate Rates] Starting calculateRates with order data:', orderData);
       
       // Verificar que orderData tenga la estructura correcta
       if (!orderData || !orderData.address_from || !orderData.address_to || !orderData.parcels) {
-        console.error('Invalid order data structure:', orderData);
+        console.error('❌ [Calculate Rates] Invalid order data structure:', orderData);
         throw new Error('Invalid order data structure');
       }
       
-      console.log('Order data structure is valid');
+      console.log('✅ [Calculate Rates] Order data structure is valid');
       
-      // Obtener tarifas de EasyPost
-      console.log('Getting rates from EasyPost...');
-      const rates = await easypostService.getShippingRates(
+      // CRÍTICO: Log detallado de los datos del paquete que se enviarán a Shippo
+      console.log('📦 [Calculate Rates] Datos del paquete que se enviarán a Shippo:');
+      orderData.parcels.forEach((parcel, idx) => {
+        console.log(`   Paquete ${idx + 1}:`);
+        console.log(`      - Peso: ${parcel.weight || parcel.mass} ${parcel.massUnit || parcel.mass_unit || 'lb'}`);
+        console.log(`      - Dimensiones: ${parcel.length}" x ${parcel.width}" x ${parcel.height}"`);
+        console.log(`      - Distance Unit: ${parcel.distanceUnit || parcel.distance_unit || 'in'}`);
+        console.log(`      - Mass Unit: ${parcel.massUnit || parcel.mass_unit || 'lb'}`);
+        console.log(`      - Parcel completo:`, JSON.stringify(parcel, null, 2));
+      });
+      console.log('⚠️ [Calculate Rates] IMPORTANTE: Estos son los datos EXACTOS que Shippo usará para calcular las tarifas');
+      console.log('⚠️ [Calculate Rates] Si estos datos son diferentes a los reales, los precios serán incorrectos');
+      
+      // Obtener tarifas de Shippo
+      console.log('📦 [Calculate Rates] Getting rates from Shippo...');
+      const rates = await shippoService.getShippingRates(
         orderData.address_from,
         orderData.address_to,
-        orderData.parcels[0]
+        orderData.parcels
       );
       
-      console.log('Rates received from EasyPost:', rates);
+      console.log('📦 [Rates] Rates recibidos de Shippo (SIN FILTRAR):', rates);
+      console.log('📦 [Rates] Cantidad total de rates:', rates.length);
       
-      // Filtrar solo USPS, UPS, FedEx y DHL
-      const filteredRates = rates.filter(rate => {
-        const carrier = rate.carrier?.toLowerCase();
-        return carrier === 'usps' || 
-               carrier === 'ups' || 
-               carrier === 'upsdap' || 
-               carrier === 'fedex' || 
-               carrier === 'fedexdefault' ||
-               carrier === 'dhl' ||
-               carrier === 'dhlexpress';
+      // Log detallado de cada rate recibido
+      rates.forEach((rate, idx) => {
+        const rateId = rate.id || rate.objectId || rate.object_id;
+        const carrier = rate.provider || rate.carrier;
+        const service = rate.servicelevel?.name || rate.service;
+        const amount = rate.amount_local || rate.amount;
+        const amountOriginal = rate.amount;
+        const amountLocal = rate.amount_local;
+        console.log(`   Rate ${idx + 1}:`);
+        console.log(`      ID: ${rateId}`);
+        console.log(`      Carrier: ${carrier}`);
+        console.log(`      Service: ${service}`);
+        console.log(`      Amount (original): $${amountOriginal}`);
+        console.log(`      Amount (local): $${amountLocal}`);
+        console.log(`      Amount (usado): $${amount}`);
+        console.log(`      Rate completo:`, JSON.stringify(rate, null, 2));
       });
       
-      console.log('Filtered rates (USPS, UPS, FedEx, DHL only):', filteredRates);
-      setRates(filteredRates);
+      // Log los carriers/providers disponibles para debugging
+      const carriers = rates.map(rate => ({
+        carrier: rate.carrier,
+        provider: rate.provider,
+        service: rate.service || rate.servicelevel?.name
+      }));
+      console.log('Available carriers/providers:', carriers);
+      
+      // Filtrar solo USPS, UPS, FedEx y DHL
+      // Shippo puede usar 'provider' o 'carrier' en diferentes versiones de la API
+      // También puede tener diferentes formatos de nombres
+      const filteredRates = rates.filter(rate => {
+        const carrierName = (rate.provider || rate.carrier || rate.servicelevel?.token || '').toLowerCase();
+        const serviceName = (rate.service || rate.servicelevel?.name || '').toLowerCase();
+        
+        // Buscar en el nombre del carrier/provider y también en el servicio
+        const searchText = `${carrierName} ${serviceName}`;
+        
+        const isUSPS = searchText.includes('usps') || 
+                      searchText.includes('united states postal service') ||
+                      searchText.includes('united states post');
+        const isUPS = (searchText.includes('ups') || searchText.includes('united parcel')) && 
+                     !searchText.includes('usps');
+        const isFedEx = searchText.includes('fedex') || 
+                       searchText.includes('federal express') ||
+                       searchText.includes('fedex_');
+        const isDHL = searchText.includes('dhl') || 
+                     searchText.includes('dhl_') ||
+                     searchText.includes('dhlecommerce') ||
+                     searchText.includes('dhl ecommerce');
+        
+        return isUSPS || isUPS || isFedEx || isDHL;
+      });
+      
+      // Log detallado para debugging
+      console.log('🔍 Debugging carriers:');
+      rates.forEach((rate, idx) => {
+        const carrierName = rate.provider || rate.carrier || 'N/A';
+        const serviceName = rate.service || rate.servicelevel?.name || 'N/A';
+        console.log(`  Rate ${idx}: provider="${carrierName}", carrier="${rate.carrier}", service="${serviceName}"`);
+      });
+      
+      // Separar por carrier y limitar a 3 opciones por carrier
+      const groupedRates = {
+        usps: [],
+        ups: [],
+        fedex: [],
+        dhl: []
+      };
+      
+      filteredRates.forEach(rate => {
+        const carrierName = (rate.provider || rate.carrier || rate.servicelevel?.token || '').toLowerCase();
+        const serviceName = (rate.service || rate.servicelevel?.name || '').toLowerCase();
+        const searchText = `${carrierName} ${serviceName}`;
+        const amount = parseFloat(rate.amount || rate.amount_local || 0);
+        
+        if (searchText.includes('usps') || searchText.includes('united states postal service') || searchText.includes('united states post')) {
+          groupedRates.usps.push(rate);
+        } else if ((searchText.includes('ups') || searchText.includes('united parcel')) && !searchText.includes('usps')) {
+          groupedRates.ups.push(rate);
+        } else if (searchText.includes('fedex') || searchText.includes('federal express') || searchText.includes('fedex_')) {
+          groupedRates.fedex.push(rate);
+        } else if (searchText.includes('dhl') || searchText.includes('dhl_') || searchText.includes('dhlecommerce') || searchText.includes('dhl ecommerce')) {
+          groupedRates.dhl.push(rate);
+        }
+      });
+      
+      console.log('📊 Rates agrupados:', {
+        usps: groupedRates.usps.length,
+        ups: groupedRates.ups.length,
+        fedex: groupedRates.fedex.length,
+        dhl: groupedRates.dhl.length
+      });
+      
+      // Ordenar por precio (más barato primero) y limitar a 3 por carrier
+      const limitRates = (ratesArray, limit = 3) => {
+        return ratesArray
+          .sort((a, b) => {
+            const priceA = parseFloat(a.amount || a.amount_local || 0);
+            const priceB = parseFloat(b.amount || b.amount_local || 0);
+            return priceA - priceB;
+          })
+          .slice(0, limit);
+      };
+      
+      // Limitar a 3 opciones de cada carrier (las 3 más baratas)
+      const finalRates = [
+        ...limitRates(groupedRates.usps, 3), // Máximo 3 de USPS
+        ...limitRates(groupedRates.ups, 3),  // Máximo 3 de UPS
+        ...limitRates(groupedRates.fedex, 3), // Máximo 3 de FedEx
+        ...limitRates(groupedRates.dhl, 3)   // Máximo 3 de DHL
+      ];
+      
+      console.log('📦 [Rates] Filtered rates (máximo 3 de cada carrier):', finalRates);
+      console.log(`📦 [Rates] Found ${finalRates.length} rates: USPS(${limitRates(groupedRates.usps, 3).length}), UPS(${limitRates(groupedRates.ups, 3).length}), FedEx(${limitRates(groupedRates.fedex, 3).length}), DHL(${limitRates(groupedRates.dhl, 3).length})`);
+      
+      // Log detallado de los rates finales que se mostrarán al usuario
+      console.log('📦 [Rates] Rates FINALES que se mostrarán al usuario:');
+      finalRates.forEach((rate, idx) => {
+        const rateId = rate.id || rate.objectId || rate.object_id;
+        const carrier = rate.provider || rate.carrier;
+        const service = rate.servicelevel?.name || rate.service;
+        const amount = parseFloat(rate.amount || rate.amount_local || 0);
+        console.log(`   ${idx + 1}. ${carrier} - ${service}: $${amount.toFixed(2)}`);
+        console.log(`      Rate ID: ${rateId}`);
+        console.log(`      Amount original: $${rate.amount}`);
+        console.log(`      Amount local: $${rate.amount_local}`);
+        console.log(`      Amount usado: $${amount}`);
+      });
+      
+      setRates(finalRates);
     } catch (err) {
       console.error('Error calculating rates:', err);
-      setError('No se pudieron obtener las tarifas de envío. Por favor, verifica la configuración de EasyPost.');
+      setError('No se pudieron obtener las tarifas de envío. Por favor, verifica la configuración de Shippo.');
     } finally {
       setLoading(false);
     }
@@ -92,14 +230,54 @@ const ShippingCalculator = ({
 
   const handleConfirmShipping = () => {
     if (selectedRate) {
+      // Obtener el ID del rate para guardarlo directamente
+      const rateId = selectedRate.id || selectedRate.objectId || selectedRate.object_id;
+      
+      // CRÍTICO: Guardar el packageInfo exacto que se usó para calcular estos rates
+      // Esto asegura que cuando se cree el shipment, use las mismas dimensiones/peso
+      const parcel = orderData?.parcels?.[0];
+      const packageInfo = parcel ? {
+        weight: String(parcel.weight || parcel.mass || '0.22'),
+        weightUnit: parcel.massUnit || parcel.mass_unit || 'lb',
+        length: String(parcel.length || '8'),
+        width: String(parcel.width || '6'),
+        height: String(parcel.height || '4'),
+        distanceUnit: parcel.distanceUnit || parcel.distance_unit || 'in'
+      } : null;
+      
+      console.log('📦 [PackageInfo] Guardando packageInfo exacto usado para calcular rates:');
+      console.log('   Parcel original:', JSON.stringify(parcel, null, 2));
+      console.log('   PackageInfo extraído:', JSON.stringify(packageInfo, null, 2));
+      console.log('   ⚠️ Este packageInfo DEBE ser exactamente igual al usado cuando se cree el shipment');
+      
+      // Guardar TODA la información del rate para poder identificarlo después
       onShippingSelected({
-        rate: selectedRate,
+        rate: {
+          id: rateId,
+          objectId: selectedRate.objectId || selectedRate.id,
+          object_id: selectedRate.object_id || selectedRate.id,
+          provider: selectedRate.provider,
+          carrier: selectedRate.carrier,
+          service: selectedRate.service,
+          servicelevel: selectedRate.servicelevel,
+          amount: selectedRate.amount,
+          amount_local: selectedRate.amount_local,
+          // Guardar información única para identificación
+          carrier_token: selectedRate.carrier_token || selectedRate.provider,
+          servicelevel_token: selectedRate.servicelevel_token || selectedRate.servicelevel?.token,
+          // Guardar el rate completo como referencia
+          fullRate: selectedRate
+        },
+        // Guardar el rateId directamente para uso en el backend (prioridad alta)
+        rateId: rateId,
+        // CRÍTICO: Guardar packageInfo exacto usado para estos rates
+        packageInfo: packageInfo,
         trackingNumber: 'PENDING', // Se generará al comprar la etiqueta
         labelUrl: null,
         packingSlipUrl: null,
         eta: selectedRate.eta,
-        cost: selectedRate.amount,
-                  carrier: selectedRate.carrier || selectedRate.provider,
+        cost: selectedRate.amount_local || selectedRate.amount,
+        carrier: selectedRate.carrier || selectedRate.provider,
         serviceLevel: selectedRate.service || selectedRate.servicelevel?.name
       });
       onClose();
@@ -188,8 +366,8 @@ const ShippingCalculator = ({
         } else if (serviceLevel.includes('standard')) {
           minDays = 1; maxDays = 3; // 1-3 días
         }
-      } else if (provider === 'easypost') {
-        // EasyPost no especifica el carrier directamente, usar valores por defecto
+      } else if (provider === 'shippo') {
+        // Shippo - usar valores por defecto si no hay información específica
         minDays = 2; maxDays = 3;
       }
     }
@@ -386,7 +564,7 @@ const ShippingCalculator = ({
                             fontSize: { xs: '0.9rem', sm: '1rem', md: '1.1rem' }
                           }}
                         >
-                          {formatPrice(rate.amount)}
+                          {formatPrice(rate.amount_local || rate.amount)}
                         </Typography>
                       </Box>
 

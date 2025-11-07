@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tu pedido ha sido enviado - DeliZuKar</title>
+</head>
+<body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f4f4f4;">
+    
+    <!-- Header -->
+    <div style="background: linear-gradient(135deg, #c8626d 0%, #be8782 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
+        <h1 style="margin: 0; font-size: 28px; font-weight: bold;">DeliZuKar</h1>
+        <p style="margin: 10px 0 0 0; font-size: 16px; opacity: 0.9;">¡Tu pedido ha sido enviado!</p>
+    </div>
+    
+    <!-- Content -->
+    <div style="background: #ffffff; padding: 30px; border-radius: 0 0 10px 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+        
+        <h2 style="color: #c8626d; margin-top: 0;">Hola {{to_name}},</h2>
+        
+        <p style="font-size: 16px; color: #333;">
+            ¡Buenas noticias! Tu pedido <strong>#{{order_id}}</strong> ha sido enviado y está en camino.
+        </p>
+        
+        <!-- Tracking Information Box -->
+        <div style="background: #f8f9fa; padding: 25px; border-radius: 8px; margin: 25px 0; border-left: 4px solid #c8626d;">
+            <h3 style="color: #c8626d; margin-top: 0; font-size: 18px;">📦 Información de Seguimiento</h3>
+            
+            <p style="margin: 15px 0 10px 0; font-size: 14px; color: #666;">
+                <strong>Código de seguimiento:</strong>
+            </p>
+            <div style="background: white; padding: 12px; border-radius: 6px; margin-bottom: 15px; border: 1px solid #e0e0e0;">
+                <code style="font-size: 16px; font-weight: bold; color: #c8626d; letter-spacing: 1px;">{{tracking_code}}</code>
+            </div>
+            
+            <p style="margin: 10px 0; font-size: 14px; color: #666;">
+                <strong>Transportista:</strong> {{carrier_name}}<br>
+                <strong>Servicio:</strong> {{service_name}}
+            </p>
+            
+            <a href="{{tracking_url}}" 
+               style="display: inline-block; background-color: #c8626d; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; margin-top: 10px;">
+                🔍 Rastrear mi paquete
+            </a>
+        </div>
+        
+        <!-- Order Summary -->
+        <div style="background: #fff9f0; padding: 20px; border-radius: 8px; margin: 25px 0; border: 1px solid #ffe0b2;">
+            <h3 style="color: #c8626d; margin-top: 0; font-size: 16px;">📋 Resumen del Pedido</h3>
+            <p style="margin: 5px 0; font-size: 14px; color: #666;">
+                <strong>Número de pedido:</strong> #{{order_id}}
+            </p>
+            <p style="margin: 5px 0; font-size: 14px; color: #666;">
+                <strong>Productos ({{products_count}}):</strong>
+            </p>
+            <div style="background: white; padding: 12px; border-radius: 6px; margin: 10px 0; font-size: 13px; color: #666; white-space: pre-line;">{{products_list}}</div>
+            
+            <div style="border-top: 1px solid #e0e0e0; margin-top: 15px; padding-top: 15px;">
+                <div style="display: flex; justify-content: space-between; margin: 5px 0; font-size: 14px;">
+                    <span style="color: #666;">Subtotal:</span>
+                    <span style="color: #333; font-weight: bold;">{{subtotal}}</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin: 5px 0; font-size: 14px;">
+                    <span style="color: #666;">Envío ({{carrier_name}}):</span>
+                    <span style="color: #333; font-weight: bold;">{{shipping_cost}}</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin: 10px 0; padding-top: 10px; border-top: 2px solid #c8626d; font-size: 16px;">
+                    <span style="color: #c8626d; font-weight: bold;">Total:</span>
+                    <span style="color: #c8626d; font-weight: bold;">{{order_total}}</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Delivery Address -->
+        <div style="background: #e8f4fd; padding: 20px; border-radius: 8px; margin: 25px 0; border: 1px solid #b3d9ff;">
+            <h3 style="color: #c8626d; margin-top: 0; font-size: 16px;">📍 Dirección de Entrega</h3>
+            <p style="margin: 10px 0; font-size: 14px; color: #666; white-space: pre-line; line-height: 1.8;">{{delivery_address}}</p>
+        </div>
+        
+        <!-- Download Label Button -->
+        <div style="text-align: center; margin: 25px 0;">
+            <a href="{{label_url}}" 
+               style="display: inline-block; background-color: #ffffff; color: #c8626d; padding: 12px 24px; text-decoration: none; border-radius: 6px; border: 2px solid #c8626d; font-weight: bold;">
+                📄 Descargar Etiqueta de Envío (PDF)
+            </a>
+        </div>
+        
+        <!-- Help Section -->
+        <div style="background: #f0f0f0; padding: 20px; border-radius: 8px; margin: 25px 0;">
+            <p style="margin: 0; color: #666; font-size: 14px;">
+                <strong>¿Necesitas ayuda?</strong><br>
+                Si tienes alguna pregunta sobre tu pedido, no dudes en contactarnos. Estamos aquí para ayudarte.
+            </p>
+        </div>
+        
+        <!-- Footer -->
+        <div style="text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #e0e0e0;">
+            <p style="color: #666; font-size: 14px; margin: 10px 0;">
+                Gracias por confiar en DeliZuKar
+            </p>
+            <p style="color: #999; font-size: 12px; margin: 5px 0;">
+                Este es un correo automático, por favor no respondas a este mensaje.
+            </p>
+        </div>
+        
+    </div>
+    
+</body>
+</html>
+

@@ -25,17 +25,44 @@ const PayPalButtonContainer = ({
 
   if (isRejected) {
     console.error('❌ [PayPal] SDK Rejected - PayPal no está disponible');
+    console.error('❌ [PayPal] Verifica:');
+    console.error('   1. Client ID configurado correctamente');
+    console.error('   2. Client ID corresponde al environment (sandbox/production)');
+    console.error('   3. Conexión a internet activa');
+    console.error('   4. No hay bloqueadores de anuncios o extensiones que interfieran');
+    
     return (
       <Box sx={{ textAlign: 'center', py: 4 }}>
         <Alert severity="error" sx={{ mb: 2 }}>
           PayPal is not available. Please check your internet connection and try again.
         </Alert>
+        <Alert severity="info" sx={{ mb: 2, textAlign: 'left' }}>
+          <Typography variant="body2" sx={{ mb: 1 }}>
+            <strong>Posibles causas:</strong>
+          </Typography>
+          <Typography variant="body2" component="ul" sx={{ pl: 2, mb: 0 }}>
+            <li>Client ID no válido o no coincide con el environment (sandbox/production)</li>
+            <li>Problema de conexión a internet</li>
+            <li>Bloqueador de anuncios o extensión del navegador</li>
+            <li>Firewall o proxy bloqueando PayPal</li>
+          </Typography>
+        </Alert>
         <Button 
           variant="contained" 
           onClick={() => window.location.reload()}
-          sx={{ backgroundColor: '#c8626d' }}
+          sx={{ backgroundColor: '#c8626d', mr: 2 }}
         >
           Refresh Page
+        </Button>
+        <Button 
+          variant="outlined" 
+          onClick={() => {
+            console.log('🔍 [PayPal] Client ID:', process.env.REACT_APP_PAYPAL_CLIENT_ID);
+            console.log('🔍 [PayPal] Environment:', process.env.REACT_APP_PAYPAL_ENVIRONMENT);
+          }}
+          sx={{ borderColor: '#c8626d', color: '#c8626d' }}
+        >
+          Debug Info
         </Button>
       </Box>
     );
@@ -222,6 +249,8 @@ const PayPalSimple = ({
     "data-sdk-integration-source": "buttonfactory",
     "buyer-country": "US",
     "locale": "en_US",
+    // Agregar debug en desarrollo para ver errores
+    debug: process.env.NODE_ENV === 'development',
   };
 
   // En modo production, agregar configuración adicional si es necesario
@@ -233,7 +262,10 @@ const PayPalSimple = ({
     console.log('🧪 Configurando PayPal en modo SANDBOX');
   }
 
-  console.log('📦 PayPal Options:', paypalOptions);
+  console.log('📦 PayPal Options:', {
+    ...paypalOptions,
+    "client-id": clientId ? clientId.substring(0, 20) + '...' : 'NOT SET'
+  });
 
   return (
     <PayPalScriptProvider 
@@ -244,7 +276,7 @@ const PayPalSimple = ({
           Pay with PayPal
         </Typography>
         <Typography variant="body2" sx={{ mb: 3, color: 'text.secondary' }}>
-          Secure payment powered by PayPal
+          Secure payment powered by PayPal - Accepts all major credit/debit cards
         </Typography>
         
         <PayPalButtonContainer

@@ -13,6 +13,7 @@ import { useShipping } from '../hooks/useShipping';
 import { db, auth } from '../firebase/config';
 import { collection, addDoc, query, where, getDocs, updateDoc, doc } from 'firebase/firestore';
 import { onAuthStateChanged } from 'firebase/auth';
+import emailjs from '@emailjs/browser';
 
 const Checkout = () => {
   const t = (k, fallback) => (typeof fallback === 'string' ? fallback : (typeof k === 'string' ? k : ''));
@@ -233,7 +234,7 @@ const Checkout = () => {
     }
   };
 
-  // Crear datos de envío para EasyPost
+  // Crear datos de envío para Shippo
   const createShippingData = () => {
     const fromAddress = {
       name: 'Delizukar',
@@ -784,7 +785,7 @@ const Checkout = () => {
                                 })}
                               </Typography>
                               <Typography variant="body2" sx={{ color: '#666', fontSize: '0.85rem', mb: 0.5 }}>
-                                🚚 Estimated transit: {deliveryInfo.transitDays} days
+                                🚚 Estimated transit: {typeof deliveryInfo.transitDays === 'string' ? deliveryInfo.transitDays : '2-3'} days
                               </Typography>
                               <Typography variant="body2" sx={{ color: '#c8626d', fontWeight: 600, fontSize: '0.85rem' }}>
                                 📅 Estimated delivery: {deliveryInfo.deliveryDate.toLocaleDateString('en-US', { 
@@ -908,10 +909,23 @@ const Checkout = () => {
                             console.log('💰 [Checkout] Payment amount saved:', paymentDetails.amount);
                           }
                           
-                          // Guardar directamente en Firestore - SÚPER SIMPLE
+                          // CRÍTICO: Extraer packageInfo del shippingInfo si existe
+                          // Esto asegura que se use el mismo peso/dimensiones que se usaron para calcular los rates
+                          const packageInfo = shippingInfo?.packageInfo ? {
+                            weight: shippingInfo.packageInfo.weight || shippingInfo.packageInfo.mass || '0.22',
+                            weightUnit: shippingInfo.packageInfo.weightUnit || shippingInfo.packageInfo.massUnit || 'lb',
+                            length: shippingInfo.packageInfo.length || '8',
+                            width: shippingInfo.packageInfo.width || '6',
+                            height: shippingInfo.packageInfo.height || '4',
+                            distanceUnit: shippingInfo.packageInfo.distanceUnit || 'in'
+                          } : null;
+                          
+                          console.log('📦 [Checkout] PackageInfo a guardar en orden:', packageInfo);
+                          
+                          // Guardar orden usando el endpoint del backend que establece status: 'pending'
                           const orderData = {
-                            sessionId: paymentDetails.paymentId,
-                            paymentIntentId: paymentDetails.paymentId,
+                            sessionId: paymentDetails.paymentId || paymentDetails.id,
+                            paymentIntentId: paymentDetails.paymentId || paymentDetails.id,
                             customerInfo: {
                               firstName: formData.firstName,
                               lastName: formData.lastName,
@@ -929,19 +943,169 @@ const Checkout = () => {
                             total: cartTotal,
                             paymentStatus: 'paid',
                             shippingInfo: shippingInfo,
-                            createdAt: new Date(),
-                            updatedAt: new Date()
+                            // CRÍTICO: Guardar packageInfo exacto usado para calcular rates
+                            packageInfo: packageInfo,
+                            createdAt: new Date().toISOString(),
+                            updatedAt: new Date().toISOString()
                           };
                           
-                          addDoc(collection(db, 'orders'), orderData)
-                            .then(docRef => {
-                              console.log('✅ Orden guardada en Firestore:', docRef.id);
-                              localStorage.setItem('lastOrderId', docRef.id);
-                            })
-                            .catch(error => {
-                              console.error('❌ Error guardando orden:', error);
-                              alert('Error guardando orden: ' + error.message);
+                          // Usar el endpoint del backend que establece status: 'pending' correctamente
+                          const baseUrl = process.env.NODE_ENV === 'production' ? window.location.origin : '';
+                          console.log('📤 [Checkout] Enviando orden al backend:', {
+                            url: `${baseUrl}/api/create-order`,
+                            orderData: {
+                              ...orderData,
+                              paymentStatus: orderData.paymentStatus,
+                              total: orderData.total,
+                              cartItemsCount: orderData.cartItems?.length
+                            }
+                          });
+                          
+                          try {
+                            const response = await fetch(`${baseUrl}/api/create-order`, {
+                              method: 'POST',
+                              headers: {
+                                'Content-Type': 'application/json',
+                              },
+                              body: JSON.stringify(orderData)
                             });
+                            
+                            console.log('📥 [Checkout] Response status:', response.status);
+                            
+                            if (!response.ok) {
+                              const errorData = await response.json();
+                              console.error('❌ [Checkout] Error del servidor:', errorData);
+                              throw new Error(errorData.error || 'Error del servidor');
+                            }
+                            
+                            const result = await response.json();
+                            console.log('✅ [Checkout] Orden guardada en Firestore:', result);
+                            console.log('✅ [Checkout] Order ID:', result.orderId);
+                            console.log('✅ [Checkout] Payment Status:', result.order?.paymentStatus);
+                            console.log('✅ [Checkout] Status:', result.order?.status);
+                            
+                            if (result.orderId) {
+                              localStorage.setItem('lastOrderId', result.orderId);
+                              console.log('💾 [Checkout] Order ID guardado en localStorage:', result.orderId);
+                              
+                              // Enviar email de confirmación de nuevo pedido a luisuf@gmail.com
+                              try {
+                                // Inicializar EmailJS si no está inicializado
+                                if (!emailjs.init) {
+                                  emailjs.init({
+                                    publicKey: 'TbgeNq-PEAHvSqjzR'
+                                  });
+                                }
+                                
+                                const emailData = {
+                                  to_email: 'luisuf@gmail.com',
+                                  to_name: 'Luis',
+                                  order_id: result.orderId,
+                                  customer_name: `${formData.firstName} ${formData.lastName}`,
+                                  customer_email: formData.email,
+                                  customer_phone: formData.phone || 'N/A',
+                                  customer_address: `${formData.address}, ${formData.city}, ${formData.state} ${formData.zipCode}`,
+                                  order_total: `$${cartTotal.toFixed(2)}`,
+                                  shipping_cost: shippingInfo ? `$${parseFloat(shippingInfo.cost || 0).toFixed(2)}` : '$0.00',
+                                  subtotal: `$${(cartTotal - (shippingInfo ? parseFloat(shippingInfo.cost || 0) : 0)).toFixed(2)}`,
+                                  items_count: cart.length,
+                                  items_list: cart.map(item => `${item.quantity}x ${item.name} - $${parseFloat(item.price).toFixed(2)}`).join('\n'),
+                                  payment_method: 'PayPal',
+                                  payment_id: paymentDetails.id || paymentDetails.paymentId || 'N/A',
+                                  order_date: new Date().toLocaleString('es-ES', { 
+                                    year: 'numeric', 
+                                    month: 'long', 
+                                    day: 'numeric', 
+                                    hour: '2-digit', 
+                                    minute: '2-digit' 
+                                  }),
+                                  subject: `Nuevo Pedido #${result.orderId} - DeliZuKar`,
+                                  message: `Se ha recibido un nuevo pedido:\n\nID: ${result.orderId}\nCliente: ${formData.firstName} ${formData.lastName}\nEmail: ${formData.email}\nTotal: $${cartTotal.toFixed(2)}`
+                                };
+                                
+                                await emailjs.send(
+                                  'service_7biylnb',
+                                  'template_poovxvk',
+                                  emailData
+                                );
+                                
+                                console.log('✅ [Checkout] Email de confirmación de nuevo pedido enviado a luisuf@gmail.com');
+                              } catch (emailError) {
+                                console.error('❌ [Checkout] Error enviando email de confirmación:', emailError);
+                                // No bloquear el flujo si falla el email
+                              }
+                            } else {
+                              console.warn('⚠️ [Checkout] No se recibió orderId en la respuesta');
+                            }
+                          } catch (error) {
+                            console.error('❌ [Checkout] Error guardando orden:', error);
+                            console.error('❌ [Checkout] Error details:', {
+                              message: error.message,
+                              stack: error.stack
+                            });
+                            
+                            // Fallback: guardar directamente si el endpoint falla
+                            try {
+                              console.log('🔄 [Checkout] Intentando guardar directamente en Firestore (fallback)...');
+                              const docRef = await addDoc(collection(db, 'orders'), {
+                                ...orderData,
+                                status: 'pending', // Asegurar status pending incluso en fallback
+                                paymentStatus: 'paid' // Asegurar paymentStatus paid
+                              });
+                              console.log('✅ [Checkout] Orden guardada directamente (fallback):', docRef.id);
+                              localStorage.setItem('lastOrderId', docRef.id);
+                              
+                              // Enviar email de confirmación de nuevo pedido a luisuf@gmail.com
+                              try {
+                                // Inicializar EmailJS si no está inicializado
+                                if (!emailjs.init) {
+                                  emailjs.init({
+                                    publicKey: 'TbgeNq-PEAHvSqjzR'
+                                  });
+                                }
+                                
+                                const emailData = {
+                                  to_email: 'luisuf@gmail.com',
+                                  to_name: 'Luis',
+                                  order_id: docRef.id,
+                                  customer_name: `${formData.firstName} ${formData.lastName}`,
+                                  customer_email: formData.email,
+                                  customer_phone: formData.phone || 'N/A',
+                                  customer_address: `${formData.address}, ${formData.city}, ${formData.state} ${formData.zipCode}`,
+                                  order_total: `$${cartTotal.toFixed(2)}`,
+                                  shipping_cost: shippingInfo ? `$${parseFloat(shippingInfo.cost || 0).toFixed(2)}` : '$0.00',
+                                  subtotal: `$${(cartTotal - (shippingInfo ? parseFloat(shippingInfo.cost || 0) : 0)).toFixed(2)}`,
+                                  items_count: cart.length,
+                                  items_list: cart.map(item => `${item.quantity}x ${item.name} - $${parseFloat(item.price).toFixed(2)}`).join('\n'),
+                                  payment_method: 'PayPal',
+                                  payment_id: paymentDetails.id || paymentDetails.paymentId || 'N/A',
+                                  order_date: new Date().toLocaleString('es-ES', { 
+                                    year: 'numeric', 
+                                    month: 'long', 
+                                    day: 'numeric', 
+                                    hour: '2-digit', 
+                                    minute: '2-digit' 
+                                  }),
+                                  subject: `Nuevo Pedido #${docRef.id} - DeliZuKar`,
+                                  message: `Se ha recibido un nuevo pedido:\n\nID: ${docRef.id}\nCliente: ${formData.firstName} ${formData.lastName}\nEmail: ${formData.email}\nTotal: $${cartTotal.toFixed(2)}`
+                                };
+                                
+                                await emailjs.send(
+                                  'service_7biylnb',
+                                  'template_poovxvk',
+                                  emailData
+                                );
+                                
+                                console.log('✅ [Checkout] Email de confirmación de nuevo pedido enviado a luisuf@gmail.com (fallback)');
+                              } catch (emailError) {
+                                console.error('❌ [Checkout] Error enviando email de confirmación (fallback):', emailError);
+                                // No bloquear el flujo si falla el email
+                              }
+                            } catch (fallbackError) {
+                              console.error('❌ [Checkout] Error en fallback:', fallbackError);
+                              alert('Error guardando orden: ' + fallbackError.message);
+                            }
+                          }
                           
                           clearCart();
                           
