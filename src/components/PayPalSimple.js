@@ -19,17 +19,28 @@ const PayPalButtonContainer = ({
   shippingAddress,
   shippingInfo
 }) => {
-  const [{ isResolved, isRejected, isPending }] = usePayPalScriptReducer();
+  const [{ isResolved, isRejected, isPending, options }] = usePayPalScriptReducer();
 
-  console.log('🔄 [PayPal] SDK State:', { isResolved, isRejected, isPending });
+  console.log('🔄 [PayPal] SDK State:', { 
+    isResolved, 
+    isRejected, 
+    isPending,
+    clientId: options?.["client-id"] ? options["client-id"].substring(0, 20) + '...' : 'NOT SET'
+  });
 
+  // Log adicional cuando se rechaza
   if (isRejected) {
     console.error('❌ [PayPal] SDK Rejected - PayPal no está disponible');
+    console.error('❌ [PayPal] Client ID usado:', options?.["client-id"] ? options["client-id"].substring(0, 30) + '...' : 'NOT SET');
+    console.error('❌ [PayPal] Environment variable:', process.env.REACT_APP_PAYPAL_ENVIRONMENT || 'NOT SET');
+    console.error('❌ [PayPal] NODE_ENV:', process.env.NODE_ENV);
     console.error('❌ [PayPal] Verifica:');
-    console.error('   1. Client ID configurado correctamente');
+    console.error('   1. Client ID configurado correctamente en Railway ANTES del build');
     console.error('   2. Client ID corresponde al environment (sandbox/production)');
-    console.error('   3. Conexión a internet activa');
-    console.error('   4. No hay bloqueadores de anuncios o extensiones que interfieran');
+    console.error('   3. Las variables REACT_APP_* deben estar configuradas ANTES de hacer build en Railway');
+    console.error('   4. Si cambiaste las variables, debes hacer un REDEPLOY completo en Railway');
+    console.error('   5. Conexión a internet activa');
+    console.error('   6. No hay bloqueadores de anuncios o extensiones que interfieran');
     
     return (
       <Box sx={{ textAlign: 'center', py: 4 }}>
@@ -213,14 +224,28 @@ const PayPalSimple = ({
   const clientId = process.env.REACT_APP_PAYPAL_CLIENT_ID;
 
   // Verificar configuración
-  if (!clientId || clientId === 'sb') {
+  if (!clientId || clientId === 'sb' || clientId === 'TU_PAYPAL_CLIENT_ID_LIVE') {
+    console.error('❌ [PayPal] Client ID no configurado o inválido:', clientId);
+    console.error('❌ [PayPal] REACT_APP_PAYPAL_CLIENT_ID:', process.env.REACT_APP_PAYPAL_CLIENT_ID);
+    console.error('❌ [PayPal] Todas las variables REACT_APP_*:', {
+      REACT_APP_PAYPAL_CLIENT_ID: process.env.REACT_APP_PAYPAL_CLIENT_ID ? 'SET' : 'NOT SET',
+      REACT_APP_PAYPAL_ENVIRONMENT: process.env.REACT_APP_PAYPAL_ENVIRONMENT || 'NOT SET',
+      NODE_ENV: process.env.NODE_ENV
+    });
+    
     return (
       <Box sx={{ textAlign: 'center', py: 4 }}>
         <Alert severity="error" sx={{ mb: 2 }}>
           PayPal Client ID not configured
         </Alert>
-        <Typography variant="body2" color="text.secondary">
-          Please configure REACT_APP_PAYPAL_CLIENT_ID in your .env.local file
+        <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+          Please configure REACT_APP_PAYPAL_CLIENT_ID in Railway environment variables
+        </Typography>
+        <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.75rem' }}>
+          Current value: {clientId || 'NOT SET'}
+        </Typography>
+        <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.75rem', mt: 1 }}>
+          Note: In Railway, REACT_APP_* variables must be set before building the app
         </Typography>
       </Box>
     );
@@ -229,15 +254,45 @@ const PayPalSimple = ({
   // Obtener el environment de las variables de entorno
   const environment = process.env.REACT_APP_PAYPAL_ENVIRONMENT || 'sandbox';
   
-  console.log('🔧 PayPal Configuration:', {
+  console.log('🔧 [PayPal] Configuration:', {
     clientId: clientId ? clientId.substring(0, 20) + '...' : 'NOT SET',
     environment: environment,
     currency: currency,
     isProduction: environment === 'production',
-    fullClientId: clientId
+    fullClientId: clientId,
+    clientIdLength: clientId ? clientId.length : 0
   });
+  
+  // Verificar que el Client ID tenga el formato correcto
+  if (clientId) {
+    const startsWithA = clientId.startsWith('A');
+    const startsWithB = clientId.startsWith('B');
+    const startsWithSb = clientId.startsWith('sb');
+    
+    console.log('🔍 [PayPal] Client ID format check:', {
+      startsWithA,
+      startsWithB,
+      startsWithSb,
+      firstChars: clientId.substring(0, 5),
+      environment: environment
+    });
+    
+    // Advertencia si el formato no es el esperado
+    if (!startsWithA && !startsWithSb && !startsWithB) {
+      console.warn('⚠️ [PayPal] Client ID no tiene el formato esperado (debe empezar con "A", "B" o "sb")');
+    }
+    
+    // Advertencia si es sandbox pero el Client ID parece de producción
+    if (environment === 'sandbox' && startsWithB && !startsWithSb) {
+      console.warn('⚠️ [PayPal] ADVERTENCIA: Client ID parece ser de PRODUCCIÓN pero environment está en SANDBOX');
+      console.warn('⚠️ [PayPal] Los Client IDs de sandbox normalmente empiezan con "sb" o "A"');
+      console.warn('⚠️ [PayPal] Si este es un Client ID de producción, cambia REACT_APP_PAYPAL_ENVIRONMENT a "production"');
+    }
+  }
 
   // Configurar opciones del SDK de PayPal
+  // NOTA: PayPal SDK detecta automáticamente el environment basándose en el Client ID
+  // Si el Client ID es de sandbox, usa sandbox automáticamente, sin importar la variable
   const paypalOptions = {
     "client-id": clientId,
     currency: currency,
@@ -249,8 +304,8 @@ const PayPalSimple = ({
     "data-sdk-integration-source": "buttonfactory",
     "buyer-country": "US",
     "locale": "en_US",
-    // Agregar debug en desarrollo para ver errores
-    debug: process.env.NODE_ENV === 'development',
+    // Siempre habilitar debug para ver errores en producción también
+    debug: true,
   };
 
   // En modo production, agregar configuración adicional si es necesario
