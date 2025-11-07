@@ -63,9 +63,15 @@ const OrdersManager = ({ open, onClose, initialTab = 'all' }) => {
 
   // Inicializar EmailJS
   useEffect(() => {
-    emailjs.init({
-      publicKey: 'TbgeNq-PEAHvSqjzR'
-    });
+    const publicKey = process.env.REACT_APP_EMAILJS_PUBLIC_KEY;
+    if (publicKey) {
+      emailjs.init({
+        publicKey: publicKey
+      });
+      console.log('✅ EmailJS inicializado con publicKey');
+    } else {
+      console.warn('⚠️ REACT_APP_EMAILJS_PUBLIC_KEY no está configurada');
+    }
   }, []);
 
   const loadOrders = async () => {
@@ -148,9 +154,17 @@ const OrdersManager = ({ open, onClose, initialTab = 'all' }) => {
 
       if (response.ok && result.success && result.emailData) {
         // 2. Enviar email con EmailJS
+        const serviceId = process.env.REACT_APP_EMAILJS_SERVICE_ID || 'service_7biylnb';
+        const templateId = process.env.REACT_APP_EMAILJS_TEMPLATE_ID || 'template_poovxvk';
+        const publicKey = process.env.REACT_APP_EMAILJS_PUBLIC_KEY;
+        
+        if (!publicKey) {
+          throw new Error('REACT_APP_EMAILJS_PUBLIC_KEY no está configurada');
+        }
+        
         await emailjs.send(
-          'service_7biylnb',
-          'template_poovxvk',
+          serviceId,
+          templateId,
           {
             to_email: result.emailData.to_email,
             to_name: result.emailData.to_name,
@@ -158,6 +172,9 @@ const OrdersManager = ({ open, onClose, initialTab = 'all' }) => {
             tracking_code: result.emailData.tracking_code,
             tracking_url: result.emailData.tracking_url,
             label_url: result.emailData.label_url
+          },
+          {
+            publicKey: publicKey
           }
         );
         
@@ -360,14 +377,27 @@ const OrdersManager = ({ open, onClose, initialTab = 'all' }) => {
         // Enviar email con EmailJS si hay datos de email
         if (result.data.emailData) {
           try {
-            await emailjs.send(
-              'service_7biylnb',
-              'template_poovxvk',
-              result.data.emailData
-            );
-            console.log('✅ Email enviado al cliente');
+            const serviceId = process.env.REACT_APP_EMAILJS_SERVICE_ID || 'service_7biylnb';
+            const templateId = process.env.REACT_APP_EMAILJS_TEMPLATE_ID || 'template_poovxvk';
+            const publicKey = process.env.REACT_APP_EMAILJS_PUBLIC_KEY;
+            
+            if (!publicKey) {
+              console.error('❌ REACT_APP_EMAILJS_PUBLIC_KEY no está configurada');
+            } else {
+              await emailjs.send(
+                serviceId,
+                templateId,
+                result.data.emailData,
+                {
+                  publicKey: publicKey
+                }
+              );
+              console.log('✅ Email enviado al cliente');
+            }
           } catch (emailError) {
             console.error('❌ Error enviando email:', emailError);
+            console.error('   Status:', emailError.status);
+            console.error('   Text:', emailError.text);
           }
         }
         

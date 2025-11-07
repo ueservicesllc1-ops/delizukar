@@ -198,22 +198,97 @@ const Checkout = () => {
     // Fecha de envío (próximo lunes)
     const shippingDate = new Date(today.getTime() + (daysToMonday * 24 * 60 * 60 * 1000));
     
-    // Días de tránsito del proveedor (usando el rango medio)
-    let transitDays = 3; // Default
+    // Días de tránsito del proveedor (usando el rango)
+    let minTransitDays = 2;
+    let maxTransitDays = 3;
+    
     if (shippingInfo?.transitDays) {
-      const transitRange = shippingInfo.transitDays.split('-');
-      if (transitRange.length === 2) {
-        transitDays = Math.ceil((parseInt(transitRange[0]) + parseInt(transitRange[1])) / 2);
+      const transitDaysValue = shippingInfo.transitDays;
+      const transitDaysStr = String(transitDaysValue);
+      const parsedNumber = parseInt(transitDaysStr);
+      
+      console.log('🔍 [Checkout] transitDays recibido:', transitDaysValue, 'tipo:', typeof transitDaysValue);
+      
+      // Verificar si está en formato correcto "2-3" o "1"
+      // Si es "23" (sin guión), es un error - debería ser "2-3"
+      const hasHyphen = transitDaysStr.includes('-');
+      const hasValidFormat = hasHyphen || (parsedNumber <= 10 && parsedNumber > 0 && parsedNumber < 10);
+      
+      // Si NO tiene guión Y es un número de 2 dígitos (ej: 23, 12, etc), es un error
+      // Debería ser "2-3" no "23"
+      const isTwoDigitNumber = !hasHyphen && parsedNumber >= 10 && parsedNumber <= 99;
+      
+      console.log('🔍 [Checkout] Análisis de transitDays:');
+      console.log('   Valor:', transitDaysValue);
+      console.log('   String:', transitDaysStr);
+      console.log('   Tiene guión:', hasHyphen);
+      console.log('   Número parseado:', parsedNumber);
+      console.log('   Es número de 2 dígitos sin guión:', isTwoDigitNumber);
+      
+      // Si NO tiene formato válido, es un número mayor a 10, o es un número de 2 dígitos sin guión, calcular el rango
+      if (!hasValidFormat || parsedNumber > 10 || typeof transitDaysValue === 'number' || isTwoDigitNumber) {
+        console.log('🔍 [Checkout] transitDays es un número inválido (' + transitDaysValue + '), calculando rango basado en carrier/service');
+        // Es un número, calcular el rango basado en el carrier y service
+        const carrier = (shippingInfo.carrier || shippingInfo.rate?.carrier || shippingInfo.rate?.provider || '').toLowerCase();
+        const serviceLevel = (shippingInfo.serviceLevel || shippingInfo.service || shippingInfo.rate?.service || shippingInfo.rate?.servicelevel?.name || '').toLowerCase();
+        
+        if (carrier === 'usps') {
+          if (serviceLevel.includes('ground') || serviceLevel.includes('advantage')) {
+            minTransitDays = 2; maxTransitDays = 3;
+          } else if (serviceLevel.includes('priority')) {
+            minTransitDays = 1; maxTransitDays = 2;
+          } else if (serviceLevel.includes('express')) {
+            minTransitDays = 1; maxTransitDays = 1;
+          }
+        } else if (carrier === 'ups') {
+          if (serviceLevel.includes('ground')) {
+            minTransitDays = 1; maxTransitDays = 5;
+          } else if (serviceLevel.includes('standard')) {
+            minTransitDays = 1; maxTransitDays = 3;
+          }
+        } else if (carrier === 'fedex' || carrier === 'fedexdefault') {
+          if (serviceLevel.includes('smart') || serviceLevel.includes('post')) {
+            minTransitDays = 2; maxTransitDays = 3;
+          } else if (serviceLevel.includes('ground')) {
+            minTransitDays = 1; maxTransitDays = 5;
+          } else if (serviceLevel.includes('standard')) {
+            minTransitDays = 1; maxTransitDays = 3;
+          }
+        }
+        
+        console.log('🔍 [Checkout] Rango calculado:', minTransitDays, '-', maxTransitDays);
+      } else {
+        console.log('🔍 [Checkout] transitDays tiene formato válido, parseando:', transitDaysStr);
+        // Es un string en formato "2-3" o "1"
+        const transitRange = transitDaysStr.split('-');
+        if (transitRange.length === 2) {
+          minTransitDays = parseInt(transitRange[0]);
+          maxTransitDays = parseInt(transitRange[1]);
+        } else if (transitRange.length === 1) {
+          minTransitDays = parseInt(transitRange[0]);
+          maxTransitDays = parseInt(transitRange[0]);
+        }
+        console.log('🔍 [Checkout] Rango parseado:', minTransitDays, '-', maxTransitDays);
       }
+    } else {
+      console.log('🔍 [Checkout] No hay transitDays en shippingInfo, usando valores por defecto (2-3)');
     }
     
-    // Fecha estimada de entrega
-    const deliveryDate = new Date(shippingDate.getTime() + (transitDays * 24 * 60 * 60 * 1000));
+    // Calcular fecha de entrega usando el promedio de días
+    const avgTransitDays = Math.ceil((minTransitDays + maxTransitDays) / 2);
+    const deliveryDate = new Date(shippingDate.getTime() + (avgTransitDays * 24 * 60 * 60 * 1000));
+    
+    // Formatear transitDays para mostrar
+    const formattedTransitDays = minTransitDays === maxTransitDays 
+      ? `${minTransitDays}` 
+      : `${minTransitDays}-${maxTransitDays}`;
+    
+    console.log('🔍 [Checkout] formattedTransitDays final:', formattedTransitDays);
     
     return {
       shippingDate,
       deliveryDate,
-      transitDays: shippingInfo?.transitDays || '2-3',
+      transitDays: formattedTransitDays,
       daysToMonday
     };
   };
@@ -785,7 +860,7 @@ const Checkout = () => {
                                 })}
                               </Typography>
                               <Typography variant="body2" sx={{ color: '#666', fontSize: '0.85rem', mb: 0.5 }}>
-                                🚚 Estimated transit: {typeof deliveryInfo.transitDays === 'string' ? deliveryInfo.transitDays : '2-3'} days
+                                🚚 Estimated transit: {deliveryInfo.transitDays} days
                               </Typography>
                               <Typography variant="body2" sx={{ color: '#c8626d', fontWeight: 600, fontSize: '0.85rem' }}>
                                 📅 Estimated delivery: {deliveryInfo.deliveryDate.toLocaleDateString('en-US', { 

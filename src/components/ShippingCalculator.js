@@ -250,36 +250,92 @@ const ShippingCalculator = ({
       console.log('   PackageInfo extraído:', JSON.stringify(packageInfo, null, 2));
       console.log('   ⚠️ Este packageInfo DEBE ser exactamente igual al usado cuando se cree el shipment');
       
-      // Guardar TODA la información del rate para poder identificarlo después
-      onShippingSelected({
-        rate: {
-          id: rateId,
-          objectId: selectedRate.objectId || selectedRate.id,
-          object_id: selectedRate.object_id || selectedRate.id,
-          provider: selectedRate.provider,
-          carrier: selectedRate.carrier,
-          service: selectedRate.service,
-          servicelevel: selectedRate.servicelevel,
-          amount: selectedRate.amount,
-          amount_local: selectedRate.amount_local,
-          // Guardar información única para identificación
-          carrier_token: selectedRate.carrier_token || selectedRate.provider,
-          servicelevel_token: selectedRate.servicelevel_token || selectedRate.servicelevel?.token,
-          // Guardar el rate completo como referencia
-          fullRate: selectedRate
-        },
-        // Guardar el rateId directamente para uso en el backend (prioridad alta)
-        rateId: rateId,
-        // CRÍTICO: Guardar packageInfo exacto usado para estos rates
-        packageInfo: packageInfo,
-        trackingNumber: 'PENDING', // Se generará al comprar la etiqueta
-        labelUrl: null,
-        packingSlipUrl: null,
-        eta: selectedRate.eta,
-        cost: selectedRate.amount_local || selectedRate.amount,
-        carrier: selectedRate.carrier || selectedRate.provider,
-        serviceLevel: selectedRate.service || selectedRate.servicelevel?.name
-      });
+          // Formatear el ETA antes de guardarlo
+          const formattedETA = formatETA(selectedRate.eta, selectedRate);
+          
+          // Calcular transitDays en formato "2-3" basado en el carrier y service
+          const calculateTransitDays = (rate) => {
+            let minDays = 2;
+            let maxDays = 3;
+            
+            const carrier = (rate.carrier || rate.provider || '').toLowerCase();
+            const serviceLevel = (rate.service || rate.servicelevel?.name || '').toLowerCase();
+            
+            if (rate && carrier) {
+              const provider = carrier;
+              
+              if (provider === 'usps') {
+                if (serviceLevel.includes('ground') || serviceLevel.includes('advantage')) {
+                  minDays = 2; maxDays = 3;
+                } else if (serviceLevel.includes('priority')) {
+                  minDays = 1; maxDays = 2;
+                } else if (serviceLevel.includes('express')) {
+                  minDays = 1; maxDays = 1;
+                }
+              } else if (provider === 'ups') {
+                if (serviceLevel.includes('ground')) {
+                  minDays = 1; maxDays = 5;
+                } else if (serviceLevel.includes('standard')) {
+                  minDays = 1; maxDays = 3;
+                }
+              } else if (provider === 'fedex' || provider === 'fedexdefault') {
+                if (serviceLevel.includes('smart') || serviceLevel.includes('post')) {
+                  minDays = 2; maxDays = 3;
+                } else if (serviceLevel.includes('ground')) {
+                  minDays = 1; maxDays = 5;
+                } else if (serviceLevel.includes('standard')) {
+                  minDays = 1; maxDays = 3;
+                }
+              } else if (provider === 'shippo') {
+                minDays = 2; maxDays = 3;
+              }
+            }
+            
+            // SIEMPRE retornar con guión, incluso si es el mismo número
+            // Esto evita que se guarde "23" en lugar de "2-3"
+            if (minDays === maxDays) {
+              return `${minDays}`;
+            }
+            // Asegurar que siempre tenga guión
+            return `${minDays}-${maxDays}`;
+          };
+          
+          const transitDays = calculateTransitDays(selectedRate);
+          
+          console.log('🔍 [ShippingCalculator] transitDays calculado:', transitDays);
+          console.log('   ⚠️ Verificar que tenga guión si es un rango (ej: "2-3" no "23")');
+          
+          // Guardar TODA la información del rate para poder identificarlo después
+          onShippingSelected({
+            rate: {
+              id: rateId,
+              objectId: selectedRate.objectId || selectedRate.id,
+              object_id: selectedRate.object_id || selectedRate.id,
+              provider: selectedRate.provider,
+              carrier: selectedRate.carrier,
+              service: selectedRate.service,
+              servicelevel: selectedRate.servicelevel,
+              amount: selectedRate.amount,
+              amount_local: selectedRate.amount_local,
+              // Guardar información única para identificación
+              carrier_token: selectedRate.carrier_token || selectedRate.provider,
+              servicelevel_token: selectedRate.servicelevel_token || selectedRate.servicelevel?.token,
+              // Guardar el rate completo como referencia
+              fullRate: selectedRate
+            },
+            // Guardar el rateId directamente para uso en el backend (prioridad alta)
+            rateId: rateId,
+            // CRÍTICO: Guardar packageInfo exacto usado para estos rates
+            packageInfo: packageInfo,
+            trackingNumber: 'PENDING', // Se generará al comprar la etiqueta
+            labelUrl: null,
+            packingSlipUrl: null,
+            eta: formattedETA, // Usar el ETA formateado (ej: "del 15 de enero al 17 de enero")
+            transitDays: transitDays, // Guardar transitDays en formato "2-3" o "1"
+            cost: selectedRate.amount_local || selectedRate.amount,
+            carrier: selectedRate.carrier || selectedRate.provider,
+            serviceLevel: selectedRate.service || selectedRate.servicelevel?.name
+          });
       onClose();
     }
   };

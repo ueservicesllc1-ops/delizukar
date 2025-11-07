@@ -70,11 +70,77 @@ const ShippingConfirmationPopup = ({
     let minTransitDays = 2;
     let maxTransitDays = 3;
     
+    // SIEMPRE calcular el rango basado en carrier/service si transitDays no está en formato correcto
+    // Esto asegura que nunca mostremos "23 days" incorrectamente
     if (shippingInfo?.transitDays) {
-      const transitRange = shippingInfo.transitDays.split('-');
-      if (transitRange.length === 2) {
-        minTransitDays = parseInt(transitRange[0]);
-        maxTransitDays = parseInt(transitRange[1]);
+      const transitDaysValue = shippingInfo.transitDays;
+      const transitDaysStr = String(transitDaysValue);
+      
+      console.log('🔍 [ShippingConfirmationPopup] transitDays recibido:', transitDaysValue, 'tipo:', typeof transitDaysValue);
+      
+      // Verificar si está en formato correcto "2-3" o "1"
+      // Si es "23" (sin guión), es un error - debería ser "2-3"
+      const hasHyphen = transitDaysStr.includes('-');
+      const parsedNumber = parseInt(transitDaysStr);
+      const hasValidFormat = hasHyphen || (parsedNumber <= 10 && parsedNumber > 0 && parsedNumber < 10);
+      
+      console.log('🔍 [ShippingConfirmationPopup] Análisis de transitDays:');
+      console.log('   Valor:', transitDaysValue);
+      console.log('   String:', transitDaysStr);
+      console.log('   Tiene guión:', hasHyphen);
+      console.log('   Número parseado:', parsedNumber);
+      console.log('   Formato válido:', hasValidFormat);
+      
+      // Si NO tiene guión Y es un número de 2 dígitos (ej: 23, 12, etc), es un error
+      // Debería ser "2-3" no "23"
+      const isTwoDigitNumber = !hasHyphen && parsedNumber >= 10 && parsedNumber <= 99;
+      
+      // Si NO tiene formato válido, es un número mayor a 10, o es un número de 2 dígitos sin guión, calcular el rango
+      if (!hasValidFormat || parsedNumber > 10 || typeof transitDaysValue === 'number' || isTwoDigitNumber) {
+        console.log('🔍 [ShippingConfirmationPopup] transitDays es un número (' + transitDaysValue + '), calculando rango basado en carrier/service');
+        // Es un número, calcular el rango basado en el carrier y service
+        const carrier = (shippingInfo.carrier || shippingInfo.rate?.carrier || shippingInfo.rate?.provider || '').toLowerCase();
+        const serviceLevel = (shippingInfo.serviceLevel || shippingInfo.service || shippingInfo.rate?.service || shippingInfo.rate?.servicelevel?.name || '').toLowerCase();
+        
+        console.log('🔍 [ShippingConfirmationPopup] Carrier:', carrier, 'Service:', serviceLevel);
+        
+        if (carrier === 'usps') {
+          if (serviceLevel.includes('ground') || serviceLevel.includes('advantage')) {
+            minTransitDays = 2; maxTransitDays = 3;
+          } else if (serviceLevel.includes('priority')) {
+            minTransitDays = 1; maxTransitDays = 2;
+          } else if (serviceLevel.includes('express')) {
+            minTransitDays = 1; maxTransitDays = 1;
+          }
+        } else if (carrier === 'ups') {
+          if (serviceLevel.includes('ground')) {
+            minTransitDays = 1; maxTransitDays = 5;
+          } else if (serviceLevel.includes('standard')) {
+            minTransitDays = 1; maxTransitDays = 3;
+          }
+        } else if (carrier === 'fedex' || carrier === 'fedexdefault') {
+          if (serviceLevel.includes('smart') || serviceLevel.includes('post')) {
+            minTransitDays = 2; maxTransitDays = 3;
+          } else if (serviceLevel.includes('ground')) {
+            minTransitDays = 1; maxTransitDays = 5;
+          } else if (serviceLevel.includes('standard')) {
+            minTransitDays = 1; maxTransitDays = 3;
+          }
+        }
+        
+        console.log('🔍 [ShippingConfirmationPopup] Rango calculado:', minTransitDays, '-', maxTransitDays);
+      } else {
+        console.log('🔍 [ShippingConfirmationPopup] transitDays es string con formato, parseando:', transitDaysStr);
+        // Es un string en formato "2-3" o "1"
+        const transitRange = transitDaysStr.split('-');
+        if (transitRange.length === 2) {
+          minTransitDays = parseInt(transitRange[0]);
+          maxTransitDays = parseInt(transitRange[1]);
+        } else if (transitRange.length === 1) {
+          minTransitDays = parseInt(transitRange[0]);
+          maxTransitDays = parseInt(transitRange[0]);
+        }
+        console.log('🔍 [ShippingConfirmationPopup] Rango parseado:', minTransitDays, '-', maxTransitDays);
       }
     }
     
@@ -82,17 +148,28 @@ const ShippingConfirmationPopup = ({
     const minDeliveryDate = new Date(shippingDate.getTime() + (minTransitDays * 24 * 60 * 60 * 1000));
     const maxDeliveryDate = new Date(shippingDate.getTime() + (maxTransitDays * 24 * 60 * 60 * 1000));
     
+    // Formatear transitDays para mostrar
+    const formattedTransitDays = minTransitDays === maxTransitDays 
+      ? `${minTransitDays}` 
+      : `${minTransitDays}-${maxTransitDays}`;
+    
     return {
       shippingDate,
       minDeliveryDate,
       maxDeliveryDate,
       minTransitDays,
       maxTransitDays,
-      transitDays: shippingInfo?.transitDays || '2-3'
+      transitDays: formattedTransitDays
     };
   };
 
   const deliveryInfo = calculateDeliveryDate();
+  
+  // Debug: verificar qué valor tiene transitDays
+  console.log('🔍 [ShippingConfirmationPopup] shippingInfo completo:', JSON.stringify(shippingInfo, null, 2));
+  console.log('🔍 [ShippingConfirmationPopup] deliveryInfo.transitDays:', deliveryInfo.transitDays);
+  console.log('🔍 [ShippingConfirmationPopup] deliveryInfo.minTransitDays:', deliveryInfo.minTransitDays);
+  console.log('🔍 [ShippingConfirmationPopup] deliveryInfo.maxTransitDays:', deliveryInfo.maxTransitDays);
 
   const handleAccept = () => {
     setShowPayment(true);
@@ -208,7 +285,7 @@ const ShippingConfirmationPopup = ({
                   <Box sx={{ display: 'flex', alignItems: 'center' }}>
                     <Schedule sx={{ color: '#666', mr: 1, fontSize: '1rem' }} />
                     <Typography variant="body2" sx={{ color: '#666' }}>
-                      ETA: {new Date(shippingInfo.eta).toLocaleDateString('es-ES')}
+                      ETA: {shippingInfo.eta}
                     </Typography>
                   </Box>
                 )}
