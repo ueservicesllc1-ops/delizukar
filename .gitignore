@@ -75,3 +75,7 @@ stripe-cli.log
 # Temporary files
 tmp/
 temp/
+
+# Railway environment variables (contain secrets)
+railway-env-variables.json
+railway-env-variables.txt
