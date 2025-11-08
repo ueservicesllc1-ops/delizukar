@@ -11,10 +11,12 @@ console.log('SHIPPO_API_TOKEN:', process.env.SHIPPO_API_TOKEN ? 'SET' : 'NOT SET
 console.log('REACT_APP_SHIPPO_API_TOKEN:', process.env.REACT_APP_SHIPPO_API_TOKEN ? 'SET' : 'NOT SET');
 console.log('DEFAULT_SHIPPO_TOKEN:', process.env.DEFAULT_SHIPPO_TOKEN ? 'SET' : 'NOT SET');
 
+const DEFAULT_SHIPPO_TOKEN = process.env.DEFAULT_SHIPPO_TOKEN || '';
+
 const resolveShippoToken = () =>
   process.env.SHIPPO_API_TOKEN ||
   process.env.REACT_APP_SHIPPO_API_TOKEN ||
-  process.env.DEFAULT_SHIPPO_TOKEN ||
+  DEFAULT_SHIPPO_TOKEN ||
   '';
 
 // Importar Shippo (nueva API v2)
