@@ -13,7 +13,11 @@ const matchesIphone16Viewport = () => {
   const pixelRatio = window.devicePixelRatio || 1;
   const viewportMatches =
     typeof window.matchMedia === 'function' &&
-    window.matchMedia('(max-width: 393px) and (max-height: 852px)').matches;
+    [
+      '(max-width: 393px) and (max-height: 852px)',
+      '(max-width: 414px) and (max-height: 896px)',
+      '(max-width: 430px) and (max-height: 932px)'
+    ].some((query) => window.matchMedia(query).matches);
 
   return pixelRatio >= 3 && viewportMatches;
 };

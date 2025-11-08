@@ -2423,6 +2423,20 @@
       position: relative !important;
     }
     
+    .iphone-modal-elevated {
+      z-index: 1000003 !important;
+    }
+
+    .iphone-modal-elevated .MuiPaper-root {
+      z-index: 1000004 !important;
+      position: relative !important;
+    }
+
+    .iphone-modal-backdrop {
+      z-index: 1000002 !important;
+      background-color: rgba(0, 0, 0, 0.45) !important;
+    }
+    
     /* iPhone 16 Popup Hero - Asegurar que esté por encima y visible */
     .popup-hero-mobile {
       z-index: 999999 !important;

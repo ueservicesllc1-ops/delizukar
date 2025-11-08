@@ -502,6 +502,14 @@ const ShippingCalculator = ({
             : {})
         }
       }}
+      slotProps={
+        isIphone16
+          ? {
+              root: { className: 'iphone-modal-elevated' },
+              backdrop: { className: 'iphone-modal-backdrop' }
+            }
+          : undefined
+      }
       BackdropProps={
         isIphone16
           ? {
