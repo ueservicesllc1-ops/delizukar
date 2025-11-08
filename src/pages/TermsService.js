@@ -2,9 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { Box, Container, Typography } from '@mui/material';
 import { db } from '../firebase/config';
 import { doc, getDoc, collection, getDocs } from 'firebase/firestore';
+import { useLanguage } from '../context/LanguageContext';
+import { translateText } from '../services/translateService';
 
 const TermsService = () => {
   
+  const { language } = useLanguage();
+  const [rawPageData, setRawPageData] = useState(null);
+  const [autoTranslations, setAutoTranslations] = useState({});
   const [pageData, setPageData] = useState({
     title: 'Términos de Servicio',
     content: 'Contenido de términos de servicio estará disponible próximamente',
@@ -18,6 +23,65 @@ const TermsService = () => {
     loadPageData();
   }, []);
 
+  useEffect(() => {
+    if (rawPageData) {
+      const localized = (baseKey, fallback) => {
+        const autoKey = `${baseKey}_${language}`;
+        const baseValue =
+          rawPageData?.[`${baseKey}_en`] ||
+          rawPageData?.[baseKey] ||
+          fallback;
+
+        return (
+          rawPageData?.[`${baseKey}_${language}`] ||
+          (language === 'es' ? rawPageData?.[`${baseKey}_es`] : undefined) ||
+          (language === 'en' ? rawPageData?.[`${baseKey}_en`] : undefined) ||
+          autoTranslations[autoKey] ||
+          baseValue
+        );
+      };
+
+      setPageData(prev => ({
+        ...prev,
+        title: localized('title', prev.title),
+        content: localized('content', prev.content),
+        titleFont: rawPageData.titleFont || prev.titleFont,
+        contentFont: rawPageData.contentFont || prev.contentFont
+      }));
+
+      const ensureAutoTranslation = async (key) => {
+        const autoKey = `${key}_${language}`;
+        if (!language) return;
+        if (rawPageData?.[`${key}_${language}`] || autoTranslations[autoKey]) {
+          return;
+        }
+
+        const baseValue =
+          rawPageData?.[`${key}_en`] ||
+          rawPageData?.[key];
+
+        if (!baseValue) return;
+        if (language === 'en') return;
+        if (language === 'es' && rawPageData?.[`${key}_es`]) return;
+
+        try {
+          const translated = await translateText(baseValue, language, 'en');
+          if (translated && typeof translated === 'string') {
+            setAutoTranslations(prev => ({
+              ...prev,
+              [autoKey]: translated
+            }));
+          }
+        } catch (error) {
+          console.error(`Error translating ${key} to ${language}:`, error);
+        }
+      };
+
+      ensureAutoTranslation('title');
+      ensureAutoTranslation('content');
+    }
+  }, [rawPageData, language, autoTranslations]);
+
   // Eliminado: sistema de traducción automático
 
   const loadPageData = async () => {
@@ -25,13 +89,7 @@ const TermsService = () => {
       const ref = doc(db, 'pages', 'terms-service');
       const snap = await getDoc(ref);
       const data = snap.exists() ? snap.data() : {};
-      setPageData(prev => ({
-        ...prev,
-        title: data.title_es || data.title || 'Términos de Servicio',
-        content: data.content_es || data.content || 'Contenido de términos de servicio estará disponible próximamente',
-        titleFont: data.titleFont || prev.titleFont,
-        contentFont: data.contentFont || prev.contentFont
-      }));
+      setRawPageData(data || {});
       
       // Cargar fuentes desde Firestore
       await loadFontsFromFirestore();
