@@ -8,10 +8,18 @@ if (typeof fetch === 'undefined') {
 }
 console.log('🔍 Environment variables loaded:');
 console.log('SHIPPO_API_TOKEN:', process.env.SHIPPO_API_TOKEN ? 'SET' : 'NOT SET');
+console.log('REACT_APP_SHIPPO_API_TOKEN:', process.env.REACT_APP_SHIPPO_API_TOKEN ? 'SET' : 'NOT SET');
+console.log('DEFAULT_SHIPPO_TOKEN:', process.env.DEFAULT_SHIPPO_TOKEN ? 'SET' : 'NOT SET');
+
+const resolveShippoToken = () =>
+  process.env.SHIPPO_API_TOKEN ||
+  process.env.REACT_APP_SHIPPO_API_TOKEN ||
+  process.env.DEFAULT_SHIPPO_TOKEN ||
+  '';
 
 // Importar Shippo (nueva API v2)
 // Token debe estar en .env como SHIPPO_API_TOKEN o REACT_APP_SHIPPO_API_TOKEN
-const shippoToken = process.env.SHIPPO_API_TOKEN || process.env.REACT_APP_SHIPPO_API_TOKEN;
+const shippoToken = resolveShippoToken();
 
 // Nueva API de Shippo v2: usar new Shippo.Shippo({ apiKeyHeader })
 const shippoModule = require('shippo');
@@ -23,6 +31,8 @@ if (shippoToken) {
   } catch (error) {
     console.error('❌ Error initializing Shippo client:', error.message);
   }
+} else {
+  console.error('❌ Shippo token not configured. Shippo API calls will fail until a token is provided.');
 }
 
 console.log('🔑 Shippo token configured:', shippoToken ? `${shippoToken.substring(0, 20)}...` : 'NOT SET');
@@ -205,7 +215,7 @@ app.post('/api/shippo/create-address', async (req, res) => {
     console.log('🔍 DEBUG: Creating address in Shippo');
     console.log('🔍 DEBUG: Request body:', JSON.stringify(req.body, null, 2));
     
-    const apiToken = process.env.SHIPPO_API_TOKEN || process.env.REACT_APP_SHIPPO_API_TOKEN || DEFAULT_SHIPPO_TOKEN;
+    const apiToken = resolveShippoToken();
     
     if (!apiToken) {
       return res.status(500).json({ error: 'SHIPPO_API_TOKEN no está configurada' });
@@ -268,7 +278,7 @@ app.post('/api/shippo/validate-address', async (req, res) => {
     console.log('🔍 DEBUG: Validating address in Shippo');
     console.log('🔍 DEBUG: Request body:', JSON.stringify(req.body, null, 2));
     
-    const apiToken = process.env.SHIPPO_API_TOKEN || process.env.REACT_APP_SHIPPO_API_TOKEN || DEFAULT_SHIPPO_TOKEN;
+    const apiToken = resolveShippoToken();
     
     if (!apiToken) {
       return res.status(500).json({ error: 'SHIPPO_API_TOKEN no está configurada' });
@@ -382,7 +392,7 @@ app.post('/api/shippo/shipments', async (req, res) => {
     console.log('🔍 DEBUG: Creating shipment in Shippo');
     console.log('🔍 DEBUG: Request body:', JSON.stringify(req.body, null, 2));
     
-    const apiToken = process.env.SHIPPO_API_TOKEN || process.env.REACT_APP_SHIPPO_API_TOKEN || DEFAULT_SHIPPO_TOKEN;
+    const apiToken = resolveShippoToken();
     
     if (!apiToken) {
       return res.status(500).json({ error: 'SHIPPO_API_TOKEN no está configurada' });
@@ -801,7 +811,7 @@ app.get('/api/shippo/shipments/:shipmentId/rates', async (req, res) => {
   try {
     console.log('🔍 DEBUG: Getting rates for shipment:', req.params.shipmentId);
     
-    const apiToken = process.env.SHIPPO_API_TOKEN || process.env.REACT_APP_SHIPPO_API_TOKEN || DEFAULT_SHIPPO_TOKEN;
+    const apiToken = resolveShippoToken();
     
     if (!apiToken) {
       return res.status(500).json({ error: 'SHIPPO_API_TOKEN no está configurada' });
@@ -832,7 +842,7 @@ app.post('/api/shippo/transactions', async (req, res) => {
     console.log('🔍 DEBUG: Creating transaction in Shippo');
     console.log('🔍 DEBUG: Request body:', JSON.stringify(req.body, null, 2));
     
-    const apiToken = process.env.SHIPPO_API_TOKEN || process.env.REACT_APP_SHIPPO_API_TOKEN || DEFAULT_SHIPPO_TOKEN;
+    const apiToken = resolveShippoToken();
     
     if (!apiToken) {
       return res.status(500).json({ error: 'SHIPPO_API_TOKEN no está configurada' });
@@ -874,7 +884,7 @@ app.post('/api/shippo/transactions/instant', async (req, res) => {
     console.log('🔍 DEBUG: Creating instant transaction in Shippo');
     console.log('🔍 DEBUG: Request body:', JSON.stringify(req.body, null, 2));
     
-    const apiToken = process.env.SHIPPO_API_TOKEN || process.env.REACT_APP_SHIPPO_API_TOKEN || DEFAULT_SHIPPO_TOKEN;
+    const apiToken = resolveShippoToken();
     
     if (!apiToken) {
       return res.status(500).json({ error: 'SHIPPO_API_TOKEN no está configurada' });
@@ -958,7 +968,7 @@ app.get('/api/shippo/account', async (req, res) => {
   try {
     console.log('🔍 DEBUG: Getting Shippo account info');
     
-    const apiToken = process.env.SHIPPO_API_TOKEN || process.env.REACT_APP_SHIPPO_API_TOKEN || DEFAULT_SHIPPO_TOKEN;
+    const apiToken = resolveShippoToken();
     
     if (!apiToken) {
       return res.status(500).json({ error: 'SHIPPO_API_TOKEN no está configurada' });
@@ -1008,7 +1018,7 @@ app.post('/api/shippo/elements/authz', async (req, res) => {
   try {
     console.log('🔍 DEBUG: Generating JWT for Shippo Shipping Elements');
     
-    const apiToken = process.env.SHIPPO_API_TOKEN || process.env.REACT_APP_SHIPPO_API_TOKEN || DEFAULT_SHIPPO_TOKEN;
+    const apiToken = resolveShippoToken();
     
     if (!apiToken) {
       return res.status(500).json({ error: 'SHIPPO_API_TOKEN no está configurada' });
@@ -1061,7 +1071,7 @@ async function buyShippingLabelForOrder(shippingInfo) {
       return null;
     }
     
-    const apiToken = process.env.SHIPPO_API_TOKEN || process.env.REACT_APP_SHIPPO_API_TOKEN || DEFAULT_SHIPPO_TOKEN;
+    const apiToken = resolveShippoToken();
     
     if (!apiToken) {
       console.error('❌ SHIPPO_API_TOKEN no está configurada');
@@ -1122,7 +1132,7 @@ app.post('/api/create-shipment-complete', async (req, res) => {
       });
     }
 
-    const apiToken = process.env.SHIPPO_API_TOKEN || process.env.REACT_APP_SHIPPO_API_TOKEN || DEFAULT_SHIPPO_TOKEN;
+    const apiToken = resolveShippoToken();
     
     if (!apiToken) {
       return res.status(500).json({

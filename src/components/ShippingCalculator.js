@@ -17,6 +17,7 @@ import {
 import { LocalShipping, CheckCircle, Close } from '@mui/icons-material';
  
 import shippoService from '../services/shippoService';
+import useIphone16 from '../hooks/useIphone16';
 
 const ShippingCalculator = ({ 
   open, 
@@ -29,6 +30,7 @@ const ShippingCalculator = ({
   const [rates, setRates] = useState([]);
   const [selectedRate, setSelectedRate] = useState(null);
   const [error, setError] = useState(null);
+  const isIphone16 = useIphone16();
 
   useEffect(() => {
     console.log('🔍 [ShippingCalculator] useEffect triggered:', { open, hasOrderData: !!orderData });
@@ -479,9 +481,37 @@ const ShippingCalculator = ({
       onClose={onClose}
       maxWidth="md"
       fullWidth
+      sx={
+        isIphone16
+          ? {
+              zIndex: 1000001,
+              '& .MuiDialog-container': {
+                alignItems: 'center'
+              }
+            }
+          : undefined
+      }
       PaperProps={{
-        sx: { borderRadius: '16px' }
+        sx: {
+          borderRadius: '16px',
+          ...(isIphone16
+            ? {
+                position: 'relative',
+                zIndex: 1000002
+              }
+            : {})
+        }
       }}
+      BackdropProps={
+        isIphone16
+          ? {
+              sx: {
+                zIndex: 1000000,
+                backgroundColor: 'rgba(0,0,0,0.45)'
+              }
+            }
+          : undefined
+      }
     >
       <DialogTitle sx={{ 
         backgroundColor: '#c8626d', 
