@@ -294,16 +294,27 @@ const Checkout = () => {
   };
 
   const handleInputChange = (e) => {
-    setFormData({
+    const { name, value } = e.target;
+    const updatedFormData = {
       ...formData,
-      [e.target.name]: e.target.value
-    });
+      [name]: value
+    };
+
+    setFormData(updatedFormData);
     
     // Calcular envío automáticamente cuando se complete la dirección
-    if (e.target.name === 'zipCode' && e.target.value.length >= 5) {
+    if (name === 'zipCode' && value.length >= 5) {
+      const timeoutFormData = { ...updatedFormData };
       setTimeout(() => {
-        if (formData.firstName && formData.lastName && formData.address && formData.city && e.target.value) {
-          handleOpenShipping();
+        if (
+          timeoutFormData.firstName &&
+          timeoutFormData.lastName &&
+          timeoutFormData.address &&
+          timeoutFormData.city &&
+          timeoutFormData.state &&
+          timeoutFormData.zipCode
+        ) {
+          handleOpenShipping(timeoutFormData);
         }
       }, 1000); // Esperar 1 segundo después de escribir el código postal
     }
@@ -363,19 +374,21 @@ const Checkout = () => {
   };
 
   // Abrir calculador de envíos automáticamente
-  const handleOpenShipping = () => {
+  const handleOpenShipping = (overrideFormData) => {
     setShippingError(null);
+
+    const data = overrideFormData || formData;
     
     // Crear dirección para validar (sin validar campos primero)
     const addressToValidate = {
-      name: `${formData.firstName || ''} ${formData.lastName || ''}`,
-      street1: formData.address || '',
-      city: formData.city || '',
-      state: formData.state || '', // Usar el estado del formulario
-      zip: formData.zipCode || '',
+      name: `${data.firstName || ''} ${data.lastName || ''}`,
+      street1: data.address || '',
+      city: data.city || '',
+      state: data.state || '', // Usar el estado del formulario
+      zip: data.zipCode || '',
       country: 'US',
-      phone: formData.phone || '',
-      email: formData.email || '',
+      phone: data.phone || '',
+      email: data.email || '',
       is_residential: true
     };
     
