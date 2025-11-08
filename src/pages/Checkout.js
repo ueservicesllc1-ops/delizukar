@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { Box, Container, Typography, Grid, Card, CardContent, TextField, Button, Divider, Alert } from '@mui/material';
 import { CreditCard, LocalShipping, Security, ArrowBack, LocalOffer } from '@mui/icons-material';
@@ -50,6 +50,7 @@ const Checkout = () => {
   
   // Estados para popup de confirmación de envío
   const [shippingConfirmationOpen, setShippingConfirmationOpen] = useState(false);
+  const autoValidationSignatureRef = useRef('');
 
   // Estados para vouchers
   const [user, setUser] = useState(null);
@@ -295,29 +296,10 @@ const Checkout = () => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    const updatedFormData = {
-      ...formData,
+    setFormData((prev) => ({
+      ...prev,
       [name]: value
-    };
-
-    setFormData(updatedFormData);
-    
-    // Calcular envío automáticamente cuando se complete la dirección
-    if (name === 'zipCode' && value.length >= 5) {
-      const timeoutFormData = { ...updatedFormData };
-      setTimeout(() => {
-        if (
-          timeoutFormData.firstName &&
-          timeoutFormData.lastName &&
-          timeoutFormData.address &&
-          timeoutFormData.city &&
-          timeoutFormData.state &&
-          timeoutFormData.zipCode
-        ) {
-          handleOpenShipping(timeoutFormData);
-        }
-      }, 1000); // Esperar 1 segundo después de escribir el código postal
-    }
+    }));
   };
 
   // Crear datos de envío para Shippo
@@ -396,6 +378,53 @@ const Checkout = () => {
     setCorrectedAddress(addressToValidate);
     setAddressCorrectionOpen(true);
   };
+
+  useEffect(() => {
+    const zipReady = formData.zipCode && formData.zipCode.trim().length >= 5;
+    const requiredFieldsFilled =
+      zipReady &&
+      formData.firstName &&
+      formData.lastName &&
+      formData.address &&
+      formData.city &&
+      formData.state;
+
+    if (!requiredFieldsFilled) {
+      return;
+    }
+
+    const signature = [
+      formData.firstName?.trim(),
+      formData.lastName?.trim(),
+      formData.address?.trim(),
+      formData.city?.trim(),
+      formData.state?.trim(),
+      formData.zipCode?.trim(),
+      formData.phone?.trim() || '',
+      formData.email?.trim() || ''
+    ].join('|');
+
+    if (autoValidationSignatureRef.current === signature) {
+      return;
+    }
+
+    autoValidationSignatureRef.current = signature;
+
+    const timeout = setTimeout(() => {
+      handleOpenShipping(formData);
+    }, 400);
+
+    return () => clearTimeout(timeout);
+  }, [
+    formData.firstName,
+    formData.lastName,
+    formData.address,
+    formData.city,
+    formData.state,
+    formData.zipCode,
+    formData.phone,
+    formData.email
+  ]);
 
   // Manejar selección de envío
   const handleShippingSelected = (shippingData) => {
