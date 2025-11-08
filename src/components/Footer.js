@@ -38,24 +38,28 @@ const Footer = () => {
     es: {
       quickLinks: 'Enlaces Rápidos', terms: 'Términos y Condiciones', termsService: 'Términos de Servicio',
       faq: 'Preguntas Frecuentes', allergy: 'Avisos de Alergias', shipping: 'Política de Envío', cookie: 'Instrucciones de Cuidado de Galletas',
+      navTitle: 'Navegación', navHome: 'Inicio', navProducts: 'Productos', navContact: 'Contacto', navAbout: 'Nosotros',
       subscribe: 'Suscríbete a nuestros emails', emailPh: 'Correo electrónico', subscribing: 'Suscribiendo...', subscribeBtn: 'Suscribir',
       followUs: 'Síguenos en', payments: 'Métodos de pago', copyright: 'Todos los derechos reservados.', madeWith: 'Hecho con amor', developed: 'Desarrollado por Freedom Labs.'
     },
     en: {
       quickLinks: 'Quick Links', terms: 'Terms and Conditions', termsService: 'Terms of Service',
       faq: 'Frequently Asked Questions', allergy: 'Allergy Notices', shipping: 'Shipping Policy', cookie: 'Cookie Care Instructions',
+      navTitle: 'Navigation', navHome: 'Home', navProducts: 'Products', navContact: 'Contact', navAbout: 'About Us',
       subscribe: 'Subscribe to our emails', emailPh: 'Email address', subscribing: 'Subscribing...', subscribeBtn: 'Subscribe',
       followUs: 'Follow us', payments: 'Payment methods', copyright: 'All rights reserved.', madeWith: 'Made with love', developed: 'Developed by Freedom Labs.'
     },
     fr: {
       quickLinks: 'Liens rapides', terms: 'Termes et conditions', termsService: 'Conditions d’utilisation',
       faq: 'Questions fréquentes', allergy: 'Avis d’allergies', shipping: 'Politique d’expédition', cookie: 'Instructions de soin des cookies',
+      navTitle: 'Navigation', navHome: 'Accueil', navProducts: 'Produits', navContact: 'Contact', navAbout: 'À propos de nous',
       subscribe: 'Abonnez-vous à nos emails', emailPh: 'Adresse e-mail', subscribing: 'Abonnement...', subscribeBtn: 'S’abonner',
       followUs: 'Suivez-nous', payments: 'Moyens de paiement', copyright: 'Tous droits réservés.', madeWith: 'Fait avec amour', developed: 'Développé par Freedom Labs.'
     },
     pt: {
       quickLinks: 'Links Rápidos', terms: 'Termos e Condições', termsService: 'Termos de Serviço',
       faq: 'Perguntas Frequentes', allergy: 'Avisos de Alergias', shipping: 'Política de Envio', cookie: 'Instruções de Cuidado de Cookies',
+      navTitle: 'Navegação', navHome: 'Início', navProducts: 'Produtos', navContact: 'Contato', navAbout: 'Sobre nós',
       subscribe: 'Assine nossos emails', emailPh: 'Email', subscribing: 'Assinando...', subscribeBtn: 'Assinar',
       followUs: 'Siga-nos', payments: 'Métodos de pagamento', copyright: 'Todos os direitos reservados.', madeWith: 'Feito com amor', developed: 'Desenvolvido por Freedom Labs.'
     }
@@ -232,21 +236,21 @@ const Footer = () => {
                   textAlign: 'center'
                 }}
               >
-Navegación
+                {text.navTitle || 'Navegación'}
               </Typography>
               
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, alignItems: 'center' }}>
                 <Link href="/" sx={{ color: 'white', textDecoration: 'none', fontSize: '0.95rem', '&:hover': { color: '#EB8B8B' } }}>
-                  Inicio
+                  {text.navHome || 'Inicio'}
                 </Link>
                 <Link href="/productos" sx={{ color: 'white', textDecoration: 'none', fontSize: '0.95rem', '&:hover': { color: '#EB8B8B' } }}>
-                  Productos
+                  {text.navProducts || 'Productos'}
                 </Link>
                 <Link href="/contacto" sx={{ color: 'white', textDecoration: 'none', fontSize: '0.95rem', '&:hover': { color: '#EB8B8B' } }}>
-                  Contacto
+                  {text.navContact || 'Contacto'}
                 </Link>
                 <Link href="/nosotros" sx={{ color: 'white', textDecoration: 'none', fontSize: '0.95rem', '&:hover': { color: '#EB8B8B' } }}>
-                  Nosotros
+                  {text.navAbout || 'Nosotros'}
                 </Link>
               </Box>
             </motion.div>
