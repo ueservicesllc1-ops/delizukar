@@ -132,7 +132,8 @@ app.get('/api/health', (req, res) => {
 const translateServer = express();
 translateServer.use(express.json());
 translateServer.use(cors({ origin: (o, cb) => cb(null, true) }));
-translateServer.post('/api/translate-google', async (req, res) => {
+
+const handleGoogleTranslate = async (req, res) => {
   try {
     const body = req.body || {};
     const qRaw = body.q ?? body.text;
@@ -167,10 +168,15 @@ translateServer.post('/api/translate-google', async (req, res) => {
     console.error('❌ Google translate proxy error:', e);
     return res.status(500).json({ error: 'Google translate proxy error', message: e.message });
   }
-});
+};
+
+translateServer.post('/api/translate-google', handleGoogleTranslate);
 translateServer.listen(5050, '0.0.0.0', () => {
   console.log('🌐 Translate server running on port 5050');
 });
+
+// Also expose translate endpoint on main server port (useful in production where port 5050 may not be accessible)
+app.post('/api/translate-google', handleGoogleTranslate);
 
 // ==================== GOOGLE TRANSLATE PROXY (v2) ====================
 // POST /api/translate-google { q: string|string[], target: 'en', source?: 'es' }
