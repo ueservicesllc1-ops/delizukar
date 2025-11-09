@@ -39,7 +39,7 @@ const Footer = () => {
       quickLinks: 'Enlaces Rápidos', terms: 'Términos y Condiciones', termsService: 'Términos de Servicio',
       faq: 'Preguntas Frecuentes', allergy: 'Avisos de Alergias', shipping: 'Política de Envío', cookie: 'Instrucciones de Cuidado de Galletas',
       navTitle: 'Navegación', navHome: 'Inicio', navProducts: 'Productos', navContact: 'Contacto', navAbout: 'Nosotros',
-      subscribe: 'Suscríbete a nuestros emails', emailPh: 'Correo electrónico', subscribing: 'Suscribiendo...', subscribeBtn: 'Suscribir',
+      subscribe: 'Suscríbete a nuestros emails', emailPh: 'Correo electrónico', subscribing: 'Suscribiendo...', subscribeBtn: 'Suscribirse',
       followUs: 'Síguenos en', payments: 'Métodos de pago', copyright: 'Todos los derechos reservados.', madeWith: 'Hecho con amor', developed: 'Desarrollado por Freedom Labs.'
     },
     en: {
