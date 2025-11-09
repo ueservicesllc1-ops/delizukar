@@ -44,6 +44,12 @@ const Home = () => {
     descripcionFerrero: 'Galleta estilo NY con Ferrero Rocher, chips de chocolate oscuro y avellanas tostadas—intensa, elegante y adictiva.',
     descripcionGeneral: 'Deliciosas {productName} con ingredientes premium. Galletas estilo Nueva York perfectamente horneadas para disfrutar o compartir.'
   });
+  const pinkStripMessages = {
+    es: 'DeliZuKar: el Wi-Fi de tu corazón (siempre te conecta con la felicidad).',
+    en: "DeliZuKar: your heart's Wi-Fi (always keeps you connected to happiness).",
+    fr: "DeliZuKar : le Wi-Fi de ton cœur (toujours connecté au bonheur).",
+    pt: 'DeliZuKar: o Wi-Fi do seu coração (sempre te conecta à felicidade).'
+  };
 
   // Traducir textos cuando cambia el idioma
   useEffect(() => {
@@ -256,7 +262,7 @@ const Home = () => {
             textOverflow: 'ellipsis'
           }}
         >
-          DeliZuKar: your heart's Wi-Fi (always keeps you connected to happiness).
+          {pinkStripMessages[language] || pinkStripMessages.en}
         </Typography>
       </Box>
 
