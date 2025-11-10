@@ -146,15 +146,10 @@ const TestimonialsSection = () => {
 
   return (
     <Box
-      className="testimonials-mobile"
-      sx={{
-        mt: { xs: 10, sm: 10, md: 8 },
-        pt: { xs: 8, sm: 8, md: 6 },
-        pb: { xs: 8, md: 8 },
-        backgroundColor: '#f8f9fa'
-      }}
+      className="bg-[#f8f9fa] py-12 sm:py-16 lg:py-20"
+      sx={{ mt: { xs: '3rem', md: '4rem' } }}
     >
-      <Container maxWidth="lg">
+      <Container maxWidth="lg" className="px-4 sm:px-6 lg:px-8">
         <motion.div
           initial={{ opacity: 0, y: 50 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -163,116 +158,110 @@ const TestimonialsSection = () => {
         >
           <Typography
             variant="h2"
-            className="testimonials-title"
+            className="text-center text-4xl font-extrabold text-[#EC8C8D] sm:text-5xl"
             sx={{
-              textAlign: 'center',
-              fontWeight: 800,
-              color: '#EC8C8D',
               mb: 2,
-              fontSize: { xs: '2rem', md: '3rem' },
               fontFamily: loading ? 'Playfair Display, serif' : `"${titleConfig.font}", serif !important`
             }}
           >
             {translatedTexts.title}
           </Typography>
           
-
-          <Grid container spacing={4} justifyContent="center" sx={{ mt: 6 }}>
+          <div className="mt-10 grid grid-cols-1 gap-6 md:grid-cols-3">
             {testimonials.map((testimonial, index) => (
-              <Grid item xs={12} md={4} key={testimonial.id || index} sx={{ display: 'flex', justifyContent: 'center' }}>
-                <motion.div
-                  initial={{ opacity: 0, y: 30 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.6, delay: index * 0.1 }}
+              <motion.div
+                key={testimonial.id || index}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.6, delay: index * 0.1 }}
+                className="flex justify-center"
+              >
+                <Card
+                  sx={{
+                    p: 3,
+                    width: '100%',
+                    maxWidth: '360px',
+                    minHeight: '300px',
+                    borderRadius: '20px',
+                    boxShadow: '0 8px 32px rgba(0,0,0,0.1)',
+                    backgroundColor: 'white',
+                    transition: 'all 0.3s ease',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    '&:hover': {
+                      transform: 'translateY(-5px)',
+                      boxShadow: '0 16px 48px rgba(0,0,0,0.15)'
+                    }
+                  }}
                 >
-                  <Card
-                    className="testimonial-card-mobile"
+                  <CardContent
                     sx={{
-                      p: 2,
-                      width: '350px',
-                      height: '300px',
-                      borderRadius: '20px',
-                      boxShadow: '0 8px 32px rgba(0,0,0,0.1)',
-                      backgroundColor: 'white',
-                      transition: 'all 0.3s ease',
                       display: 'flex',
                       flexDirection: 'column',
-                      '&:hover': {
-                        transform: 'translateY(-5px)',
-                        boxShadow: '0 16px 48px rgba(0,0,0,0.15)'
-                      }
-                    }}
-                  >
-                    <CardContent className="testimonial-content-mobile" sx={{ 
-                      display: 'flex', 
-                      flexDirection: 'column', 
                       height: '100%',
                       justifyContent: 'space-between',
-                      paddingTop: '16px !important',
-                      paddingBottom: '16px !important'
-                    }}>
-                      <Box sx={{ display: 'flex', alignItems: 'center', mb: 0.5 }}>
-                        <Avatar
-                          src={testimonial.photoUrl}
-                          alt={testimonial.name}
-                          sx={{
-                            width: 60,
-                            height: 60,
-                            mr: 2,
-                            backgroundColor: '#EC8C8D'
-                          }}
-                        >
-                          {testimonial.name ? testimonial.name.charAt(0).toUpperCase() : 'C'}
-                        </Avatar>
-                        <Box>
-                          <Typography
-                            variant="h6"
-                            className="testimonial-name-mobile"
-                            sx={{
-                              fontWeight: 600,
-                              color: '#EC8C8D',
-                              mb: 0.5,
-                              fontFamily: testimonial.titleFont ? `"${testimonial.titleFont}", sans-serif` : 'inherit'
-                            }}
-                          >
-                            {testimonial.name}
-                          </Typography>
-                          <Typography
-                            variant="body2"
-                            sx={{ color: '#666' }}
-                          >
-                            {translatedTexts.verifiedClient}
-                          </Typography>
-                        </Box>
-                      </Box>
-
-                      <Box sx={{ display: 'flex', mb: 0.5 }}>
-                        <Rating
-                          value={testimonial.rating || 5}
-                          readOnly
-                          sx={{ color: '#FFD700' }}
-                        />
-                      </Box>
-
-                      <Typography
-                        variant="body1"
-                        className="testimonial-text-mobile"
+                      p: 0
+                    }}
+                  >
+                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                      <Avatar
+                        src={testimonial.photoUrl}
+                        alt={testimonial.name}
                         sx={{
-                          color: '#666',
-                          lineHeight: 1.6,
-                          fontStyle: 'italic',
-                          fontFamily: testimonial.commentFont ? `"${testimonial.commentFont}", sans-serif` : 'inherit'
+                          width: 60,
+                          height: 60,
+                          mr: 2,
+                          backgroundColor: '#EC8C8D'
                         }}
                       >
-                        "{testimonial.comment}"
-                      </Typography>
-                    </CardContent>
-                  </Card>
-                </motion.div>
-              </Grid>
+                        {testimonial.name ? testimonial.name.charAt(0).toUpperCase() : 'C'}
+                      </Avatar>
+                      <Box>
+                        <Typography
+                          variant="h6"
+                          sx={{
+                            fontWeight: 600,
+                            color: '#EC8C8D',
+                            mb: 0.5,
+                            fontFamily: testimonial.titleFont ? `"${testimonial.titleFont}", sans-serif` : 'inherit'
+                          }}
+                        >
+                          {testimonial.name}
+                        </Typography>
+                        <Typography
+                          variant="body2"
+                          sx={{ color: '#666' }}
+                        >
+                          {translatedTexts.verifiedClient}
+                        </Typography>
+                      </Box>
+                    </Box>
+
+                    <Box sx={{ display: 'flex', mb: 1 }}>
+                      <Rating
+                        value={testimonial.rating || 5}
+                        readOnly
+                        sx={{ color: '#FFD700' }}
+                      />
+                    </Box>
+
+                    <Typography
+                      variant="body1"
+                      sx={{
+                        color: '#666',
+                        lineHeight: 1.6,
+                        fontStyle: 'italic',
+                        fontFamily: testimonial.commentFont ? `"${testimonial.commentFont}", sans-serif` : 'inherit'
+                      }}
+                    >
+                      "{testimonial.comment}"
+                    </Typography>
+                  </CardContent>
+                </Card>
+              </motion.div>
             ))}
-          </Grid>
+          </div>
         </motion.div>
       </Container>
     </Box>

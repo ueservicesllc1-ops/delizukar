@@ -3,7 +3,6 @@ import { motion } from 'framer-motion';
 import {
   Box,
   Container,
-  Grid,
   Typography,
   Link,
   IconButton,
@@ -14,7 +13,6 @@ import {
   Facebook,
   Instagram
 } from '@mui/icons-material';
-import { responsiveComponents } from '../utils/responsiveDesign';
 import { doc, getDoc, collection, addDoc, query, where, getDocs } from 'firebase/firestore';
 import { db } from '../firebase/config';
 import { useLanguage } from '../context/LanguageContext';
@@ -27,7 +25,7 @@ const TikTokIcon = () => (
     viewBox="0 0 24 24"
     fill="currentColor"
   >
-    <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z"/>
+    <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z" />
   </svg>
 );
 
@@ -39,7 +37,7 @@ const Footer = () => {
       quickLinks: 'Enlaces Rápidos', terms: 'Términos y Condiciones', termsService: 'Términos de Servicio',
       faq: 'Preguntas Frecuentes', allergy: 'Avisos de Alergias', shipping: 'Política de Envío', cookie: 'Instrucciones de Cuidado de Galletas',
       navTitle: 'Navegación', navHome: 'Inicio', navProducts: 'Productos', navContact: 'Contacto', navAbout: 'Nosotros',
-      subscribe: 'Suscríbete a nuestros emails', emailPh: 'Correo electrónico', subscribing: 'Suscribiendo...', subscribeBtn: 'Suscribirse',
+      subscribe: 'Suscríbete a nuestros emails', emailPh: 'Correo electrónico', subscribing: 'Suscribiendo...', subscribeBtn: 'Suscribir',
       followUs: 'Síguenos en', payments: 'Métodos de pago', copyright: 'Todos los derechos reservados.', madeWith: 'Hecho con amor', developed: 'Desarrollado por Freedom Labs.'
     },
     en: {
@@ -73,7 +71,6 @@ const Footer = () => {
   const [subscriptionMessage, setSubscriptionMessage] = useState('');
   const [subscriptionLoading, setSubscriptionLoading] = useState(false);
 
-  // Cargar enlaces de redes sociales desde Firebase
   useEffect(() => {
     loadSocialLinks();
   }, []);
@@ -82,7 +79,7 @@ const Footer = () => {
     try {
       const docRef = doc(db, 'config', 'socialMedia');
       const docSnap = await getDoc(docRef);
-      
+
       if (docSnap.exists()) {
         const data = docSnap.data();
         setSocialLinks({
@@ -111,7 +108,6 @@ const Footer = () => {
     setSubscriptionMessage('');
 
     try {
-      // Verificar si el email ya está suscrito
       const subscriptionsRef = collection(db, 'emailSubscriptions');
       const q = query(subscriptionsRef, where('email', '==', email.trim().toLowerCase()));
       const querySnapshot = await getDocs(q);
@@ -122,7 +118,6 @@ const Footer = () => {
         return;
       }
 
-      // Agregar nueva suscripción
       await addDoc(subscriptionsRef, {
         email: email.trim().toLowerCase(),
         subscribedAt: new Date().toISOString(),
@@ -132,12 +127,10 @@ const Footer = () => {
 
       setSubscriptionMessage('Suscripción exitosa');
       setEmail('');
-      
-      // Limpiar mensaje después de 3 segundos
+
       setTimeout(() => {
         setSubscriptionMessage('');
       }, 3000);
-
     } catch (error) {
       console.error('Error suscribiendo email:', error);
       setSubscriptionMessage('Error al suscribirte');
@@ -150,308 +143,224 @@ const Footer = () => {
     <Box
       data-no-translate
       component="footer"
-      className="footer-mobile"
-      sx={{
-        backgroundColor: '#C8626D !important',
-        background: '#C8626D !important',
-        color: 'white',
-        pt: 0,
-        pb: 0,
-        position: 'relative'
-      }}
+      className="bg-[#C8626D] text-white"
+      sx={{ position: 'relative' }}
     >
-      <Container maxWidth="lg">
-        <Grid container spacing={{ xs: 3, sm: 4, md: 5, lg: 6, xl: 8 }} className="footer-content-mobile" justifyContent="center" sx={{
-          // Sistema responsivo universal
-          padding: responsiveComponents.footer.padding
-        }}>
-          {/* Sección 1: Enlaces Rápidos */}
-          <Grid item xs={12} sm={6} md={4} lg={3} className="footer-section-mobile">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6 }}
-              sx={{ 
-                // Sistema responsivo universal
-                padding: { xs: '3px 20px', sm: '4px 25px', md: '5px 30px', lg: '6px 35px', xl: '8px 40px' }
-              }}
-            >
-              <Typography
-                variant="h6"
-                className="footer-title-mobile"
-                sx={{
-                  fontWeight: 600,
-                  color: 'white',
-                  mb: 1,
-                  fontSize: '1.1rem',
-                  textAlign: 'center'
-                }}
-              >
-{text.quickLinks || 'Enlaces Rápidos'}
-              </Typography>
-              
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, alignItems: 'center' }}>
-                <Link href="/terms" className="footer-link-mobile" sx={{ color: 'white', textDecoration: 'none', fontSize: '0.95rem', '&:hover': { color: '#EB8B8B' } }}>
-                  {text.terms || 'Términos y Condiciones'}
-                </Link>
-                <Link href="/terms-service" sx={{ color: 'white', textDecoration: 'none', fontSize: '0.95rem', '&:hover': { color: '#EB8B8B' } }}>
-                  {text.termsService || 'Términos de Servicio'}
-                </Link>
-                <Link href="/faq" sx={{ color: 'white', textDecoration: 'none', fontSize: '0.95rem', '&:hover': { color: '#EB8B8B' } }}>
-                  {text.faq || 'Preguntas Frecuentes'}
-                </Link>
-                <Link href="/allergy" sx={{ color: 'white', textDecoration: 'none', fontSize: '0.95rem', '&:hover': { color: '#EB8B8B' } }}>
-                  {text.allergy || 'Avisos de Alergias'}
-                </Link>
-                <Link href="/shipping" sx={{ color: 'white', textDecoration: 'none', fontSize: '0.95rem', '&:hover': { color: '#EB8B8B' } }}>
-                  {text.shipping || 'Política de Envío'}
-                </Link>
-                <Link href="/cookie-care" sx={{ color: 'white', textDecoration: 'none', fontSize: '0.95rem', '&:hover': { color: '#EB8B8B' } }}>
-                  {text.cookie || 'Instrucciones de Cuidado de Galletas'}
-                </Link>
-              </Box>
-            </motion.div>
-          </Grid>
-
-          {/* Sección 2: Navegación */}
-          <Grid item xs={12} sm={6} md={4} lg={3}>
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6, delay: 0.1 }}
-              sx={{ 
-                // Sistema responsivo universal
-                padding: { xs: '3px 20px', sm: '4px 25px', md: '5px 30px', lg: '6px 35px', xl: '8px 40px' }
-              }}
-            >
-              <Typography
-                variant="h6"
-                sx={{
-                  fontWeight: 600,
-                  color: 'white',
-                  mb: 1,
-                  fontSize: '1.1rem',
-                  textAlign: 'center'
-                }}
-              >
-                {text.navTitle || 'Navegación'}
-              </Typography>
-              
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, alignItems: 'center' }}>
-                <Link href="/" sx={{ color: 'white', textDecoration: 'none', fontSize: '0.95rem', '&:hover': { color: '#EB8B8B' } }}>
-                  {text.navHome || 'Inicio'}
-                </Link>
-                <Link href="/productos" sx={{ color: 'white', textDecoration: 'none', fontSize: '0.95rem', '&:hover': { color: '#EB8B8B' } }}>
-                  {text.navProducts || 'Productos'}
-                </Link>
-                <Link href="/contacto" sx={{ color: 'white', textDecoration: 'none', fontSize: '0.95rem', '&:hover': { color: '#EB8B8B' } }}>
-                  {text.navContact || 'Contacto'}
-                </Link>
-                <Link href="/nosotros" sx={{ color: 'white', textDecoration: 'none', fontSize: '0.95rem', '&:hover': { color: '#EB8B8B' } }}>
-                  {text.navAbout || 'Nosotros'}
-                </Link>
-              </Box>
-            </motion.div>
-          </Grid>
-
-          {/* Sección 3: Redes Sociales y Suscripción */}
-          <Grid item xs={12} sm={12} md={4} lg={3}>
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-              sx={{ 
-                // Sistema responsivo universal
-                padding: { xs: '3px 20px', sm: '4px 25px', md: '5px 30px', lg: '6px 35px', xl: '8px 40px' }
-              }}
-            >
-              <Typography
-                variant="h6"
-                sx={{
-                  fontWeight: 600,
-                  color: 'white',
-                  mb: 1,
-                  fontSize: '1.1rem',
-                  textAlign: 'center'
-                }}
-              >
-{text.subscribe || 'Suscríbete a nuestros emails'}
-              </Typography>
-              
-              <Box sx={{ display: 'flex', gap: 1, mb: 1, justifyContent: 'center' }}>
-                <TextField
-                  placeholder={text.emailPh || 'Correo electrónico'}
-                  variant="outlined"
-                  size="small"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  disabled={subscriptionLoading}
-                  sx={{
-                    flexGrow: 1,
-                    maxWidth: '200px',
-                    '& .MuiOutlinedInput-root': {
-                      backgroundColor: 'rgba(255,255,255,0.1)',
-                      color: 'white',
-                      '& fieldset': {
-                        borderColor: 'rgba(255,255,255,0.3)'
-                      },
-                      '&:hover fieldset': {
-                        borderColor: '#EB8B8B'
-                      },
-                      '&.Mui-focused fieldset': {
-                        borderColor: '#EB8B8B'
-                      }
-                    },
-                    '& .MuiInputBase-input': {
-                      color: 'white',
-                      '&::placeholder': {
-                        color: '#ccc',
-                        opacity: 1
-                      }
-                    }
-                  }}
-                />
-                <Button
-                  variant="contained"
-                  onClick={handleSubscribe}
-                  disabled={subscriptionLoading || !email.trim()}
-                  sx={{
-                    backgroundColor: '#EB8B8B',
-                    '&:hover': {
-                      backgroundColor: '#C8626D'
-                    },
-                    '&:disabled': {
-                      backgroundColor: 'rgba(255, 255, 255, 0.3)',
-                      color: 'rgba(255, 255, 255, 0.7)'
-                    }
-                  }}
-                >
-                  {subscriptionLoading ? (text.subscribing || 'Suscribiendo...') : (text.subscribeBtn || 'Suscribir')}
-                </Button>
-              </Box>
-
-              {subscriptionMessage && (
-                <Typography
-                  variant="body2"
-                  sx={{
-                    color: subscriptionMessage.includes('exitosamente') ? '#4CAF50' : '#FF9800',
-                    textAlign: 'center',
-                    mt: 1,
-                    fontWeight: 600
-                  }}
-                >
-                  {subscriptionMessage}
-                </Typography>
-              )}
-
-              <Typography
-                variant="h6"
-                sx={{
-                  fontWeight: 600,
-                  color: 'white',
-                  mb: 2,
-                  fontSize: '1.1rem',
-                  textAlign: 'center'
-                }}
-              >
-{text.followUs || 'Síguenos en'}
-              </Typography>
-              
-              <Box sx={{ display: 'flex', gap: 1, mb: 1, justifyContent: 'center' }}>
-                <IconButton
-                  href={socialLinks.facebook || "#"}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  sx={{
-                    color: 'white',
-                    backgroundColor: 'rgba(255,255,255,0.1)',
-                    '&:hover': {
-                      backgroundColor: '#EB8B8B',
-                      color: 'white'
-                    },
-                    transition: 'all 0.3s ease'
-                  }}
-                >
-                  <Facebook />
-                </IconButton>
-                <IconButton
-                  href={socialLinks.instagram || "#"}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  sx={{
-                    color: 'white',
-                    backgroundColor: 'rgba(255,255,255,0.1)',
-                    '&:hover': {
-                      backgroundColor: '#EB8B8B',
-                      color: 'white'
-                    },
-                    transition: 'all 0.3s ease'
-                  }}
-                >
-                  <Instagram />
-                </IconButton>
-                <IconButton
-                  href={socialLinks.tiktok || "#"}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  sx={{
-                    color: 'white',
-                    backgroundColor: 'rgba(255,255,255,0.1)',
-                    '&:hover': {
-                      backgroundColor: '#EB8B8B',
-                      color: 'white'
-                    },
-                    transition: 'all 0.3s ease'
-                  }}
-                >
-                  <TikTokIcon />
-                </IconButton>
-              </Box>
-
-              <Typography
-                variant="body2"
-                sx={{
-                  color: 'white',
-                  fontSize: '0.9rem',
-                  textAlign: 'center'
-                }}
-              >
-                {text.payments || 'Métodos de pago'}
-              </Typography>
-            </motion.div>
-          </Grid>
-        </Grid>
-
-        {/* Copyright */}
-        <Box className="footer-copyright-mobile" sx={{ textAlign: 'center', mt: 0 }}>
+      <Container maxWidth="lg" className="mx-auto px-4 py-12 sm:px-6 lg:px-10">
+        <div className="grid grid-cols-1 gap-12 lg:grid-cols-3">
           <motion.div
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
+            className="flex flex-col items-center gap-3 text-center"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
           >
-            <Typography
-              variant="body2"
-              sx={{
-                color: 'white',
-                fontSize: '0.9rem'
-              }}
-            >
-              © {currentYear} Delizukar. {text.copyright || 'Todos los derechos reservados.'} 
-              {text.madeWith || 'Hecho con amor'}
-              <br />
-              {text.developed || 'Desarrollado por Freedom Labs.'}
+            <Typography variant="h6" sx={{ fontWeight: 600 }}>
+              {text.quickLinks || 'Enlaces Rápidos'}
+            </Typography>
+
+            <Box className="flex flex-col gap-2">
+              <Link href="/terms" sx={{ color: 'white', textDecoration: 'none', fontSize: '0.95rem', '&:hover': { color: '#EB8B8B' } }}>
+                {text.terms || 'Términos y Condiciones'}
+              </Link>
+              <Link href="/terms-service" sx={{ color: 'white', textDecoration: 'none', fontSize: '0.95rem', '&:hover': { color: '#EB8B8B' } }}>
+                {text.termsService || 'Términos de Servicio'}
+              </Link>
+              <Link href="/faq" sx={{ color: 'white', textDecoration: 'none', fontSize: '0.95rem', '&:hover': { color: '#EB8B8B' } }}>
+                {text.faq || 'Preguntas Frecuentes'}
+              </Link>
+              <Link href="/allergy" sx={{ color: 'white', textDecoration: 'none', fontSize: '0.95rem', '&:hover': { color: '#EB8B8B' } }}>
+                {text.allergy || 'Avisos de Alergias'}
+              </Link>
+              <Link href="/shipping" sx={{ color: 'white', textDecoration: 'none', fontSize: '0.95rem', '&:hover': { color: '#EB8B8B' } }}>
+                {text.shipping || 'Política de Envío'}
+              </Link>
+              <Link href="/cookie-care" sx={{ color: 'white', textDecoration: 'none', fontSize: '0.95rem', '&:hover': { color: '#EB8B8B' } }}>
+                {text.cookie || 'Instrucciones de Cuidado de Galletas'}
+              </Link>
+            </Box>
+          </motion.div>
+
+          <motion.div
+            className="flex flex-col items-center gap-3 text-center"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, delay: 0.1 }}
+          >
+            <Typography variant="h6" sx={{ fontWeight: 600 }}>
+              {text.navTitle || 'Navegación'}
+            </Typography>
+
+            <Box className="flex flex-col gap-2">
+              <Link href="/" sx={{ color: 'white', textDecoration: 'none', fontSize: '0.95rem', '&:hover': { color: '#EB8B8B' } }}>
+                {text.navHome || 'Inicio'}
+              </Link>
+              <Link href="/productos" sx={{ color: 'white', textDecoration: 'none', fontSize: '0.95rem', '&:hover': { color: '#EB8B8B' } }}>
+                {text.navProducts || 'Productos'}
+              </Link>
+              <Link href="/contacto" sx={{ color: 'white', textDecoration: 'none', fontSize: '0.95rem', '&:hover': { color: '#EB8B8B' } }}>
+                {text.navContact || 'Contacto'}
+              </Link>
+              <Link href="/nosotros" sx={{ color: 'white', textDecoration: 'none', fontSize: '0.95rem', '&:hover': { color: '#EB8B8B' } }}>
+                {text.navAbout || 'Nosotros'}
+              </Link>
+            </Box>
+          </motion.div>
+
+          <motion.div
+            className="flex flex-col items-center gap-4 text-center"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+          >
+            <Typography variant="h6" sx={{ fontWeight: 600 }}>
+              {text.subscribe || 'Suscríbete a nuestros emails'}
+            </Typography>
+
+            <Box className="flex w-full flex-col items-center justify-center gap-3 sm:flex-row">
+              <TextField
+                placeholder={text.emailPh || 'Correo electrónico'}
+                variant="outlined"
+                size="small"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                disabled={subscriptionLoading}
+                sx={{
+                  flexGrow: 1,
+                  maxWidth: '220px',
+                  '& .MuiOutlinedInput-root': {
+                    backgroundColor: 'rgba(255,255,255,0.1)',
+                    color: 'white',
+                    '& fieldset': {
+                      borderColor: 'rgba(255,255,255,0.3)'
+                    },
+                    '&:hover fieldset': {
+                      borderColor: '#EB8B8B'
+                    },
+                    '&.Mui-focused fieldset': {
+                      borderColor: '#EB8B8B'
+                    }
+                  },
+                  '& .MuiInputBase-input': {
+                    color: 'white',
+                    '&::placeholder': {
+                      color: '#ccc',
+                      opacity: 1
+                    }
+                  }
+                }}
+              />
+              <Button
+                variant="contained"
+                onClick={handleSubscribe}
+                disabled={subscriptionLoading || !email.trim()}
+                sx={{
+                  backgroundColor: '#EB8B8B',
+                  '&:hover': {
+                    backgroundColor: '#C8626D'
+                  },
+                  '&:disabled': {
+                    backgroundColor: 'rgba(255, 255, 255, 0.3)',
+                    color: 'rgba(255, 255, 255, 0.7)'
+                  }
+                }}
+              >
+                {subscriptionLoading ? (text.subscribing || 'Suscribiendo...') : (text.subscribeBtn || 'Suscribir')}
+              </Button>
+            </Box>
+
+            {subscriptionMessage && (
+              <Typography
+                variant="body2"
+                sx={{
+                  color: subscriptionMessage.includes('exitos') ? '#4CAF50' : '#FF9800',
+                  fontWeight: 600
+                }}
+              >
+                {subscriptionMessage}
+              </Typography>
+            )}
+
+            <Typography variant="h6" sx={{ fontWeight: 600 }}>
+              {text.followUs || 'Síguenos en'}
+            </Typography>
+
+            <Box className="flex items-center justify-center gap-2">
+              <IconButton
+                href={socialLinks.facebook || '#'}
+                target="_blank"
+                rel="noopener noreferrer"
+                sx={{
+                  color: 'white',
+                  backgroundColor: 'rgba(255,255,255,0.1)',
+                  '&:hover': {
+                    backgroundColor: '#EB8B8B',
+                    color: 'white'
+                  },
+                  transition: 'all 0.3s ease'
+                }}
+              >
+                <Facebook />
+              </IconButton>
+              <IconButton
+                href={socialLinks.instagram || '#'}
+                target="_blank"
+                rel="noopener noreferrer"
+                sx={{
+                  color: 'white',
+                  backgroundColor: 'rgba(255,255,255,0.1)',
+                  '&:hover': {
+                    backgroundColor: '#EB8B8B',
+                    color: 'white'
+                  },
+                  transition: 'all 0.3s ease'
+                }}
+              >
+                <Instagram />
+              </IconButton>
+              <IconButton
+                href={socialLinks.tiktok || '#'}
+                target="_blank"
+                rel="noopener noreferrer"
+                sx={{
+                  color: 'white',
+                  backgroundColor: 'rgba(255,255,255,0.1)',
+                  '&:hover': {
+                    backgroundColor: '#EB8B8B',
+                    color: 'white'
+                  },
+                  transition: 'all 0.3s ease'
+                }}
+              >
+                <TikTokIcon />
+              </IconButton>
+            </Box>
+
+            <Typography variant="body2" sx={{ fontSize: '0.9rem' }}>
+              {text.payments || 'Métodos de pago'}
             </Typography>
           </motion.div>
-        </Box>
+        </div>
+
+        <motion.div
+          className="mt-10 text-center"
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+        >
+          <Typography variant="body2" sx={{ fontSize: '0.9rem' }}>
+            © {currentYear} Delizukar. {text.copyright || 'Todos los derechos reservados.'}{' '}
+            {text.madeWith || 'Hecho con amor'}
+            <br />
+            {text.developed || 'Desarrollado por Freedom Labs.'}
+          </Typography>
+        </motion.div>
       </Container>
 
-      {/* Logo en esquina superior derecha */}
       <motion.div
-        className="footer-logo-mobile"
         initial={{ opacity: 0, scale: 0.8 }}
         whileInView={{ opacity: 1, scale: 1 }}
         viewport={{ once: true }}
@@ -467,13 +376,13 @@ const Footer = () => {
           src="/LOGO.png"
           alt="Delizukar Logo"
           sx={{
-            height: 78, // 30% más grande (60 * 1.3 = 78)
+            height: 78,
             width: 'auto',
-            filter: 'brightness(0) invert(1)', // Hace el logo blanco
+            filter: 'brightness(0) invert(1)',
             transition: 'all 0.3s ease',
             '&:hover': {
-              transform: 'scale(1.05)', // Solo escala, sin translateY
-              filter: 'brightness(0) invert(1) drop-shadow(0 0 10px rgba(255,255,255,0.5))' // Efecto de brillo al hover
+              transform: 'scale(1.05)',
+              filter: 'brightness(0) invert(1) drop-shadow(0 0 10px rgba(255,255,255,0.5))'
             }
           }}
         />

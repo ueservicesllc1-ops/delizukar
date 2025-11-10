@@ -181,7 +181,7 @@ function App() {
           <div className="App">
             <RouteWatcher />
             <Box sx={{ 
-              paddingTop: { xs: '500px', sm: '70px', md: '70px' },
+              paddingTop: { xs: '110px', sm: '115px', md: '125px' },
               backgroundColor: '#ffffff',
               '@media (min-width: 768px) and (max-width: 1200px) and (orientation: landscape)': {
                 paddingTop: '120px'

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import {
   AppBar,
   Toolbar,
@@ -8,11 +8,9 @@ import {
   IconButton,
   Badge,
   Box,
-  Container,
   Drawer,
   List,
   ListItem,
-  ListItemText,
   useTheme,
   useMediaQuery,
   Menu,
@@ -20,73 +18,48 @@ import {
   Avatar
 } from '@mui/material';
 import {
-  ShoppingBasket,
   Menu as MenuIcon,
   Search,
-  AccountBalanceWallet,
   ShoppingBag,
   Person,
-  Favorite,
-  Close,
   Security,
-  Login,
-  PersonAdd
+  Login
 } from '@mui/icons-material';
 import { useStore } from '../context/StoreContext';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { auth, db } from '../firebase/config';
-import { 
-  signInWithPopup, 
-  GoogleAuthProvider, 
-  signOut, 
-  onAuthStateChanged 
+import {
+  signInWithPopup,
+  GoogleAuthProvider,
+  signOut,
+  onAuthStateChanged
 } from 'firebase/auth';
 import { collection, addDoc, getDocs, query, where } from 'firebase/firestore';
-import { responsiveComponents, getResponsiveValue } from '../utils/responsiveDesign';
-import { applyTranslations, startAutoTranslate } from '../utils/applyTranslations';
-import { translateText } from '../services/translateService';
 import { useLanguage } from '../context/LanguageContext';
+import { startAutoTranslate } from '../utils/applyTranslations';
+import { translateText } from '../services/translateService';
+
 const Header = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
   const [user, setUser] = useState(null);
-  const [authMenuOpen, setAuthMenuOpen] = useState(false);
   const [translatingLang, setTranslatingLang] = useState(false);
-  const { cart, getCartItemsCount } = useStore();
+  const { getCartItemsCount } = useStore();
   const { language, setLanguage } = useLanguage();
-  
+
   const navigate = useNavigate();
   const location = useLocation();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
-  // Aplicar idioma guardado y activar auto-traducción para contenido dinámico
   useEffect(() => {
-    try {
-      if (language !== 'es') setTimeout(() => startAutoTranslate(language, 'es'), 100);
-    } catch {}
-  }, []);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      setScrolled(window.scrollY > 50);
-    };
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-
-  
-
-  // Escuchar cambios de autenticación
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (user) {
+    const unsubscribe = onAuthStateChanged(auth, (userData) => {
+      if (userData) {
         setUser({
-          displayName: user.displayName,
-          email: user.email,
-          photoURL: user.photoURL,
-          uid: user.uid
+          displayName: userData.displayName,
+          email: userData.email,
+          photoURL: userData.photoURL,
+          uid: userData.uid
         });
       } else {
         setUser(null);
@@ -95,106 +68,6 @@ const Header = () => {
 
     return () => unsubscribe();
   }, []);
-
-  const saveUserToFirestore = async (userData) => {
-    try {
-      // Verificar si el usuario ya existe
-      const usersRef = collection(db, 'registeredUsers');
-      const q = query(usersRef, where('uid', '==', userData.uid));
-      const querySnapshot = await getDocs(q);
-      
-      if (querySnapshot.empty) {
-        // Usuario no existe, guardarlo
-        await addDoc(usersRef, {
-          uid: userData.uid,
-          displayName: userData.displayName,
-          email: userData.email,
-          photoURL: userData.photoURL,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-          role: 'user',
-          status: 'active'
-        });
-        console.log('✅ Usuario guardado en Firestore');
-      } else {
-        console.log('ℹ️ Usuario ya existe en Firestore');
-      }
-    } catch (error) {
-      console.error('❌ Error guardando usuario en Firestore:', error);
-    }
-  };
-
-  const handleGoogleAuth = async () => {
-    try {
-      console.log('Iniciando autenticación con Google...');
-      
-      const provider = new GoogleAuthProvider();
-      provider.addScope('email');
-      provider.addScope('profile');
-      
-      const result = await signInWithPopup(auth, provider);
-      const user = result.user;
-      
-      console.log('✅ Usuario autenticado:', user.displayName);
-      
-      // Guardar usuario en Firestore
-      await saveUserToFirestore({
-        uid: user.uid,
-        displayName: user.displayName,
-        email: user.email,
-        photoURL: user.photoURL
-      });
-      
-      // Redirigir a home después del login
-      navigate('/');
-      
-      // El estado se actualizará automáticamente por onAuthStateChanged
-    } catch (error) {
-      console.error('❌ Error en autenticación:', error);
-      
-      // Mostrar mensaje de error al usuario
-      if (error.code === 'auth/popup-closed-by-user') {
-        console.log('Usuario cerró el popup de autenticación');
-      } else if (error.code === 'auth/popup-blocked') {
-        console.log('Popup bloqueado por el navegador');
-      } else {
-        console.log('Error de autenticación:', error.message);
-      }
-    }
-  };
-
-  const handleLogout = async () => {
-    try {
-      await signOut(auth);
-      console.log('✅ Usuario deslogueado');
-      // El estado se actualizará automáticamente por onAuthStateChanged
-    } catch (error) {
-      console.error('❌ Error al cerrar sesión:', error);
-    }
-  };
-
-  // No mostrar header en la página de checkout
-  if (location.pathname === '/checkout') {
-    return null;
-  }
-
-  const handleDrawerToggle = () => {
-    setMobileOpen(!mobileOpen);
-  };
-
-  const handleProfileMenuOpen = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const handleProfileMenuClose = () => {
-    setAnchorEl(null);
-  };
-
-  const handleCartClick = () => {
-    navigate('/carrito');
-  };
-
-  const cartItemsCount = getCartItemsCount();
 
   const labels = {
     es: { home: 'Inicio', products: 'Productos', about: 'Nosotros', contact: 'Contacto', faq: 'FAQ' },
@@ -211,21 +84,91 @@ const Header = () => {
     { label: L.faq, href: '/faq' }
   ];
 
+  const handleDrawerToggle = () => {
+    setMobileOpen(!mobileOpen);
+  };
+
+  const saveUserToFirestore = async (userData) => {
+    const usersRef = collection(db, 'registeredUsers');
+    const q = query(usersRef, where('uid', '==', userData.uid));
+    const querySnapshot = await getDocs(q);
+
+    if (querySnapshot.empty) {
+      await addDoc(usersRef, {
+        uid: userData.uid,
+        displayName: userData.displayName,
+        email: userData.email,
+        photoURL: userData.photoURL,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        role: 'user',
+        status: 'active'
+      });
+    }
+  };
+
+  const handleGoogleAuth = async () => {
+    try {
+      const provider = new GoogleAuthProvider();
+      const result = await signInWithPopup(auth, provider);
+      const authUser = result.user;
+      await saveUserToFirestore({
+        uid: authUser.uid,
+        displayName: authUser.displayName,
+        email: authUser.email,
+        photoURL: authUser.photoURL
+      });
+      navigate('/');
+    } catch (error) {
+      console.error('Error en autenticación:', error);
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+    } catch (error) {
+      console.error('Error al cerrar sesión:', error);
+    }
+  };
+
+  const handleCartClick = () => {
+    navigate('/carrito');
+  };
+
+  const handleLanguageChange = async (lang) => {
+    try { localStorage.setItem('selectedLanguage', lang); } catch {}
+    setLanguage(lang);
+    if (lang === 'es') {
+      window.location.reload();
+    } else {
+      try {
+        setTranslatingLang(true);
+        await translateText('Hola', lang, 'es');
+        startAutoTranslate(lang, 'es');
+      } catch {
+        alert('No se pudo traducir. Verifica backend y API key.');
+      } finally {
+        setTranslatingLang(false);
+      }
+    }
+  };
+
+  if (location.pathname === '/checkout') {
+    return null;
+  }
+
   const drawer = (
-    <Box sx={{ width: 250, backgroundColor: '#c8626d', height: '100%', position: 'relative' }}>
-      <Box sx={{ p: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Typography variant="h6" sx={{ fontWeight: 700, color: 'white' }}>
-          Delizukar
-        </Typography>
+    <Box sx={{ width: 260, height: '100%', backgroundColor: '#c8626d', color: 'white', display: 'flex', flexDirection: 'column' }}>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', px: 2, py: 2 }}>
+        <Typography variant="h6" sx={{ fontWeight: 700 }}>Delizukar</Typography>
         <IconButton onClick={handleDrawerToggle} sx={{ color: 'white' }}>
-          <Close />
+          <MenuIcon />
         </IconButton>
       </Box>
-      
-      
-      <List>
+      <List sx={{ flexGrow: 1 }}>
         {menuItems.map((item) => (
-          <ListItem key={item.label} sx={{ py: 1 }}>
+          <ListItem key={item.label} disablePadding>
             <Button
               href={item.href}
               sx={{
@@ -235,9 +178,10 @@ const Header = () => {
                 textTransform: 'none',
                 fontSize: '1rem',
                 fontWeight: 500,
+                px: 2,
+                py: 1,
                 '&:hover': {
-                  backgroundColor: 'rgba(255,255,255,0.2)',
-                  color: 'white'
+                  backgroundColor: 'rgba(255,255,255,0.18)'
                 }
               }}
             >
@@ -246,485 +190,246 @@ const Header = () => {
           </ListItem>
         ))}
       </List>
-      
-      {/* Selector de idioma para móvil */}
-      <Box sx={{ p: 2, position: 'absolute', bottom: 16, left: 0, right: 0 }}>
-        <select
+      <Box sx={{ px: 2, pb: 3 }}>
+        <Box
+          component="select"
           aria-label="Seleccionar idioma"
           value={language}
-          onChange={async (e) => {
-            const lang = e.target.value;
-            try { localStorage.setItem('selectedLanguage', lang); } catch {}
-            setLanguage(lang);
-            if (lang === 'es') {
-              window.location.reload();
-            } else {
-              try {
-                setTranslatingLang(true);
-                await translateText('Hola', lang, 'es');
-                startAutoTranslate(lang, 'es');
-              } catch {
-                alert('No se pudo traducir. Verifica backend y API key.');
-              } finally {
-                setTranslatingLang(false);
-              }
-            }
-          }}
-          style={{
+          onChange={(e) => handleLanguageChange(e.target.value)}
+          disabled={translatingLang}
+          sx={{
             width: '100%',
-            padding: '8px 12px',
-            borderRadius: '8px',
-            border: '1px solid white',
+            borderRadius: '12px',
+            border: '1px solid rgba(255,255,255,0.7)',
+            backgroundColor: 'rgba(255,255,255,0.9)',
             color: '#c8626d',
-            background: 'white',
+            fontWeight: 600,
+            fontSize: '0.9rem',
+            px: 2,
+            py: 1.2,
             outline: 'none',
-            opacity: translatingLang ? 0.6 : 1,
-            pointerEvents: translatingLang ? 'none' : 'auto'
+            boxShadow: '0 6px 16px rgba(0,0,0,0.12)'
           }}
         >
           <option value="es">ES</option>
           <option value="en">EN</option>
           <option value="fr">FR</option>
           <option value="pt">PT</option>
-        </select>
+        </Box>
       </Box>
     </Box>
   );
 
+  const LanguageSelect = (props) => (
+    <Box
+      component="select"
+      aria-label="Seleccionar idioma"
+      value={language}
+      onChange={(e) => handleLanguageChange(e.target.value)}
+      disabled={translatingLang}
+      sx={{
+        borderRadius: '999px',
+        border: '1px solid #c8626d',
+        backgroundColor: '#ffffff',
+        color: '#c8626d',
+        fontWeight: 600,
+        fontSize: '0.85rem',
+        px: 2,
+        py: 0.6,
+        boxShadow: '0 4px 12px rgba(0,0,0,0.12)',
+        outline: 'none',
+        ...props.sx
+      }}
+    >
+      <option value="es">ES</option>
+      <option value="en">EN</option>
+      <option value="fr">FR</option>
+      <option value="pt">PT</option>
+    </Box>
+  );
+
+  const renderMobileToolbar = () => (
+    <Toolbar disableGutters sx={{ position: 'relative', flexDirection: 'column', gap: 1.2, px: 2, py: 1.4, minHeight: 'auto' }}>
+      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%' }}>
+        <IconButton onClick={handleDrawerToggle} sx={{ color: '#c8626d', position: 'absolute', left: 8 }}>
+          <MenuIcon />
+        </IconButton>
+
+        <motion.a href="/" whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} style={{ display: 'flex', justifyContent: 'center', width: '100%', marginTop: '6px' }}>
+          <Box component="img" src="/LOGO.png" alt="Delizukar Logo" sx={{ height: 95, width: 'auto' }} />
+        </motion.a>
+
+        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 0.5, position: 'absolute', right: 8, top: 8 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <IconButton
+              onClick={user ? (e) => setAnchorEl(e.currentTarget) : handleGoogleAuth}
+              sx={{ color: '#c8626d' }}
+            >
+              {user ? <Person /> : <Login />}
+            </IconButton>
+            <IconButton onClick={handleCartClick} sx={{ color: '#be8782' }}>
+              <Badge badgeContent={getCartItemsCount()} color="error">
+                <ShoppingBag />
+              </Badge>
+            </IconButton>
+          </Box>
+          <LanguageSelect sx={{ px: 1.5, py: 0.4, fontSize: '0.75rem' }} />
+        </Box>
+      </Box>
+    </Toolbar>
+  );
+
+  const renderDesktopToolbar = () => (
+    <Toolbar disableGutters sx={{ position: 'relative', flexDirection: 'column', gap: 2.5, px: 3, py: 2.2, minHeight: 'auto', display: { xs: 'none', md: 'flex' } }}>
+      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+          <IconButton sx={{ color: '#be8782' }}>
+            <Search />
+          </IconButton>
+          {menuItems.map((item) => (
+            <Button
+              key={item.label}
+              href={item.href}
+              sx={{
+                color: '#eb8b8b',
+                textTransform: 'none',
+                fontWeight: 500,
+                fontSize: '1rem',
+                px: 2.5,
+                py: 1,
+                borderRadius: '25px',
+                '&:hover': {
+                  backgroundColor: '#c8626d20'
+                }
+              }}
+            >
+              {item.label}
+            </Button>
+          ))}
+        </Box>
+
+        <motion.a href="/" whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} style={{ display: 'flex', justifyContent: 'center', width: '100%', marginTop: '8px' }}>
+          <Box component="img" src="/LOGO.png" alt="Delizukar Logo" sx={{ height: 160, width: 'auto' }} />
+        </motion.a>
+
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, justifyContent: 'flex-end', minWidth: '210px' }}>
+          <LanguageSelect />
+          {user ? (
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <Avatar src={user.photoURL} alt={user.displayName} sx={{ width: 36, height: 36 }} />
+              <Typography variant="body2" sx={{ fontWeight: 600, color: '#c8626d', maxWidth: '140px', textOverflow: 'ellipsis', whiteSpace: 'nowrap', overflow: 'hidden' }}>
+                {user.displayName}
+              </Typography>
+              <Button
+                variant="outlined"
+                onClick={handleLogout}
+                sx={{
+                  borderColor: '#c8626d',
+                  color: '#c8626d',
+                  textTransform: 'none',
+                  fontWeight: 600,
+                  '&:hover': {
+                    backgroundColor: '#c8626d',
+                    color: 'white',
+                    borderColor: '#c8626d'
+                  }
+                }}
+              >
+                Salir
+              </Button>
+              <IconButton onClick={(e) => setAnchorEl(e.currentTarget)} sx={{ color: '#c8626d' }}>
+                <Person sx={{ fontSize: '1.8rem' }} />
+              </IconButton>
+            </Box>
+          ) : (
+            <Button
+              variant="outlined"
+              startIcon={<Login />}
+              onClick={handleGoogleAuth}
+              sx={{
+                borderColor: '#c8626d',
+                color: '#c8626d',
+                textTransform: 'none',
+                fontWeight: 600,
+                '&:hover': {
+                  backgroundColor: '#c8626d',
+                  color: 'white',
+                  borderColor: '#c8626d'
+                }
+              }}
+            >
+              Iniciar Sesión
+            </Button>
+          )}
+          {user && (user.email === 'ueservicesllc1@gmail.com' || user.email === 'florvazdi@gmail.com') && (
+            <IconButton component="a" href="/admin" sx={{ color: '#c8626d' }}>
+              <Security sx={{ fontSize: '1.8rem' }} />
+            </IconButton>
+          )}
+          <IconButton onClick={handleCartClick} sx={{ color: '#be8782' }}>
+            <Badge badgeContent={getCartItemsCount()} color="error">
+              <ShoppingBag />
+            </Badge>
+          </IconButton>
+        </Box>
+      </Box>
+    </Toolbar>
+  );
+
   return (
     <div data-no-translate>
-      <motion.div
-        initial={{ y: -100 }}
-        animate={{ y: 0 }}
-        transition={{ duration: 0.5 }}
+      <AppBar
+        position="fixed"
+        sx={{
+          backgroundColor: '#ffece5',
+          boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
+          zIndex: (theme) => theme.zIndex.drawer + 1
+        }}
       >
-        <AppBar
-          position="fixed"
-          className="header-mobile"
-          sx={{
-            backgroundColor: '#ffece5',
-            boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
-            zIndex: (theme) => isMobile ? 1000 : theme.zIndex.appBar,
-            top: 0,
-            left: 0,
-            right: 0,
-            // Sistema responsivo universal
-            height: responsiveComponents.header.height,
-            width: '100%',
-            '& .MuiToolbar-root': {
-              minHeight: responsiveComponents.header.height,
-              padding: responsiveComponents.header.padding
-            }
-          }}
-        >
-          <Container maxWidth="lg">
-            <Toolbar sx={{ 
-              flexDirection: 'column', 
-              py: 0.5, // reduce padding vertical aún más
-              minHeight: '70px', // reduce altura total significativamente
-              justifyContent: 'center',
-              position: 'relative', // Necesario para posicionar el selector de idioma
-              overflow: 'visible' // Asegurar que el selector sea visible
-            }}>
-              {/* User Info - Top Right */}
-              {user && (
-                <Box sx={{ 
-                  position: 'absolute', 
-                  top: 8, 
-                  right: 16, 
-                  zIndex: 10,
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 1,
-                  backgroundColor: 'rgba(255,255,255,0.9)',
-                  padding: '4px 8px',
-                  borderRadius: '20px',
-                  boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
-                }}>
-                  <Avatar
-                    src={user.photoURL}
-                    alt={user.displayName}
-                    className="header-user-avatar"
-                    sx={{ width: 24, height: 24 }}
-                  />
-                  <Typography 
-                    variant="caption" 
-                    sx={{ 
-                      color: '#c8626d', 
-                      fontWeight: 600,
-                      fontSize: '0.7rem',
-                      maxWidth: '100px',
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                      whiteSpace: 'nowrap'
-                    }}
-                  >
-                    {user.displayName}
-                  </Typography>
-                  <Button
-                    size="small"
-                    variant="outlined"
-                    onClick={handleLogout}
-                    sx={{
-                      borderColor: '#c8626d',
-                      color: '#c8626d',
-                      fontSize: '0.6rem',
-                      py: 0.3,
-                      px: 0.8,
-                      minWidth: 'auto',
-                      minHeight: '20px',
-                      '&:hover': {
-                        backgroundColor: '#c8626d',
-                        color: 'white',
-                        borderColor: '#c8626d'
-                      }
-                    }}
-                  >
-                    Salir
-                  </Button>
-                </Box>
-              )}
+        {isMobile ? renderMobileToolbar() : renderDesktopToolbar()}
+      </AppBar>
 
-              {/* Authentication Buttons - Top Right (when not logged in) */}
-              {!user && (
-                <Box sx={{ 
-                  position: 'absolute', 
-                  top: 4, 
-                  right: 16, 
-                  zIndex: 10 
-                }}>
-                  <Box sx={{ display: 'flex', gap: 0.5 }} className="header-auth-buttons">
-                    <Button
-                      size="small"
-                      variant="outlined"
-                      startIcon={<Login />}
-                      onClick={handleGoogleAuth}
-                      className="header-auth-buttons"
-                      sx={{
-                        borderColor: '#c8626d',
-                        color: '#c8626d',
-                        fontSize: { xs: '0.5rem', sm: '0.6rem' },
-                        py: { xs: 0.2, sm: 0.3 },
-                        px: { xs: 0.6, sm: 0.8 },
-                        minWidth: 'auto',
-                        height: { xs: '24px', sm: '28px' },
-                        '&:hover': {
-                          backgroundColor: '#c8626d',
-                          color: 'white',
-                          borderColor: '#c8626d'
-                        }
-                      }}
-                    >
-                      Iniciar Sesión
-                    </Button>
-                  </Box>
-                </Box>
-              )}
-
-              {/* Logo with Search and User Icons */}
-              <Box sx={{ 
-                display: 'flex', 
-                alignItems: 'center', 
-                justifyContent: 'center',
-                width: '100%',
-                marginBottom: '8px',
-                mt: 1,
-                position: 'relative'
-              }}>
-                {/* Mobile Menu Button - Left */}
-                {isMobile && (
-                  <Box sx={{ 
-                    position: 'absolute', 
-                    left: 0, 
-                    display: 'flex', 
-                    alignItems: 'center', 
-                    gap: 1 
-                  }}>
-                    <IconButton
-                      onClick={handleDrawerToggle}
-                      sx={{
-                        color: '#eb8b8b',
-                        '&:hover': {
-                          backgroundColor: '#eb8b8b20'
-                        }
-                      }}
-                    >
-                      <MenuIcon />
-                    </IconButton>
-                  </Box>
-                )}
-                  {/* Search Icon - Left (desktop only) */}
-                  {!isMobile && (
-                    <Box sx={{ 
-                      position: 'absolute', 
-                      left: 0, 
-                      display: 'flex', 
-                      alignItems: 'center', 
-                      gap: 1 
-                    }}>
-                      <IconButton
-                        sx={{
-                          color: '#be8782',
-                          '&:hover': {
-                            backgroundColor: '#be878220'
-                          }
-                        }}
-                      >
-                        <Search />
-                      </IconButton>
-                    </Box>
-                  )}
-
-                {/* Logo - Center */}
-                <motion.div
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  <Box
-                    component="a"
-                    href="/"
-                    sx={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      textDecoration: 'none'
-                    }}
-                  >
-                    <Box
-                      component="img"
-                      src="/LOGO.png"
-                      alt="Delizukar Logo"
-                      sx={{
-                        height: 100, // Made smaller for mobile
-                        width: 'auto',
-                        transition: 'all 0.3s ease'
-                      }}
-                    />
-                  </Box>
-                </motion.div>
-
-
-                {/* Cart, Profile, Admin Icons and Auth Buttons - Right */}
-
-                {/* User, Cart and Admin Icons - Horizontal layout - Right */}
-                <Box sx={{ 
-                  display: 'flex', 
-                  flexDirection: 'row',
-                  alignItems: 'center', 
-                  gap: 0.2,
-                  position: 'absolute',
-                  right: 16
-                }}>
-                  {/* Profile - Left */}
-                  <IconButton
-                    className="user-icon-mobile"
-                    onClick={handleProfileMenuOpen}
-                    sx={{
-                      color: '#c8626d',
-                      fontSize: '1.5rem',
-                      '&:hover': {
-                        backgroundColor: '#c8626d20'
-                      }
-                    }}
-                  >
-                    <Person sx={{ fontSize: '1.5rem' }} />
-                  </IconButton>
-
-                  {/* Admin Panel - Right - Solo para usuarios autorizados */}
-                  {user && (user.email === 'ueservicesllc1@gmail.com' || user.email === 'florvazdi@gmail.com') && (
-                    <motion.div
-                      className="admin-icon-mobile"
-                      whileHover={{ scale: 1.1 }}
-                      whileTap={{ scale: 0.9 }}
-                    >
-                      <IconButton
-                        component="a"
-                        href="/admin"
-                        sx={{
-                          color: '#c8626d',
-                          fontSize: '1.5rem',
-                          '&:hover': {
-                            backgroundColor: '#c8626d20',
-                            color: '#be8782'
-                          }
-                        }}
-                      >
-                        <Security sx={{ fontSize: '1.5rem' }} />
-                      </IconButton>
-                    </motion.div>
-                  )}
-
-                  {/* Shopping Cart - Right */}
-                  <motion.div
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.9 }}
-                  >
-                    <IconButton
-                      onClick={handleCartClick}
-                      className="header-cart-icon"
-                      sx={{
-                        color: '#be8782',
-                        fontSize: '1.5rem',
-                        '&:hover': {
-                          backgroundColor: '#be878220'
-                        }
-                      }}
-                    >
-                      <Badge badgeContent={cartItemsCount} color="error">
-                        <ShoppingBag sx={{ fontSize: '1.5rem' }} />
-                      </Badge>
-                    </IconButton>
-                  </motion.div>
-                  
-                </Box>
-              </Box>
-
-              {/* Navigation and Actions Container */}
-              <Box sx={{ 
-                display: 'flex', 
-                justifyContent: 'center', 
-                alignItems: 'center', 
-                width: '100%',
-                flexWrap: 'wrap',
-                gap: 2
-              }}>
-                {/* Desktop Navigation - Centered */}
-                {!isMobile && (
-                  <Box sx={{ display: 'flex', gap: 1, justifyContent: 'center', alignItems: 'center', flex: 1 }}>
-                    {menuItems.map((item) => (
-                        <Button
-                          key={item.label}
-                          href={item.href}
-                          sx={{
-                            color: '#eb8b8b',
-                            textTransform: 'none',
-                            fontWeight: 500,
-                            fontSize: '1rem',
-                            px: 2,
-                            py: 1,
-                            borderRadius: '25px',
-                            transition: 'all 0.3s ease',
-                            '&:hover': {
-                              backgroundColor: '#c8626d20',
-                              transform: 'translateY(-2px)'
-                            }
-                          }}
-                        >
-                        {item.label}
-                      </Button>
-                    ))}
-                  </Box>
-                )}
-
-                
-
-                {/* Actions - Hidden on desktop, shown on mobile */}
-                <Box sx={{ display: { xs: 'flex', md: 'none' }, alignItems: 'center', gap: 1 }}>
-                  {/* Mobile actions can go here if needed */}
-                </Box>
-              </Box>
-
-              {/* Selector de idioma - borde inferior derecho del header (todos los dispositivos) */}
-              <Box sx={{ 
-                  position: 'absolute',
-                  right: 16,
-                  bottom: 0,
-                  zIndex: 10000
-                }}>
-                  <select
-                    aria-label="Seleccionar idioma"
-                    value={language}
-                    onChange={async (e) => {
-                      const lang = e.target.value;
-                      try { localStorage.setItem('selectedLanguage', lang); } catch {}
-                      setLanguage(lang);
-                      if (lang === 'es') {
-                        window.location.reload();
-                      } else {
-                        try {
-                          setTranslatingLang(true);
-                          await translateText('Hola', lang, 'es');
-                          startAutoTranslate(lang, 'es');
-                        } catch {
-                          alert('No se pudo traducir. Verifica backend y API key.');
-                        } finally {
-                          setTranslatingLang(false);
-                        }
-                      }
-                    }}
-                    style={{
-                      padding: '4px 8px',
-                      borderRadius: '16px',
-                      border: '1px solid #c8626d',
-                      color: '#c8626d',
-                      background: 'white',
-                      outline: 'none',
-                      opacity: translatingLang ? 0.6 : 1,
-                      pointerEvents: translatingLang ? 'none' : 'auto',
-                      fontSize: '0.75rem',
-                      fontWeight: 600,
-                      zIndex: 10000,
-                      position: 'relative',
-                      boxShadow: '0 2px 8px rgba(0,0,0,0.2)'
-                    }}
-                  >
-                    <option value="es">ES</option>
-                    <option value="en">EN</option>
-                    <option value="fr">FR</option>
-                    <option value="pt">PT</option>
-                  </select>
-                </Box>
-                
-            </Toolbar>
-          </Container>
-        </AppBar>
-      </motion.div>
-
-      {/* Mobile Drawer */}
       <Drawer
         variant="temporary"
         anchor="left"
         open={mobileOpen}
         onClose={handleDrawerToggle}
-        ModalProps={{
-          keepMounted: true,
-          style: { zIndex: 999999 }
-        }}
+        ModalProps={{ keepMounted: true }}
         sx={{
           display: { xs: 'block', md: 'none' },
-          zIndex: 999999,
+          zIndex: (theme) => theme.zIndex.drawer + 2,
           '& .MuiDrawer-paper': {
             boxSizing: 'border-box',
-            width: 250,
-            zIndex: 999999,
-            position: 'relative',
-            top: 0,
-            backgroundColor: '#c8626d !important',
-            background: '#c8626d !important'
-          },
-          '& .MuiBackdrop-root': {
-            zIndex: 999998
+            width: 260,
+            zIndex: (theme) => theme.zIndex.drawer + 2,
+            top: 0
           }
         }}
       >
         {drawer}
       </Drawer>
 
-      {/* Profile Menu */}
-      <Menu
-        anchorEl={anchorEl}
-        open={Boolean(anchorEl)}
-        onClose={handleProfileMenuClose}
-        transformOrigin={{ horizontal: 'right', vertical: 'top' }}
-        anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
-        sx={{
-          zIndex: 10002
-        }}
-      >
-        <MenuItem onClick={handleProfileMenuClose}>Mi Perfil</MenuItem>
-        <MenuItem onClick={handleProfileMenuClose}>Mis Pedidos</MenuItem>
-        <MenuItem onClick={handleProfileMenuClose}>Configuración</MenuItem>
-        <MenuItem onClick={handleLogout}>Salir</MenuItem>
-      </Menu>
+      {user && (
+        <Menu
+          anchorEl={anchorEl}
+          open={Boolean(anchorEl)}
+          onClose={() => setAnchorEl(null)}
+          transformOrigin={{ horizontal: 'right', vertical: 'top' }}
+          anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
+        >
+          <MenuItem onClick={() => setAnchorEl(null)}>Mi Perfil</MenuItem>
+          <MenuItem onClick={() => setAnchorEl(null)}>Mis Pedidos</MenuItem>
+          <MenuItem onClick={() => setAnchorEl(null)}>Configuración</MenuItem>
+          <MenuItem
+            onClick={() => {
+              setAnchorEl(null);
+              handleLogout();
+            }}
+          >
+            Salir
+          </MenuItem>
+        </Menu>
+      )}
     </div>
   );
 };

@@ -60,7 +60,7 @@ export const FeaturedProductsProvider = ({ children }) => {
                   @font-face {
                     font-family: '${newConfig.titleFont}';
                     src: url('${fontSource}');
-                    font-display: swap;
+                    font-display: block;
                   }
                 `;
                 

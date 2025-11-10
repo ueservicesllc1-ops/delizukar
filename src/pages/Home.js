@@ -1,708 +1,288 @@
-import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import { Box, Container, Typography, Grid, Card, CardContent, Button, Chip, Dialog, DialogTitle, DialogContent, DialogActions, Avatar, Rating, IconButton } from '@mui/material';
-import { ArrowForward, Star, LocalShipping, Security, Support, ChevronLeft, ChevronRight } from '@mui/icons-material';
-import HeroBanner from '../components/HeroBanner';
-import ProductCards from '../components/ProductCards';
-import Banner2 from '../components/Banner2';
-import TestimonialsSection from '../components/TestimonialsSection';
-import PopupHero from '../components/PopupHero';
-import { useTitleConfig } from '../context/TitleConfigContext';
-import { useFeaturedProducts } from '../context/FeaturedProductsContext';
+import React, { useEffect, useMemo, useState } from 'react';
+import {
+  Box,
+  Card,
+  CardContent,
+  Typography,
+  Button,
+  CardMedia,
+  Dialog,
+  DialogContent,
+  IconButton,
+  Divider
+} from '@mui/material';
+import { Close, ShoppingBag } from '@mui/icons-material';
+import Rating from '@mui/material/Rating';
 import { useStore } from '../context/StoreContext';
-import AfterpayMessaging from '../components/AfterpayMessaging';
-import { responsiveComponents } from '../utils/responsiveDesign';
 import { useLanguage } from '../context/LanguageContext';
-import { translateBatch } from '../services/translateService';
 
 const Home = () => {
-  const { language } = useLanguage();
-  const { titleConfig, loading } = useTitleConfig();
-  const { featuredConfig, featuredProducts, loading: featuredLoading } = useFeaturedProducts();
-  const { addToCart } = useStore();
+  const { featuredProducts, products, productsLoading, addToCart } = useStore();
   const [selectedProduct, setSelectedProduct] = useState(null);
-  const [productDetailOpen, setProductDetailOpen] = useState(false);
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const [popupOpen, setPopupOpen] = useState(false);
-  const [translatedTexts, setTranslatedTexts] = useState({
-    verDetalles: 'Ver Detalles',
-    verTodasLasGalletas: 'Ver Todas las Galletas',
-    agregarAlCarrito: 'Agregar al Carrito',
-    cerrar: 'Cerrar',
-    destacado: 'Destacado',
-    masVendido: 'Más Vendido',
-    nuevo: 'Nuevo',
-    reseñas: 'reseñas',
-    stockDisponible: 'Stock disponible:',
-    unidades: 'unidades',
-    agotado: 'Agotado',
-    stockBajo: 'Stock Bajo',
-    stockMedio: 'Stock Medio',
-    enStock: 'En Stock',
-    galletasDestacadas: 'Galletas Destacadas',
-    vistaImagen: 'Vista',
-    descripcionFerrero: 'Galleta estilo NY con Ferrero Rocher, chips de chocolate oscuro y avellanas tostadas—intensa, elegante y adictiva.',
-    descripcionGeneral: 'Deliciosas {productName} con ingredientes premium. Galletas estilo Nueva York perfectamente horneadas para disfrutar o compartir.'
-  });
-  const pinkStripMessages = {
-    es: 'DeliZuKar: el Wi-Fi de tu corazón (siempre te conecta con la felicidad).',
-    en: "DeliZuKar: your heart's Wi-Fi (always keeps you connected to happiness).",
-    fr: "DeliZuKar : le Wi-Fi de ton cœur (toujours connecté au bonheur).",
-    pt: 'DeliZuKar: o Wi-Fi do seu coração (sempre te conecta à felicidade).'
+  const [isBrittanyLoaded, setIsBrittanyLoaded] = useState(false);
+  const { language } = useLanguage();
+
+  const translations = {
+    es: {
+      bannerMessage: 'DeliZuKar: el Wi-Fi de tu corazón (siempre te conecta a la felicidad).',
+      featuredTitle: 'Galletas Destacadas',
+      viewDetails: 'Ver detalles',
+      addToCart: 'Agregar al carrito',
+      noFeatured: 'Aún no hay suficientes galletas destacadas para mostrar.'
+    },
+    en: {
+      bannerMessage: 'DeliZuKar: your heart’s Wi-Fi (always connects you to happiness).',
+      featuredTitle: 'Featured Cookies',
+      viewDetails: 'View details',
+      addToCart: 'Add to cart',
+      noFeatured: 'Not enough featured cookies to display yet.'
+    },
+    fr: {
+      bannerMessage: 'DeliZuKar : le Wi-Fi de ton cœur (toujours connecté au bonheur).',
+      featuredTitle: 'Biscuits en vedette',
+      viewDetails: 'Voir les détails',
+      addToCart: 'Ajouter au panier',
+      noFeatured: 'Pas encore assez de biscuits en vedette à afficher.'
+    },
+    pt: {
+      bannerMessage: 'DeliZuKar: o Wi-Fi do seu coração (sempre conecta você à felicidade).',
+      featuredTitle: 'Cookies em destaque',
+      viewDetails: 'Ver detalhes',
+      addToCart: 'Adicionar ao carrinho',
+      noFeatured: 'Ainda não há cookies em destaque suficientes para mostrar.'
+    }
   };
 
-  // Traducir textos cuando cambia el idioma
+  const copy = translations[language] || translations.es;
+
   useEffect(() => {
-    const translateTexts = async () => {
-      if (language === 'es') {
-        setTranslatedTexts({
-          verDetalles: 'Ver Detalles',
-          verTodasLasGalletas: 'Ver Todas las Galletas',
-          agregarAlCarrito: 'Agregar al Carrito',
-          cerrar: 'Cerrar',
-          destacado: 'Destacado',
-          masVendido: 'Más Vendido',
-          nuevo: 'Nuevo',
-          reseñas: 'reseñas',
-          stockDisponible: 'Stock disponible:',
-          unidades: 'unidades',
-          agotado: 'Agotado',
-          stockBajo: 'Stock Bajo',
-          stockMedio: 'Stock Medio',
-          enStock: 'En Stock',
-          galletasDestacadas: 'Galletas Destacadas',
-          vistaImagen: 'Vista',
-          descripcionFerrero: 'Galleta estilo NY con Ferrero Rocher, chips de chocolate oscuro y avellanas tostadas—intensa, elegante y adictiva.',
-          descripcionGeneral: 'Deliciosas {productName} con ingredientes premium. Galletas estilo Nueva York perfectamente horneadas para disfrutar o compartir.'
-        });
-      } else {
-        try {
-          const textsToTranslate = [
-            'Ver Detalles',
-            'Ver Todas las Galletas',
-            'Agregar al Carrito',
-            'Cerrar',
-            'Destacado',
-            'Más Vendido',
-            'Nuevo',
-            'reseñas',
-            'Stock disponible:',
-            'unidades',
-            'Agotado',
-            'Stock Bajo',
-            'Stock Medio',
-            'En Stock',
-            'Galletas Destacadas',
-            'Vista',
-            'Galleta estilo NY con Ferrero Rocher, chips de chocolate oscuro y avellanas tostadas—intensa, elegante y adictiva.',
-            'Deliciosas {productName} con ingredientes premium. Galletas estilo Nueva York perfectamente horneadas para disfrutar o compartir.'
-          ];
-          const translated = await translateBatch(textsToTranslate, language, 'es');
-          setTranslatedTexts({
-            verDetalles: translated[0] || 'Ver Detalles',
-            verTodasLasGalletas: translated[1] || 'Ver Todas las Galletas',
-            agregarAlCarrito: translated[2] || 'Agregar al Carrito',
-            cerrar: translated[3] || 'Cerrar',
-            destacado: translated[4] || 'Destacado',
-            masVendido: translated[5] || 'Más Vendido',
-            nuevo: translated[6] || 'Nuevo',
-            reseñas: translated[7] || 'reseñas',
-            stockDisponible: translated[8] || 'Stock disponible:',
-            unidades: translated[9] || 'unidades',
-            agotado: translated[10] || 'Agotado',
-            stockBajo: translated[11] || 'Stock Bajo',
-            stockMedio: translated[12] || 'Stock Medio',
-            enStock: translated[13] || 'En Stock',
-            galletasDestacadas: translated[14] || 'Galletas Destacadas',
-            vistaImagen: translated[15] || 'Vista',
-            descripcionFerrero: translated[16] || 'Galleta estilo NY con Ferrero Rocher, chips de chocolate oscuro y avellanas tostadas—intensa, elegante y adictiva.',
-            descripcionGeneral: translated[17] || 'Deliciosas {productName} con ingredientes premium. Galletas estilo Nueva York perfectamente horneadas para disfrutar o compartir.'
-          });
-        } catch (error) {
-          console.error('Error translating texts:', error);
+    let isMounted = true;
+
+    const loadFont = async () => {
+      try {
+        if (document?.fonts?.load) {
+          await Promise.all([
+            document.fonts.load("400 24px BrittanySignature"),
+            document.fonts.load("1em BrittanySignature")
+          ]);
+        } else if (document?.fonts?.ready) {
+          await document.fonts.ready;
+        }
+      } catch (error) {
+        console.warn('No se pudo cargar BrittanySignature a través de document.fonts:', error);
+      } finally {
+        if (isMounted) {
+          setIsBrittanyLoaded(true);
         }
       }
     };
-    translateTexts();
-  }, [language]);
 
-  // Funciones para el carrusel del popup
-  const getProductImages = () => {
-    if (!selectedProduct) return [];
-    
-    // Usar el array 'images' si existe, sino usar solo 'image'
-    if (selectedProduct.images && Array.isArray(selectedProduct.images)) {
-      return selectedProduct.images;
-    } else if (selectedProduct.image) {
-      return [selectedProduct.image];
-    }
-    
-    return [];
-  };
+    loadFont();
 
-  const nextImage = () => {
-    const images = getProductImages();
-    setCurrentImageIndex((prev) => (prev + 1) % images.length);
-  };
-
-  const prevImage = () => {
-    const images = getProductImages();
-    setCurrentImageIndex((prev) => (prev - 1 + images.length) % images.length);
-  };
-
-  // Resetear índice cuando se abre un producto diferente
-  React.useEffect(() => {
-    setCurrentImageIndex(0);
-  }, [selectedProduct]);
-
-  // Mostrar popup al cargar la página
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setPopupOpen(true);
-    }, 2000); // Mostrar después de 2 segundos
-
-    return () => clearTimeout(timer);
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
-  // Debug: verificar si el popup se está abriendo
-  useEffect(() => {
-    console.log('Popup state:', popupOpen);
-  }, [popupOpen]);
+  const featuredItems = useMemo(() => {
+    if (productsLoading) return [];
+    const availableFeatured = featuredProducts.length > 0
+      ? featuredProducts
+      : products.filter((product) => product.featured);
+    const additionalItems = products.filter(
+      (product) => !availableFeatured.some((featured) => featured.id === product.id)
+    );
+    return [...availableFeatured, ...additionalItems].slice(0, 4);
+  }, [featuredProducts, products, productsLoading]);
+
+  const handleOpenDetail = (product) => {
+    setSelectedProduct(product);
+  };
+
+  const handleCloseDetail = () => {
+    setSelectedProduct(null);
+  };
 
   return (
-    <Box className="home-mobile" sx={{
-      // Sistema responsivo universal
-      padding: responsiveComponents.container.padding,
-      maxWidth: '100%',
-      margin: '0 auto',
-      marginTop: responsiveComponents.banner.marginTop
+    <Box sx={{
+      width: '100vw',
+      position: 'relative',
+      left: '50%',
+      right: '50%',
+      marginLeft: '-50vw',
+      marginRight: '-50vw',
+      marginTop: { xs: '16px', md: '24px' }
     }}>
-      {/* Hero Banner */}
-      <Box sx={{
-        width: '100vw',
-        marginLeft: 'calc(-50vw + 50%)',
-        marginRight: 'calc(-50vw + 50%)',
-        marginTop: '-30px',
-        marginBottom: '-50px',
-        position: 'relative',
-        '@media (min-width: 769px) and (max-width: 1024px) and (orientation: landscape)': {
-          marginTop: '-30px'
-        },
-        '@media (min-width: 1201px)': {
-          marginTop: '20px'
-        }
-      }}>
-        <HeroBanner />
-      </Box>
-
-      {/* Franja rosa separada */}
       <Box
-        className="hero-color-strip-mobile"
+        component="img"
+        src="/banner.jpg"
+        alt="Banner principal"
+        sx={{ width: '100%', display: 'block' }}
+      />
+      <Box
         sx={{
-          width: '100vw',
-          marginLeft: 'calc(-50vw + 50%)',
-          marginRight: 'calc(-50vw + 50%)',
-          height: '50px',
-          backgroundColor: '#C8626D',
-          position: 'relative',
-          zIndex: 999,
-          marginTop: '-40px',
+          backgroundColor: '#c8626d',
+          color: 'white',
+          py: 1.2,
           display: 'flex',
-          alignItems: 'center',
           justifyContent: 'center',
-          cursor: 'default !important',
-          pointerEvents: 'none !important',
-          userSelect: 'none',
-          WebkitUserSelect: 'none',
-          MozUserSelect: 'none',
-          msUserSelect: 'none',
-          '@media (max-width: 767px)': {
-            marginTop: '0px'
-          },
-          '& *': {
-            cursor: 'default !important',
-            pointerEvents: 'none !important'
-          },
-          '&::before': {
-            cursor: 'default !important',
-            pointerEvents: 'none !important'
-          },
-          '&::after': {
-            cursor: 'default !important',
-            pointerEvents: 'none !important'
-          },
-          '@media (min-width: 768px) and (max-width: 1200px) and (orientation: landscape)': {
-            marginTop: '0px'
-          },
-          '@media (min-width: 1201px)': {
-            marginTop: '-20px'
-          },
-          '@media (max-width: 767px)': {
-            marginTop: '-60px'
-          }
+          px: 2
         }}
       >
-        <Typography
-          variant="body1"
-          data-no-translate
-          sx={{
-            color: '#ffffff',
-            fontWeight: 700,
-            fontSize: { xs: '0.6rem', sm: '0.65rem', md: '0.9rem' },
-            textAlign: 'center',
-            fontFamily: 'Arial, sans-serif',
-            textShadow: '2px 2px 4px rgba(0,0,0,0.7)',
-            cursor: 'default !important',
-            pointerEvents: 'none !important',
-            userSelect: 'none',
-            WebkitUserSelect: 'none',
-            MozUserSelect: 'none',
-            msUserSelect: 'none',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            width: '100%',
-            height: '100%',
-            zIndex: 1000,
-            position: 'relative',
-            letterSpacing: '0.3px',
-            whiteSpace: 'nowrap',
-            overflow: 'hidden',
-            textOverflow: 'ellipsis'
+        <span style={{ fontSize: '0.7rem', whiteSpace: 'nowrap' }}>{copy.bannerMessage}</span>
+      </Box>
+      <Box sx={{ mt: { xs: 3, md: 4 }, textAlign: 'center', minHeight: '48px' }}>
+        <span
+          style={{
+            fontFamily: 'BrittanySignature',
+            fontSize: '2.1rem',
+            color: '#c8626d',
+            visibility: isBrittanyLoaded ? 'visible' : 'hidden'
           }}
         >
-          {pinkStripMessages[language] || pinkStripMessages.en}
-        </Typography>
+          {copy.featuredTitle}
+        </span>
       </Box>
-
-      {/* Featured Products */}
-      <Box sx={{ 
-        py: 2, 
-        pt: 6, 
-        backgroundColor: '#fafafa',
-        '@media (max-width: 767px)': {
-          marginTop: '-60px',
-          pt: 1
-        },
-        '@media (min-width: 768px) and (max-width: 1200px) and (orientation: landscape)': {
-          marginTop: '30px'
-        }
-      }}>
-        <Container maxWidth="lg">
-          <motion.div
-            initial={{ opacity: 0, y: 50 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.8 }}
-          >
-            <Box sx={{ textAlign: 'center', mb: 3 }}>
-              {!featuredLoading && featuredConfig.titleFont && (
-                <Typography
-                  variant="h2"
-                  className="featured-products-title"
-                  sx={{
-                    fontSize: { xs: '2rem', md: '3rem' },
-                    fontWeight: 800,
-                    color: '#EC8C8D',
-                    mb: 2,
-                    fontFamily: `"${featuredConfig.titleFont}", serif !important`,
-                    position: 'relative',
-                    zIndex: 10,
-                    '&::before': { display: 'none' },
-                    '&::after': { display: 'none' }
-                  }}
-                >
-                  {translatedTexts.galletasDestacadas}
-                </Typography>
-              )}
-            </Box>
-
-            <Box
-              sx={{
-                transform: { xs: 'translateY(220px)', md: 'none' },
-                transition: 'transform 0.3s ease'
-              }}
-            >
-              {featuredProducts.length > 0 ? (
-                <Grid container spacing={4} justifyContent="center">
-                  {featuredProducts.map((product, index) => (
-                    <Grid size={{ xs: 12, sm: 6, md: 3 }} key={product.id}>
-                      <motion.div
-                        initial={{ opacity: 0, y: 30 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        viewport={{ once: true }}
-                        transition={{ duration: 0.6, delay: index * 0.1 }}
-                        whileHover={{ y: -10 }}
-                      >
-                        <Card
-                          sx={{
-                            height: '100%',
-                            borderRadius: '20px',
-                            boxShadow: '0 8px 32px rgba(0,0,0,0.1)',
-                            transition: 'all 0.3s ease',
-                            '&:hover': {
-                              boxShadow: '0 16px 48px rgba(0,0,0,0.15)',
-                              transform: 'translateY(-5px)'
-                            }
-                          }}
-                        >
-                        <CardContent sx={{ p: 3, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                          <Box sx={{ position: 'relative', mb: 0.5, display: 'flex', justifyContent: 'center', width: '100%' }}>
-                              <Box
-                                component="img"
-                                src={product.image}
-                                alt={product.name}
-                                sx={{
-                                  width: '180px',
-                                  height: '160px',
-                                  objectFit: 'cover',
-                                  borderRadius: '15px',
-                                  margin: '0 auto'
-                                }}
-                              />
-                              {/* Chips en la esquina superior izquierda */}
-                              <Box sx={{ position: 'absolute', top: 8, left: 8, display: 'flex', flexDirection: 'column', gap: 0.5 }}>
-                                {product.featured && <Chip label={translatedTexts.destacado} size="small" color="primary" sx={{ fontSize: '0.7rem', height: '24px' }} />}
-                                {product.bestSeller && <Chip label={translatedTexts.masVendido} size="small" color="success" sx={{ fontSize: '0.7rem', height: '24px' }} />}
-                                {product.isNew && <Chip label={translatedTexts.nuevo} size="small" color="warning" sx={{ fontSize: '0.7rem', height: '24px' }} />}
-                              </Box>
-                            </Box>
-                            <Typography
-                              variant="h6"
-                              sx={{
-                                fontWeight: 700,
-                                color: '#EC8C8D',
-                                mb: 1,
-                                mt: 1,
-                                fontFamily: '"Asap", sans-serif',
-                                textTransform: 'uppercase',
-                                letterSpacing: '0.5px'
-                              }}
-                            >
-                              {product.name}
-                            </Typography>
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-                              <Typography
-                                variant="h5"
-                                sx={{
-                                  fontWeight: 800,
-                                  color: '#c8626d'
-                                }}
-                              >
-                                ${product.price}
-                              </Typography>
-                              <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                                <Rating 
-                                  value={product.rating || 5} 
-                                  readOnly 
-                                  size="small"
-                                  sx={{ 
-                                    '& .MuiRating-icon': { 
-                                      fontSize: '1rem',
-                                      color: '#FFD700'
-                                    } 
-                                  }} 
-                                />
-                              </Box>
-                            </Box>
-                            <Button
-                              variant="contained"
-                              fullWidth
-                              size="small"
-                              onClick={() => {
-                                setSelectedProduct(product);
-                                setProductDetailOpen(true);
-                              }}
-                              sx={{
-                                backgroundColor: '#C8626D',
-                                '&:hover': { backgroundColor: '#B5555A' },
-                                borderRadius: '10px',
-                                py: 0.5,
-                                px: 1,
-                                fontWeight: 600,
-                                fontSize: '0.7rem',
-                                minHeight: '32px'
-                              }}
-                            >
-                              {translatedTexts.verDetalles}
-                            </Button>
-                          </CardContent>
-                        </Card>
-                      </motion.div>
-                    </Grid>
-                  ))}
-                </Grid>
-              ) : (
-                <ProductCards showAll={false} />
-              )}
-            </Box>
-
-            {/* Botón para ver más productos */}
-            <Box sx={{ textAlign: 'center', mt: 6 }}>
-              <motion.div
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                <Button
-                  variant="outlined"
-                  size="large"
-                  href="/productos"
-                  sx={{
-                    borderColor: '#c8626d',
-                    color: '#c8626d',
-                    px: 4,
-                    py: 1.5,
-                    borderRadius: '25px',
-                    textTransform: 'none',
-                    fontWeight: 600,
-                    fontSize: '1.1rem',
-                    '&:hover': {
-                      backgroundColor: '#c8626d',
-                      color: 'white',
-                      borderColor: '#c8626d',
-                      transform: 'translateY(-2px)',
-                      boxShadow: '0 8px 25px rgba(139, 69, 19, 0.3)'
-                    },
-                    transition: 'all 0.3s ease'
-                  }}
-                >
-                  {translatedTexts.verTodasLasGalletas}
-                </Button>
-              </motion.div>
-            </Box>
-
+      {!productsLoading && featuredItems.length > 0 && (
+        <Box sx={{ px: { xs: 2, md: 6 }, mt: { xs: 3, md: 4 }, pb: { xs: 4, md: 6 } }}>
           <Box
             sx={{
-              mt: { xs: 4, md: 8 },
-              mx: 'calc(50% - 50vw)',
-              width: '100vw'
+              display: 'flex',
+              flexWrap: 'wrap',
+              gap: { xs: 2, md: 3 },
+              justifyContent: 'center'
             }}
           >
-            <Box
-              component="img"
-              src="/banner2.jpg"
-              alt="Banner promocional"
-              className="banner2"
-              sx={{
-                width: '100%',
-                display: 'block'
-              }}
-            />
+            {featuredItems.map((item) => (
+              <Card
+                key={item.id}
+                sx={{
+                  borderRadius: '18px',
+                  boxShadow: '0 12px 30px rgba(0,0,0,0.08)',
+                  flex: { xs: '0 1 calc(50% - 8px)', md: '0 1 calc(50% - 12px)' }
+                }}
+              >
+                <CardMedia
+                  component="img"
+                  image={item.image}
+                  alt={item.name}
+                  sx={{ width: '100%', height: 180, objectFit: 'cover' }}
+                />
+                <CardContent sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1.5 }}>
+                  <Typography variant="h6" sx={{ fontWeight: 700, color: '#c8626d', fontFamily: 'Asap', fontSize: '1rem', textAlign: 'center' }}>
+                    {item.name}
+                  </Typography>
+                  <Typography variant="body1" sx={{ fontWeight: 600, color: '#4a4a4a' }}>
+                    ${Number(item.price || 0).toFixed(2)}
+                  </Typography>
+                  <Button
+                    variant="contained"
+                    sx={{ backgroundColor: '#c8626d', borderRadius: '20px', px: 3 }}
+                    onClick={() => handleOpenDetail(item)}
+                  >
+                    {copy.viewDetails}
+                  </Button>
+                </CardContent>
+              </Card>
+            ))}
           </Box>
-          </motion.div>
-        </Container>
-      </Box>
+        </Box>
+      )}
 
-    {/* Testimonials Section */}
-    <TestimonialsSection />
-
-      {/* Product Detail Dialog */}
       <Dialog
-        className="product-detail-mobile"
-        open={productDetailOpen}
-        onClose={() => setProductDetailOpen(false)}
+        open={Boolean(selectedProduct)}
+        onClose={handleCloseDetail}
         maxWidth="md"
         fullWidth
-        sx={{
-          '& .MuiDialog-paper': {
+        PaperProps={{
+          sx: {
             borderRadius: '20px',
-            maxHeight: '90vh',
             backgroundColor: '#fafafa',
             border: '1px solid #e0e0e0',
             boxShadow: '0 8px 32px rgba(0,0,0,0.12)'
           }
         }}
       >
-        {selectedProduct && (
-          <>
-            <DialogTitle>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <Typography variant="h5" sx={{ 
-                  fontWeight: 700, 
-                  color: '#c8626d',
-                  fontFamily: '"Asap", sans-serif',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.5px'
-                }}>
+        <DialogContent sx={{ p: 0, position: 'relative' }}>
+          <IconButton
+            aria-label="Cerrar"
+            onClick={handleCloseDetail}
+            sx={{
+              position: 'absolute',
+              top: 8,
+              right: 8,
+              zIndex: 1,
+              backgroundColor: 'rgba(200, 98, 109, 0.1)',
+              color: '#c8626d',
+              '&:hover': {
+                backgroundColor: 'rgba(200, 98, 109, 0.2)'
+              }
+            }}
+          >
+            <Close />
+          </IconButton>
+          {selectedProduct && (
+            <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' } }}>
+              <Box sx={{ flexBasis: { md: '50%' }, flexShrink: 0 }}>
+                <Box sx={{ height: '100%', minHeight: { xs: 240, md: 420 }, overflow: 'hidden' }}>
+                  <img
+                    src={selectedProduct.image}
+                    alt={selectedProduct.name}
+                    style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                  />
+                </Box>
+              </Box>
+              <Box sx={{ flex: 1, p: { xs: 2.5, md: 4 } }}>
+                <Typography sx={{ fontWeight: 700, mb: 1, color: '#333', fontFamily: 'Asap', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
                   {selectedProduct.name}
                 </Typography>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+                  {selectedProduct.rating && (
+                    <Rating value={Number(selectedProduct.rating)} precision={0.1} readOnly size="small" sx={{ color: '#FFD700' }} />
+                  )}
+                  {selectedProduct.reviews && (
+                    <Typography variant="body2" sx={{ color: '#666' }}>
+                      ({selectedProduct.reviews})
+                    </Typography>
+                  )}
+                </Box>
+                <Typography sx={{ fontWeight: 700, color: '#c8626d', mb: 2, fontSize: '1.4rem' }}>
+                  ${Number(selectedProduct.price || 0).toFixed(2)}
+                </Typography>
+                {selectedProduct.description && (
+                  <Typography variant="body2" sx={{ color: '#555', lineHeight: 1.6, mb: 3 }}>
+                    {selectedProduct.description}
+                  </Typography>
+                )}
+                <Divider sx={{ mb: 3 }} />
                 <Button
-                  onClick={() => setProductDetailOpen(false)}
-                  sx={{ 
-                    color: '#c8626d',
-                    backgroundColor: 'rgba(200, 98, 109, 0.1)',
-                    borderRadius: '50%',
-                    minWidth: '40px',
-                    width: '40px',
-                    height: '40px',
+                  variant="contained"
+                  fullWidth
+                  startIcon={<ShoppingBag />}
+                  sx={{
+                    backgroundColor: '#c8626d',
+                    textTransform: 'none',
+                    fontWeight: 700,
+                    py: 1.4,
                     '&:hover': {
-                      backgroundColor: 'rgba(200, 98, 109, 0.2)'
+                      backgroundColor: '#b25763'
                     }
                   }}
+                  onClick={() => {
+                    addToCart(selectedProduct);
+                    handleCloseDetail();
+                  }}
                 >
-                  ✕
+                  {copy.addToCart}
                 </Button>
               </Box>
-            </DialogTitle>
-            
-            <DialogContent sx={{ p: 0 }}>
-              <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, minHeight: '500px' }}>
-                {/* Lado Izquierdo - Imagen */}
-                <Box sx={{ flex: 1, p: 3 }}>
-                  <Box sx={{ width: '100%' }}>
-                    {/* Imagen principal */}
-                    <Box
-                      component="img"
-                      src={getProductImages()[currentImageIndex]}
-                      alt={selectedProduct.name}
-                      sx={{
-                        width: '100%',
-                        height: '400px',
-                        objectFit: 'contain',
-                        borderRadius: '15px',
-                        backgroundColor: '#f8f9fa',
-                        mb: 2
-                      }}
-                    />
-                    
-                    {/* Miniaturas de las imágenes */}
-                    <Box sx={{ 
-                      display: 'flex', 
-                      gap: 1, 
-                      justifyContent: 'center',
-                      flexWrap: 'wrap'
-                    }}>
-                      {getProductImages().map((image, index) => (
-                        <Box
-                          key={index}
-                          onClick={() => setCurrentImageIndex(index)}
-                          sx={{
-                            width: '80px',
-                            height: '80px',
-                            borderRadius: '8px',
-                            overflow: 'hidden',
-                            cursor: 'pointer',
-                            border: index === currentImageIndex ? '3px solid #C8626D' : '2px solid #ddd',
-                            transition: 'all 0.3s',
-                            backgroundColor: 'white',
-                            '&:hover': {
-                              borderColor: '#C8626D',
-                              transform: 'scale(1.05)'
-                            }
-                          }}
-                        >
-                          <Box
-                            component="img"
-                            src={image}
-                            alt={`${translatedTexts.vistaImagen} ${index + 1}`}
-                            sx={{
-                              width: '100%',
-                              height: '100%',
-                              objectFit: 'cover'
-                            }}
-                          />
-                        </Box>
-                      ))}
-                    </Box>
-                  </Box>
-                </Box>
-                
-                {/* Lado Derecho - Información */}
-                <Box sx={{ flex: 1, p: 3, display: 'flex', flexDirection: 'column' }}>
-                  <Typography variant="h4" sx={{ fontWeight: 800, color: '#c8626d', mb: 2 }}>
-                    ${selectedProduct.price}
-                  </Typography>
-                  
-                  {/* Afterpay Messaging */}
-                  {selectedProduct.price >= 1 && selectedProduct.price <= 4000 && (
-                    <AfterpayMessaging amount={selectedProduct.price} />
-                  )}
-                  
-                  <Box sx={{ display: 'flex', gap: 1, mb: 3 }}>
-                    {selectedProduct.featured && <Chip label={translatedTexts.destacado} color="primary" />}
-                    {selectedProduct.bestSeller && <Chip label={translatedTexts.masVendido} color="success" />}
-                    {selectedProduct.isNew && <Chip label={translatedTexts.nuevo} color="warning" />}
-                  </Box>
-                  
-                  {selectedProduct.rating && (
-                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                      <Rating value={selectedProduct.rating} readOnly sx={{ mr: 1 }} />
-                          <Typography variant="body2" sx={{ color: '#666' }}>
-                        ({selectedProduct.reviews} {translatedTexts.reseñas})
-                      </Typography>
-                    </Box>
-                  )}
-                  
-                  <Typography variant="body1" sx={{ color: '#666', lineHeight: 1.6, mb: 3, flex: 1 }}>
-                    {selectedProduct.name && selectedProduct.name.toLowerCase().includes('ferrero') 
-                      ? translatedTexts.descripcionFerrero
-                      : translatedTexts.descripcionGeneral.replace('{productName}', selectedProduct.name)
-                    }
-                  </Typography>
-                  
-                  {selectedProduct.inventory !== undefined && (
-                    <Box sx={{ mb: 3 }}>
-                      <Typography variant="body2" sx={{ color: '#666', mb: 1 }}>
-                        {translatedTexts.stockDisponible} {selectedProduct.inventory} {translatedTexts.unidades}
-                      </Typography>
-                      <Chip
-                        label={
-                          selectedProduct.inventory === 0 ? translatedTexts.agotado :
-                          selectedProduct.inventory < 10 ? translatedTexts.stockBajo :
-                          selectedProduct.inventory < 50 ? translatedTexts.stockMedio : translatedTexts.enStock
-                        }
-                        color={
-                          selectedProduct.inventory === 0 ? 'error' :
-                          selectedProduct.inventory < 10 ? 'warning' :
-                          selectedProduct.inventory < 50 ? 'default' : 'success'
-                        }
-                      />
-                    </Box>
-                  )}
-                </Box>
-              </Box>
-            </DialogContent>
-            
-            <DialogActions sx={{ p: 3 }}>
-              <Button
-                onClick={() => setProductDetailOpen(false)}
-                sx={{ color: '#c8626d' }}
-              >
-                {translatedTexts.cerrar}
-              </Button>
-              <Button
-                variant="contained"
-                onClick={() => {
-                  // Agregar al carrito usando el contexto
-                  addToCart(selectedProduct);
-                  
-                  // Cerrar el popup
-                  setProductDetailOpen(false);
-                }}
-                sx={{
-                  backgroundColor: '#C8626D',
-                  '&:hover': { backgroundColor: '#B5555A' },
-                  borderRadius: '25px',
-                  px: 3,
-                  py: 1.5,
-                  fontWeight: 600
-                }}
-              >
-                {translatedTexts.agregarAlCarrito}
-              </Button>
-            </DialogActions>
-          </>
-        )}
+            </Box>
+          )}
+        </DialogContent>
       </Dialog>
-
-      {/* Popup Hero */}
-      <PopupHero
-        open={popupOpen}
-        onClose={() => setPopupOpen(false)}
-      />
-
     </Box>
   );
 };
 
 export default Home;
+

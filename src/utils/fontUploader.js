@@ -141,7 +141,7 @@ export const fontUploader = {
           @font-face {
             font-family: '${fontName}';
             src: url(${fontData});
-            font-display: swap;
+            font-display: block;
           }
         `;
 
