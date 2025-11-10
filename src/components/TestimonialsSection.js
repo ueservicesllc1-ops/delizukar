@@ -145,10 +145,7 @@ const TestimonialsSection = () => {
   }
 
   return (
-    <Box
-      className="bg-[#f8f9fa] py-12 sm:py-16 lg:py-20"
-      sx={{ mt: { xs: '3rem', md: '4rem' } }}
-    >
+    <Box sx={{ py: { xs: 2, md: 4 } }}>
       <Container maxWidth="lg" className="px-4 sm:px-6 lg:px-8">
         <motion.div
           initial={{ opacity: 0, y: 50 }}
@@ -156,16 +153,6 @@ const TestimonialsSection = () => {
           viewport={{ once: true }}
           transition={{ duration: 0.8 }}
         >
-          <Typography
-            variant="h2"
-            className="text-center text-4xl font-extrabold text-[#EC8C8D] sm:text-5xl"
-            sx={{
-              mb: 2,
-              fontFamily: loading ? 'Playfair Display, serif' : `"${titleConfig.font}", serif !important`
-            }}
-          >
-            {translatedTexts.title}
-          </Typography>
           
           <div className="mt-10 grid grid-cols-1 gap-6 md:grid-cols-3">
             {testimonials.map((testimonial, index) => (

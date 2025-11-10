@@ -15,6 +15,7 @@ import { Close, ShoppingBag } from '@mui/icons-material';
 import Rating from '@mui/material/Rating';
 import { useStore } from '../context/StoreContext';
 import { useLanguage } from '../context/LanguageContext';
+import TestimonialsSection from '../components/TestimonialsSection';
 
 const Home = () => {
   const { featuredProducts, products, productsLoading, addToCart } = useStore();
@@ -188,6 +189,66 @@ const Home = () => {
           </Box>
         </Box>
       )}
+      <Box sx={{ display: 'flex', justifyContent: 'center', mt: { xs: 2, md: 3 } }}>
+        <Button
+          variant="outlined"
+          href="/productos"
+          sx={{
+            borderColor: '#c8626d',
+            color: '#c8626d',
+            borderRadius: '24px',
+            px: { xs: 3, md: 4 },
+            py: { xs: 1, md: 1.2 },
+            fontWeight: 600,
+            textTransform: 'none',
+            '&:hover': {
+              backgroundColor: '#c8626d',
+              color: '#fff',
+              borderColor: '#c8626d'
+            }
+          }}
+        >
+          {language === 'es' && 'Ver todas las galletas'}
+          {language === 'en' && 'View all cookies'}
+          {language === 'fr' && 'Voir tous les biscuits'}
+          {language === 'pt' && 'Ver todos os cookies'}
+        </Button>
+      </Box>
+      <Box
+        sx={{
+          width: '100vw',
+          position: 'relative',
+          left: '50%',
+          right: '50%',
+          marginLeft: '-50vw',
+          marginRight: '-50vw',
+          mt: { xs: 4, md: 6 }
+        }}
+      >
+        <Box
+          component="img"
+          src="/banner2.jpg"
+          alt="Banner secundario"
+          sx={{ width: '100%', display: 'block' }}
+        />
+       </Box>
+      <Box sx={{ mt: { xs: 4, md: 6 }, textAlign: 'center' }}>
+        <Typography
+          sx={{
+            fontFamily: 'BrittanySignature',
+            fontSize: { xs: '2rem', md: '2.6rem' },
+            color: '#c8626d'
+          }}
+        >
+          {language === 'es' && 'Nuestros Clientes Felices'}
+          {language === 'en' && 'Our Happy Clients'}
+          {language === 'fr' && 'Nos clients heureux'}
+          {language === 'pt' && 'Nossos clientes felizes'}
+        </Typography>
+      </Box>
+      <Box sx={{ mt: { xs: 4, md: 6 } }}>
+        <TestimonialsSection />
+      </Box>
 
       <Dialog
         open={Boolean(selectedProduct)}

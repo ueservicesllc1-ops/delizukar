@@ -357,36 +357,25 @@ const Footer = () => {
             <br />
             {text.developed || 'Desarrollado por Freedom Labs.'}
           </Typography>
+          <Box sx={{ mt: 4, display: 'flex', justifyContent: 'center' }}>
+            <Box
+              component="img"
+              src="/LOGO.png"
+              alt="Delizukar Logo"
+              sx={{
+                height: 70,
+                width: 'auto',
+                filter: 'brightness(0) invert(1)',
+                transition: 'all 0.3s ease',
+                '&:hover': {
+                  transform: 'scale(1.05)',
+                  filter: 'brightness(0) invert(1) drop-shadow(0 0 10px rgba(255,255,255,0.5))'
+                }
+              }}
+            />
+          </Box>
         </motion.div>
       </Container>
-
-      <motion.div
-        initial={{ opacity: 0, scale: 0.8 }}
-        whileInView={{ opacity: 1, scale: 1 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.6, delay: 0.2 }}
-        style={{
-          position: 'absolute',
-          top: '100px',
-          right: '40px'
-        }}
-      >
-        <Box
-          component="img"
-          src="/LOGO.png"
-          alt="Delizukar Logo"
-          sx={{
-            height: 78,
-            width: 'auto',
-            filter: 'brightness(0) invert(1)',
-            transition: 'all 0.3s ease',
-            '&:hover': {
-              transform: 'scale(1.05)',
-              filter: 'brightness(0) invert(1) drop-shadow(0 0 10px rgba(255,255,255,0.5))'
-            }
-          }}
-        />
-      </motion.div>
     </Box>
   );
 };
