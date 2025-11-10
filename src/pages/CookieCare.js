@@ -161,7 +161,7 @@ const CookieCare = () => {
   // console.log('Render CookieCare:', { title: pageData.title, hasContent: !!pageData.content });
 
   return (
-    <Box className="cookie-care-page-mobile" sx={{ py: 8, pt: { xs: 24, md: 30 }, opacity: fontsReady ? 1 : 0, transition: 'opacity 0.01s ease' }}>
+    <Box className="cookie-care-page-mobile" sx={{ py: 8, pt: { xs: 24, md: 40 }, opacity: fontsReady ? 1 : 0, transition: 'opacity 0.01s ease' }}>
       <Container maxWidth="lg">
         <Typography
           variant="h2"

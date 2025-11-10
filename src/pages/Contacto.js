@@ -177,7 +177,7 @@ const Contacto = () => {
   };
 
   return (
-    <Box className="contacto-mobile" sx={{ py: 8, pt: { xs: 12, md: 16 }, opacity: fontsReady ? 1 : 0, transition: 'opacity 0.01s ease' }}>
+    <Box className="contacto-mobile" sx={{ py: 8, pt: { xs: 12, md: 20 }, opacity: fontsReady ? 1 : 0, transition: 'opacity 0.01s ease' }}>
       <Container maxWidth="lg">
         <Typography
           className="contacto-title-mobile"

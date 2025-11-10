@@ -127,7 +127,7 @@ const Terms = () => {
   };
 
   return (
-    <Box className="terms-page-mobile" sx={{ py: 8, pt: { xs: 8, md: 12 }, opacity: fontsReady ? 1 : 0, transition: 'opacity 0.01s ease' }}>
+    <Box className="terms-page-mobile" sx={{ py: 8, pt: { xs: 8, md: 22 }, opacity: fontsReady ? 1 : 0, transition: 'opacity 0.01s ease' }}>
       <Container maxWidth="lg">
 
         <Typography

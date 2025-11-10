@@ -280,44 +280,43 @@ const Header = () => {
   );
 
   const renderDesktopToolbar = () => (
-    <Toolbar disableGutters sx={{ position: 'relative', flexDirection: 'column', gap: 2.5, px: 3, py: 2.2, minHeight: 'auto', display: { xs: 'none', md: 'flex' } }}>
+    <Toolbar
+      disableGutters
+      sx={{
+        display: { xs: 'none', md: 'flex' },
+        flexDirection: 'column',
+        alignItems: 'stretch',
+        gap: { md: 2, lg: 2.5 },
+        px: { md: 4, lg: 6 },
+        py: { md: 1.5, lg: 2 },
+        minHeight: 'auto'
+      }}
+    >
       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-          <IconButton sx={{ color: '#be8782' }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: { md: 1.5, lg: 2 }, flex: 1 }}>
+          <IconButton sx={{ color: '#be8782', ml: { md: 4, lg: 6 } }}>
             <Search />
           </IconButton>
-          {menuItems.map((item) => (
-            <Button
-              key={item.label}
-              href={item.href}
-              sx={{
-                color: '#eb8b8b',
-                textTransform: 'none',
-                fontWeight: 500,
-                fontSize: '1rem',
-                px: 2.5,
-                py: 1,
-                borderRadius: '25px',
-                '&:hover': {
-                  backgroundColor: '#c8626d20'
-                }
-              }}
-            >
-              {item.label}
-            </Button>
-          ))}
         </Box>
 
-        <motion.a href="/" whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} style={{ display: 'flex', justifyContent: 'center', width: '100%', marginTop: '8px' }}>
-          <Box component="img" src="/LOGO.png" alt="Delizukar Logo" sx={{ height: 160, width: 'auto' }} />
+        <motion.a
+          href="/"
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          style={{ display: 'flex', justifyContent: 'center', flex: 1 }}
+        >
+          <Box component="img" src="/LOGO.png" alt="Delizukar Logo" sx={{ height: { md: 140, lg: 160 }, width: 'auto' }} />
         </motion.a>
 
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, justifyContent: 'flex-end', minWidth: '210px' }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: { md: 1.2, lg: 1.6 }, justifyContent: 'flex-end', flex: 1, minWidth: { md: '220px', lg: '260px' } }}>
           <LanguageSelect />
           {user ? (
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
               <Avatar src={user.photoURL} alt={user.displayName} sx={{ width: 36, height: 36 }} />
-              <Typography variant="body2" sx={{ fontWeight: 600, color: '#c8626d', maxWidth: '140px', textOverflow: 'ellipsis', whiteSpace: 'nowrap', overflow: 'hidden' }}>
+              <Typography
+                variant="body2"
+                sx={{ fontWeight: 600, color: '#c8626d', maxWidth: { md: '120px', lg: '160px' }, textOverflow: 'ellipsis', whiteSpace: 'nowrap', overflow: 'hidden' }}
+              >
                 {user.displayName}
               </Typography>
               <Button
@@ -372,6 +371,38 @@ const Header = () => {
             </Badge>
           </IconButton>
         </Box>
+      </Box>
+
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          flexWrap: 'wrap',
+          gap: { md: 1.5, lg: 2.5 },
+          width: '100%'
+        }}
+      >
+        {menuItems.map((item) => (
+          <Button
+            key={item.label}
+            href={item.href}
+            sx={{
+              color: '#eb8b8b',
+              textTransform: 'none',
+              fontWeight: 600,
+              fontSize: { md: '1rem', lg: '1.05rem' },
+              px: { md: 2.2, lg: 2.8 },
+              py: { md: 0.8, lg: 1 },
+              borderRadius: '999px',
+              '&:hover': {
+                backgroundColor: '#c8626d20'
+              }
+            }}
+          >
+            {item.label}
+          </Button>
+        ))}
       </Box>
     </Toolbar>
   );

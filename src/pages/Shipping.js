@@ -153,7 +153,7 @@ const Shipping = () => {
   // Eliminado: sistema de auto-traducción
 
   return (
-    <Box className="shipping-page-mobile" sx={{ py: 8, pt: { xs: 10, md: 14 }, opacity: fontsReady ? 1 : 0, transition: 'opacity 0.01s ease' }}>
+    <Box className="shipping-page-mobile" sx={{ py: 8, pt: { xs: 10, md: 20 }, backgroundColor: '#fafafa', minHeight: '100vh', transition: 'opacity 0.01s ease', opacity: fontsReady ? 1 : 0 }}>
       <Container maxWidth="lg">
         <Typography
           variant="h2"

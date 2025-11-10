@@ -103,12 +103,13 @@ const Products = () => {
         <Box sx={{ mb: 4, textAlign: 'center' }}>
           <Typography
             sx={{
-              fontFamily: 'BrittanySignature',
+               fontFamily: 'BrittanySignature',
               fontSize: { xs: '2.4rem', md: '3rem' },
-              color: '#c8626d'
-            }}
-          >
-            {language === 'es' && 'Nuestras Galletas'}
+              mt: { xs: 0, md: 2.5 },
+               color: '#c8626d'
+             }}
+           >
+             {language === 'es' && 'Nuestras Galletas'}
             {language === 'en' && 'Our Cookies'}
             {language === 'fr' && 'Nos biscuits'}
             {language === 'pt' && 'Nossos cookies'}
@@ -119,14 +120,16 @@ const Products = () => {
         <Grid container spacing={3} className="products-grid-mobile" sx={{ 
           display: 'grid',
           gridTemplateColumns: {
-            xs: 'repeat(2, minmax(0, 1fr))'
+            xs: 'repeat(2, minmax(0, 1fr))',
+            md: 'repeat(3, minmax(0, 1fr))',
+            lg: 'repeat(4, minmax(0, 1fr))'
           },
-          gap: { xs: 2, md: 3 }
+          gap: { xs: 2, md: 3, lg: 3.5 }
         }}>
           {productsLoading ? (
             // Skeleton loading mientras cargan los productos
             Array.from({ length: 8 }).map((_, index) => (
-              <Box key={index} sx={{ flex: '0 1 calc(50% - 12px)' }}>
+              <Box key={index}>
                 <Card sx={{ width: '100%', height: '320px', display: 'flex', flexDirection: 'column' }}>
                   <Skeleton variant="rectangular" height={280} />
                   <CardContent>
@@ -142,7 +145,7 @@ const Products = () => {
             ))
           ) : (
             products.map((product, index) => (
-            <Box key={product.id} sx={{ flex: '0 1 calc(50% - 12px)' }}>
+            <Box key={product.id}>
               <motion.div
                 initial={{ opacity: 0, y: 50 }}
                 animate={{ opacity: 1, y: 0 }}

@@ -140,7 +140,7 @@ const TermsService = () => {
   };
 
   return (
-    <Box className="terms-service-page-mobile" sx={{ py: 8, pt: { xs: 10, md: 14 }, opacity: fontsReady ? 1 : 0, transition: 'opacity 0.01s ease' }}>
+    <Box className="terms-service-page-mobile" sx={{ py: 8, pt: { xs: 10, md: 20 }, opacity: fontsReady ? 1 : 0, transition: 'opacity 0.01s ease' }}>
       <Container maxWidth="lg">
         <Typography
           variant="h2"

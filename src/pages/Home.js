@@ -112,7 +112,7 @@ const Home = () => {
       right: '50%',
       marginLeft: '-50vw',
       marginRight: '-50vw',
-      marginTop: { xs: '16px', md: '24px' }
+      marginTop: { xs: '16px', md: '72px', lg: '96px' }
     }}>
       <Box
         component="img"
@@ -124,19 +124,28 @@ const Home = () => {
         sx={{
           backgroundColor: '#c8626d',
           color: 'white',
-          py: 1.2,
+          py: { xs: 1.4, md: 1.8 },
           display: 'flex',
           justifyContent: 'center',
           px: 2
         }}
       >
-        <span style={{ fontSize: '0.7rem', whiteSpace: 'nowrap' }}>{copy.bannerMessage}</span>
+        <Box
+          component="span"
+          sx={{
+            fontSize: { xs: '0.65rem', md: '1.3rem' },
+            letterSpacing: { xs: '0.02em', md: '0.05em' },
+            whiteSpace: 'nowrap'
+          }}
+        >
+          {copy.bannerMessage}
+        </Box>
       </Box>
       <Box sx={{ mt: { xs: 3, md: 4 }, textAlign: 'center', minHeight: '48px' }}>
         <span
           style={{
             fontFamily: 'BrittanySignature',
-            fontSize: '2.1rem',
+            fontSize: '2.4rem',
             color: '#c8626d',
             visibility: isBrittanyLoaded ? 'visible' : 'hidden'
           }}
@@ -145,13 +154,17 @@ const Home = () => {
         </span>
       </Box>
       {!productsLoading && featuredItems.length > 0 && (
-        <Box sx={{ px: { xs: 2, md: 6 }, mt: { xs: 3, md: 4 }, pb: { xs: 4, md: 6 } }}>
+        <Box sx={{ px: { xs: 2, md: 4 }, mt: { xs: 3, md: 5 }, pb: { xs: 4, md: 6 }, display: 'flex', justifyContent: 'center' }}>
+          <Box sx={{ width: '100%', maxWidth: { md: '900px', lg: '1100px' } }}>
           <Box
             sx={{
-              display: 'flex',
-              flexWrap: 'wrap',
-              gap: { xs: 2, md: 3 },
-              justifyContent: 'center'
+              display: 'grid',
+              gridTemplateColumns: {
+                xs: 'repeat(2, minmax(0, 1fr))',
+                md: 'repeat(3, minmax(0, 1fr))',
+                lg: 'repeat(4, minmax(0, 1fr))'
+              },
+              gap: { xs: 2, md: 3, lg: 4 }
             }}
           >
             {featuredItems.map((item) => (
@@ -160,14 +173,14 @@ const Home = () => {
                 sx={{
                   borderRadius: '18px',
                   boxShadow: '0 12px 30px rgba(0,0,0,0.08)',
-                  flex: { xs: '0 1 calc(50% - 8px)', md: '0 1 calc(50% - 12px)' }
+                  height: '100%'
                 }}
               >
                 <CardMedia
                   component="img"
                   image={item.image}
                   alt={item.name}
-                  sx={{ width: '100%', height: 180, objectFit: 'cover' }}
+                  sx={{ width: '100%', height: { xs: 160, md: 170, lg: 180 }, objectFit: 'cover' }}
                 />
                 <CardContent sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1.5 }}>
                   <Typography variant="h6" sx={{ fontWeight: 700, color: '#c8626d', fontFamily: 'Asap', fontSize: '1rem', textAlign: 'center' }}>
@@ -186,6 +199,7 @@ const Home = () => {
                 </CardContent>
               </Card>
             ))}
+          </Box>
           </Box>
         </Box>
       )}

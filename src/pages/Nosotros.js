@@ -220,7 +220,7 @@ const Nosotros = () => {
   }, [language, rawData, updateDisplayForLanguage]);
 
   return (
-    <Box className="nosotros-mobile" sx={{ pt: { xs: 12, md: 16 }, pb: 8, opacity: fontsReady ? 1 : 0, transition: 'opacity 0.01s ease' }}>
+    <Box className="nosotros-mobile" sx={{ pt: { xs: 12, md: 20 }, pb: 8, opacity: fontsReady ? 1 : 0, transition: 'opacity 0.01s ease' }}>
       <style>
         {`
           @keyframes slowFloat {
