@@ -2,6 +2,61 @@ import React, { useState, useEffect } from 'react';
 import { Box, Container, Typography } from '@mui/material';
 import { db } from '../firebase/config';
 import { doc, getDoc, collection, getDocs } from 'firebase/firestore';
+import { useLanguage } from '../context/LanguageContext';
+
+const normalizeHtmlContent = (text) => {
+  if (!text) return '';
+  const trimmed = text.trim();
+  if (!trimmed) return '';
+  if (/<[a-z][\s\S]*>/i.test(trimmed)) {
+    return trimmed;
+  }
+  const paragraphs = trimmed.split(/\n\s*\n/);
+  return paragraphs
+    .map((paragraph) => {
+      const safe = paragraph.replace(/\n/g, '<br/>');
+      return `<p>${safe}</p>`;
+    })
+    .join('\n');
+};
+
+const expandKeys = (data = {}) => {
+  const result = {};
+  Object.entries(data).forEach(([key, value]) => {
+    if (!key) return;
+    result[key] = value;
+    result[key.toLowerCase()] = value;
+    if (!key.endsWith('_en') && key.toLowerCase().endsWith('_en')) {
+      result[key.slice(0, -3) + '_en'] = value;
+    }
+    if (!key.endsWith('_es') && key.toLowerCase().endsWith('_es')) {
+      result[key.slice(0, -3) + '_es'] = value;
+    }
+  });
+  return result;
+};
+
+const getLocalizedValue = (data, baseKey, lang) => {
+  if (!data) return undefined;
+  if (!lang) return data[baseKey];
+
+  const normalizedLang = lang.toLowerCase();
+  const candidates = [
+    `${baseKey}_${normalizedLang}`,
+    `${baseKey}${normalizedLang.charAt(0).toUpperCase()}${normalizedLang.slice(1)}`,
+    `${baseKey}_${normalizedLang.toUpperCase()}`,
+    `${baseKey}${normalizedLang.toUpperCase()}`,
+    `${baseKey}_${lang}`
+  ];
+
+  for (const key of candidates) {
+    if (data[key] !== undefined) {
+      return data[key];
+    }
+  }
+
+  return data[baseKey];
+};
 
 const Allergy = () => {
   
@@ -14,6 +69,7 @@ const Allergy = () => {
 
   const [fontsReady, setFontsReady] = useState(false);
   const [firestoreData, setFirestoreData] = useState(null);
+  const { language } = useLanguage();
 
   useEffect(() => {
     loadPageData();
@@ -21,28 +77,36 @@ const Allergy = () => {
 
   // Priorizar siempre Firestore; si no hay datos, usar defaults en español
   useEffect(() => {
-    if (firestoreData) {
-      setPageData(prev => ({
-        ...prev,
-        title: firestoreData.title_es || firestoreData.title || 'Avisos de Alergias',
-        content: firestoreData.content_es || firestoreData.content || '',
-        titleFont: firestoreData.titleFont || prev.titleFont,
-        contentFont: firestoreData.contentFont || prev.contentFont
-      }));
-    } else {
+    if (!firestoreData) {
       setPageData(prev => ({
         ...prev,
         title: 'Avisos de Alergias',
         content: ''
       }));
+      return;
     }
-  }, [firestoreData]);
+
+    const lang = language || 'es';
+    const fallbackTitle = getLocalizedValue(firestoreData, 'title', 'es') || firestoreData.title || 'Avisos de Alergias';
+    const fallbackContent = getLocalizedValue(firestoreData, 'content', 'es') || firestoreData.content || '';
+
+    const localizedTitle = getLocalizedValue(firestoreData, 'title', lang) || fallbackTitle;
+    const localizedContent = getLocalizedValue(firestoreData, 'content', lang) || fallbackContent;
+
+    setPageData(prev => ({
+      ...prev,
+      title: localizedTitle,
+      content: normalizeHtmlContent(localizedContent),
+      titleFont: firestoreData.titleFont || prev.titleFont,
+      contentFont: firestoreData.contentFont || prev.contentFont
+    }));
+  }, [firestoreData, language]);
 
   const loadPageData = async () => {
     try {
       const ref = doc(db, 'pages', 'allergy');
       const snap = await getDoc(ref);
-      const data = snap.exists() ? snap.data() : {};
+      const data = snap.exists() ? expandKeys(snap.data()) : {};
       setFirestoreData(data);
       
       // Cargar fuentes desde Firestore
@@ -95,7 +159,7 @@ const Allergy = () => {
   };
 
   return (
-    <Box className="allergy-page-mobile" sx={{ py: 8, pt: 35, opacity: fontsReady ? 1 : 0, transition: 'opacity 0.01s ease' }}>
+    <Box className="allergy-page-mobile" sx={{ py: 8, pt: { xs: 8, md: 12 }, opacity: fontsReady ? 1 : 0, transition: 'opacity 0.01s ease' }}>
       <Container maxWidth="lg">
         <Typography
           variant="h2"
@@ -104,8 +168,7 @@ const Allergy = () => {
             textAlign: 'center',
             fontWeight: 800,
             color: '#EC8C8D',
-            mb: 2,
-            mt: '-160px',
+            mb: 3,
             fontSize: { xs: '2rem', md: '3rem' },
             fontFamily: pageData.titleFont ? `"${pageData.titleFont}", serif` : 'Playfair Display, serif'
           }}
@@ -118,7 +181,7 @@ const Allergy = () => {
           <Box
             sx={{
               color: '#666',
-              textAlign: 'left',
+              textAlign: 'justify',
               fontStyle: 'normal',
               fontFamily: pageData.contentFont ? `"${pageData.contentFont}", sans-serif` : 'Roboto, sans-serif',
               lineHeight: 1.6,

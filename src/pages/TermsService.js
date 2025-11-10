@@ -140,7 +140,7 @@ const TermsService = () => {
   };
 
   return (
-    <Box className="terms-service-page-mobile" sx={{ py: 8, pt: 35, opacity: fontsReady ? 1 : 0, transition: 'opacity 0.01s ease' }}>
+    <Box className="terms-service-page-mobile" sx={{ py: 8, pt: { xs: 10, md: 14 }, opacity: fontsReady ? 1 : 0, transition: 'opacity 0.01s ease' }}>
       <Container maxWidth="lg">
         <Typography
           variant="h2"
@@ -149,8 +149,7 @@ const TermsService = () => {
             textAlign: 'center',
             fontWeight: 800,
             color: '#EC8C8D',
-            mb: 2,
-            mt: '-160px',
+            mb: 3,
             fontSize: { xs: '2rem', md: '3rem' },
             fontFamily: pageData.titleFont ? `"${pageData.titleFont}", serif` : 'Playfair Display, serif'
           }}
@@ -163,7 +162,7 @@ const TermsService = () => {
           <Box
             sx={{
               color: '#666',
-              textAlign: 'left',
+              textAlign: 'justify',
               fontStyle: 'normal',
               fontFamily: pageData.contentFont ? `"${pageData.contentFont}", sans-serif` : 'Roboto, sans-serif',
               lineHeight: 1.6,

@@ -2,6 +2,62 @@ import React, { useState, useEffect } from 'react';
 import { Box, Container, Typography } from '@mui/material';
 import { db } from '../firebase/config';
 import { doc, getDoc, collection, getDocs } from 'firebase/firestore';
+import { useLanguage } from '../context/LanguageContext';
+
+const normalizeHtmlContent = (text) => {
+  if (!text) return '';
+  const trimmed = text.trim();
+  if (!trimmed) return '';
+  if (/<[a-z][\s\S]*>/i.test(trimmed)) {
+    return trimmed;
+  }
+  const paragraphs = trimmed.split(/\n\s*\n/);
+  return paragraphs
+    .map((paragraph) => {
+      const safe = paragraph.replace(/\n/g, '<br/>');
+      return `<p>${safe}</p>`;
+    })
+    .join('\n');
+};
+
+const normalizeDataKeys = (data = {}) => {
+  const result = {};
+  Object.entries(data).forEach(([key, value]) => {
+    if (!key) return;
+    const lower = key.toLowerCase();
+    result[key] = value;
+    result[lower] = value;
+    if (!key.endsWith('_en') && lower.endsWith('_en')) {
+      result[key.slice(0, -3) + '_en'] = value;
+    }
+    if (!key.endsWith('_es') && lower.endsWith('_es')) {
+      result[key.slice(0, -3) + '_es'] = value;
+    }
+  });
+  return result;
+};
+
+const getLocalizedValue = (data, baseKey, lang) => {
+  if (!data) return undefined;
+  if (!lang) return data[baseKey];
+
+  const normalizedLang = lang.toLowerCase();
+  const candidates = [
+    `${baseKey}_${normalizedLang}`,
+    `${baseKey}${normalizedLang.charAt(0).toUpperCase()}${normalizedLang.slice(1)}`,
+    `${baseKey}_${normalizedLang.toUpperCase()}`,
+    `${baseKey}${normalizedLang.toUpperCase()}`,
+    `${baseKey}_${lang}`
+  ];
+
+  for (const key of candidates) {
+    if (data[key] !== undefined) {
+      return data[key];
+    }
+  }
+
+  return data[baseKey];
+};
 
 const CookieCare = () => {
   
@@ -13,6 +69,8 @@ const CookieCare = () => {
   });
 
   const [fontsReady, setFontsReady] = useState(false);
+  const [firestoreData, setFirestoreData] = useState(null);
+  const { language } = useLanguage();
 
   useEffect(() => {
     loadPageData();
@@ -22,15 +80,9 @@ const CookieCare = () => {
     try {
       const ref = doc(db, 'pages', 'cookie-care');
       const snap = await getDoc(ref);
-      const data = snap.exists() ? snap.data() : {};
-      setPageData(prev => ({
-        ...prev,
-        title: data.title_es || data.title || 'Instrucciones de Cuidado de Galletas',
-        content: data.content_es || data.content || '',
-        titleFont: data.titleFont || prev.titleFont,
-        contentFont: data.contentFont || prev.contentFont
-      }));
-      
+      const data = snap.exists() ? normalizeDataKeys(snap.data()) : {};
+      setFirestoreData(data);
+
       // Cargar fuentes desde Firestore
       await loadFontsFromFirestore();
       setFontsReady(true);
@@ -38,6 +90,32 @@ const CookieCare = () => {
       console.error('Error cargando datos desde Firestore:', error);
     }
   };
+
+  useEffect(() => {
+    if (!firestoreData) {
+      setPageData(prev => ({
+        ...prev,
+       title: 'Instrucciones de Cuidado de Galletas',
+       content: ''
+      }));
+      return;
+    }
+
+    const lang = language || 'es';
+    const fallbackTitle = getLocalizedValue(firestoreData, 'title', 'es') || firestoreData.title || 'Instrucciones de Cuidado de Galletas';
+    const fallbackContent = getLocalizedValue(firestoreData, 'content', 'es') || firestoreData.content || '';
+
+    const localizedTitle = getLocalizedValue(firestoreData, 'title', lang) || fallbackTitle;
+    const localizedContent = getLocalizedValue(firestoreData, 'content', lang) || fallbackContent;
+
+    setPageData(prev => ({
+      ...prev,
+      title: localizedTitle,
+      content: normalizeHtmlContent(localizedContent),
+      titleFont: firestoreData.titleFont || prev.titleFont,
+      contentFont: firestoreData.contentFont || prev.contentFont
+    }));
+  }, [firestoreData, language]);
 
   const loadFontsFromFirestore = async () => {
     try {
@@ -83,7 +161,7 @@ const CookieCare = () => {
   // console.log('Render CookieCare:', { title: pageData.title, hasContent: !!pageData.content });
 
   return (
-    <Box className="cookie-care-page-mobile" sx={{ py: 8, pt: 35, opacity: fontsReady ? 1 : 0, transition: 'opacity 0.01s ease' }}>
+    <Box className="cookie-care-page-mobile" sx={{ py: 8, pt: { xs: 24, md: 30 }, opacity: fontsReady ? 1 : 0, transition: 'opacity 0.01s ease' }}>
       <Container maxWidth="lg">
         <Typography
           variant="h2"
@@ -106,7 +184,7 @@ const CookieCare = () => {
           <Box
             sx={{
               color: '#666',
-              textAlign: 'left',
+              textAlign: 'justify',
               fontStyle: 'normal',
               fontFamily: pageData.contentFont ? `"${pageData.contentFont}", sans-serif` : 'Roboto, sans-serif',
               lineHeight: 1.6,
