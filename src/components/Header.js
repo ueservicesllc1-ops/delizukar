@@ -71,9 +71,7 @@ const Header = () => {
 
   const labels = {
     es: { home: 'Inicio', products: 'Productos', about: 'Nosotros', contact: 'Contacto', faq: 'FAQ' },
-    en: { home: 'Home', products: 'Products', about: 'About Us', contact: 'Contact', faq: 'FAQ' },
-    fr: { home: 'Accueil', products: 'Produits', about: 'À propos', contact: 'Contact', faq: 'FAQ' },
-    pt: { home: 'Início', products: 'Produtos', about: 'Sobre nós', contact: 'Contato', faq: 'FAQ' }
+    en: { home: 'Home', products: 'Products', about: 'About Us', contact: 'Contact', faq: 'FAQ' }
   };
   const L = labels[language] || labels.es;
   const menuItems = [
@@ -213,8 +211,6 @@ const Header = () => {
         >
           <option value="es">ES</option>
           <option value="en">EN</option>
-          <option value="fr">FR</option>
-          <option value="pt">PT</option>
         </Box>
       </Box>
     </Box>
@@ -243,8 +239,6 @@ const Header = () => {
     >
       <option value="es">ES</option>
       <option value="en">EN</option>
-      <option value="fr">FR</option>
-      <option value="pt">PT</option>
     </Box>
   );
 

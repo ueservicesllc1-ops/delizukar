@@ -298,14 +298,13 @@ const ShippingCalculator = ({
             if (minDays === maxDays) {
               return `${minDays}`;
             }
-            // Asegurar que siempre tenga guión
             return `${minDays}-${maxDays}`;
           };
           
           const transitDays = calculateTransitDays(selectedRate);
+          const transitDaysDisplay = transitDays.includes('-') ? `${transitDays} days` : `${transitDays} days`;
           
           console.log('🔍 [ShippingCalculator] transitDays calculado:', transitDays);
-          console.log('   ⚠️ Verificar que tenga guión si es un rango (ej: "2-3" no "23")');
           
           // Guardar TODA la información del rate para poder identificarlo después
           onShippingSelected({
@@ -333,7 +332,7 @@ const ShippingCalculator = ({
             labelUrl: null,
             packingSlipUrl: null,
             eta: formattedETA, // Usar el ETA formateado (ej: "del 15 de enero al 17 de enero")
-            transitDays: transitDays, // Guardar transitDays en formato "2-3" o "1"
+            transitDays: transitDaysDisplay,
             cost: selectedRate.amount_local || selectedRate.amount,
             carrier: selectedRate.carrier || selectedRate.provider,
             serviceLevel: selectedRate.service || selectedRate.servicelevel?.name
