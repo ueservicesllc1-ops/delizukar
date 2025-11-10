@@ -296,7 +296,23 @@ const CheckoutSuccess = () => {
                 {shippingInfo.transitDays && (
                   <Box sx={{ mb: 1 }}>
                     <Typography variant="body2" sx={{ color: '#2e7d32', fontSize: '0.85rem' }}>
-                      🚚 Tránsito estimado: {shippingInfo.transitDays} días
+                      🚚 Tránsito estimado: {
+                        shippingInfo.minTransitDays !== undefined && shippingInfo.maxTransitDays !== undefined
+                          ? (shippingInfo.minTransitDays === shippingInfo.maxTransitDays
+                              ? shippingInfo.minTransitDays
+                              : `${shippingInfo.minTransitDays} - ${shippingInfo.maxTransitDays}`)
+                          : (() => {
+                              const transitValue = `${shippingInfo.transitDays}`.trim();
+                              if (transitValue.includes('-')) {
+                                const parts = transitValue.split('-').map((p) => p.trim());
+                                return `${parts[0]} - ${parts[1]}`;
+                              }
+                              if (!Number.isNaN(parseInt(transitValue, 10)) && transitValue.length === 2) {
+                                return `${transitValue[0]} - ${transitValue[1]}`;
+                              }
+                              return transitValue;
+                            })()
+                      } días
                     </Typography>
                   </Box>
                 )}

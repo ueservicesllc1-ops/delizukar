@@ -69,6 +69,16 @@ const ShippingConfirmationPopup = ({
     // Días de tránsito del proveedor (usando el rango)
     let minTransitDays = 2;
     let maxTransitDays = 3;
+    if (shippingInfo?.minTransitDays !== undefined && shippingInfo?.maxTransitDays !== undefined) {
+      const minCandidate = Number(shippingInfo.minTransitDays);
+      const maxCandidate = Number(shippingInfo.maxTransitDays);
+      if (!Number.isNaN(minCandidate) && minCandidate > 0) {
+        minTransitDays = minCandidate;
+      }
+      if (!Number.isNaN(maxCandidate) && maxCandidate > 0) {
+        maxTransitDays = maxCandidate;
+      }
+    }
     
     // SIEMPRE calcular el rango basado en carrier/service si transitDays no está en formato correcto
     // Esto asegura que nunca mostremos "23 days" incorrectamente
@@ -235,7 +245,11 @@ const ShippingConfirmationPopup = ({
                 <Box sx={{ display: 'flex', alignItems: 'center', mb: 1.5 }}>
                   <LocalShipping sx={{ color: '#666', mr: 1, fontSize: '1rem' }} />
                   <Typography variant="body1" sx={{ color: '#666' }}>
-                    {t('shippingConfirmation.transitTime', 'Tiempo de tránsito estimado')}: {deliveryInfo.transitDays} {t('shippingConfirmation.days', 'días')}
+                    {t('shippingConfirmation.transitTime', 'Tiempo de tránsito estimado')}: {
+                      deliveryInfo.minTransitDays === deliveryInfo.maxTransitDays
+                        ? `${deliveryInfo.minTransitDays}`
+                        : `${deliveryInfo.minTransitDays} - ${deliveryInfo.maxTransitDays}`
+                    } {t('shippingConfirmation.days', 'días')}
                   </Typography>
                 </Box>
 

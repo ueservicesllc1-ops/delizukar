@@ -303,6 +303,22 @@ const ShippingCalculator = ({
           
           const transitDays = calculateTransitDays(selectedRate);
           const transitDaysDisplay = transitDays;
+          const normalizedTransit = transitDays.replace('days', '').replace(/ /g, '').trim();
+          let minTransit = 2;
+          let maxTransit = 3;
+          if (normalizedTransit.includes('-')) {
+            const parts = normalizedTransit.split('-').map((p) => parseInt(p.trim(), 10));
+            if (parts.length === 2 && !Number.isNaN(parts[0]) && !Number.isNaN(parts[1])) {
+              minTransit = parts[0];
+              maxTransit = parts[1];
+            }
+          } else {
+            const parsed = parseInt(normalizedTransit, 10);
+            if (!Number.isNaN(parsed)) {
+              minTransit = parsed;
+              maxTransit = parsed;
+            }
+          }
           
           console.log('🔍 [ShippingCalculator] transitDays calculado:', transitDays);
           
@@ -333,6 +349,8 @@ const ShippingCalculator = ({
             packingSlipUrl: null,
             eta: formattedETA, // Usar el ETA formateado (ej: "del 15 de enero al 17 de enero")
             transitDays: transitDaysDisplay,
+            minTransitDays: minTransit,
+            maxTransitDays: maxTransit,
             cost: selectedRate.amount_local || selectedRate.amount,
             carrier: selectedRate.carrier || selectedRate.provider,
             serviceLevel: selectedRate.service || selectedRate.servicelevel?.name

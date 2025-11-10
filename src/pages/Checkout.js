@@ -202,7 +202,17 @@ const Checkout = () => {
     // Días de tránsito del proveedor (usando el rango)
     let minTransitDays = 2;
     let maxTransitDays = 3;
-    
+    if (shippingInfo?.minTransitDays !== undefined && shippingInfo?.maxTransitDays !== undefined) {
+      const minCandidate = Number(shippingInfo.minTransitDays);
+      const maxCandidate = Number(shippingInfo.maxTransitDays);
+      if (!Number.isNaN(minCandidate) && minCandidate > 0) {
+        minTransitDays = minCandidate;
+      }
+      if (!Number.isNaN(maxCandidate) && maxCandidate > 0) {
+        maxTransitDays = maxCandidate;
+      }
+    }
+ 
     if (shippingInfo?.transitDays) {
       const transitDaysValue = shippingInfo.transitDays;
       const transitDaysStr = String(transitDaysValue);
@@ -283,14 +293,20 @@ const Checkout = () => {
     const formattedTransitDays = minTransitDays === maxTransitDays 
       ? `${minTransitDays}` 
       : `${minTransitDays}-${maxTransitDays}`;
-    
+    const formattedTransitDaysDisplay = minTransitDays === maxTransitDays
+      ? `${minTransitDays}`
+      : `${minTransitDays} - ${maxTransitDays}`;
+     
     console.log('🔍 [Checkout] formattedTransitDays final:', formattedTransitDays);
     
     return {
       shippingDate,
       deliveryDate,
       transitDays: formattedTransitDays,
-      daysToMonday
+      daysToMonday,
+      minTransitDays,
+      maxTransitDays,
+      transitDaysDisplay: formattedTransitDaysDisplay
     };
   };
 
@@ -902,7 +918,11 @@ const Checkout = () => {
                                 })}
                               </Typography>
                               <Typography variant="body2" sx={{ color: '#666', fontSize: '0.85rem', mb: 0.5 }}>
-                                🚚 Estimated transit: {deliveryInfo.transitDays} days
+                                🚚 Estimated transit: {
+                                  deliveryInfo.minTransitDays === deliveryInfo.maxTransitDays
+                                    ? `${deliveryInfo.minTransitDays}`
+                                    : `${deliveryInfo.minTransitDays} - ${deliveryInfo.maxTransitDays}`
+                                } days
                               </Typography>
                               <Typography variant="body2" sx={{ color: '#c8626d', fontWeight: 600, fontSize: '0.85rem' }}>
                                 📅 Estimated delivery: {deliveryInfo.deliveryDate.toLocaleDateString('en-US', { 
