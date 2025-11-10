@@ -187,6 +187,9 @@ const Home = () => {
         position: 'relative',
         '@media (min-width: 769px) and (max-width: 1024px) and (orientation: landscape)': {
           marginTop: '-30px'
+        },
+        '@media (min-width: 1201px)': {
+          marginTop: '20px'
         }
       }}>
         <HeroBanner />
@@ -213,6 +216,9 @@ const Home = () => {
           WebkitUserSelect: 'none',
           MozUserSelect: 'none',
           msUserSelect: 'none',
+          '@media (max-width: 767px)': {
+            marginTop: '0px'
+          },
           '& *': {
             cursor: 'default !important',
             pointerEvents: 'none !important'
@@ -229,7 +235,10 @@ const Home = () => {
             marginTop: '0px'
           },
           '@media (min-width: 1201px)': {
-            marginTop: '-58px'
+            marginTop: '-20px'
+          },
+          '@media (max-width: 767px)': {
+            marginTop: '-60px'
           }
         }}
       >
@@ -271,6 +280,10 @@ const Home = () => {
         py: 2, 
         pt: 6, 
         backgroundColor: '#fafafa',
+        '@media (max-width: 767px)': {
+          marginTop: '-60px',
+          pt: 1
+        },
         '@media (min-width: 768px) and (max-width: 1200px) and (orientation: landscape)': {
           marginTop: '30px'
         }
@@ -449,15 +462,31 @@ const Home = () => {
                 </Button>
               </motion.div>
             </Box>
+
+          <Box
+            sx={{
+              mt: { xs: 4, md: 8 },
+              mx: 'calc(50% - 50vw)',
+              width: '100vw'
+            }}
+          >
+            <Box
+              component="img"
+              src="/banner2.jpg"
+              alt="Banner promocional"
+              className="banner2"
+              sx={{
+                width: '100%',
+                display: 'block'
+              }}
+            />
+          </Box>
           </motion.div>
         </Container>
       </Box>
 
-      {/* Banner 2 - Carga desde Firebase */}
-      <Banner2 />
-
-      {/* Testimonials Section */}
-      <TestimonialsSection />
+    {/* Testimonials Section */}
+    <TestimonialsSection />
 
       {/* Product Detail Dialog */}
       <Dialog

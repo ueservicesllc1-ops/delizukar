@@ -145,7 +145,15 @@ const TestimonialsSection = () => {
   }
 
   return (
-    <Box className="testimonials-mobile" sx={{ py: 8, pt: { xs: 30, sm: 20, md: 8 }, backgroundColor: '#f8f9fa' }}>
+    <Box
+      className="testimonials-mobile"
+      sx={{
+        mt: { xs: 80, sm: 80, md: 60 },
+        pt: { xs: 24, sm: 24, md: 12 },
+        pb: { xs: 10, md: 12 },
+        backgroundColor: '#f8f9fa'
+      }}
+    >
       <Container maxWidth="lg">
         <motion.div
           initial={{ opacity: 0, y: 50 }}
