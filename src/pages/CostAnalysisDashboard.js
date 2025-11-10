@@ -223,6 +223,20 @@ const CostAnalysisDashboard = () => {
     loadData();
   }, []);
 
+  useEffect(() => {
+    try {
+      const storedMargin = localStorage.getItem('costAnalysisProfitMargin');
+      if (storedMargin !== null) {
+        const parsed = parseFloat(storedMargin);
+        if (!Number.isNaN(parsed)) {
+          setCustomProfitMargin(parsed);
+        }
+      }
+    } catch (error) {
+      console.warn('No se pudo leer el margen personalizado guardado:', error);
+    }
+  }, []);
+
   // Recalcular cuando cambie el margen personalizado
   useEffect(() => {
     if (products.length > 0) {
@@ -758,6 +772,13 @@ const CostAnalysisDashboard = () => {
           <Button 
             onClick={() => {
               console.log('💾 Guardando margen personalizado:', customProfitMargin + '%');
+              const sanitizedMargin = !Number.isNaN(customProfitMargin) ? customProfitMargin : 30;
+              try {
+                localStorage.setItem('costAnalysisProfitMargin', sanitizedMargin.toString());
+              } catch (error) {
+                console.warn('No se pudo guardar el margen personalizado:', error);
+              }
+              setCustomProfitMargin(sanitizedMargin);
               setSettingsOpen(false);
             }}
             variant="contained"
