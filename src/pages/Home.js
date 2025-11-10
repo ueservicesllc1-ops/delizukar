@@ -317,117 +317,125 @@ const Home = () => {
               )}
             </Box>
 
-            {featuredProducts.length > 0 ? (
-              <Grid container spacing={4} justifyContent="center">
-                {featuredProducts.map((product, index) => (
-                  <Grid size={{ xs: 12, sm: 6, md: 3 }} key={product.id}>
-                    <motion.div
-                      initial={{ opacity: 0, y: 30 }}
-                      whileInView={{ opacity: 1, y: 0 }}
-                      viewport={{ once: true }}
-                      transition={{ duration: 0.6, delay: index * 0.1 }}
-                      whileHover={{ y: -10 }}
-                    >
-                      <Card
-                        sx={{
-                          height: '100%',
-                          borderRadius: '20px',
-                          boxShadow: '0 8px 32px rgba(0,0,0,0.1)',
-                          transition: 'all 0.3s ease',
-                          '&:hover': {
-                            boxShadow: '0 16px 48px rgba(0,0,0,0.15)',
-                            transform: 'translateY(-5px)'
-                          }
-                        }}
+            <Box
+              sx={{
+                transform: { xs: 'translateY(220px)', md: 'none' },
+                transition: 'transform 0.3s ease'
+              }}
+            >
+              {featuredProducts.length > 0 ? (
+                <Grid container spacing={4} justifyContent="center">
+                  {featuredProducts.map((product, index) => (
+                    <Grid size={{ xs: 12, sm: 6, md: 3 }} key={product.id}>
+                      <motion.div
+                        initial={{ opacity: 0, y: 30 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}
+                        transition={{ duration: 0.6, delay: index * 0.1 }}
+                        whileHover={{ y: -10 }}
                       >
+                        <Card
+                          sx={{
+                            height: '100%',
+                            borderRadius: '20px',
+                            boxShadow: '0 8px 32px rgba(0,0,0,0.1)',
+                            transition: 'all 0.3s ease',
+                            '&:hover': {
+                              boxShadow: '0 16px 48px rgba(0,0,0,0.15)',
+                              transform: 'translateY(-5px)'
+                            }
+                          }}
+                        >
                         <CardContent sx={{ p: 3, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                           <Box sx={{ position: 'relative', mb: 0.5, display: 'flex', justifyContent: 'center', width: '100%' }}>
-                            <Box
-                              component="img"
-                              src={product.image}
-                              alt={product.name}
-                              sx={{
-                                width: '180px',
-                                height: '160px',
-                                objectFit: 'cover',
-                                borderRadius: '15px',
-                                margin: '0 auto'
-                              }}
-                            />
-                            {/* Chips en la esquina superior izquierda */}
-                            <Box sx={{ position: 'absolute', top: 8, left: 8, display: 'flex', flexDirection: 'column', gap: 0.5 }}>
-                              {product.featured && <Chip label={translatedTexts.destacado} size="small" color="primary" sx={{ fontSize: '0.7rem', height: '24px' }} />}
-                              {product.bestSeller && <Chip label={translatedTexts.masVendido} size="small" color="success" sx={{ fontSize: '0.7rem', height: '24px' }} />}
-                              {product.isNew && <Chip label={translatedTexts.nuevo} size="small" color="warning" sx={{ fontSize: '0.7rem', height: '24px' }} />}
+                              <Box
+                                component="img"
+                                src={product.image}
+                                alt={product.name}
+                                sx={{
+                                  width: '180px',
+                                  height: '160px',
+                                  objectFit: 'cover',
+                                  borderRadius: '15px',
+                                  margin: '0 auto'
+                                }}
+                              />
+                              {/* Chips en la esquina superior izquierda */}
+                              <Box sx={{ position: 'absolute', top: 8, left: 8, display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+                                {product.featured && <Chip label={translatedTexts.destacado} size="small" color="primary" sx={{ fontSize: '0.7rem', height: '24px' }} />}
+                                {product.bestSeller && <Chip label={translatedTexts.masVendido} size="small" color="success" sx={{ fontSize: '0.7rem', height: '24px' }} />}
+                                {product.isNew && <Chip label={translatedTexts.nuevo} size="small" color="warning" sx={{ fontSize: '0.7rem', height: '24px' }} />}
+                              </Box>
                             </Box>
-                          </Box>
-                          <Typography
-                            variant="h6"
-                            sx={{
-                              fontWeight: 700,
-                              color: '#EC8C8D',
-                              mb: 0.25,
-                              fontFamily: '"Asap", sans-serif',
-                              textTransform: 'uppercase',
-                              letterSpacing: '0.5px'
-                            }}
-                          >
-                            {product.name}
-                          </Typography>
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
                             <Typography
-                              variant="h5"
+                              variant="h6"
                               sx={{
-                                fontWeight: 800,
-                                color: '#c8626d'
+                                fontWeight: 700,
+                                color: '#EC8C8D',
+                                mb: 1,
+                                mt: 1,
+                                fontFamily: '"Asap", sans-serif',
+                                textTransform: 'uppercase',
+                                letterSpacing: '0.5px'
                               }}
                             >
-                              ${product.price}
+                              {product.name}
                             </Typography>
-                            <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                              <Rating 
-                                value={product.rating || 5} 
-                                readOnly 
-                                size="small"
-                                sx={{ 
-                                  '& .MuiRating-icon': { 
-                                    fontSize: '1rem',
-                                    color: '#FFD700'
-                                  } 
-                                }} 
-                              />
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                              <Typography
+                                variant="h5"
+                                sx={{
+                                  fontWeight: 800,
+                                  color: '#c8626d'
+                                }}
+                              >
+                                ${product.price}
+                              </Typography>
+                              <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                                <Rating 
+                                  value={product.rating || 5} 
+                                  readOnly 
+                                  size="small"
+                                  sx={{ 
+                                    '& .MuiRating-icon': { 
+                                      fontSize: '1rem',
+                                      color: '#FFD700'
+                                    } 
+                                  }} 
+                                />
+                              </Box>
                             </Box>
-                          </Box>
-                          <Button
-                            variant="contained"
-                            fullWidth
-                            size="small"
-                            onClick={() => {
-                              setSelectedProduct(product);
-                              setProductDetailOpen(true);
-                            }}
-                            sx={{
-                              backgroundColor: '#C8626D',
-                              '&:hover': { backgroundColor: '#B5555A' },
-                              borderRadius: '10px',
-                              py: 0.5,
-                              px: 1,
-                              fontWeight: 600,
-                              fontSize: '0.7rem',
-                              minHeight: '32px'
-                            }}
-                          >
-                            {translatedTexts.verDetalles}
-                          </Button>
-                        </CardContent>
-                      </Card>
-                    </motion.div>
-                  </Grid>
-                ))}
-              </Grid>
-            ) : (
-              <ProductCards showAll={false} />
-            )}
+                            <Button
+                              variant="contained"
+                              fullWidth
+                              size="small"
+                              onClick={() => {
+                                setSelectedProduct(product);
+                                setProductDetailOpen(true);
+                              }}
+                              sx={{
+                                backgroundColor: '#C8626D',
+                                '&:hover': { backgroundColor: '#B5555A' },
+                                borderRadius: '10px',
+                                py: 0.5,
+                                px: 1,
+                                fontWeight: 600,
+                                fontSize: '0.7rem',
+                                minHeight: '32px'
+                              }}
+                            >
+                              {translatedTexts.verDetalles}
+                            </Button>
+                          </CardContent>
+                        </Card>
+                      </motion.div>
+                    </Grid>
+                  ))}
+                </Grid>
+              ) : (
+                <ProductCards showAll={false} />
+              )}
+            </Box>
 
             {/* Botón para ver más productos */}
             <Box sx={{ textAlign: 'center', mt: 6 }}>

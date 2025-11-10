@@ -45,6 +45,7 @@ const ProductCards = ({ products: propProducts, showAll = false }) => {
                   borderRadius: '8px',
                   overflow: 'hidden',
                   boxShadow: '0 8px 32px rgba(0,0,0,0.1)',
+                  backgroundColor: '#e3f2ff',
                   transition: 'all 0.3s ease',
                   cursor: 'pointer',
                   '&:hover': {
@@ -54,16 +55,19 @@ const ProductCards = ({ products: propProducts, showAll = false }) => {
                 }}
               >
                 {/* Imagen del producto */}
-                <Box className="product-image-container" sx={{ position: 'relative', overflow: 'hidden' }}>
+                <Box
+                  className="product-image-container"
+                  sx={{ position: 'relative', overflow: 'hidden', pb: 6.25 }}
+                >
                     <ProductImage
                       src={product.image}
                       alt={product.name}
                       height={280}
                       sx={{
                         transition: 'transform 0.3s ease',
-                        transform: 'translateY(-20px)',
+                        transform: 'translateY(0)',
                         '&:hover': {
-                          transform: 'translateY(-20px) scale(1.05)'
+                          transform: 'translateY(0) scale(1.05)'
                         }
                       }}
                     />
@@ -112,16 +116,16 @@ const ProductCards = ({ products: propProducts, showAll = false }) => {
                   </IconButton>
                 </Box>
 
-                <CardContent className="product-card-content-mobile" sx={{ flexGrow: 0, p: 1.5, transform: 'translateY(-10px)' }}>
+                <CardContent className="product-card-content-mobile" sx={{ flexGrow: 0, p: 1.5, pt: 2.5, pb: 1.5 }}>
                     <Typography
                       variant="h6"
                       className="product-title-mobile"
                       sx={{
                         fontWeight: 600,
-                        mb: 0.5,
+                        mt: 1.5,
+                        mb: 1,
                         color: '#333',
                         fontSize: '1rem',
-                        transform: 'translateY(5px)',
                         fontFamily: '"Asap", sans-serif',
                         textTransform: 'uppercase',
                         letterSpacing: '0.5px'

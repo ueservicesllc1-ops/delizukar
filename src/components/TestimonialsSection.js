@@ -148,9 +148,9 @@ const TestimonialsSection = () => {
     <Box
       className="testimonials-mobile"
       sx={{
-        mt: { xs: 80, sm: 80, md: 60 },
-        pt: { xs: 24, sm: 24, md: 12 },
-        pb: { xs: 10, md: 12 },
+        mt: { xs: 10, sm: 10, md: 8 },
+        pt: { xs: 8, sm: 8, md: 6 },
+        pb: { xs: 8, md: 8 },
         backgroundColor: '#f8f9fa'
       }}
     >

@@ -91,7 +91,14 @@ const FeaturedProducts = () => {
             </motion.div>
           </Box>
 
-          <Grid container spacing={4}>
+          <Grid
+            container
+            spacing={4}
+            sx={{
+              transform: { xs: 'translateY(160px)', md: 'none' },
+              transition: 'transform 0.3s ease'
+            }}
+          >
             {featuredProducts.map((product, index) => (
               <Grid size={{ xs: 12, sm: 6, md: 3 }} key={product.id}>
                 <motion.div
