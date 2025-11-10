@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   Box,
   Typography,
@@ -42,6 +42,44 @@ import {
 } from '@mui/icons-material';
 import { collection, getDocs, query, orderBy } from 'firebase/firestore';
 import { db } from '../firebase/config';
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  ArcElement,
+  PointElement,
+  LineElement,
+  Tooltip as ChartTooltip,
+  Legend
+} from 'chart.js';
+import { Bar, Doughnut, Line } from 'react-chartjs-2';
+
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  ArcElement,
+  PointElement,
+  LineElement,
+  ChartTooltip,
+  Legend
+);
+
+const getCategoryLabel = (category) => {
+  switch (category) {
+    case 'materia_prima':
+      return 'Materia prima';
+    case 'empaque':
+      return 'Empaque';
+    case 'decoracion':
+      return 'Decoración';
+    case 'otros':
+      return 'Otros';
+    default:
+      return category ? category.replace(/_/g, ' ') : 'Sin categoría';
+  }
+};
 
 const CostAnalysisDashboard = () => {
   const [products, setProducts] = useState([]);
@@ -58,6 +96,128 @@ const CostAnalysisDashboard = () => {
     totalProductionCost: 0,
     totalSuggestedRevenue: 0
   });
+
+  const topIngredientCosts = useMemo(() => {
+    if (!ingredients || ingredients.length === 0) return [];
+    return [...ingredients]
+      .map((ingredient) => ({
+        name: ingredient.name,
+        cost: parseFloat(ingredient.price) || 0
+      }))
+      .sort((a, b) => b.cost - a.cost)
+      .slice(0, 6);
+  }, [ingredients]);
+
+  const categoryDistribution = useMemo(() => {
+    if (!ingredients || ingredients.length === 0) return [];
+    const categoriesMap = ingredients.reduce((acc, ingredient) => {
+      const category = ingredient.category || 'otros';
+      acc[category] = (acc[category] || 0) + 1;
+      return acc;
+    }, {});
+    return Object.entries(categoriesMap).map(([category, count]) => ({
+      category,
+      count
+    }));
+  }, [ingredients]);
+
+  const productProfitData = useMemo(() => {
+    if (!products || products.length === 0) return [];
+    return [...products]
+      .map((product) => {
+        const analysis = calculateProductCost(product, ingredients, true);
+        return {
+          name: product.name,
+          profit: Math.max(analysis.profit || 0, 0)
+        };
+      })
+      .sort((a, b) => b.profit - a.profit)
+      .slice(0, 6);
+  }, [products, ingredients]);
+
+  const ingredientCostsChartData = useMemo(() => ({
+    labels: topIngredientCosts.map((item) => item.name),
+    datasets: [
+      {
+        label: 'Costo por ingrediente ($)',
+        data: topIngredientCosts.map((item) => item.cost),
+        backgroundColor: ['#c8626d', '#ec8c8d', '#f7b0ab', '#8d9a7d', '#a0c4ff', '#ffc8dd'],
+        borderRadius: 8
+      }
+    ]
+  }), [topIngredientCosts]);
+
+  const ingredientCategoryChartData = useMemo(() => ({
+    labels: categoryDistribution.map((item) => getCategoryLabel(item.category)),
+    datasets: [
+      {
+        data: categoryDistribution.map((item) => item.count),
+        backgroundColor: ['#c8626d', '#8d9a7d', '#f7b0ab', '#a0c4ff', '#ffafcc', '#bde0fe'],
+        borderWidth: 1
+      }
+    ]
+  }), [categoryDistribution]);
+
+  const productProfitChartData = useMemo(() => ({
+    labels: productProfitData.map((item) => item.name),
+    datasets: [
+      {
+        label: 'Ganancia estimada ($)',
+        data: productProfitData.map((item) => parseFloat(item.profit.toFixed(2))),
+        backgroundColor: '#8d9a7d',
+        borderColor: '#6b7b5d',
+        tension: 0.4,
+        fill: false
+      }
+    ]
+  }), [productProfitData]);
+
+  const barOptions = {
+    responsive: true,
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        callbacks: {
+          label: (context) => `$${context.formattedValue}`
+        }
+      }
+    },
+    scales: {
+      y: {
+        ticks: {
+          callback: (value) => `$${value}`
+        }
+      }
+    }
+  };
+
+  const doughnutOptions = {
+    responsive: true,
+    plugins: {
+      legend: {
+        position: 'bottom'
+      }
+    }
+  };
+
+  const lineOptions = {
+    responsive: true,
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        callbacks: {
+          label: (context) => `$${context.formattedValue}`
+        }
+      }
+    },
+    scales: {
+      y: {
+        ticks: {
+          callback: (value) => `$${value}`
+        }
+      }
+    }
+  };
 
   useEffect(() => {
     loadData();
@@ -114,7 +274,7 @@ const CostAnalysisDashboard = () => {
     }
   };
 
-  const calculateProductCost = (product, ingredients, useCustomMargin = false) => {
+  function calculateProductCost(product, ingredients, useCustomMargin = false) {
     let totalCost = 0;
     let ingredientDetails = [];
     
@@ -171,7 +331,7 @@ const CostAnalysisDashboard = () => {
       ingredientDetails,
       profitMargin
     };
-  };
+  }
 
   const calculateSummary = (productsList, ingredientsList) => {
     let totalProductionCost = 0;
@@ -505,6 +665,53 @@ const CostAnalysisDashboard = () => {
           )}
         </CardContent>
       </Card>
+
+      {/* Visualizaciones */}
+      <Box sx={{ mt: 4 }}>
+        <Typography variant="h5" sx={{ fontWeight: 600, color: '#c8626d', mb: 2 }}>
+          Visualizaciones de Costos
+        </Typography>
+        <Grid container spacing={3}>
+          {topIngredientCosts.length > 0 && (
+            <Grid item xs={12} md={6} lg={4}>
+              <Card sx={{ height: '100%' }}>
+                <CardContent>
+                  <Typography variant="h6" sx={{ fontFamily: '"Asap", sans-serif', color: '#333', mb: 2 }}>
+                    Ingredientes más costosos
+                  </Typography>
+                  <Bar data={ingredientCostsChartData} options={barOptions} />
+                </CardContent>
+              </Card>
+            </Grid>
+          )}
+
+          {categoryDistribution.length > 0 && (
+            <Grid item xs={12} md={6} lg={4}>
+              <Card sx={{ height: '100%' }}>
+                <CardContent>
+                  <Typography variant="h6" sx={{ fontFamily: '"Asap", sans-serif', color: '#333', mb: 2 }}>
+                    Distribución por categoría
+                  </Typography>
+                  <Doughnut data={ingredientCategoryChartData} options={doughnutOptions} />
+                </CardContent>
+              </Card>
+            </Grid>
+          )}
+
+          {productProfitData.length > 0 && (
+            <Grid item xs={12} md={12} lg={4}>
+              <Card sx={{ height: '100%' }}>
+                <CardContent>
+                  <Typography variant="h6" sx={{ fontFamily: '"Asap", sans-serif', color: '#333', mb: 2 }}>
+                    Productos con mayor ganancia
+                  </Typography>
+                  <Line data={productProfitChartData} options={lineOptions} />
+                </CardContent>
+              </Card>
+            </Grid>
+          )}
+        </Grid>
+      </Box>
 
       {/* Modal de configuración de margen */}
       <Dialog open={settingsOpen} onClose={() => setSettingsOpen(false)} maxWidth="sm" fullWidth>
