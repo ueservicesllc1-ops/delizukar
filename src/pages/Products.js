@@ -100,28 +100,33 @@ const Products = () => {
     }}>
       <Container maxWidth="xl" sx={{ maxWidth: '1400px' }}>
         {/* Header */}
-        <Box sx={{ mb: 3 }}>
-          
-          
-
-
-          {/* Filtros por categoría eliminados a solicitud */}
+        <Box sx={{ mb: 4, textAlign: 'center' }}>
+          <Typography
+            sx={{
+              fontFamily: 'BrittanySignature',
+              fontSize: { xs: '2.4rem', md: '3rem' },
+              color: '#c8626d'
+            }}
+          >
+            {language === 'es' && 'Nuestras Galletas'}
+            {language === 'en' && 'Our Cookies'}
+            {language === 'fr' && 'Nos biscuits'}
+            {language === 'pt' && 'Nossos cookies'}
+          </Typography>
         </Box>
 
         {/* Grid de productos */}
         <Grid container spacing={3} className="products-grid-mobile" sx={{ 
           display: 'grid',
-          gridTemplateColumns: { 
-            xs: '1fr', 
-            sm: 'repeat(2, 1fr)', 
-            md: 'repeat(5, 1fr)' 
+          gridTemplateColumns: {
+            xs: 'repeat(2, minmax(0, 1fr))'
           },
-          gap: 3
+          gap: { xs: 2, md: 3 }
         }}>
           {productsLoading ? (
             // Skeleton loading mientras cargan los productos
             Array.from({ length: 8 }).map((_, index) => (
-              <Box key={index}>
+              <Box key={index} sx={{ flex: '0 1 calc(50% - 12px)' }}>
                 <Card sx={{ width: '100%', height: '320px', display: 'flex', flexDirection: 'column' }}>
                   <Skeleton variant="rectangular" height={280} />
                   <CardContent>
@@ -137,7 +142,7 @@ const Products = () => {
             ))
           ) : (
             products.map((product, index) => (
-            <Box key={product.id}>
+            <Box key={product.id} sx={{ flex: '0 1 calc(50% - 12px)' }}>
               <motion.div
                 initial={{ opacity: 0, y: 50 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -280,12 +285,6 @@ const Products = () => {
                           size="small"
                           sx={{ color: '#FFD700' }}
                         />
-                        <Typography
-                          variant="body2"
-                          sx={{ ml: 0.5, color: '#666', fontSize: '0.8rem' }}
-                        >
-                          ({product.reviews} {translatedTexts.reseñas})
-                        </Typography>
                       </Box>
                     </Box>
 
