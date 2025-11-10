@@ -302,7 +302,7 @@ const ShippingCalculator = ({
           };
           
           const transitDays = calculateTransitDays(selectedRate);
-          const transitDaysDisplay = transitDays.includes('-') ? `${transitDays} days` : `${transitDays} days`;
+          const transitDaysDisplay = transitDays;
           
           console.log('🔍 [ShippingCalculator] transitDays calculado:', transitDays);
           
