@@ -3,7 +3,22 @@ import { Box, Container, Typography } from '@mui/material';
 import { db } from '../firebase/config';
 import { doc, getDoc, collection, getDocs } from 'firebase/firestore';
 import { useLanguage } from '../context/LanguageContext';
-import { translateBatch } from '../services/translateService';
+
+const normalizeHtmlContent = (text) => {
+  if (!text) return '';
+  const trimmed = text.trim();
+  if (!trimmed) return '';
+  if (/<[a-z][\s\S]*>/i.test(trimmed)) {
+    return trimmed;
+  }
+  const paragraphs = trimmed.split(/\n\s*\n/);
+  return paragraphs
+    .map((paragraph) => {
+      const safe = paragraph.replace(/\n/g, '<br/>');
+      return `<p>${safe}</p>`;
+    })
+    .join('\n');
+};
 
 const Terms = () => {
   const [pageData, setPageData] = useState({
@@ -16,10 +31,11 @@ const Terms = () => {
   const [fontsReady, setFontsReady] = useState(false);
   const { language } = useLanguage();
   const [display, setDisplay] = useState({ title: 'Términos y Condiciones', content: '' });
+  const [rawData, setRawData] = useState(null);
 
   useEffect(() => {
     loadPageData();
-  }, [language]);
+  }, []);
 
   // Eliminado: sistema de auto-traducción
 
@@ -40,41 +56,7 @@ const Terms = () => {
         ...prev,
         ...rawData
       }));
-      
-      // Establecer contenido mostrado según idioma actual
-      const currentLang = language || 'es';
-      const titleByLang = data[`title_${currentLang}`];
-      const contentByLang = data[`content_${currentLang}`];
-      
-      if (currentLang === 'es') {
-        setDisplay({ 
-          title: data.title_es || data.title || 'Términos y Condiciones', 
-          content: data.content_es || data.content || '' 
-        });
-      } else if (titleByLang || contentByLang) {
-        setDisplay({ 
-          title: titleByLang || data.title || 'Términos y Condiciones', 
-          content: contentByLang || data.content || '' 
-        });
-      } else {
-        // Traducir desde ES a idioma destino
-        try {
-          const [trTitle, trContent] = await translateBatch([
-            data.title_es || data.title || 'Términos y Condiciones',
-            data.content_es || data.content || ''
-          ], currentLang, 'es');
-          setDisplay({ 
-            title: trTitle || (data.title_es || data.title || 'Términos y Condiciones'), 
-            content: trContent || (data.content_es || data.content || '') 
-          });
-        } catch (error) {
-          console.error('Error traduciendo:', error);
-          setDisplay({ 
-            title: data.title_es || data.title || 'Términos y Condiciones', 
-            content: data.content_es || data.content || '' 
-          });
-        }
-      }
+      setRawData(data);
       
       // Siempre cargar fuentes desde Firestore
       await loadFontsFromFirestore();
@@ -83,6 +65,22 @@ const Terms = () => {
       console.error('Error cargando datos desde Firestore:', error);
     }
   };
+
+  useEffect(() => {
+    if (!rawData) return;
+
+    const currentLang = language || 'es';
+    const fallbackTitle = rawData.title_es || rawData.title || pageData.title;
+    const fallbackContent = rawData.content_es || rawData.content || pageData.content;
+
+    const titleByLang = rawData[`title_${currentLang}`] || fallbackTitle;
+    const contentByLang = rawData[`content_${currentLang}`] || fallbackContent;
+
+    setDisplay({
+      title: titleByLang,
+      content: normalizeHtmlContent(contentByLang)
+    });
+  }, [language, rawData]);
 
   const loadFontsFromFirestore = async () => {
     try {
@@ -129,7 +127,7 @@ const Terms = () => {
   };
 
   return (
-    <Box className="terms-page-mobile" sx={{ py: 8, pt: '500px', opacity: fontsReady ? 1 : 0, transition: 'opacity 0.01s ease' }}>
+    <Box className="terms-page-mobile" sx={{ py: 8, pt: { xs: 8, md: 12 }, opacity: fontsReady ? 1 : 0, transition: 'opacity 0.01s ease' }}>
       <Container maxWidth="lg">
 
         <Typography
@@ -138,8 +136,7 @@ const Terms = () => {
             textAlign: 'center',
             fontWeight: 800,
             color: '#EC8C8D',
-            mb: 2,
-            mt: '-350px',
+            mb: 3,
             fontSize: { xs: '2rem', md: '3rem' },
             fontFamily: pageData.titleFont ? `"${pageData.titleFont}", serif` : 'Playfair Display, serif'
           }}
@@ -152,7 +149,7 @@ const Terms = () => {
           <Box
             sx={{
               color: '#666',
-              textAlign: 'left',
+              textAlign: 'justify',
               fontStyle: 'normal',
               fontFamily: pageData.contentFont ? `"${pageData.contentFont}", sans-serif` : 'Roboto, sans-serif',
               lineHeight: 1.6,

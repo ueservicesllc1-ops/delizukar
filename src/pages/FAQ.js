@@ -2,7 +2,24 @@ import React, { useState, useEffect } from 'react';
 import { Box, Container, Typography } from '@mui/material';
 import { db } from '../firebase/config';
 import { doc, getDoc, setDoc, collection, getDocs } from 'firebase/firestore';
+import { useLanguage } from '../context/LanguageContext';
 // i18n no se usa aquí: priorizamos Firestore
+
+const normalizeHtmlContent = (text) => {
+  if (!text) return '';
+  const trimmed = text.trim();
+  if (!trimmed) return '';
+  if (/<[a-z][\s\S]*>/i.test(trimmed)) {
+    return trimmed;
+  }
+  const paragraphs = trimmed.split(/\n\s*\n/);
+  return paragraphs
+    .map((paragraph) => {
+      const safe = paragraph.replace(/\n/g, '<br/>');
+      return `<p>${safe}</p>`;
+    })
+    .join('\n');
+};
 
 const FAQ = () => {
   const [pageData, setPageData] = useState({
@@ -32,24 +49,30 @@ No podemos programar fechas específicas de envío o entrega. Todos los pedidos 
 
   const [fontsReady, setFontsReady] = useState(false);
   const [firestoreData, setFirestoreData] = useState(null);
+  const { language } = useLanguage();
 
   useEffect(() => {
     loadPageData();
   }, []);
 
-  // Priorizar siempre Firestore; si no hay datos, dejar vacío para evitar falsos positivos
   useEffect(() => {
-    if (firestoreData) {
-      setPageData(prev => ({
-        ...prev,
-        // Solo usar español si existe; si no, mantener los defaults en español
-        title: firestoreData.title_es ? firestoreData.title_es : prev.title,
-        content: firestoreData.content_es ? firestoreData.content_es : prev.content,
-        titleFont: firestoreData.titleFont || prev.titleFont,
-        contentFont: firestoreData.contentFont || prev.contentFont
-      }));
-    }
-  }, [firestoreData]);
+    if (!firestoreData) return;
+
+    const lang = language || 'es';
+    const fallbackTitle = firestoreData.title_es || firestoreData.title || pageData.title;
+    const fallbackContent = firestoreData.content_es || firestoreData.content || pageData.content;
+
+    const localizedTitle = firestoreData[`title_${lang}`] || fallbackTitle;
+    const localizedContent = firestoreData[`content_${lang}`] || fallbackContent;
+
+    setPageData(prev => ({
+      ...prev,
+      title: localizedTitle,
+      content: normalizeHtmlContent(localizedContent),
+      titleFont: firestoreData.titleFont || prev.titleFont,
+      contentFont: firestoreData.contentFont || prev.contentFont
+    }));
+  }, [firestoreData, language]);
 
   const loadPageData = async () => {
     try {

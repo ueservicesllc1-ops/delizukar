@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { Box, Container, Typography, TextField, Button, Grid, Alert } from '@mui/material';
 import { db } from '../firebase/config';
-import { collection, addDoc, serverTimestamp, doc, getDoc, collection as fsCollection, getDocs } from 'firebase/firestore';
+import { collection, addDoc, serverTimestamp, doc, getDoc, collection as fsCollection, getDocs, setDoc } from 'firebase/firestore';
+import { useLanguage } from '../context/LanguageContext';
+import { translateBatch } from '../services/translateService';
 
 const Contacto = () => {
   const [pageData, setPageData] = useState({
@@ -11,6 +13,8 @@ const Contacto = () => {
     contentFont: 'Roboto'
   });
   const [fontsReady, setFontsReady] = useState(false);
+  const [rawData, setRawData] = useState(null);
+  const { language } = useLanguage();
   const [form, setForm] = useState({ nombre: '', email: '', mensaje: '' });
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
@@ -34,12 +38,12 @@ const Contacto = () => {
         const data = snap.exists() ? snap.data() : {};
         setPageData(prev => ({
           ...prev,
-          // Forzar español siempre
-          title: 'Contáctanos',
-          content: data.content_es || prev.content,
+          title: data.title_es || data.title || prev.title,
+          content: data.content_es || data.content || prev.content,
           titleFont: data.titleFont || prev.titleFont,
           contentFont: data.contentFont || prev.contentFont
         }));
+        setRawData(data);
 
         // Fuentes desde localStorage (dataURL) para evitar CORS
         try {
@@ -63,7 +67,64 @@ const Contacto = () => {
     load();
   }, []);
 
-  // Eliminado: sistema de auto-traducción
+  useEffect(() => {
+    const localizeContent = async () => {
+      if (!rawData) return;
+      const lang = language || 'es';
+      if (lang === 'es') {
+        setPageData(prev => ({
+          ...prev,
+          title: rawData.title_es || rawData.title || prev.title,
+          content: rawData.content_es || rawData.content || prev.content
+        }));
+        return;
+      }
+
+      const localizedTitle = rawData[`title_${lang}`];
+      const localizedContent = rawData[`content_${lang}`];
+
+      if (localizedTitle || localizedContent) {
+        setPageData(prev => ({
+          ...prev,
+          title: localizedTitle || rawData.title_es || rawData.title || prev.title,
+          content: localizedContent || rawData.content_es || rawData.content || prev.content
+        }));
+        return;
+      }
+
+      try {
+        const [translatedTitle, translatedContent] = await translateBatch([
+          rawData.title_es || rawData.title || 'Contáctanos',
+          rawData.content_es || rawData.content || ''
+        ], lang, 'es');
+
+        const resultTitle = translatedTitle || rawData.title_es || rawData.title || 'Contáctanos';
+        const resultContent = translatedContent || rawData.content_es || rawData.content || '';
+
+        setPageData(prev => ({
+          ...prev,
+          title: resultTitle,
+          content: resultContent
+        }));
+
+        const updates = {};
+        if (!rawData[`title_${lang}`]) {
+          updates[`title_${lang}`] = resultTitle;
+        }
+        if (!rawData[`content_${lang}`]) {
+          updates[`content_${lang}`] = resultContent;
+        }
+        if (Object.keys(updates).length > 0) {
+          await setDoc(doc(db, 'pages', 'contacto'), updates, { merge: true });
+          setRawData(prev => (prev ? { ...prev, ...updates } : prev));
+        }
+      } catch (error) {
+        console.error('Error translating Contacto page:', error);
+      }
+    };
+
+    localizeContent();
+  }, [language, rawData]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -116,7 +177,7 @@ const Contacto = () => {
   };
 
   return (
-    <Box className="contacto-mobile" sx={{ py: 8, pt: 25, opacity: fontsReady ? 1 : 0, transition: 'opacity 0.01s ease' }}>
+    <Box className="contacto-mobile" sx={{ py: 8, pt: { xs: 12, md: 16 }, opacity: fontsReady ? 1 : 0, transition: 'opacity 0.01s ease' }}>
       <Container maxWidth="lg">
         <Typography
           className="contacto-title-mobile"
@@ -130,9 +191,23 @@ const Contacto = () => {
             fontFamily: pageData.titleFont ? `"${pageData.titleFont}", serif` : 'Playfair Display, serif'
           }}
         >
-          Contáctanos
+          {pageData.title}
         </Typography>
 
+        {pageData.content && (
+          <Typography
+            sx={{
+              textAlign: 'center',
+              maxWidth: '600px',
+              mx: 'auto',
+              mb: 4,
+              color: '#666',
+              fontFamily: pageData.contentFont ? `"${pageData.contentFont}", sans-serif` : 'Roboto, sans-serif'
+            }}
+          >
+            {pageData.content}
+          </Typography>
+        )}
 
         {sent && (
           <Alert severity="success" sx={{ mb: 3 }}>
@@ -140,12 +215,12 @@ const Contacto = () => {
           </Alert>
         )}
 
-        <Box className="contacto-form-mobile" component="form" onSubmit={handleSubmit} noValidate sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', maxWidth: '600px', mx: 'auto' }}>
-          <Grid container spacing={2} sx={{ width: '100%', ml: '80px' }}>
+        <Box className="contacto-form-mobile" component="form" onSubmit={handleSubmit} noValidate sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', maxWidth: '600px', mx: 'auto', mt: 2 }}>
+          <Grid container spacing={2} sx={{ width: '100%' }}>
             <Grid item xs={12} md={6}>
               <TextField
                 fullWidth
-                label="Nombre"
+                label={language === 'en' ? 'Name' : language === 'fr' ? 'Nom' : language === 'pt' ? 'Nome' : 'Nombre'}
                 name="nombre"
                 value={form.nombre}
                 onChange={handleChange}
@@ -165,9 +240,9 @@ const Contacto = () => {
             </Grid>
           </Grid>
           
-          <Box sx={{ mt: 2, width: '100%', display: 'flex', justifyContent: 'center' }}>
+          <Box sx={{ mt: 2, width: '100%' }}>
             <TextField
-              label="Mensaje"
+              label={language === 'en' ? 'Message' : language === 'fr' ? 'Message' : language === 'pt' ? 'Mensagem' : 'Mensaje'}
               name="mensaje"
               value={form.mensaje}
               onChange={handleChange}
@@ -175,7 +250,7 @@ const Contacto = () => {
               rows={4}
               required
               sx={{ 
-                width: '90%',
+                width: '100%',
                 '& .MuiOutlinedInput-root': {
                   fontSize: '1.4rem',
                   padding: '20px',
@@ -206,7 +281,9 @@ const Contacto = () => {
                 '&:hover': { backgroundColor: '#b5555a' }
               }}
             >
-              {sending ? 'Enviando...' : 'Enviar Mensaje'}
+              {sending
+                ? language === 'en' ? 'Sending...' : language === 'fr' ? 'Envoi...' : language === 'pt' ? 'Enviando...' : 'Enviando...'
+                : language === 'en' ? 'Send Message' : language === 'fr' ? 'Envoyer le message' : language === 'pt' ? 'Enviar mensagem' : 'Enviar Mensaje'}
             </Button>
           </Box>
         </Box>
