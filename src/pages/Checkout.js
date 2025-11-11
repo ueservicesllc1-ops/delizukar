@@ -15,6 +15,15 @@ import { collection, addDoc, query, where, getDocs, updateDoc, doc } from 'fireb
 import { onAuthStateChanged } from 'firebase/auth';
 import emailjs from '@emailjs/browser';
 
+const CARD_LOGOS = [
+  { alt: 'Visa', src: '/assets/payments/visa.svg' },
+  { alt: 'Mastercard', src: '/assets/payments/mastercard.svg' },
+  { alt: 'American Express', src: '/assets/payments/amex.svg' },
+  { alt: 'Discover', src: '/assets/payments/discover.svg' },
+  { alt: 'JCB', src: '/assets/payments/jcb.svg' },
+  { alt: 'Diners Club', src: '/assets/payments/dinersclub.svg' }
+];
+
 const Checkout = () => {
   const t = (k, fallback) => (typeof fallback === 'string' ? fallback : (typeof k === 'string' ? k : ''));
   const { getCartTotal, getCartItemsCount, clearCart, cart } = useStore();
@@ -963,8 +972,6 @@ const Checkout = () => {
                         Secure payment with SSL encryption
                       </Typography>
                     </Box>
-
-
                   </CardContent>
                 </Card>
 
@@ -999,6 +1006,7 @@ const Checkout = () => {
                       });
                       return hasAllFields;
                     })() ? (
+                      <>
                       <PayPalPaymentForm 
                         key={`paypal-${formData.email}-${cartTotal}`}
                         cartItems={cart}
@@ -1261,6 +1269,40 @@ const Checkout = () => {
                           country: 'US'
                         }}
                       />
+                      <Box
+                        sx={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: { xs: 'flex-start', md: 'center' },
+                          gap: 2,
+                          flexWrap: 'wrap',
+                          mt: 3
+                        }}
+                      >
+                        {CARD_LOGOS.map((logo) => (
+                          <Box
+                            key={logo.alt}
+                            sx={{
+                              backgroundColor: '#ffffff',
+                              borderRadius: '8px',
+                              p: 0.75,
+                              boxShadow: '0 3px 10px rgba(0,0,0,0.12)'
+                            }}
+                          >
+                            <img
+                              src={`${process.env.PUBLIC_URL}${logo.src}`}
+                              alt={logo.alt}
+                              style={{
+                                height: '30px',
+                                maxWidth: '96px',
+                                display: 'block',
+                                objectFit: 'contain'
+                              }}
+                            />
+                          </Box>
+                        ))}
+                      </Box>
+                      </>
                     ) : (
                       <Box sx={{ textAlign: 'center', py: 3 }}>
                         <Typography variant="body1" sx={{ color: '#666', mb: 2 }}>
@@ -1311,6 +1353,8 @@ const Checkout = () => {
                         </Box>
                       </Box>
                     )}
+
+                    
                     
                     {paymentError && (
                       <Alert severity="error" sx={{ mt: 2 }}>
