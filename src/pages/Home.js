@@ -15,12 +15,14 @@ import { Close, ShoppingBag } from '@mui/icons-material';
 import Rating from '@mui/material/Rating';
 import { useStore } from '../context/StoreContext';
 import { useLanguage } from '../context/LanguageContext';
+import PopupHero from '../components/PopupHero';
 import TestimonialsSection from '../components/TestimonialsSection';
 
 const Home = () => {
   const { featuredProducts, products, productsLoading, addToCart } = useStore();
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [isBrittanyLoaded, setIsBrittanyLoaded] = useState(false);
+  const [popupHeroOpen, setPopupHeroOpen] = useState(false);
   const { language } = useLanguage();
 
   const translations = {
@@ -104,6 +106,18 @@ const Home = () => {
     setSelectedProduct(null);
   };
 
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setPopupHeroOpen(true);
+    }, 1500);
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  const handleClosePopupHero = () => {
+    setPopupHeroOpen(false);
+  };
+
   return (
     <Box sx={{
       width: '100vw',
@@ -114,6 +128,7 @@ const Home = () => {
       marginRight: '-50vw',
       marginTop: { xs: '16px', md: '72px', lg: '96px' }
     }}>
+      <PopupHero open={popupHeroOpen} onClose={handleClosePopupHero} />
       <Box
         component="img"
         src="/banner.jpg"

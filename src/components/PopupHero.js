@@ -377,8 +377,8 @@ const PopupHero = ({ open, onClose }) => {
               width: '90vw',
               maxWidth: '700px',
               height: 'auto',
-              maxHeight: isIPhone16 ? '95vh' : '85vh',
-              minHeight: isIPhone16 ? '85vh' : '50vh',
+              maxHeight: isIPhone16 ? '95vh' : '90vh',
+              minHeight: isIPhone16 ? '75vh' : '60vh',
               borderRadius: '32px',
               overflow: 'hidden',
               boxShadow: '0 32px 100px rgba(0,0,0,0.25)',
@@ -941,17 +941,17 @@ const PopupHero = ({ open, onClose }) => {
             </Box>
 
             {/* Contenido principal */}
-            <DialogContent sx={{ p: 0, position: 'relative', zIndex: 2, pt: '100px', minHeight: isIPhone16 ? '75vh' : '350px', maxHeight: isIPhone16 ? '85vh' : 'auto' }}>
+            <DialogContent sx={{ p: 0, position: 'relative', zIndex: 2, pt: '90px', minHeight: isIPhone16 ? '70vh' : '320px', maxHeight: isIPhone16 ? '80vh' : 'auto' }}>
               <Box sx={{ 
                 display: 'flex', 
                 flexDirection: { xs: 'column', md: 'row' },
-                minHeight: isIPhone16 ? '50vh' : '350px'
+                minHeight: isIPhone16 ? '45vh' : '320px'
               }}>
                 {/* LADO IZQUIERDO - CONTENIDO */}
                     <Box sx={{
                       flex: isIPhone16 ? 1 : 1, 
-                      padding: isIPhone16 ? '20px 15px' : '30px 25px',
-                      paddingTop: isIPhone16 ? '40px' : '30px',
+                      padding: isIPhone16 ? '20px 15px 25px' : '28px 24px 30px',
+                      paddingTop: isIPhone16 ? '18px' : '12px',
                       display: 'flex',
                       flexDirection: 'column',
                       justifyContent: 'flex-start',
@@ -968,7 +968,7 @@ const PopupHero = ({ open, onClose }) => {
                       initial={{ opacity: 0, x: -30 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ duration: 0.8, delay: 0.4 }}
-                      style={{ position: 'relative', top: '70px', zIndex: 15, marginBottom: '10px' }}
+                      style={{ position: 'relative', zIndex: 15, marginBottom: '14px', marginTop: '8px' }}
                     >
                       <Typography
                         variant="h4"
@@ -999,7 +999,7 @@ const PopupHero = ({ open, onClose }) => {
                     initial={{ opacity: 0, x: -30 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ duration: 0.8, delay: 0.6 }}
-                    style={{ position: 'relative', top: '50px', zIndex: 15, marginBottom: '15px' }}
+                    style={{ position: 'relative', zIndex: 15 }}
                   >
                     <Typography
                       variant="h6"
@@ -1020,13 +1020,20 @@ const PopupHero = ({ open, onClose }) => {
                     </Typography>
                   </motion.div>
 
+                  {/* Espaciador para separar del encabezado */}
+                  <Box
+                    sx={{
+                    height: { xs: 72, md: 110 }
+                    }}
+                  />
+
                   {/* Descripción */}
                   {(currentOfferData?.description) && (
                     <motion.div
                       initial={{ opacity: 0, x: -30 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ duration: 0.8, delay: 0.8 }}
-                      style={{ position: 'relative', top: '70px', zIndex: 15, marginBottom: '20px' }}
+                      style={{ position: 'relative', zIndex: 15 }}
                     >
                       <Typography
                         variant="body2"
@@ -1052,7 +1059,7 @@ const PopupHero = ({ open, onClose }) => {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.8, delay: 1.0 }}
-                    style={{ position: 'relative', top: '30px' }}
+                    style={{ position: 'relative', top: '-70px' }}
                   >
                         <Box sx={{ display: 'flex', justifyContent: 'center', mb: 3 }}>
                       <motion.div
@@ -1195,7 +1202,9 @@ const PopupHero = ({ open, onClose }) => {
                   overflow: 'hidden',
                   backgroundColor: '#000',
                   height: '100%',
-                  minHeight: '350px'
+                  minHeight: '350px',
+                  alignItems: 'flex-start',
+                  marginTop: { xs: '-100px', md: '60px' }
                 }}>
                   {/* Contenedor máscara - ventana fija que ocupa todo el espacio */}
                   <Box
@@ -1206,7 +1215,7 @@ const PopupHero = ({ open, onClose }) => {
                       overflow: 'hidden',
                       background: '#000',
                       display: 'flex',
-                      alignItems: 'center',
+                      alignItems: 'flex-start',
                       justifyContent: 'center',
                       minHeight: '350px'
                     }}

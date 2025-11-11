@@ -36,7 +36,7 @@ import {
 } from 'firebase/auth';
 import { collection, addDoc, getDocs, query, where } from 'firebase/firestore';
 import { useLanguage } from '../context/LanguageContext';
-import { startAutoTranslate } from '../utils/applyTranslations';
+import { startAutoTranslate, stopAutoTranslate } from '../utils/applyTranslations';
 import { translateText } from '../services/translateService';
 
 const Header = () => {
@@ -135,10 +135,10 @@ const Header = () => {
   };
 
   const handleLanguageChange = async (lang) => {
-    try { localStorage.setItem('selectedLanguage', lang); } catch {}
     setLanguage(lang);
     if (lang === 'es') {
-      window.location.reload();
+      stopAutoTranslate();
+      setTranslatingLang(false);
     } else {
       try {
         setTranslatingLang(true);
@@ -209,8 +209,8 @@ const Header = () => {
             boxShadow: '0 6px 16px rgba(0,0,0,0.12)'
           }}
         >
-          <option value="es">ES</option>
           <option value="en">EN</option>
+          <option value="es">ES</option>
         </Box>
       </Box>
     </Box>
@@ -237,8 +237,8 @@ const Header = () => {
         ...props.sx
       }}
     >
-      <option value="es">ES</option>
       <option value="en">EN</option>
+      <option value="es">ES</option>
     </Box>
   );
 
