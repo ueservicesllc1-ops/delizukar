@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Dialog,
@@ -22,8 +22,6 @@ import {
 import { collection, getDocs } from 'firebase/firestore';
 import { db } from '../firebase/config';
 import { useLanguage } from '../context/LanguageContext';
-import { translateBatch } from '../services/translateService';
-
 const STATIC_TEXTS = {
   es: {
     seg: 'seg',
@@ -114,76 +112,61 @@ const PopupHero = ({ open, onClose }) => {
     [language]
   );
 
-  // Traducir ofertas dinámicas cuando cambia el idioma
-  useEffect(() => {
-    const translateOffers = async () => {
-      if (language === 'es' || originalOffers.length === 0) {
-        setOffers(originalOffers);
-        setPopupConfig(originalPopupConfig);
-        return;
-      }
+  const fallbackLanguages = useMemo(() => {
+    const order = [language];
+    if (language !== 'en') order.push('en');
+    if (language !== 'es') order.push('es');
+    order.push('base');
+    return order;
+  }, [language]);
 
-      try {
-        // Traducir welcomeTitle
-        let translatedWelcomeTitle = originalPopupConfig.welcomeTitle;
-        if (originalPopupConfig.welcomeTitle) {
-          try {
-            const [translated] = await translateBatch([originalPopupConfig.welcomeTitle], language, 'es');
-            translatedWelcomeTitle = translated || originalPopupConfig.welcomeTitle;
-          } catch (error) {
-            console.error('Error translating welcomeTitle:', error);
-          }
+  const getLocalizedValue = useCallback((source = {}, key) => {
+    for (const langCode of fallbackLanguages) {
+      if (langCode === 'base') {
+        const value = source[key];
+        if (typeof value === 'string' && value.trim()) {
+          return value;
         }
-
-        // Traducir cada oferta
-        const translatedOffers = await Promise.all(
-          originalOffers.map(async (offer) => {
-            const textsToTranslate = [];
-            const keys = ['title', 'description', 'discountText', 'discountConditions', 'buttonText'];
-            keys.forEach(key => {
-              if (offer[key]) {
-                textsToTranslate.push(offer[key]);
-              }
-            });
-
-            if (textsToTranslate.length === 0) {
-              return offer;
-            }
-
-            try {
-              const translated = await translateBatch(textsToTranslate, language, 'es');
-              const translatedOffer = { ...offer };
-              let translatedIndex = 0;
-              keys.forEach(key => {
-                if (offer[key]) {
-                  translatedOffer[key] = translated[translatedIndex] || offer[key];
-                  translatedIndex++;
-                }
-              });
-              return translatedOffer;
-            } catch (error) {
-              console.error('Error translating offer:', error);
-              return offer;
-            }
-          })
-        );
-
-        setOffers(translatedOffers);
-        setPopupConfig({
-          ...originalPopupConfig,
-          welcomeTitle: translatedWelcomeTitle
-        });
-      } catch (error) {
-        console.error('Error translating offers:', error);
-        setOffers(originalOffers);
-        setPopupConfig(originalPopupConfig);
+        continue;
       }
-    };
 
-    if (!loading && originalOffers.length > 0) {
-      translateOffers();
+      const normalized = langCode.toLowerCase();
+      const candidate =
+        source[`${key}_${normalized}`] ??
+        source[`${key}_${normalized.toUpperCase?.()}`] ??
+        source[`${key}_${normalized.replace('-', '')}`];
+
+      if (typeof candidate === 'string' && candidate.trim()) {
+        return candidate;
+      }
     }
-  }, [language, originalOffers, originalPopupConfig, loading]);
+    return source[key] ?? '';
+  }, [fallbackLanguages]);
+
+  // Localizar ofertas y configuración cuando cambia el idioma
+  useEffect(() => {
+    if (originalOffers.length === 0) {
+      setOffers([]);
+      return;
+    }
+
+    const localizedOffers = originalOffers.map((offer) => ({
+      ...offer,
+      title: getLocalizedValue(offer, 'title'),
+      description: getLocalizedValue(offer, 'description'),
+      discountText: getLocalizedValue(offer, 'discountText'),
+      discountConditions: getLocalizedValue(offer, 'discountConditions'),
+      buttonText: getLocalizedValue(offer, 'buttonText'),
+      welcomeTitle: getLocalizedValue(offer, 'welcomeTitle')
+    }));
+
+    setOffers(localizedOffers);
+    setPopupConfig((prev) => ({
+      ...prev,
+      showWelcomeTitle: originalPopupConfig.showWelcomeTitle,
+      welcomeTitle: getLocalizedValue(originalPopupConfig, 'welcomeTitle')
+    }));
+  }, [originalOffers, originalPopupConfig, getLocalizedValue]);
 
   // Cargar ofertas y configuración desde Firebase solo una vez
   useEffect(() => {
@@ -226,8 +209,8 @@ const PopupHero = ({ open, onClose }) => {
           setDuration(popupDuration);
           setTimeLeft(popupDuration);
           const configData = {
-            showWelcomeTitle: config.showWelcomeTitle === true,
-            welcomeTitle: config.welcomeTitle || ''
+            ...config,
+            showWelcomeTitle: config.showWelcomeTitle === true
           };
           setOriginalPopupConfig(configData);
           setPopupConfig(configData);
@@ -376,7 +359,7 @@ const PopupHero = ({ open, onClose }) => {
                 md: isIPhone16 ? '95vh' : '90vh'
               },
               minHeight: {
-                xs: isIPhone16 ? '60vh' : '50vh',
+                xs: isIPhone16 ? '58vh' : '48vh',
                 md: isIPhone16 ? '75vh' : '60vh'
               },
               borderRadius: { xs: '24px', md: '32px' },
@@ -609,7 +592,7 @@ const PopupHero = ({ open, onClose }) => {
                 top: 0,
                 left: 0,
                 right: 0,
-                height: '100px',
+                height: '70px',
                 background: 'linear-gradient(135deg, #C8626D 0%, #EB8B8B 100%)',
                 zIndex: 3,
                 boxShadow: '0 4px 20px rgba(255,107,107,0.3)',
@@ -946,8 +929,8 @@ const PopupHero = ({ open, onClose }) => {
                 p: 0,
                 position: 'relative',
                 zIndex: 2,
-                pt: { xs: '90px', md: '90px' },
-                minHeight: { xs: '40vh', md: '320px' },
+                pt: { xs: '70px', md: '90px' },
+                minHeight: { xs: '32vh', md: '320px' },
                 maxHeight: { xs: isIPhone16 ? '70vh' : 'auto', md: 'auto' }
               }}
             >
@@ -960,11 +943,11 @@ const PopupHero = ({ open, onClose }) => {
                     <Box sx={{
                       flex: isIPhone16 ? 1 : 1, 
                       padding: {
-                        xs: '18px 16px 26px',
+                        xs: '14px 14px 20px',
                         md: '28px 24px 30px'
                       },
                       paddingTop: {
-                        xs: '12px',
+                        xs: '10px',
                         md: '12px'
                       },
                       display: 'flex',
@@ -1042,7 +1025,7 @@ const PopupHero = ({ open, onClose }) => {
                   {/* Espaciador para separar del encabezado */}
                   <Box
                     sx={{
-                      height: { xs: 48, md: 110 }
+                      height: { xs: 24, md: 110 }
                     }}
                   />
 
@@ -1078,7 +1061,7 @@ const PopupHero = ({ open, onClose }) => {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.8, delay: 1.0 }}
-                    style={{ position: 'relative', top: '-70px' }}
+                    style={{ position: 'relative', top: '-40px' }}
                   >
                         <Box sx={{ display: 'flex', justifyContent: 'center', mb: 3 }}>
                       <motion.div
@@ -1221,9 +1204,9 @@ const PopupHero = ({ open, onClose }) => {
                   overflow: 'hidden',
                   backgroundColor: '#000',
                   height: '100%',
-                  minHeight: { xs: '280px', md: '350px' },
+                  minHeight: { xs: '220px', md: '350px' },
                   alignItems: 'flex-start',
-                  marginTop: { xs: '-100px', md: '60px' }
+                  marginTop: { xs: '-60px', md: '60px' }
                 }}>
                   {/* Contenedor máscara - ventana fija que ocupa todo el espacio */}
                   <Box
@@ -1236,7 +1219,7 @@ const PopupHero = ({ open, onClose }) => {
                       display: 'flex',
                       alignItems: 'flex-start',
                       justifyContent: 'center',
-                      minHeight: { xs: '280px', md: '350px' }
+                      minHeight: { xs: '220px', md: '350px' }
                     }}
                   >
                     {/* Imagen que se mueve detrás de la máscara */}

@@ -243,7 +243,7 @@ const Header = () => {
   );
 
   const renderMobileToolbar = () => (
-    <Toolbar disableGutters sx={{ position: 'relative', flexDirection: 'column', gap: 1.2, px: 2, py: 1.4, minHeight: 'auto' }}>
+          <Toolbar disableGutters sx={{ position: 'relative', flexDirection: 'column', gap: 1, px: 2, py: 1.2, minHeight: 'auto' }}>
       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%' }}>
         <IconButton onClick={handleDrawerToggle} sx={{ color: '#c8626d', position: 'absolute', left: 8 }}>
           <MenuIcon />
@@ -274,18 +274,18 @@ const Header = () => {
   );
 
   const renderDesktopToolbar = () => (
-    <Toolbar
-      disableGutters
-      sx={{
-        display: { xs: 'none', md: 'flex' },
-        flexDirection: 'column',
-        alignItems: 'stretch',
-        gap: { md: 2, lg: 2.5 },
-        px: { md: 4, lg: 6 },
-        py: { md: 1.5, lg: 2 },
-        minHeight: 'auto'
-      }}
-    >
+            <Toolbar
+              disableGutters
+              sx={{
+                display: { xs: 'none', md: 'flex' },
+                flexDirection: 'column',
+                alignItems: 'stretch',
+                gap: { md: 1.5, lg: 2 },
+                px: { md: 4, lg: 6 },
+                py: { md: 1.1, lg: 1.5 },
+                minHeight: 'auto'
+              }}
+            >
       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: { md: 1.5, lg: 2 }, flex: 1 }}>
           <IconButton sx={{ color: '#be8782', ml: { md: 4, lg: 6 } }}>
