@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Dialog,
@@ -23,6 +23,45 @@ import { collection, getDocs } from 'firebase/firestore';
 import { db } from '../firebase/config';
 import { useLanguage } from '../context/LanguageContext';
 import { translateBatch } from '../services/translateService';
+
+const STATIC_TEXTS = {
+  es: {
+    seg: 'seg',
+    discount: 'DESCUENTO',
+    codeLabel: 'Código:',
+    defaultTitle: '¡Ofertas Especiales!',
+    defaultButton: 'Ver productos',
+    defaultDiscountText: '¡APROVECHA ESTA OFERTA!',
+    defaultDiscountConditions: 'A usuarios registrados en su primera compra'
+  },
+  en: {
+    seg: 'sec',
+    discount: 'DISCOUNT',
+    codeLabel: 'Code:',
+    defaultTitle: 'Special Offers!',
+    defaultButton: 'View products',
+    defaultDiscountText: 'TAKE ADVANTAGE OF THIS OFFER!',
+    defaultDiscountConditions: 'For registered users on their first purchase'
+  },
+  fr: {
+    seg: 'sec',
+    discount: 'RÉDUCTION',
+    codeLabel: 'Code :',
+    defaultTitle: 'Offres spéciales !',
+    defaultButton: 'Voir les produits',
+    defaultDiscountText: 'PROFITEZ DE CETTE OFFRE !',
+    defaultDiscountConditions: 'Pour les utilisateurs inscrits lors de leur premier achat'
+  },
+  pt: {
+    seg: 'seg',
+    discount: 'DESCONTO',
+    codeLabel: 'Código:',
+    defaultTitle: 'Ofertas especiais!',
+    defaultButton: 'Ver produtos',
+    defaultDiscountText: 'APROVEITE ESTA OFERTA!',
+    defaultDiscountConditions: 'Para usuários registrados na primeira compra'
+  }
+};
 
 const PopupHero = ({ open, onClose }) => {
   const { language } = useLanguage();
@@ -70,59 +109,10 @@ const PopupHero = ({ open, onClose }) => {
       window.removeEventListener('orientationchange', checkIPhone16);
     };
   }, []);
-  const [translatedTexts, setTranslatedTexts] = useState({
-    seg: 'seg',
-    discount: 'DESCUENTO',
-    codeLabel: 'Código:',
-    defaultTitle: '¡Ofertas Especiales!',
-    defaultButton: 'Ver Productos',
-    defaultDiscountText: '¡APROVECHA ESTA OFERTA!',
-    defaultDiscountConditions: 'A usuarios registrados en su primera compra'
-  });
-
-  console.log('PopupHero - open:', open, 'loading:', loading, 'offers:', offers.length);
-
-  // Traducir textos estáticos cuando cambia el idioma
-  useEffect(() => {
-    const translateStaticTexts = async () => {
-      if (language === 'es') {
-        setTranslatedTexts({
-          seg: 'seg',
-          discount: 'DESCUENTO',
-          codeLabel: 'Código:',
-          defaultTitle: '¡Ofertas Especiales!',
-          defaultButton: 'Ver Productos',
-          defaultDiscountText: '¡APROVECHA ESTA OFERTA!',
-          defaultDiscountConditions: 'A usuarios registrados en su primera compra'
-        });
-      } else {
-        try {
-          const textsToTranslate = [
-            'seg',
-            'DESCUENTO',
-            'Código:',
-            '¡Ofertas Especiales!',
-            'Ver Productos',
-            '¡APROVECHA ESTA OFERTA!',
-            'A usuarios registrados en su primera compra'
-          ];
-          const translated = await translateBatch(textsToTranslate, language, 'es');
-          setTranslatedTexts({
-            seg: translated[0] || 'seg',
-            discount: translated[1] || 'DESCUENTO',
-            codeLabel: translated[2] || 'Código:',
-            defaultTitle: translated[3] || '¡Ofertas Especiales!',
-            defaultButton: translated[4] || 'Ver Productos',
-            defaultDiscountText: translated[5] || '¡APROVECHA ESTA OFERTA!',
-            defaultDiscountConditions: translated[6] || 'A usuarios registrados en su primera compra'
-          });
-        } catch (error) {
-          console.error('Error translating static texts:', error);
-        }
-      }
-    };
-    translateStaticTexts();
-  }, [language]);
+  const translatedTexts = useMemo(
+    () => STATIC_TEXTS[language] || STATIC_TEXTS.es,
+    [language]
+  );
 
   // Traducir ofertas dinámicas cuando cambia el idioma
   useEffect(() => {
