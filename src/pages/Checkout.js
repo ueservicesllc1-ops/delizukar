@@ -1,6 +1,19 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { Box, Container, Typography, Grid, Card, CardContent, TextField, Button, Divider, Alert } from '@mui/material';
+import {
+  Box,
+  Container,
+  Typography,
+  Grid,
+  Card,
+  CardContent,
+  TextField,
+  Button,
+  Divider,
+  Alert,
+  Select,
+  MenuItem
+} from '@mui/material';
 import { CreditCard, LocalShipping, Security, ArrowBack, LocalOffer } from '@mui/icons-material';
 import { useStore } from '../context/StoreContext';
 import { useNavigate } from 'react-router-dom';
@@ -14,6 +27,7 @@ import { db, auth } from '../firebase/config';
 import { collection, addDoc, query, where, getDocs, updateDoc, doc } from 'firebase/firestore';
 import { onAuthStateChanged } from 'firebase/auth';
 import emailjs from '@emailjs/browser';
+import { useLanguage } from '../context/LanguageContext';
 
 const CARD_LOGOS = [
   { alt: 'Visa', src: '/assets/payments/visa.svg' },
@@ -24,8 +38,117 @@ const CARD_LOGOS = [
   { alt: 'Diners Club', src: '/assets/payments/dinersclub.svg' }
 ];
 
+const CHECKOUT_TRANSLATIONS = {
+  es: {
+    'checkout.backToCart': 'Volver al carrito',
+    'checkout.title': 'Completa tu compra',
+    'checkout.subtitle': 'Completa tus datos para procesar el pedido',
+    'checkout.contactInfo': 'Información de contacto',
+    'checkout.firstName': 'Nombre',
+    'checkout.lastName': 'Apellido',
+    'checkout.email': 'Correo electrónico',
+    'checkout.phone': 'Teléfono',
+    'checkout.shippingAddress': 'Dirección de envío',
+    'checkout.address': 'Dirección',
+    'checkout.city': 'Ciudad',
+    'checkout.zipCode': 'Código postal',
+    'checkout.state': 'Estado / Provincia',
+    'checkout.orderSummary': 'Resumen del pedido',
+    'checkout.subtotal': 'Subtotal',
+    'checkout.item': 'artículo',
+    'checkout.items': 'artículos',
+    'checkout.shipping': 'Envío',
+    'checkout.toBeDetermined': 'Por determinar',
+    'checkout.total': 'Total',
+    'checkout.paymentInfo': 'Información de pago',
+    'checkout.languageLabel': 'Idioma',
+    'voucher.discountCode': 'Código de descuento',
+    'voucher.enterDiscountCode': 'Introduce tu código de descuento',
+    'voucher.apply': 'Aplicar cupón',
+    'voucher.applying': 'Aplicando...',
+    'voucher.loginToUse': 'Inicia sesión para usar códigos de descuento',
+    'voucher.mustBeLoggedIn': 'Debes iniciar sesión para usar un cupón.',
+    'voucher.enterCode': 'Introduce un código de descuento.',
+    'voucher.invalidCode': 'Código de descuento inválido.',
+    'voucher.notActive': 'Este cupón no está activo.',
+    'voucher.alreadyUsed': 'Ya has usado este cupón.',
+    'voucher.applied': '¡Cupón aplicado! {percentage}% de descuento',
+    'voucher.appliedLabel': '{code} - {percentage}% DTO',
+    'voucher.discount': 'Descuento'
+  },
+  en: {
+    'checkout.backToCart': 'Back to cart',
+    'checkout.title': 'Complete purchase',
+    'checkout.subtitle': 'Fill in your information to process the order',
+    'checkout.contactInfo': 'Contact information',
+    'checkout.firstName': 'First name',
+    'checkout.lastName': 'Last name',
+    'checkout.email': 'Email',
+    'checkout.phone': 'Phone',
+    'checkout.shippingAddress': 'Shipping address',
+    'checkout.address': 'Address',
+    'checkout.city': 'City',
+    'checkout.zipCode': 'ZIP / Postal code',
+    'checkout.state': 'State / Province',
+    'checkout.orderSummary': 'Order summary',
+    'checkout.subtotal': 'Subtotal',
+    'checkout.item': 'item',
+    'checkout.items': 'items',
+    'checkout.shipping': 'Shipping',
+    'checkout.toBeDetermined': 'To be determined',
+    'checkout.total': 'Total',
+    'checkout.paymentInfo': 'Payment information',
+    'checkout.languageLabel': 'Language',
+    'voucher.discountCode': 'Discount code',
+    'voucher.enterDiscountCode': 'Enter your discount code',
+    'voucher.apply': 'Apply coupon',
+    'voucher.applying': 'Applying...',
+    'voucher.loginToUse': 'Log in to use discount codes',
+    'voucher.mustBeLoggedIn': 'You must be logged in to use a voucher.',
+    'voucher.enterCode': 'Please enter a voucher code.',
+    'voucher.invalidCode': 'Invalid voucher code.',
+    'voucher.notActive': 'This voucher is not active.',
+    'voucher.alreadyUsed': 'You have already used this voucher.',
+    'voucher.applied': 'Coupon applied! {percentage}% discount',
+    'voucher.appliedLabel': '{code} - {percentage}% OFF',
+    'voucher.discount': 'Discount'
+  }
+};
+
 const Checkout = () => {
-  const t = (k, fallback) => (typeof fallback === 'string' ? fallback : (typeof k === 'string' ? k : ''));
+  const { language, setLanguage } = useLanguage();
+  const t = (key, fallbackOrVars, maybeVars) => {
+    let fallback = undefined;
+    let vars = {};
+
+    if (
+      typeof fallbackOrVars === 'object' &&
+      fallbackOrVars !== null &&
+      !Array.isArray(fallbackOrVars)
+    ) {
+      vars = fallbackOrVars;
+    } else {
+      fallback = fallbackOrVars;
+      if (typeof maybeVars === 'object' && maybeVars !== null) {
+        vars = maybeVars;
+      }
+    }
+
+    const dictionary = CHECKOUT_TRANSLATIONS[language] || CHECKOUT_TRANSLATIONS.es;
+    let template =
+      dictionary[key] ??
+      CHECKOUT_TRANSLATIONS.es[key] ??
+      fallback ??
+      (typeof key === 'string' ? key : '');
+
+    if (typeof template === 'string') {
+      Object.entries(vars || {}).forEach(([token, value]) => {
+        template = template.replace(new RegExp(`\\{${token}\\}`, 'g'), value);
+      });
+    }
+
+    return template;
+  };
   const { getCartTotal, getCartItemsCount, clearCart, cart } = useStore();
   const navigate = useNavigate();
   const { createOrderData } = useShipping();
@@ -95,12 +218,12 @@ const Checkout = () => {
   // Funciones para manejar vouchers
   const handleApplyVoucher = async () => {
     if (!user) {
-      setVoucherError(t('voucher.mustBeLoggedIn', 'You must be logged in to use a voucher'));
+      setVoucherError(t('voucher.mustBeLoggedIn'));
       return;
     }
 
     if (!voucherCode.trim()) {
-      setVoucherError(t('voucher.enterCode', 'Please enter a voucher code'));
+      setVoucherError(t('voucher.enterCode'));
       return;
     }
 
@@ -115,7 +238,7 @@ const Checkout = () => {
       const querySnapshot = await getDocs(q);
 
       if (querySnapshot.empty) {
-        throw new Error(t('voucher.invalidCode', 'Invalid voucher code'));
+        throw new Error(t('voucher.invalidCode'));
       }
 
       const voucherDoc = querySnapshot.docs[0];
@@ -123,7 +246,7 @@ const Checkout = () => {
 
       // Verificar si el voucher está activo
       if (!voucherData.isActive) {
-        throw new Error(t('voucher.notActive', 'This voucher is not active'));
+        throw new Error(t('voucher.notActive'));
       }
 
       // Verificar si el usuario ya usó este voucher en la colección voucherUsages
@@ -136,12 +259,12 @@ const Checkout = () => {
       const usageSnapshot = await getDocs(usageQuery);
 
       if (!usageSnapshot.empty) {
-        throw new Error(t('voucher.alreadyUsed', 'You have already used this voucher'));
+        throw new Error(t('voucher.alreadyUsed'));
       }
 
       // Aplicar el voucher
       setAppliedVoucher(voucherData);
-      setVoucherSuccess(t('voucher.applied', `Voucher applied! ${voucherData.discountPercentage}% discount`));
+      setVoucherSuccess(t('voucher.applied', { percentage: voucherData.discountPercentage }));
       setVoucherCode('');
 
       // Guardar voucher en localStorage para persistencia
@@ -526,21 +649,44 @@ const Checkout = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
         >
-          <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              gap: 2,
+              flexWrap: 'wrap',
+              mb: 2
+            }}
+          >
             <Button
               startIcon={<ArrowBack />}
               onClick={() => navigate('/carrito')}
               className="button-mobile"
               sx={{
                 color: '#c8626d',
-                mr: 2,
                 textTransform: 'none',
                 fontWeight: 600,
                 fontSize: '0.9rem'
               }}
             >
-              {t('checkout.backToCart', 'Back to Cart')}
+              {t('checkout.backToCart')}
             </Button>
+
+            <Select
+              value={language}
+              onChange={(event) => setLanguage(event.target.value)}
+              size="small"
+              sx={{
+                minWidth: 140,
+                backgroundColor: '#fff',
+                borderRadius: '20px',
+                '& .MuiSelect-select': { py: 1, px: 2, fontWeight: 600 }
+              }}
+            >
+              <MenuItem value="es">Español</MenuItem>
+              <MenuItem value="en">English</MenuItem>
+            </Select>
           </Box>
 
           <Typography
@@ -553,7 +699,7 @@ const Checkout = () => {
               fontFamily: 'Playfair Display, serif'
             }}
           >
-            {t('checkout.title', 'Complete Purchase')}
+            {t('checkout.title')}
           </Typography>
           
           <Typography
@@ -564,7 +710,7 @@ const Checkout = () => {
               fontSize: '0.9rem'
             }}
           >
-            {t('checkout.subtitle', 'Complete your information to process the order')}
+            {t('checkout.subtitle')}
           </Typography>
         </motion.div>
 
@@ -589,14 +735,14 @@ const Checkout = () => {
                         fontSize: '1.1rem'
                       }}
                     >
-                      {t('checkout.contactInfo', 'Contact Information')}
+                      {t('checkout.contactInfo')}
                     </Typography>
                     
                     <Grid container spacing={2}>
                       <Grid size={{ xs: 12, md: 6 }}>
                         <TextField
                           fullWidth
-                          label={t('checkout.firstName', 'First Name')}
+                          label={t('checkout.firstName')}
                           name="firstName"
                           value={formData.firstName}
                           onChange={handleInputChange}
@@ -613,7 +759,7 @@ const Checkout = () => {
                       <Grid size={{ xs: 12, md: 6 }}>
                         <TextField
                           fullWidth
-                          label={t('checkout.lastName', 'Last Name')}
+                          label={t('checkout.lastName')}
                           name="lastName"
                           value={formData.lastName}
                           onChange={handleInputChange}
@@ -629,7 +775,7 @@ const Checkout = () => {
                       <Grid size={{ xs: 12, md: 6 }}>
                         <TextField
                           fullWidth
-                          label={t('checkout.email', 'Email')}
+                          label={t('checkout.email')}
                           name="email"
                           type="email"
                           value={formData.email}
@@ -646,7 +792,7 @@ const Checkout = () => {
                       <Grid size={{ xs: 12, md: 6 }}>
                         <TextField
                           fullWidth
-                          label={t('checkout.phone', 'Phone')}
+                          label={t('checkout.phone')}
                           name="phone"
                           value={formData.phone}
                           onChange={handleInputChange}
@@ -676,7 +822,7 @@ const Checkout = () => {
                           fontSize: '1.1rem'
                         }}
                       >
-                        {t('checkout.shippingAddress', 'Shipping Address')}
+                        {t('checkout.shippingAddress')}
                       </Typography>
                     </Box>
                     
@@ -684,7 +830,7 @@ const Checkout = () => {
                       <Grid size={12}>
                         <TextField
                           fullWidth
-                          label={t('checkout.address', 'Address')}
+                          label={t('checkout.address')}
                           name="address"
                           value={formData.address}
                           onChange={handleInputChange}
@@ -700,7 +846,7 @@ const Checkout = () => {
                       <Grid size={{ xs: 12, sm: 6 }}>
                         <TextField
                           fullWidth
-                          label={t('checkout.city', 'City')}
+                          label={t('checkout.city')}
                           name="city"
                           value={formData.city}
                           onChange={handleInputChange}
@@ -716,7 +862,7 @@ const Checkout = () => {
                       <Grid size={{ xs: 12, sm: 6 }}>
                         <TextField
                           fullWidth
-                          label={t('checkout.zipCode', 'ZIP Code')}
+                          label={t('checkout.zipCode')}
                           name="zipCode"
                           value={formData.zipCode}
                           onChange={handleInputChange}
@@ -732,7 +878,7 @@ const Checkout = () => {
                       <Grid size={{ xs: 12, sm: 6 }}>
                         <TextField
                           fullWidth
-                          label={t('checkout.state', 'State')}
+                          label={t('checkout.state')}
                           name="state"
                           value={formData.state}
                           onChange={handleInputChange}
@@ -776,7 +922,7 @@ const Checkout = () => {
                         fontSize: '1.1rem'
                       }}
                     >
-                      {t('checkout.orderSummary', 'Order Summary')}
+                      {t('checkout.orderSummary')}
                     </Typography>
 
                     {/* Sección de Voucher */}
@@ -793,7 +939,10 @@ const Checkout = () => {
                               <Box sx={{ p: 1.5, backgroundColor: '#e8f5e8', borderRadius: '8px', border: '1px solid #4caf50', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                 <Typography variant="body2" sx={{ color: '#2e7d32', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 1 }}>
                                   <LocalOffer sx={{ fontSize: '1rem' }} />
-                                  {t('voucher.appliedLabel', `${appliedVoucher.code} - ${appliedVoucher.discountPercentage}% OFF`)}
+                                  {t('voucher.appliedLabel', {
+                                    code: appliedVoucher.code,
+                                    percentage: appliedVoucher.discountPercentage
+                                  })}
                                 </Typography>
                                 <Button
                                   size="small"
@@ -813,7 +962,7 @@ const Checkout = () => {
                             <Box sx={{ display: 'flex', gap: 1 }}>
                               <TextField
                                 fullWidth
-                                placeholder={t('voucher.enterDiscountCode', 'Enter discount code')}
+                                placeholder={t('voucher.enterDiscountCode')}
                                 value={voucherCode}
                                 onChange={(e) => setVoucherCode(e.target.value.toUpperCase())}
                                 size="small"
@@ -832,7 +981,7 @@ const Checkout = () => {
                                   }
                                 }}
                               >
-                                {loadingVoucher ? t('voucher.applying', 'Applying...') : t('voucher.apply', 'Apply')}
+                                {loadingVoucher ? t('voucher.applying') : t('voucher.apply')}
                               </Button>
                             </Box>
                           )}
@@ -847,7 +996,7 @@ const Checkout = () => {
                         <Box sx={{ mb: 2, p: 1.5, backgroundColor: '#f8f9fa', borderRadius: '8px' }}>
                           <Typography variant="body2" sx={{ color: '#666', textAlign: 'center' }}>
                             <LocalOffer sx={{ fontSize: '1rem', mr: 1, verticalAlign: 'middle' }} />
-                            {t('voucher.loginToUse', 'Log in to use a discount code')}
+                            {t('voucher.loginToUse')}
                           </Typography>
                         </Box>
                       )}
@@ -856,7 +1005,8 @@ const Checkout = () => {
                     <Box sx={{ mb: 2 }}>
                       <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
                         <Typography variant="body2" sx={{ color: '#666', fontSize: '0.9rem' }}>
-                          {t('checkout.subtotal', 'Subtotal')} ({cartItemsCount} {cartItemsCount === 1 ? t('checkout.item', 'item') : t('checkout.items', 'items')})
+                          {t('checkout.subtotal')} ({cartItemsCount}{' '}
+                          {cartItemsCount === 1 ? t('checkout.item') : t('checkout.items')})
                         </Typography>
                         <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '0.9rem' }}>
                           ${calculateSubtotal().toFixed(2)}
@@ -876,10 +1026,12 @@ const Checkout = () => {
                       
                       <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
                         <Typography variant="body2" sx={{ color: '#666', fontSize: '0.9rem' }}>
-                          {t('checkout.shipping', 'Shipping')}
+                          {t('checkout.shipping')}
                         </Typography>
                         <Typography variant="body2" sx={{ fontWeight: 600, color: shippingInfo ? '#C8626D' : '#666', fontSize: '0.9rem' }}>
-                          {shippingInfo ? `$${parseFloat(shippingInfo.cost || 0).toFixed(2)}` : t('checkout.toBeDetermined', 'To be determined')}
+                          {shippingInfo
+                            ? `$${parseFloat(shippingInfo.cost || 0).toFixed(2)}`
+                            : t('checkout.toBeDetermined')}
                         </Typography>
                       </Box>
                       
@@ -887,7 +1039,7 @@ const Checkout = () => {
                       
                       <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
                         <Typography variant="h6" sx={{ fontWeight: 700, color: '#333', fontSize: '1.1rem' }}>
-                          {t('checkout.total', 'Total')}
+                          {t('checkout.total')}
                         </Typography>
                         <Typography variant="h6" sx={{ fontWeight: 700, color: '#c8626d', fontSize: '1.1rem' }}>
                           ${(calculateTotal() + (shippingInfo ? parseFloat(shippingInfo.cost || 0) : 0)).toFixed(2)}
@@ -988,7 +1140,7 @@ const Checkout = () => {
                           fontSize: '1.1rem'
                         }}
                       >
-                        {t('checkout.paymentInfo', 'Payment Information')}
+                        {t('checkout.paymentInfo')}
                       </Typography>
                     </Box>
                     

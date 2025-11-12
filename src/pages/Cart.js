@@ -7,13 +7,107 @@ import { useStore } from '../context/StoreContext';
 import { useNavigate } from 'react-router-dom';
 import AfterpayMessaging from '../components/AfterpayMessaging';
 import { useMinProducts } from '../hooks/useMinProducts';
+import { useLanguage } from '../context/LanguageContext';
  
 import { auth, db } from '../firebase/config';
 import { onAuthStateChanged } from 'firebase/auth';
 import { doc, getDoc, updateDoc, collection, query, where, getDocs } from 'firebase/firestore';
 
+const CART_TRANSLATIONS = {
+  en: {
+    'cart.continueShopping': 'Continue Shopping',
+    'cart.empty': 'Your cart is empty',
+    'cart.emptyDescription': 'Add some delicious cookies to get started!',
+    'cart.orderSummary': 'Order Summary',
+    'cart.subtotal': 'Subtotal',
+    'cart.item': 'item',
+    'cart.items': 'items',
+    'cart.shipping': 'Shipping',
+    'cart.toBeDetermined': 'To be determined',
+    'cart.total': 'Total',
+    'cart.accept': 'I accept the',
+    'cart.shippingPolicy': 'Shipping Policy',
+    'cart.checkout': 'Proceed to Payment',
+    'cart.minimumProducts': 'Minimum {count} product{plural} required',
+    'cart.acceptShipping': 'You must accept the Shipping Policy',
+    'cart.cannotProceed': 'Cannot proceed',
+    'voucher.discountCode': 'Discount Code',
+    'voucher.enterDiscountCode': 'Enter your discount code',
+    'voucher.apply': 'Apply coupon',
+    'voucher.applying': 'Applying...',
+    'voucher.loginToUse': 'Log in to use discount codes',
+    'voucher.mustBeLoggedIn': 'You must be logged in to use a coupon.',
+    'voucher.enterCode': 'Please enter a discount code.',
+    'voucher.invalidCode': 'Invalid discount code.',
+    'voucher.notActive': 'This coupon is not active.',
+    'voucher.alreadyUsed': 'You have already used this coupon.',
+    'voucher.applied': 'Coupon applied: {percentage}% off',
+    'voucher.discount': 'Discount',
+    'voucher.discountLabel': '{code}: {percentage}% off'
+  },
+  es: {
+    'cart.continueShopping': 'Seguir comprando',
+    'cart.empty': 'Tu carrito está vacío',
+    'cart.emptyDescription': '¡Agrega algunas galletas deliciosas para comenzar!',
+    'cart.orderSummary': 'Resumen del pedido',
+    'cart.subtotal': 'Subtotal',
+    'cart.item': 'artículo',
+    'cart.items': 'artículos',
+    'cart.shipping': 'Envío',
+    'cart.toBeDetermined': 'Por determinar',
+    'cart.total': 'Total',
+    'cart.accept': 'Acepto la',
+    'cart.shippingPolicy': 'Política de envío',
+    'cart.checkout': 'Proceder al pago',
+    'cart.minimumProducts': 'Se requiere un mínimo de {count} producto{plural}',
+    'cart.acceptShipping': 'Debes aceptar la Política de envío',
+    'cart.cannotProceed': 'No se puede continuar',
+    'voucher.discountCode': 'Código de descuento',
+    'voucher.enterDiscountCode': 'Introduce tu código de descuento',
+    'voucher.apply': 'Aplicar cupón',
+    'voucher.applying': 'Aplicando...',
+    'voucher.loginToUse': 'Inicia sesión para usar códigos de descuento',
+    'voucher.mustBeLoggedIn': 'Debes iniciar sesión para usar un cupón.',
+    'voucher.enterCode': 'Introduce un código de descuento.',
+    'voucher.invalidCode': 'Código de descuento inválido.',
+    'voucher.notActive': 'Este cupón no está activo.',
+    'voucher.alreadyUsed': 'Ya has usado este cupón.',
+    'voucher.applied': 'Cupón aplicado: {percentage}% de descuento',
+    'voucher.discount': 'Descuento',
+    'voucher.discountLabel': '{code}: {percentage}% de descuento'
+  }
+};
+
 const Cart = () => {
-  const t = (k, fallback) => (typeof fallback === 'string' ? fallback : (typeof k === 'string' ? k : ''));
+  const { language } = useLanguage();
+  const t = (key, fallbackOrVars, maybeVars) => {
+    let fallback = undefined;
+    let vars = {};
+
+    if (typeof fallbackOrVars === 'object' && fallbackOrVars !== null && !Array.isArray(fallbackOrVars)) {
+      vars = fallbackOrVars;
+    } else {
+      fallback = fallbackOrVars;
+      if (typeof maybeVars === 'object' && maybeVars !== null) {
+        vars = maybeVars;
+      }
+    }
+
+    const template =
+      CART_TRANSLATIONS[language]?.[key] ??
+      CART_TRANSLATIONS.es[key] ??
+      fallback ??
+      (typeof key === 'string' ? key : '');
+
+    if (typeof template !== 'string') {
+      return template;
+    }
+
+    return Object.keys(vars).reduce(
+      (acc, currentKey) => acc.replace(new RegExp(`\\{${currentKey}\\}`, 'g'), vars[currentKey]),
+      template
+    );
+  };
   const { cart, updateCartQuantity, removeFromCart, getCartTotal, getCartItemsCount } = useStore();
 
   // Función para mapear categorías
@@ -193,7 +287,7 @@ const Cart = () => {
                 fontWeight: 600
               }}
             >
-              {t('cart.continueShopping', 'Continue Shopping')}
+              {t('cart.continueShopping')}
             </Button>
           </Box>
 
@@ -223,7 +317,7 @@ const Cart = () => {
                   mb: 2
                 }}
               >
-                {t('cart.empty', 'Your cart is empty')}
+                {t('cart.empty')}
               </Typography>
               <Typography
                 variant="body1"
@@ -232,7 +326,7 @@ const Cart = () => {
                   mb: 4
                 }}
               >
-                ¡Agrega algunas galletas deliciosas para comenzar!
+                {t('cart.emptyDescription')}
               </Typography>
             </Card>
           </motion.div>
@@ -464,7 +558,7 @@ const Cart = () => {
                         letterSpacing: '0.5px'
                       }}
                     >
-                      {t('cart.orderSummary', 'Order Summary')}
+                      {t('cart.orderSummary')}
                     </Typography>
 
                     {/* Sección de Vouchers */}
@@ -533,7 +627,7 @@ const Cart = () => {
                     <Box sx={{ mb: 2 }}>
                       <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
                         <Typography variant="body2" sx={{ color: '#666', fontSize: '0.9rem' }}>
-                          {t('cart.subtotal', 'Subtotal')} ({calculateTotalItems()} {calculateTotalItems() === 1 ? t('cart.item', 'item') : t('cart.items', 'items')})
+                          {t('cart.subtotal')} ({calculateTotalItems()} {calculateTotalItems() === 1 ? t('cart.item') : t('cart.items')})
                         </Typography>
                         <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '0.9rem' }}>
                           ${calculateSubtotal().toFixed(2)}
@@ -553,10 +647,10 @@ const Cart = () => {
                       
                       <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
                         <Typography variant="body2" sx={{ color: '#666', fontSize: '0.9rem' }}>
-                          {t('cart.shipping', 'Shipping')}
+                          {t('cart.shipping')}
                         </Typography>
                         <Typography variant="body2" sx={{ fontWeight: 600, color: '#666', fontSize: '0.9rem' }}>
-                          {t('cart.toBeDetermined', 'To be determined')}
+                          {t('cart.toBeDetermined')}
                         </Typography>
                       </Box>
                       
@@ -564,7 +658,7 @@ const Cart = () => {
                       
                       <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
                         <Typography variant="h6" sx={{ fontWeight: 700, color: '#333', fontSize: '1.1rem' }}>
-                          {t('cart.total', 'Total')}
+                          {t('cart.total')}
                         </Typography>
                         <Typography variant="h6" sx={{ fontWeight: 700, color: '#c8626d', fontSize: '1.1rem' }}>
                           ${calculateTotal().toFixed(2)}
@@ -594,7 +688,7 @@ const Cart = () => {
                       }
                       label={
                         <Typography variant="body2" sx={{ color: '#666', fontSize: '0.8rem' }}>
-                          {t('cart.accept', 'I accept the')}{' '}
+                          {t('cart.accept')}{' '}
                           <Button
                             variant="text"
                             sx={{
@@ -611,7 +705,7 @@ const Cart = () => {
                             }}
                             onClick={() => navigate('/shipping')}
                           >
-                            Shipping Policy
+                            {t('cart.shippingPolicy')}
                           </Button>
                         </Typography>
                       }
@@ -641,12 +735,16 @@ const Cart = () => {
                         transition: 'all 0.3s ease'
                       }}
                     >
-                      {canProceedToCheckout() ? t('cart.checkout', 'Proceed to Payment') : 
-                        calculateTotalItems() < minProducts ? 
-                          t('cart.minimumProducts', 'Minimum {count} product{plural} required').replace('{count}', minProducts).replace('{plural}', minProducts > 1 ? 's' : '') :
-                          !acceptShippingPolicy ? t('cart.acceptShipping', 'You must accept the Shipping Policy') :
-                          t('cart.cannotProceed', 'Cannot proceed')
-                      }
+                      {canProceedToCheckout()
+                        ? t('cart.checkout')
+                        : calculateTotalItems() < minProducts
+                        ? t('cart.minimumProducts', {
+                            count: minProducts,
+                            plural: minProducts > 1 ? 's' : ''
+                          })
+                        : !acceptShippingPolicy
+                        ? t('cart.acceptShipping')
+                        : t('cart.cannotProceed')}
                     </Button>
 
                     <Button
@@ -668,7 +766,7 @@ const Cart = () => {
                         }
                       }}
                     >
-                      {t('cart.continueShopping', 'Continue Shopping')}
+                      {t('cart.continueShopping')}
                     </Button>
                   </CardContent>
                 </Card>
