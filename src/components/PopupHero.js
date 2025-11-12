@@ -42,6 +42,10 @@ const PopupHero = ({ open, onClose }) => {
     welcomeTitle: ''
   });
   const [isIPhone16, setIsIPhone16] = useState(false);
+  const mobileTitleFontSize = isIPhone16 ? '1.3rem' : '1.35rem';
+  const mobileSubtitleFontSize = isIPhone16 ? '0.95rem' : '1.05rem';
+  const mobileDescriptionFontSize = isIPhone16 ? '0.78rem' : '0.85rem';
+  const mobileDiscountFontSize = isIPhone16 ? '1.05rem' : '1.15rem';
 
   // Detectar si estamos en iPhone 16 (393px × 852px) - Reactivo
   useEffect(() => {
@@ -374,12 +378,18 @@ const PopupHero = ({ open, onClose }) => {
           }}
           PaperProps={{
             sx: {
-              width: '90vw',
-              maxWidth: '700px',
+              width: { xs: '88vw', md: '90vw' },
+              maxWidth: { xs: '360px', md: '700px' },
               height: 'auto',
-              maxHeight: isIPhone16 ? '95vh' : '90vh',
-              minHeight: isIPhone16 ? '75vh' : '60vh',
-              borderRadius: '32px',
+              maxHeight: {
+                xs: isIPhone16 ? '85vh' : '75vh',
+                md: isIPhone16 ? '95vh' : '90vh'
+              },
+              minHeight: {
+                xs: isIPhone16 ? '60vh' : '50vh',
+                md: isIPhone16 ? '75vh' : '60vh'
+              },
+              borderRadius: { xs: '24px', md: '32px' },
               overflow: 'hidden',
               boxShadow: '0 32px 100px rgba(0,0,0,0.25)',
               backgroundColor: 'transparent',
@@ -941,17 +951,32 @@ const PopupHero = ({ open, onClose }) => {
             </Box>
 
             {/* Contenido principal */}
-            <DialogContent sx={{ p: 0, position: 'relative', zIndex: 2, pt: '90px', minHeight: isIPhone16 ? '70vh' : '320px', maxHeight: isIPhone16 ? '80vh' : 'auto' }}>
+            <DialogContent
+              sx={{
+                p: 0,
+                position: 'relative',
+                zIndex: 2,
+                pt: { xs: '90px', md: '90px' },
+                minHeight: { xs: '40vh', md: '320px' },
+                maxHeight: { xs: isIPhone16 ? '70vh' : 'auto', md: 'auto' }
+              }}
+            >
               <Box sx={{ 
                 display: 'flex', 
                 flexDirection: { xs: 'column', md: 'row' },
-                minHeight: isIPhone16 ? '45vh' : '320px'
+                minHeight: { xs: 'auto', md: '320px' }
               }}>
                 {/* LADO IZQUIERDO - CONTENIDO */}
                     <Box sx={{
                       flex: isIPhone16 ? 1 : 1, 
-                      padding: isIPhone16 ? '20px 15px 25px' : '28px 24px 30px',
-                      paddingTop: isIPhone16 ? '18px' : '12px',
+                      padding: {
+                        xs: '18px 16px 26px',
+                        md: '28px 24px 30px'
+                      },
+                      paddingTop: {
+                        xs: '12px',
+                        md: '12px'
+                      },
                       display: 'flex',
                       flexDirection: 'column',
                       justifyContent: 'flex-start',
@@ -982,7 +1007,7 @@ const PopupHero = ({ open, onClose }) => {
                           backgroundClip: 'text',
                           WebkitBackgroundClip: 'text',
                           WebkitTextFillColor: 'transparent',
-                          fontSize: isIPhone16 ? '1.5rem' : '1.8rem',
+                          fontSize: { xs: mobileTitleFontSize, md: '1.8rem' },
                           display: 'block',
                           visibility: 'visible',
                           opacity: 1,
@@ -999,7 +1024,11 @@ const PopupHero = ({ open, onClose }) => {
                     initial={{ opacity: 0, x: -30 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ duration: 0.8, delay: 0.6 }}
-                    style={{ position: 'relative', zIndex: 15 }}
+                    style={{
+                      position: 'relative',
+                      zIndex: 15,
+                      marginTop: { xs: '24px', md: 0 }
+                    }}
                   >
                     <Typography
                       variant="h6"
@@ -1009,7 +1038,7 @@ const PopupHero = ({ open, onClose }) => {
                         mb: 2,
                         fontFamily: 'Playfair Display, serif',
                         textShadow: '0 1px 5px rgba(255,107,107,0.2)',
-                        fontSize: isIPhone16 ? '1rem' : '1.2rem',
+                        fontSize: { xs: mobileSubtitleFontSize, md: '1.2rem' },
                         display: 'block',
                         visibility: 'visible',
                         opacity: 1,
@@ -1023,7 +1052,7 @@ const PopupHero = ({ open, onClose }) => {
                   {/* Espaciador para separar del encabezado */}
                   <Box
                     sx={{
-                    height: { xs: 72, md: 110 }
+                      height: { xs: 48, md: 110 }
                     }}
                   />
 
@@ -1041,7 +1070,7 @@ const PopupHero = ({ open, onClose }) => {
                           color: '#666',
                           mb: 3,
                           lineHeight: 1.6,
-                          fontSize: isIPhone16 ? '0.85rem' : '0.95rem',
+                          fontSize: { xs: mobileDescriptionFontSize, md: '0.95rem' },
                           fontWeight: 500,
                           display: 'block',
                           visibility: 'visible',
@@ -1115,7 +1144,7 @@ const PopupHero = ({ open, onClose }) => {
                           sx={{
                             color: 'white',
                             fontWeight: 900,
-                            fontSize: '1.3rem',
+                            fontSize: { xs: mobileDiscountFontSize, md: '1.3rem' },
                             textAlign: 'center',
                             textShadow: '0 2px 10px rgba(0,0,0,0.3)',
                             position: 'relative',
@@ -1131,7 +1160,7 @@ const PopupHero = ({ open, onClose }) => {
                           sx={{
                             color: 'rgba(255,255,255,0.9)',
                             fontWeight: 600,
-                            fontSize: '0.8rem',
+                            fontSize: { xs: '0.75rem', md: '0.8rem' },
                             textAlign: 'center',
                             textShadow: '0 1px 5px rgba(0,0,0,0.3)',
                             position: 'relative',
@@ -1147,7 +1176,7 @@ const PopupHero = ({ open, onClose }) => {
                           sx={{
                             color: 'rgba(255,255,255,0.8)',
                             fontWeight: 500,
-                            fontSize: '0.7rem',
+                            fontSize: { xs: '0.6rem', md: '0.7rem' },
                             textAlign: 'center',
                             textShadow: '0 1px 3px rgba(0,0,0,0.3)',
                             position: 'relative',
@@ -1172,7 +1201,7 @@ const PopupHero = ({ open, onClose }) => {
                               sx={{
                                 color: 'rgba(255,255,255,0.9)',
                                 fontWeight: 600,
-                                fontSize: '0.7rem',
+                                fontSize: { xs: '0.6rem', md: '0.7rem' },
                                 textAlign: 'center',
                                 textShadow: '0 1px 3px rgba(0,0,0,0.3)',
                                 position: 'relative',
@@ -1202,7 +1231,7 @@ const PopupHero = ({ open, onClose }) => {
                   overflow: 'hidden',
                   backgroundColor: '#000',
                   height: '100%',
-                  minHeight: '350px',
+                  minHeight: { xs: '280px', md: '350px' },
                   alignItems: 'flex-start',
                   marginTop: { xs: '-100px', md: '60px' }
                 }}>
@@ -1217,7 +1246,7 @@ const PopupHero = ({ open, onClose }) => {
                       display: 'flex',
                       alignItems: 'flex-start',
                       justifyContent: 'center',
-                      minHeight: '350px'
+                      minHeight: { xs: '280px', md: '350px' }
                     }}
                   >
                     {/* Imagen que se mueve detrás de la máscara */}
@@ -1295,9 +1324,9 @@ const PopupHero = ({ open, onClose }) => {
                             background: 'linear-gradient(135deg, #C8626D 0%, #EB8B8B 100%)',
                             color: 'white',
                             fontWeight: 800,
-                            fontSize: '0.9rem',
-                            px: 3,
-                            py: 1.5,
+                            fontSize: { xs: '0.85rem', md: '0.9rem' },
+                            px: { xs: 2.4, md: 3 },
+                            py: { xs: 1.1, md: 1.5 },
                             borderRadius: '50px',
                             textTransform: 'none',
                             border: '2px solid #C8626D',
