@@ -3,10 +3,66 @@ import { motion } from 'framer-motion';
 import { Box, Container, Typography, Grid, Card, CardMedia, CardContent, Button, Rating, Chip, IconButton } from '@mui/material';
 import { AddShoppingCart, Favorite, Share, ArrowBack, AccountBalanceWallet, ShoppingBag } from '@mui/icons-material';
 import { useParams, useNavigate } from 'react-router-dom';
- 
+import { useLanguage } from '../context/LanguageContext';
+
+const TEXTS = {
+  es: {
+    backToProducts: 'Volver a productos',
+    new: 'Nuevo',
+    bestSeller: 'Más vendido',
+    reviews: 'reseñas',
+    ingredients: 'Ingredientes:',
+    nutrition: 'Información nutricional (por porción):',
+    calories: 'Calorías',
+    fat: 'Grasa',
+    carbs: 'Carbohidratos',
+    protein: 'Proteína',
+    addToCart: 'Agregar al carrito'
+  },
+  en: {
+    backToProducts: 'Back to products',
+    new: 'New',
+    bestSeller: 'Best seller',
+    reviews: 'reviews',
+    ingredients: 'Ingredients:',
+    nutrition: 'Nutrition facts (per serving):',
+    calories: 'Calories',
+    fat: 'Fat',
+    carbs: 'Carbs',
+    protein: 'Protein',
+    addToCart: 'Add to cart'
+  },
+  fr: {
+    backToProducts: 'Retour aux produits',
+    new: 'Nouveau',
+    bestSeller: 'Meilleure vente',
+    reviews: 'avis',
+    ingredients: 'Ingrédients :',
+    nutrition: 'Informations nutritionnelles (par portion) :',
+    calories: 'Calories',
+    fat: 'Matières grasses',
+    carbs: 'Glucides',
+    protein: 'Protéines',
+    addToCart: 'Ajouter au panier'
+  },
+  pt: {
+    backToProducts: 'Voltar aos produtos',
+    new: 'Novo',
+    bestSeller: 'Mais vendido',
+    reviews: 'avaliações',
+    ingredients: 'Ingredientes:',
+    nutrition: 'Informação nutricional (por porção):',
+    calories: 'Calorias',
+    fat: 'Gordura',
+    carbs: 'Carboidratos',
+    protein: 'Proteína',
+    addToCart: 'Adicionar ao carrinho'
+  }
+};
 
 const ProductDetail = () => {
-  const t = (k, fallback) => (typeof fallback === 'string' ? fallback : (typeof k === 'string' ? k : ''));
+  const { language } = useLanguage();
+  const texts = TEXTS[language] || TEXTS.es;
   const { id } = useParams();
   const navigate = useNavigate();
 
@@ -55,7 +111,7 @@ const ProductDetail = () => {
               fontWeight: 600
             }}
           >
-            Volver a Productos
+            {texts.backToProducts}
           </Button>
         </motion.div>
 
@@ -99,7 +155,7 @@ const ProductDetail = () => {
                 <Box sx={{ display: 'flex', gap: 1, mb: 2 }}>
                   {product.isNew && (
                     <Chip
-                      label={t('product.new', 'New')}
+                      label={texts.new}
                       sx={{
                         backgroundColor: '#4CAF50',
                         color: 'white',
@@ -109,7 +165,7 @@ const ProductDetail = () => {
                   )}
                   {product.isBestSeller && (
                     <Chip
-                      label="Más Vendido"
+                      label={texts.bestSeller}
                       sx={{
                         backgroundColor: '#FF6B35',
                         color: 'white',
@@ -153,7 +209,7 @@ const ProductDetail = () => {
                     variant="body1"
                     sx={{ color: '#666', fontWeight: 600 }}
                   >
-                    {product.rating} ({product.reviews} reseñas)
+                    {product.rating} ({product.reviews} {texts.reviews})
                   </Typography>
                 </Box>
 
@@ -205,7 +261,7 @@ const ProductDetail = () => {
                       mb: 2
                     }}
                   >
-                    Ingredientes:
+                    {texts.ingredients}
                   </Typography>
                   <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
                     {product.ingredients.map((ingredient, index) => (
@@ -232,7 +288,7 @@ const ProductDetail = () => {
                       mb: 2
                     }}
                   >
-                    Información Nutricional (por porción):
+                    {texts.nutrition}
                   </Typography>
                   <Grid container spacing={2}>
                     <Grid item xs={3}>
@@ -241,7 +297,7 @@ const ProductDetail = () => {
                           {product.nutrition.calories}
                         </Typography>
                         <Typography variant="body2" sx={{ color: '#666' }}>
-                          Calorías
+                          {texts.calories}
                         </Typography>
                       </Box>
                     </Grid>
@@ -251,7 +307,7 @@ const ProductDetail = () => {
                           {product.nutrition.fat}g
                         </Typography>
                         <Typography variant="body2" sx={{ color: '#666' }}>
-                          Grasa
+                          {texts.fat}
                         </Typography>
                       </Box>
                     </Grid>
@@ -261,7 +317,7 @@ const ProductDetail = () => {
                           {product.nutrition.carbs}g
                         </Typography>
                         <Typography variant="body2" sx={{ color: '#666' }}>
-                          Carbohidratos
+                          {texts.carbs}
                         </Typography>
                       </Box>
                     </Grid>
@@ -271,7 +327,7 @@ const ProductDetail = () => {
                           {product.nutrition.protein}g
                         </Typography>
                         <Typography variant="body2" sx={{ color: '#666' }}>
-                          Proteína
+                          {texts.protein}
                         </Typography>
                       </Box>
                     </Grid>
@@ -302,7 +358,7 @@ const ProductDetail = () => {
                       transition: 'all 0.3s ease'
                     }}
                   >
-                    {t('product.addToCart', 'Add to Cart')}
+                    {texts.addToCart}
                   </Button>
                   
                   <IconButton

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { Box, Container, Typography, Grid, Card, CardContent, CardActions, Button, Chip, Rating, IconButton, TextField, InputAdornment, Dialog, DialogContent, Skeleton } from '@mui/material';
 import { Close } from '@mui/icons-material';
@@ -8,88 +8,83 @@ import ProductImageCarousel from '../components/ProductImageCarousel';
 import ProductImage from '../components/ProductImage';
 import AfterpayMessaging from '../components/AfterpayMessaging';
 import { useLanguage } from '../context/LanguageContext';
-import { translateBatch } from '../services/translateService';
+
+const TEXTS = {
+  es: {
+    title: 'Nuestras Galletas',
+    addToCart: 'Agregar al carrito',
+    nuevo: 'Nuevo',
+    masVendido: 'Más vendido',
+    stock: 'Stock:',
+    units: 'unidades',
+    agotado: 'Agotado',
+    stockBajo: 'Stock bajo',
+    stockMedio: 'Stock medio',
+    enStock: 'En stock',
+    reseñas: 'reseñas',
+    cerrar: 'Cerrar',
+    stockDisponible: 'Stock disponible:',
+    unidades: 'unidades'
+  },
+  en: {
+    title: 'Our Cookies',
+    addToCart: 'Add to cart',
+    nuevo: 'New',
+    masVendido: 'Best seller',
+    stock: 'Stock:',
+    units: 'units',
+    agotado: 'Out of stock',
+    stockBajo: 'Low stock',
+    stockMedio: 'Medium stock',
+    enStock: 'In stock',
+    reseñas: 'reviews',
+    cerrar: 'Close',
+    stockDisponible: 'Stock available:',
+    unidades: 'units'
+  },
+  fr: {
+    title: 'Nos biscuits',
+    addToCart: 'Ajouter au panier',
+    nuevo: 'Nouveau',
+    masVendido: 'Meilleure vente',
+    stock: 'Stock :',
+    units: 'unités',
+    agotado: 'Rupture de stock',
+    stockBajo: 'Stock bas',
+    stockMedio: 'Stock moyen',
+    enStock: 'En stock',
+    reseñas: 'avis',
+    cerrar: 'Fermer',
+    stockDisponible: 'Stock disponible :',
+    unidades: 'unités'
+  },
+  pt: {
+    title: 'Nossos cookies',
+    addToCart: 'Adicionar ao carrinho',
+    nuevo: 'Novo',
+    masVendido: 'Mais vendido',
+    stock: 'Estoque:',
+    units: 'unidades',
+    agotado: 'Esgotado',
+    stockBajo: 'Estoque baixo',
+    stockMedio: 'Estoque médio',
+    enStock: 'Em estoque',
+    reseñas: 'avaliações',
+    cerrar: 'Fechar',
+    stockDisponible: 'Estoque disponível:',
+    unidades: 'unidades'
+  }
+};
 
 const Products = () => {
   const { language } = useLanguage();
   const { categories, products, addToCart, productsLoading } = useStore();
   const [open, setOpen] = useState(false);
   const [selected, setSelected] = useState(null);
-  const [translatedTexts, setTranslatedTexts] = useState({
-    addToCart: 'Agregar al Carrito',
-    nuevo: 'Nuevo',
-    masVendido: 'Más Vendido',
-    stock: 'Stock:',
-    units: 'units',
-    agotado: 'Agotado',
-    stockBajo: 'Stock Bajo',
-    stockMedio: 'Stock Medio',
-    enStock: 'En Stock',
-    reseñas: 'reseñas',
-    cerrar: 'Cerrar',
-    stockDisponible: 'Stock disponible:',
-    unidades: 'unidades'
-  });
-
-  // Traducir textos cuando cambia el idioma
-  useEffect(() => {
-    const translateTexts = async () => {
-      if (language === 'es') {
-        setTranslatedTexts({
-          addToCart: 'Agregar al Carrito',
-          nuevo: 'Nuevo',
-          masVendido: 'Más Vendido',
-          stock: 'Stock:',
-          units: 'units',
-          agotado: 'Agotado',
-          stockBajo: 'Stock Bajo',
-          stockMedio: 'Stock Medio',
-          enStock: 'En Stock',
-          reseñas: 'reseñas',
-          cerrar: 'Cerrar',
-          stockDisponible: 'Stock disponible:',
-          unidades: 'unidades'
-        });
-      } else {
-        try {
-          const textsToTranslate = [
-            'Agregar al Carrito',
-            'Nuevo',
-            'Más Vendido',
-            'Stock:',
-            'units',
-            'Agotado',
-            'Stock Bajo',
-            'Stock Medio',
-            'En Stock',
-            'reseñas',
-            'Cerrar',
-            'Stock disponible:',
-            'unidades'
-          ];
-          const translated = await translateBatch(textsToTranslate, language, 'es');
-          setTranslatedTexts({
-            addToCart: translated[0] || 'Agregar al Carrito',
-            nuevo: translated[1] || 'Nuevo',
-            masVendido: translated[2] || 'Más Vendido',
-            stock: translated[3] || 'Stock:',
-            units: translated[4] || 'units',
-            agotado: translated[5] || 'Agotado',
-            stockBajo: translated[6] || 'Stock Bajo',
-            stockMedio: translated[7] || 'Stock Medio',
-            enStock: translated[8] || 'En Stock',
-            reseñas: translated[9] || 'reseñas',
-            cerrar: translated[10] || 'Cerrar',
-            stockDisponible: translated[11] || 'Stock disponible:',
-            unidades: translated[12] || 'unidades'
-          });
-        } catch (error) {
-          console.error('Error translating texts:', error);
-        }
-      }
-    };
-    translateTexts();
-  }, [language]);
+  const translatedTexts = useMemo(
+    () => TEXTS[language] || TEXTS.es,
+    [language]
+  );
 
   return (
     <Box className="products-page-mobile" sx={{ 
@@ -103,16 +98,13 @@ const Products = () => {
         <Box sx={{ mb: 4, textAlign: 'center' }}>
           <Typography
             sx={{
-               fontFamily: 'BrittanySignature',
+              fontFamily: 'BrittanySignature',
               fontSize: { xs: '2.4rem', md: '3rem' },
               mt: { xs: 0, md: 2.5 },
-               color: '#c8626d'
-             }}
-           >
-             {language === 'es' && 'Nuestras Galletas'}
-            {language === 'en' && 'Our Cookies'}
-            {language === 'fr' && 'Nos biscuits'}
-            {language === 'pt' && 'Nossos cookies'}
+              color: '#c8626d'
+            }}
+          >
+            {translatedTexts.title}
           </Typography>
         </Box>
 

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useMemo } from 'react';
 import { motion } from 'framer-motion';
 import {
   Box,
@@ -25,12 +25,53 @@ import {
   ShoppingBag
 } from '@mui/icons-material';
 import { useStore } from '../context/StoreContext';
+import { useLanguage } from '../context/LanguageContext';
+
+const TEXTS = {
+  es: {
+    title: 'Galletas destacadas',
+    description:
+      'Descubre nuestras galletas más populares, horneadas con ingredientes premium y el sabor auténtico de Nueva York.',
+    new: 'Nuevo',
+    bestSeller: 'Más vendido',
+    addToCart: 'Agregar al carrito',
+    seeAll: 'Ver todas las galletas'
+  },
+  en: {
+    title: 'Featured cookies',
+    description:
+      'Discover our most popular cookies, baked with premium ingredients and the authentic taste of New York.',
+    new: 'New',
+    bestSeller: 'Best seller',
+    addToCart: 'Add to cart',
+    seeAll: 'See all cookies'
+  },
+  fr: {
+    title: 'Biscuits en vedette',
+    description:
+      'Découvrez nos biscuits les plus populaires, réalisés avec des ingrédients premium et le goût authentique de New York.',
+    new: 'Nouveau',
+    bestSeller: 'Meilleure vente',
+    addToCart: 'Ajouter au panier',
+    seeAll: 'Voir tous les biscuits'
+  },
+  pt: {
+    title: 'Cookies em destaque',
+    description:
+      'Descubra nossos cookies mais populares, assados com ingredientes premium e o sabor autêntico de Nova York.',
+    new: 'Novo',
+    bestSeller: 'Mais vendido',
+    addToCart: 'Adicionar ao carrinho',
+    seeAll: 'Ver todos os cookies'
+  }
+};
 
 const FeaturedProducts = () => {
   const { featuredProducts, addToCart } = useStore();
+  const { language } = useLanguage();
+  const texts = useMemo(() => TEXTS[language] || TEXTS.es, [language]);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
-  const [currentLanguage, setCurrentLanguage] = useState('es');
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -72,10 +113,11 @@ const FeaturedProducts = () => {
                   fontWeight: 800,
                   color: '#EC8C8D',
                   mb: 2,
-                  fontFamily: 'Playfair Display, serif'
+                  fontFamily: 'Playfair Display, serif',
+                  textTransform: 'capitalize'
                 }}
               >
-                Galletas Destacadas
+                {texts.title}
               </Typography>
               <Typography
                 variant="h6"
@@ -86,7 +128,7 @@ const FeaturedProducts = () => {
                   lineHeight: 1.6
                 }}
               >
-                Descubre nuestras galletas más populares, horneadas con ingredientes premium y el sabor auténtico de Nueva York
+                {texts.description}
               </Typography>
             </motion.div>
           </Box>
@@ -142,7 +184,7 @@ const FeaturedProducts = () => {
                       <Box sx={{ position: 'absolute', top: 12, left: 12, display: 'flex', flexDirection: 'column', gap: 1 }}>
                         {product.isNew && (
                           <Chip
-                            label={'Nuevo'}
+                            label={texts.new}
                             size="small"
                             sx={{
                               backgroundColor: '#4CAF50',
@@ -154,7 +196,7 @@ const FeaturedProducts = () => {
                         )}
                         {product.isBestSeller && (
                           <Chip
-                            label={'Más Vendido'}
+                            label={texts.bestSeller}
                             size="small"
                             sx={{
                               backgroundColor: '#FF6B35',
@@ -261,7 +303,7 @@ const FeaturedProducts = () => {
                           transition: 'all 0.3s ease'
                         }}
                       >
-                        Añadir al carrito
+                        {texts.addToCart}
                       </Button>
                     </CardActions>
                   </Card>
@@ -299,7 +341,7 @@ const FeaturedProducts = () => {
                   transition: 'all 0.3s ease'
                 }}
               >
-                Ver Todas las Galletas
+                {texts.seeAll}
               </Button>
             </motion.div>
           </Box>
