@@ -29,6 +29,22 @@ import { onAuthStateChanged } from 'firebase/auth';
 import emailjs from '@emailjs/browser';
 import { useLanguage } from '../context/LanguageContext';
 
+// Inicializar EmailJS al cargar el módulo
+const EMAILJS_SERVICE_ID = process.env.REACT_APP_EMAILJS_SERVICE_ID || 'service_7biylnb';
+const EMAILJS_PUBLIC_KEY = process.env.REACT_APP_EMAILJS_PUBLIC_KEY || 'woa-DlbiNozuQWT44';
+
+// Inicializar EmailJS una sola vez
+if (EMAILJS_PUBLIC_KEY && EMAILJS_PUBLIC_KEY !== 'NOT SET') {
+  try {
+    emailjs.init(EMAILJS_PUBLIC_KEY);
+    console.log('✅ [EmailJS] Inicializado correctamente con Public Key:', EMAILJS_PUBLIC_KEY.substring(0, 10) + '...');
+  } catch (error) {
+    console.error('❌ [EmailJS] Error inicializando:', error);
+  }
+} else {
+  console.warn('⚠️ [EmailJS] Public Key no configurada');
+}
+
 const CARD_LOGOS = [
   { alt: 'Visa', src: '/assets/payments/visa.svg' },
   { alt: 'Mastercard', src: '/assets/payments/mastercard.svg' },
@@ -727,9 +743,20 @@ const Checkout = () => {
         console.log('📧 [Frontend] ENVIANDO CORREOS DESDE EL NAVEGADOR');
         console.log('📧 [Frontend] ========================================');
         
-        const serviceId = process.env.REACT_APP_EMAILJS_SERVICE_ID || 'service_7biylnb';
+        const serviceId = EMAILJS_SERVICE_ID;
         const templateId = process.env.REACT_APP_EMAILJS_TEMPLATE_ID || 'template_poovxvk';
-        const publicKey = process.env.REACT_APP_EMAILJS_PUBLIC_KEY || 'woa-DlbiNozuQWT44';
+        const publicKey = EMAILJS_PUBLIC_KEY;
+        
+        // Asegurar que EmailJS esté inicializado
+        if (publicKey && publicKey !== 'NOT SET') {
+          try {
+            if (typeof emailjs.init === 'function') {
+              emailjs.init(publicKey);
+            }
+          } catch (initError) {
+            console.warn('⚠️ [EmailJS] Ya estaba inicializado o error:', initError);
+          }
+        }
         
         const shippingCost = parseFloat(orderData.shippingInfo?.cost || 0);
         const subtotal = orderData.total - shippingCost;
@@ -975,15 +1002,27 @@ const Checkout = () => {
                 console.log('📧 [Test] Probando envío de correo a:', testEmail);
                 console.log('📧 [Test] Usando EmailJS desde el navegador...');
                 
-                const serviceId = process.env.REACT_APP_EMAILJS_SERVICE_ID || 'service_7biylnb';
+                const serviceId = EMAILJS_SERVICE_ID;
                 const templateId = process.env.REACT_APP_EMAILJS_TEMPLATE_ID || 'template_poovxvk';
-                const publicKey = process.env.REACT_APP_EMAILJS_PUBLIC_KEY || 'woa-DlbiNozuQWT44';
+                const publicKey = EMAILJS_PUBLIC_KEY;
                 
                 const testOrderId = 'TEST-' + Date.now();
                 
                 console.log('📧 [Test] Service ID:', serviceId);
                 console.log('📧 [Test] Template ID:', templateId);
                 console.log('📧 [Test] Public Key:', publicKey ? publicKey.substring(0, 10) + '...' : 'NOT SET');
+                
+                // Asegurar que EmailJS esté inicializado antes de enviar
+                if (publicKey && publicKey !== 'NOT SET') {
+                  try {
+                    if (typeof emailjs.init === 'function') {
+                      emailjs.init(publicKey);
+                      console.log('✅ [Test] EmailJS inicializado antes de enviar');
+                    }
+                  } catch (initError) {
+                    console.warn('⚠️ [Test] EmailJS ya estaba inicializado:', initError);
+                  }
+                }
                 
                 const result = await emailjs.send(
                   serviceId,
@@ -1493,15 +1532,27 @@ const Checkout = () => {
                             console.log('📧 [Test] Probando envío de correo a:', testEmail);
                             console.log('📧 [Test] Usando EmailJS desde el navegador...');
                             
-                            const serviceId = process.env.REACT_APP_EMAILJS_SERVICE_ID || 'service_7biylnb';
+                            const serviceId = EMAILJS_SERVICE_ID;
                             const templateId = process.env.REACT_APP_EMAILJS_TEMPLATE_ID || 'template_poovxvk';
-                            const publicKey = process.env.REACT_APP_EMAILJS_PUBLIC_KEY || 'woa-DlbiNozuQWT44';
+                            const publicKey = EMAILJS_PUBLIC_KEY;
                             
                             const testOrderId = 'TEST-' + Date.now();
                             
                             console.log('📧 [Test] Service ID:', serviceId);
                             console.log('📧 [Test] Template ID:', templateId);
                             console.log('📧 [Test] Public Key:', publicKey ? publicKey.substring(0, 10) + '...' : 'NOT SET');
+                            
+                            // Asegurar que EmailJS esté inicializado antes de enviar
+                            if (publicKey && publicKey !== 'NOT SET') {
+                              try {
+                                if (typeof emailjs.init === 'function') {
+                                  emailjs.init(publicKey);
+                                  console.log('✅ [Test] EmailJS inicializado antes de enviar');
+                                }
+                              } catch (initError) {
+                                console.warn('⚠️ [Test] EmailJS ya estaba inicializado:', initError);
+                              }
+                            }
                             
                             const result = await emailjs.send(
                               serviceId,
@@ -1752,9 +1803,20 @@ const Checkout = () => {
                               console.log('📧 [Checkout] ENVIANDO CORREOS DESDE EL NAVEGADOR (PayPal)');
                               console.log('📧 [Checkout] ========================================');
                               
-                              const serviceId = process.env.REACT_APP_EMAILJS_SERVICE_ID || 'service_7biylnb';
+                              const serviceId = EMAILJS_SERVICE_ID;
                               const templateId = process.env.REACT_APP_EMAILJS_TEMPLATE_ID || 'template_poovxvk';
-                              const publicKey = process.env.REACT_APP_EMAILJS_PUBLIC_KEY || 'woa-DlbiNozuQWT44';
+                              const publicKey = EMAILJS_PUBLIC_KEY;
+                              
+                              // Asegurar que EmailJS esté inicializado
+                              if (publicKey && publicKey !== 'NOT SET') {
+                                try {
+                                  if (typeof emailjs.init === 'function') {
+                                    emailjs.init(publicKey);
+                                  }
+                                } catch (initError) {
+                                  console.warn('⚠️ [EmailJS] Ya estaba inicializado:', initError);
+                                }
+                              }
                               
                               const shippingCost = parseFloat(shippingInfo?.cost || 0);
                               const subtotal = cartTotal - shippingCost;
@@ -1887,11 +1949,15 @@ const Checkout = () => {
                               
                               // Enviar email de confirmación de nuevo pedido a luisuf@gmail.com
                               try {
-                                // Inicializar EmailJS si no está inicializado
-                                if (!emailjs.init) {
-                                  emailjs.init({
-                                    publicKey: 'TbgeNq-PEAHvSqjzR'
-                                  });
+                                // Asegurar que EmailJS esté inicializado
+                                if (EMAILJS_PUBLIC_KEY && EMAILJS_PUBLIC_KEY !== 'NOT SET') {
+                                  try {
+                                    if (typeof emailjs.init === 'function') {
+                                      emailjs.init(EMAILJS_PUBLIC_KEY);
+                                    }
+                                  } catch (initError) {
+                                    console.warn('⚠️ [EmailJS] Ya estaba inicializado:', initError);
+                                  }
                                 }
                                 
                                 const emailData = {
@@ -1921,9 +1987,10 @@ const Checkout = () => {
                                 };
                                 
                                 await emailjs.send(
-                                  'service_7biylnb',
-                                  'template_poovxvk',
-                                  emailData
+                                  EMAILJS_SERVICE_ID,
+                                  process.env.REACT_APP_EMAILJS_TEMPLATE_ID || 'template_poovxvk',
+                                  emailData,
+                                  { publicKey: EMAILJS_PUBLIC_KEY }
                                 );
                                 
                                 console.log('✅ [Checkout] Email de confirmación de nuevo pedido enviado a luisuf@gmail.com (fallback)');
