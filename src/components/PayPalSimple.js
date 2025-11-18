@@ -257,6 +257,18 @@ const PayPalSimple = ({
   shippingAddress = null,
   shippingInfo = null
 }) => {
+  // DEBUG: Log todas las variables de entorno al inicio
+  console.log('🔍 [PayPal] DEBUG - Todas las variables process.env:', {
+    'REACT_APP_PAYPAL_CLIENT_ID': process.env.REACT_APP_PAYPAL_CLIENT_ID || 'NOT SET',
+    'REACT_APP_PAYPAL_CLIENT_ID_SANDBOX': process.env.REACT_APP_PAYPAL_CLIENT_ID_SANDBOX || 'NOT SET',
+    'REACT_APP_PAYPAL_ENVIRONMENT': process.env.REACT_APP_PAYPAL_ENVIRONMENT || 'NOT SET',
+    'REACT_APP_PAYPAL_CURRENCY': process.env.REACT_APP_PAYPAL_CURRENCY || 'NOT SET',
+    'REACT_APP_PAYPAL_INTENT': process.env.REACT_APP_PAYPAL_INTENT || 'NOT SET',
+    'NODE_ENV': process.env.NODE_ENV || 'NOT SET',
+    'hostname': window.location.hostname,
+    'all_REACT_APP_keys': Object.keys(process.env).filter(key => key.startsWith('REACT_APP_'))
+  });
+  
   // Detectar si estamos en localhost/desarrollo
   const isLocalhost = window.location.hostname === 'localhost' || 
                       window.location.hostname === '127.0.0.1' ||
@@ -267,6 +279,8 @@ const PayPalSimple = ({
   const clientId = isLocalhost 
     ? (process.env.REACT_APP_PAYPAL_CLIENT_ID_SANDBOX || process.env.REACT_APP_PAYPAL_CLIENT_ID)
     : process.env.REACT_APP_PAYPAL_CLIENT_ID;
+  
+  console.log('🔍 [PayPal] DEBUG - clientId obtenido:', clientId ? clientId.substring(0, 30) + '...' : 'NOT SET');
 
   // Verificar configuración
   if (!clientId || clientId === 'sb' || clientId === 'TU_PAYPAL_CLIENT_ID_LIVE') {
