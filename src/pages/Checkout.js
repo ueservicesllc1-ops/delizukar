@@ -626,6 +626,248 @@ const Checkout = () => {
     console.log('Shipping accepted by user');
   };
 
+  // Función para simular compra exitosa (solo para pruebas)
+  const handleTestPurchase = async () => {
+    try {
+      // Validar que todos los campos requeridos estén completos
+      if (!formData.email || !formData.firstName || !formData.lastName || !formData.address || !formData.city || !formData.zipCode) {
+        alert('Por favor completa todos los campos requeridos antes de probar');
+        return;
+      }
+
+      if (cart.length === 0) {
+        alert('El carrito está vacío');
+        return;
+      }
+
+      console.log('🧪 [Test] Simulando compra exitosa...');
+      
+      // Crear datos de pago simulados
+      const mockPaymentDetails = {
+        id: `test_payment_${Date.now()}`,
+        paymentId: `test_payment_${Date.now()}`,
+        status: 'completed',
+        amount: cartTotal
+      };
+
+      // Preparar datos de la orden igual que en el flujo real
+      const packageInfo = shippingInfo?.packageInfo ? {
+        weight: shippingInfo.packageInfo.weight || shippingInfo.packageInfo.mass || '0.22',
+        weightUnit: shippingInfo.packageInfo.weightUnit || shippingInfo.packageInfo.massUnit || 'lb',
+        length: shippingInfo.packageInfo.length || '8',
+        width: shippingInfo.packageInfo.width || '6',
+        height: shippingInfo.packageInfo.height || '4',
+        distanceUnit: shippingInfo.packageInfo.distanceUnit || 'in'
+      } : null;
+
+      const orderData = {
+        sessionId: mockPaymentDetails.paymentId,
+        paymentIntentId: mockPaymentDetails.paymentId,
+        customerInfo: {
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          email: formData.email,
+          phone: formData.phone,
+          address: {
+            line1: formData.address,
+            city: formData.city,
+            postal_code: formData.zipCode,
+            state: formData.state,
+            country: 'US'
+          }
+        },
+        cartItems: cart.map(item => ({
+          id: item.id,
+          name: item.name,
+          price: item.price,
+          quantity: item.quantity,
+          image: item.image
+        })),
+        total: cartTotal,
+        paymentStatus: 'paid',
+        packageInfo: packageInfo,
+        shippingInfo: shippingInfo || null
+      };
+
+      console.log('🧪 [Test] Enviando orden al backend...', orderData);
+
+      // Llamar al endpoint para crear la orden (esto enviará los correos automáticamente)
+      // En desarrollo, usar directamente localhost:5000 ya que el proxy no siempre funciona
+      const baseUrl = process.env.NODE_ENV === 'production' 
+        ? window.location.origin 
+        : 'http://localhost:5000';
+      
+      console.log('📧 [Frontend] ========================================');
+      console.log('📧 [Frontend] Enviando orden al servidor');
+      console.log('📧 [Frontend] Base URL:', baseUrl);
+      console.log('📧 [Frontend] ========================================');
+      console.log('📧 [Frontend] Datos de la orden:');
+      console.log('   - Customer Email:', orderData.customerInfo.email);
+      console.log('   - Total:', orderData.total);
+      console.log('   - Shipping Cost:', orderData.shippingInfo?.cost || 0);
+      console.log('   - Items:', orderData.cartItems.length);
+      
+      const response = await fetch(`${baseUrl}/api/create-order`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(orderData)
+      });
+
+      console.log('📧 [Frontend] Response status:', response.status);
+      console.log('📧 [Frontend] Response ok:', response.ok);
+
+      if (response.ok) {
+        const result = await response.json();
+        console.log('✅ [Frontend] Orden creada exitosamente:', result.orderId);
+        
+        // Enviar correos desde el frontend usando EmailJS (EmailJS solo funciona desde el navegador)
+        console.log('📧 [Frontend] ========================================');
+        console.log('📧 [Frontend] ENVIANDO CORREOS DESDE EL NAVEGADOR');
+        console.log('📧 [Frontend] ========================================');
+        
+        const serviceId = process.env.REACT_APP_EMAILJS_SERVICE_ID || 'service_7biylnb';
+        const templateId = process.env.REACT_APP_EMAILJS_TEMPLATE_ID || 'template_poovxvk';
+        const publicKey = process.env.REACT_APP_EMAILJS_PUBLIC_KEY || 'woa-DlbiNozuQWT44';
+        
+        const shippingCost = parseFloat(orderData.shippingInfo?.cost || 0);
+        const subtotal = orderData.total - shippingCost;
+        const itemsListText = orderData.cartItems.map(item => 
+          `${item.quantity}x ${item.name} - $${parseFloat(item.price).toFixed(2)} cada uno = $${(parseFloat(item.price) * item.quantity).toFixed(2)}`
+        ).join('\n');
+        
+        // Enviar correo al cliente
+        try {
+          console.log('📧 [Frontend] Enviando correo al cliente:', orderData.customerInfo.email);
+          console.log('📧 [Frontend] Service ID:', serviceId);
+          console.log('📧 [Frontend] Template ID:', templateId);
+          console.log('📧 [Frontend] Public Key:', publicKey ? publicKey.substring(0, 10) + '...' : 'NOT SET');
+          
+          const customerEmailParams = {
+            to_email: orderData.customerInfo.email,
+            to_name: `${orderData.customerInfo.firstName} ${orderData.customerInfo.lastName}`,
+            order_id: result.orderId,
+            customer_name: `${orderData.customerInfo.firstName} ${orderData.customerInfo.lastName}`,
+            customer_email: orderData.customerInfo.email,
+            customer_phone: orderData.customerInfo.phone || 'N/A',
+            customer_address: `${orderData.customerInfo.address.line1}, ${orderData.customerInfo.address.city}, ${orderData.customerInfo.address.state} ${orderData.customerInfo.address.postal_code}`,
+            order_total: `$${orderData.total.toFixed(2)}`,
+            shipping_cost: shippingCost > 0 ? `$${shippingCost.toFixed(2)}` : '$0.00',
+            subtotal: `$${subtotal.toFixed(2)}`,
+            items_count: orderData.cartItems.length.toString(),
+            items_list: itemsListText,
+            payment_method: 'PayPal',
+            payment_id: mockPaymentDetails.paymentId,
+            order_date: new Date().toLocaleString('es-ES', { 
+              year: 'numeric', 
+              month: 'long', 
+              day: 'numeric', 
+              hour: '2-digit', 
+              minute: '2-digit' 
+            }),
+            subject: `¡Confirmación de tu pedido #${result.orderId}!`,
+            message: `¡Gracias por tu compra en Delizukar! Tu pedido #${result.orderId} ha sido recibido y está siendo procesado.\n\nDetalles del pedido:\n${itemsListText}\n\nSubtotal: $${subtotal.toFixed(2)}\n${shippingCost > 0 ? `Envío: $${shippingCost.toFixed(2)}\n` : ''}Total: $${orderData.total.toFixed(2)}`,
+            tracking_code: 'PENDING',
+            tracking_url: '',
+            label_url: ''
+          };
+          
+          console.log('📧 [Frontend] Parámetros del correo al cliente:', customerEmailParams);
+          
+          const customerEmailResult = await emailjs.send(
+            serviceId,
+            templateId,
+            customerEmailParams,
+            { publicKey }
+          );
+          console.log('✅ [Frontend] Correo al cliente enviado exitosamente:', customerEmailResult);
+        } catch (emailError) {
+          console.error('❌ [Frontend] Error enviando correo al cliente:', emailError);
+          console.error('❌ [Frontend] Error status:', emailError.status);
+          console.error('❌ [Frontend] Error text:', emailError.text);
+          console.error('❌ [Frontend] Error message:', emailError.message);
+        }
+        
+        // Enviar notificación al administrador
+        try {
+          console.log('📧 [Frontend] Enviando notificación al administrador: delizukar@gmail.com');
+          
+          const adminEmailParams = {
+            to_email: 'delizukar@gmail.com',
+            to_name: 'Delizukar Admin',
+            order_id: result.orderId,
+            customer_name: `${orderData.customerInfo.firstName} ${orderData.customerInfo.lastName}`,
+            customer_email: orderData.customerInfo.email,
+            customer_phone: orderData.customerInfo.phone || 'No proporcionado',
+            customer_address: `${orderData.customerInfo.address.line1}, ${orderData.customerInfo.address.city}, ${orderData.customerInfo.address.state} ${orderData.customerInfo.address.postal_code}`,
+            order_total: `$${orderData.total.toFixed(2)}`,
+            shipping_cost: shippingCost > 0 ? `$${shippingCost.toFixed(2)}` : '$0.00',
+            subtotal: `$${subtotal.toFixed(2)}`,
+            items_count: orderData.cartItems.length.toString(),
+            items_list: itemsListText,
+            payment_method: 'PayPal',
+            payment_id: mockPaymentDetails.paymentId,
+            order_date: new Date().toLocaleString('es-ES', { 
+              year: 'numeric', 
+              month: 'long', 
+              day: 'numeric', 
+              hour: '2-digit', 
+              minute: '2-digit' 
+            }),
+            subject: `🛒 Nueva Orden Recibida - #${result.orderId}`,
+            message: `⚠️ ACCIÓN REQUERIDA: Nueva orden recibida\n\nID de pedido: ${result.orderId}\nID de pago: ${mockPaymentDetails.paymentId}\nEstado: paid\n\nCliente: ${orderData.customerInfo.firstName} ${orderData.customerInfo.lastName}\nEmail: ${orderData.customerInfo.email}\nTeléfono: ${orderData.customerInfo.phone || 'No proporcionado'}\n\nDirección:\n${orderData.customerInfo.address.line1}\n${orderData.customerInfo.address.city}, ${orderData.customerInfo.address.state} ${orderData.customerInfo.address.postal_code}\n\nProductos:\n${itemsListText}\n\nSubtotal: $${subtotal.toFixed(2)}\n${shippingCost > 0 ? `Envío: $${shippingCost.toFixed(2)}\n` : ''}Total: $${orderData.total.toFixed(2)}\n\nPor favor, procesa esta orden en el panel de administración.`,
+            tracking_code: 'PENDING',
+            tracking_url: '',
+            label_url: ''
+          };
+          
+          console.log('📧 [Frontend] Parámetros del correo al administrador:', adminEmailParams);
+          
+          const adminEmailResult = await emailjs.send(
+            serviceId,
+            templateId,
+            adminEmailParams,
+            { publicKey }
+          );
+          console.log('✅ [Frontend] Notificación al administrador enviada exitosamente:', adminEmailResult);
+        } catch (emailError) {
+          console.error('❌ [Frontend] Error enviando notificación al administrador:', emailError);
+          console.error('❌ [Frontend] Error status:', emailError.status);
+          console.error('❌ [Frontend] Error text:', emailError.text);
+          console.error('❌ [Frontend] Error message:', emailError.message);
+        }
+        
+        console.log('📧 [Frontend] ========================================');
+        
+        // Guardar información en localStorage
+        localStorage.setItem('lastOrderId', result.orderId);
+        localStorage.setItem('lastPaymentIntentId', mockPaymentDetails.paymentId);
+        localStorage.setItem('lastPaymentAmount', cartTotal.toString());
+        
+        if (shippingInfo) {
+          localStorage.setItem('lastShippingInfo', JSON.stringify(shippingInfo));
+        }
+
+        // Limpiar carrito
+        clearCart();
+
+        // Mostrar mensaje de éxito
+        alert('✅ Compra de prueba exitosa!\n\nLos correos han sido enviados:\n- Al cliente: ' + formData.email + '\n- Al administrador: delizukar@gmail.com');
+
+        // Redirigir a la página de éxito
+        navigate(`/checkout/success?payment_id=${mockPaymentDetails.paymentId}`);
+      } else {
+        const errorData = await response.json();
+        console.error('❌ [Test] Error creando orden:', errorData);
+        alert('Error en la compra de prueba: ' + (errorData.error || 'Error desconocido'));
+      }
+    } catch (error) {
+      console.error('❌ [Test] Error en compra de prueba:', error);
+      alert('Error en la compra de prueba: ' + error.message);
+    }
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
     
@@ -713,6 +955,94 @@ const Checkout = () => {
             {t('checkout.subtitle')}
           </Typography>
         </motion.div>
+
+        {/* Botón de prueba de correo - Siempre visible en la parte superior */}
+        <Box sx={{ mb: 3, p: 2, backgroundColor: '#fff3cd', borderRadius: '12px', border: '2px dashed #ffc107' }}>
+          <Typography variant="body2" sx={{ color: '#856404', mb: 1, fontWeight: 600 }}>
+            📧 Probar Envío de Correo
+          </Typography>
+          <Typography variant="caption" sx={{ color: '#856404', display: 'block', mb: 2 }}>
+            Prueba el envío de correos sin necesidad de completar el formulario.
+          </Typography>
+          <Button
+            variant="outlined"
+            fullWidth
+            onClick={async () => {
+              try {
+                const testEmail = formData.email || prompt('Ingresa un email para probar:') || 'test@example.com';
+                if (!testEmail) return;
+                
+                console.log('📧 [Test] Probando envío de correo a:', testEmail);
+                console.log('📧 [Test] Usando EmailJS desde el navegador...');
+                
+                const serviceId = process.env.REACT_APP_EMAILJS_SERVICE_ID || 'service_7biylnb';
+                const templateId = process.env.REACT_APP_EMAILJS_TEMPLATE_ID || 'template_poovxvk';
+                const publicKey = process.env.REACT_APP_EMAILJS_PUBLIC_KEY || 'woa-DlbiNozuQWT44';
+                
+                const testOrderId = 'TEST-' + Date.now();
+                
+                console.log('📧 [Test] Service ID:', serviceId);
+                console.log('📧 [Test] Template ID:', templateId);
+                console.log('📧 [Test] Public Key:', publicKey ? publicKey.substring(0, 10) + '...' : 'NOT SET');
+                
+                const result = await emailjs.send(
+                  serviceId,
+                  templateId,
+                  {
+                    to_email: testEmail,
+                    to_name: 'Test User',
+                    order_id: testOrderId,
+                    customer_name: 'Test User',
+                    customer_email: testEmail,
+                    customer_phone: 'N/A',
+                    customer_address: '123 Test St, Test City, TS 12345',
+                    order_total: '$100.00',
+                    shipping_cost: '$10.00',
+                    subtotal: '$90.00',
+                    items_count: '1',
+                    items_list: '1x Test Product - $90.00 cada uno = $90.00',
+                    payment_method: 'Test',
+                    payment_id: 'test_payment_' + Date.now(),
+                    order_date: new Date().toLocaleString('es-ES', { 
+                      year: 'numeric', 
+                      month: 'long', 
+                      day: 'numeric', 
+                      hour: '2-digit', 
+                      minute: '2-digit' 
+                    }),
+                    subject: `🧪 Test Email - ${testOrderId}`,
+                    message: `Este es un correo de prueba para verificar que EmailJS está funcionando correctamente.\n\nOrder ID: ${testOrderId}\nFecha: ${new Date().toLocaleString()}`,
+                    tracking_code: 'TEST',
+                    tracking_url: '',
+                    label_url: ''
+                  },
+                  { publicKey }
+                );
+                
+                console.log('✅ [Test] Correo enviado exitosamente:', result);
+                alert(`✅ Correo de prueba enviado exitosamente a ${testEmail}\n\nRevisa tu bandeja de entrada y la consola para más detalles.`);
+              } catch (error) {
+                console.error('❌ [Test] Error completo:', error);
+                console.error('❌ [Test] Error message:', error.message);
+                console.error('❌ [Test] Error status:', error.status);
+                console.error('❌ [Test] Error text:', error.text);
+                alert(`❌ Error: ${error.message || 'Error desconocido'}\n\nRevisa la consola para más detalles.`);
+              }
+            }}
+            sx={{
+              borderColor: '#ffc107',
+              color: '#856404',
+              '&:hover': {
+                borderColor: '#ffb300',
+                backgroundColor: '#fff9e6',
+              },
+              fontWeight: 600,
+              py: 1.5
+            }}
+          >
+            📧 Probar Envío de Correo
+          </Button>
+        </Box>
 
         <form onSubmit={handleSubmit}>
           <Grid container spacing={2}>
@@ -1144,6 +1474,93 @@ const Checkout = () => {
                       </Typography>
                     </Box>
                     
+                    {/* Botón de prueba de correo - Siempre visible */}
+                    <Box sx={{ mb: 2, p: 2, backgroundColor: '#fff3cd', borderRadius: '12px', border: '2px dashed #ffc107' }}>
+                      <Typography variant="body2" sx={{ color: '#856404', mb: 1, fontWeight: 600 }}>
+                        📧 Probar Envío de Correo
+                      </Typography>
+                      <Typography variant="caption" sx={{ color: '#856404', display: 'block', mb: 2 }}>
+                        Prueba el envío de correos sin necesidad de completar el formulario.
+                      </Typography>
+                      <Button
+                        variant="outlined"
+                        fullWidth
+                        onClick={async () => {
+                          try {
+                            const testEmail = formData.email || prompt('Ingresa un email para probar:') || 'test@example.com';
+                            if (!testEmail) return;
+                            
+                            console.log('📧 [Test] Probando envío de correo a:', testEmail);
+                            console.log('📧 [Test] Usando EmailJS desde el navegador...');
+                            
+                            const serviceId = process.env.REACT_APP_EMAILJS_SERVICE_ID || 'service_7biylnb';
+                            const templateId = process.env.REACT_APP_EMAILJS_TEMPLATE_ID || 'template_poovxvk';
+                            const publicKey = process.env.REACT_APP_EMAILJS_PUBLIC_KEY || 'woa-DlbiNozuQWT44';
+                            
+                            const testOrderId = 'TEST-' + Date.now();
+                            
+                            console.log('📧 [Test] Service ID:', serviceId);
+                            console.log('📧 [Test] Template ID:', templateId);
+                            console.log('📧 [Test] Public Key:', publicKey ? publicKey.substring(0, 10) + '...' : 'NOT SET');
+                            
+                            const result = await emailjs.send(
+                              serviceId,
+                              templateId,
+                              {
+                                to_email: testEmail,
+                                to_name: 'Test User',
+                                order_id: testOrderId,
+                                customer_name: 'Test User',
+                                customer_email: testEmail,
+                                customer_phone: 'N/A',
+                                customer_address: '123 Test St, Test City, TS 12345',
+                                order_total: '$100.00',
+                                shipping_cost: '$10.00',
+                                subtotal: '$90.00',
+                                items_count: '1',
+                                items_list: '1x Test Product - $90.00 cada uno = $90.00',
+                                payment_method: 'Test',
+                                payment_id: 'test_payment_' + Date.now(),
+                                order_date: new Date().toLocaleString('es-ES', { 
+                                  year: 'numeric', 
+                                  month: 'long', 
+                                  day: 'numeric', 
+                                  hour: '2-digit', 
+                                  minute: '2-digit' 
+                                }),
+                                subject: `🧪 Test Email - ${testOrderId}`,
+                                message: `Este es un correo de prueba para verificar que EmailJS está funcionando correctamente.\n\nOrder ID: ${testOrderId}\nFecha: ${new Date().toLocaleString()}`,
+                                tracking_code: 'TEST',
+                                tracking_url: '',
+                                label_url: ''
+                              },
+                              { publicKey }
+                            );
+                            
+                            console.log('✅ [Test] Correo enviado exitosamente:', result);
+                            alert(`✅ Correo de prueba enviado exitosamente a ${testEmail}\n\nRevisa tu bandeja de entrada y la consola para más detalles.`);
+                          } catch (error) {
+                            console.error('❌ [Test] Error completo:', error);
+                            console.error('❌ [Test] Error message:', error.message);
+                            console.error('❌ [Test] Error stack:', error.stack);
+                            alert(`❌ Error: ${error.message}\n\nRevisa la consola para más detalles.`);
+                          }
+                        }}
+                        sx={{
+                          borderColor: '#ffc107',
+                          color: '#856404',
+                          '&:hover': {
+                            borderColor: '#ffb300',
+                            backgroundColor: '#fff9e6',
+                          },
+                          fontWeight: 600,
+                          py: 1
+                        }}
+                      >
+                        📧 Probar Envío de Correo
+                      </Button>
+                    </Box>
+
                     {/* Método de pago con PayPal - Solo mostrar si hay datos completos */}
                     {(() => {
                       const hasAllFields = formData.email && formData.firstName && formData.lastName && formData.address && formData.city && formData.zipCode;
@@ -1159,6 +1576,32 @@ const Checkout = () => {
                       return hasAllFields;
                     })() ? (
                       <>
+                      {/* Botón de prueba para simular compra exitosa */}
+                      <Box sx={{ mb: 2, p: 2, backgroundColor: '#fff3cd', borderRadius: '12px', border: '2px dashed #ffc107' }}>
+                        <Typography variant="body2" sx={{ color: '#856404', mb: 1, fontWeight: 600 }}>
+                          🧪 Modo Prueba - Simular Compra
+                        </Typography>
+                        <Typography variant="caption" sx={{ color: '#856404', display: 'block', mb: 2 }}>
+                          Este botón simula una compra exitosa sin procesar pago real. Se enviarán correos automáticamente.
+                        </Typography>
+                        <Button
+                          variant="contained"
+                          fullWidth
+                          onClick={handleTestPurchase}
+                          sx={{
+                            backgroundColor: '#ffc107',
+                            color: '#000',
+                            '&:hover': {
+                              backgroundColor: '#ffb300',
+                            },
+                            fontWeight: 600,
+                            py: 1.5
+                          }}
+                        >
+                          🧪 Simular Compra Exitosa (Prueba)
+                        </Button>
+                      </Box>
+                      
                       <PayPalPaymentForm 
                         key={`paypal-${formData.email}-${cartTotal}`}
                         cartItems={cart}
@@ -1247,7 +1690,8 @@ const Checkout = () => {
                           };
                           
                           // Usar el endpoint del backend que establece status: 'pending' correctamente
-                          const baseUrl = process.env.NODE_ENV === 'production' ? window.location.origin : '';
+                          // En desarrollo, usar directamente localhost:5000 ya que el proxy no siempre funciona
+                          const baseUrl = process.env.NODE_ENV === 'production' ? window.location.origin : 'http://localhost:5000';
                           console.log('📤 [Checkout] Enviando orden al backend:', {
                             url: `${baseUrl}/api/create-order`,
                             orderData: {
@@ -1281,34 +1725,65 @@ const Checkout = () => {
                             console.log('✅ [Checkout] Payment Status:', result.order?.paymentStatus);
                             console.log('✅ [Checkout] Status:', result.order?.status);
                             
+                            console.log('📧 [Frontend] ========================================');
+                            console.log('📧 [Frontend] INFORMACIÓN SOBRE CORREOS (PayPal):');
+                            console.log('📧 [Frontend] ========================================');
+                            if (result.emailStatus) {
+                              console.log('📧 [Frontend] Email Status:', result.emailStatus);
+                              console.log('📧 [Frontend] Customer Email:', result.emailStatus.customerEmail);
+                              console.log('📧 [Frontend] Admin Email:', result.emailStatus.adminEmail);
+                              console.log('📧 [Frontend] Status:', result.emailStatus.status);
+                              console.log('📧 [Frontend] Message:', result.emailStatus.message);
+                            } else {
+                              console.log('📧 [Frontend] Los correos se están enviando en segundo plano');
+                              console.log('📧 [Frontend] Correo al cliente:', orderData.customerInfo.email);
+                              console.log('📧 [Frontend] Correo al administrador: delizukar@gmail.com');
+                            }
+                            console.log('📧 [Frontend] ========================================');
+                            
                             if (result.orderId) {
                               localStorage.setItem('lastOrderId', result.orderId);
+                              localStorage.setItem('lastPaymentIntentId', paymentDetails.paymentId || paymentDetails.id);
+                              localStorage.setItem('lastPaymentAmount', cartTotal.toString());
                               console.log('💾 [Checkout] Order ID guardado en localStorage:', result.orderId);
                               
-                              // Enviar email de confirmación de nuevo pedido a luisuf@gmail.com
+                              // Enviar correos desde el frontend usando EmailJS (EmailJS solo funciona desde el navegador)
+                              console.log('📧 [Checkout] ========================================');
+                              console.log('📧 [Checkout] ENVIANDO CORREOS DESDE EL NAVEGADOR (PayPal)');
+                              console.log('📧 [Checkout] ========================================');
+                              
+                              const serviceId = process.env.REACT_APP_EMAILJS_SERVICE_ID || 'service_7biylnb';
+                              const templateId = process.env.REACT_APP_EMAILJS_TEMPLATE_ID || 'template_poovxvk';
+                              const publicKey = process.env.REACT_APP_EMAILJS_PUBLIC_KEY || 'woa-DlbiNozuQWT44';
+                              
+                              const shippingCost = parseFloat(shippingInfo?.cost || 0);
+                              const subtotal = cartTotal - shippingCost;
+                              const itemsListText = cart.map(item => 
+                                `${item.quantity}x ${item.name} - $${parseFloat(item.price).toFixed(2)} cada uno = $${(parseFloat(item.price) * item.quantity).toFixed(2)}`
+                              ).join('\n');
+                              
+                              // Enviar correo al cliente
                               try {
-                                // Inicializar EmailJS si no está inicializado
-                                if (!emailjs.init) {
-                                  emailjs.init({
-                                    publicKey: 'TbgeNq-PEAHvSqjzR'
-                                  });
-                                }
+                                console.log('📧 [Checkout] Enviando correo al cliente:', orderData.customerInfo.email);
+                                console.log('📧 [Checkout] Service ID:', serviceId);
+                                console.log('📧 [Checkout] Template ID:', templateId);
+                                console.log('📧 [Checkout] Public Key:', publicKey ? publicKey.substring(0, 10) + '...' : 'NOT SET');
                                 
-                                const emailData = {
-                                  to_email: 'luisuf@gmail.com',
-                                  to_name: 'Luis',
+                                const customerEmailParams = {
+                                  to_email: orderData.customerInfo.email,
+                                  to_name: `${orderData.customerInfo.firstName} ${orderData.customerInfo.lastName}`,
                                   order_id: result.orderId,
-                                  customer_name: `${formData.firstName} ${formData.lastName}`,
-                                  customer_email: formData.email,
-                                  customer_phone: formData.phone || 'N/A',
-                                  customer_address: `${formData.address}, ${formData.city}, ${formData.state} ${formData.zipCode}`,
+                                  customer_name: `${orderData.customerInfo.firstName} ${orderData.customerInfo.lastName}`,
+                                  customer_email: orderData.customerInfo.email,
+                                  customer_phone: orderData.customerInfo.phone || 'N/A',
+                                  customer_address: `${orderData.customerInfo.address.line1}, ${orderData.customerInfo.address.city}, ${orderData.customerInfo.address.state} ${orderData.customerInfo.address.postal_code}`,
                                   order_total: `$${cartTotal.toFixed(2)}`,
-                                  shipping_cost: shippingInfo ? `$${parseFloat(shippingInfo.cost || 0).toFixed(2)}` : '$0.00',
-                                  subtotal: `$${(cartTotal - (shippingInfo ? parseFloat(shippingInfo.cost || 0) : 0)).toFixed(2)}`,
-                                  items_count: cart.length,
-                                  items_list: cart.map(item => `${item.quantity}x ${item.name} - $${parseFloat(item.price).toFixed(2)}`).join('\n'),
+                                  shipping_cost: shippingCost > 0 ? `$${shippingCost.toFixed(2)}` : '$0.00',
+                                  subtotal: `$${subtotal.toFixed(2)}`,
+                                  items_count: cart.length.toString(),
+                                  items_list: itemsListText,
                                   payment_method: 'PayPal',
-                                  payment_id: paymentDetails.id || paymentDetails.paymentId || 'N/A',
+                                  payment_id: paymentDetails.paymentId || paymentDetails.id || 'N/A',
                                   order_date: new Date().toLocaleString('es-ES', { 
                                     year: 'numeric', 
                                     month: 'long', 
@@ -1316,21 +1791,79 @@ const Checkout = () => {
                                     hour: '2-digit', 
                                     minute: '2-digit' 
                                   }),
-                                  subject: `Nuevo Pedido #${result.orderId} - DeliZuKar`,
-                                  message: `Se ha recibido un nuevo pedido:\n\nID: ${result.orderId}\nCliente: ${formData.firstName} ${formData.lastName}\nEmail: ${formData.email}\nTotal: $${cartTotal.toFixed(2)}`
+                                  subject: `¡Confirmación de tu pedido #${result.orderId}!`,
+                                  message: `¡Gracias por tu compra en Delizukar! Tu pedido #${result.orderId} ha sido recibido y está siendo procesado.\n\nDetalles del pedido:\n${itemsListText}\n\nSubtotal: $${subtotal.toFixed(2)}\n${shippingCost > 0 ? `Envío: $${shippingCost.toFixed(2)}\n` : ''}Total: $${cartTotal.toFixed(2)}`,
+                                  tracking_code: 'PENDING',
+                                  tracking_url: '',
+                                  label_url: ''
                                 };
                                 
-                                await emailjs.send(
-                                  'service_7biylnb',
-                                  'template_poovxvk',
-                                  emailData
-                                );
+                                console.log('📧 [Checkout] Parámetros del correo al cliente:', customerEmailParams);
                                 
-                                console.log('✅ [Checkout] Email de confirmación de nuevo pedido enviado a luisuf@gmail.com');
+                                const customerEmailResult = await emailjs.send(
+                                  serviceId,
+                                  templateId,
+                                  customerEmailParams,
+                                  { publicKey }
+                                );
+                                console.log('✅ [Checkout] Correo al cliente enviado exitosamente:', customerEmailResult);
                               } catch (emailError) {
-                                console.error('❌ [Checkout] Error enviando email de confirmación:', emailError);
-                                // No bloquear el flujo si falla el email
+                                console.error('❌ [Checkout] Error enviando correo al cliente:', emailError);
+                                console.error('❌ [Checkout] Error status:', emailError.status);
+                                console.error('❌ [Checkout] Error text:', emailError.text);
+                                console.error('❌ [Checkout] Error message:', emailError.message);
                               }
+                              
+                              // Enviar notificación al administrador
+                              try {
+                                console.log('📧 [Checkout] Enviando notificación al administrador: delizukar@gmail.com');
+                                
+                                const adminEmailParams = {
+                                  to_email: 'delizukar@gmail.com',
+                                  to_name: 'Delizukar Admin',
+                                  order_id: result.orderId,
+                                  customer_name: `${orderData.customerInfo.firstName} ${orderData.customerInfo.lastName}`,
+                                  customer_email: orderData.customerInfo.email,
+                                  customer_phone: orderData.customerInfo.phone || 'No proporcionado',
+                                  customer_address: `${orderData.customerInfo.address.line1}, ${orderData.customerInfo.address.city}, ${orderData.customerInfo.address.state} ${orderData.customerInfo.address.postal_code}`,
+                                  order_total: `$${cartTotal.toFixed(2)}`,
+                                  shipping_cost: shippingCost > 0 ? `$${shippingCost.toFixed(2)}` : '$0.00',
+                                  subtotal: `$${subtotal.toFixed(2)}`,
+                                  items_count: cart.length.toString(),
+                                  items_list: itemsListText,
+                                  payment_method: 'PayPal',
+                                  payment_id: paymentDetails.paymentId || paymentDetails.id || 'N/A',
+                                  order_date: new Date().toLocaleString('es-ES', { 
+                                    year: 'numeric', 
+                                    month: 'long', 
+                                    day: 'numeric', 
+                                    hour: '2-digit', 
+                                    minute: '2-digit' 
+                                  }),
+                                  subject: `🛒 Nueva Orden Recibida - #${result.orderId}`,
+                                  message: `⚠️ ACCIÓN REQUERIDA: Nueva orden recibida\n\nID de pedido: ${result.orderId}\nID de pago: ${paymentDetails.paymentId || paymentDetails.id || 'N/A'}\nEstado: paid\n\nCliente: ${orderData.customerInfo.firstName} ${orderData.customerInfo.lastName}\nEmail: ${orderData.customerInfo.email}\nTeléfono: ${orderData.customerInfo.phone || 'No proporcionado'}\n\nDirección:\n${orderData.customerInfo.address.line1}\n${orderData.customerInfo.address.city}, ${orderData.customerInfo.address.state} ${orderData.customerInfo.address.postal_code}\n\nProductos:\n${itemsListText}\n\nSubtotal: $${subtotal.toFixed(2)}\n${shippingCost > 0 ? `Envío: $${shippingCost.toFixed(2)}\n` : ''}Total: $${cartTotal.toFixed(2)}\n\nPor favor, procesa esta orden en el panel de administración.`,
+                                  tracking_code: 'PENDING',
+                                  tracking_url: '',
+                                  label_url: ''
+                                };
+                                
+                                console.log('📧 [Checkout] Parámetros del correo al administrador:', adminEmailParams);
+                                
+                                const adminEmailResult = await emailjs.send(
+                                  serviceId,
+                                  templateId,
+                                  adminEmailParams,
+                                  { publicKey }
+                                );
+                                console.log('✅ [Checkout] Notificación al administrador enviada exitosamente:', adminEmailResult);
+                              } catch (emailError) {
+                                console.error('❌ [Checkout] Error enviando notificación al administrador:', emailError);
+                                console.error('❌ [Checkout] Error status:', emailError.status);
+                                console.error('❌ [Checkout] Error text:', emailError.text);
+                                console.error('❌ [Checkout] Error message:', emailError.message);
+                              }
+                              
+                              console.log('📧 [Checkout] ========================================');
                             } else {
                               console.warn('⚠️ [Checkout] No se recibió orderId en la respuesta');
                             }

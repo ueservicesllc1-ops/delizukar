@@ -38,12 +38,13 @@ const CheckoutSuccess = () => {
           console.log('🔍 Fetching payment data from backend...');
           
           // Cargar información de envío del localStorage
+          let parsedShippingInfo = null;
           const savedShippingInfo = localStorage.getItem('lastShippingInfo');
           if (savedShippingInfo) {
             try {
-              const parsedShippingInfo = JSON.parse(savedShippingInfo);
+              parsedShippingInfo = JSON.parse(savedShippingInfo);
               setShippingInfo(parsedShippingInfo);
-              console.log('📦 Shipping info loaded:', parsedShippingInfo);
+              console.log('📦 Shipping info loaded from localStorage:', parsedShippingInfo);
             } catch (error) {
               console.error('❌ Error parsing shipping info:', error);
             }
@@ -53,11 +54,38 @@ const CheckoutSuccess = () => {
           const savedPaymentAmount = localStorage.getItem('lastPaymentAmount');
           console.log('💰 Saved payment amount:', savedPaymentAmount);
           
+          // Cargar orderId para obtener datos de la orden desde Firestore
+          const savedOrderId = localStorage.getItem('lastOrderId');
+          console.log('📋 Saved order ID:', savedOrderId);
+          
           // Consultar datos reales desde el backend
           // En desarrollo usa proxy (string vacío), en producción usa window.location.origin
           const baseUrl = process.env.NODE_ENV === 'production' 
             ? window.location.origin 
             : '';
+          
+          // Intentar obtener datos de la orden desde Firestore si tenemos orderId
+          let orderData = null;
+          if (savedOrderId) {
+            try {
+              const orderResponse = await fetch(`${baseUrl}/api/order/${savedOrderId}`);
+              if (orderResponse.ok) {
+                const orderResult = await orderResponse.json();
+                orderData = orderResult.order;
+                console.log('✅ Order data loaded from Firestore:', orderData);
+                
+                // Si no tenemos shippingInfo del localStorage, intentar obtenerlo de la orden
+                if (!parsedShippingInfo && orderData?.shippingInfo) {
+                  parsedShippingInfo = orderData.shippingInfo;
+                  setShippingInfo(parsedShippingInfo);
+                  console.log('📦 Shipping info loaded from order:', parsedShippingInfo);
+                }
+              }
+            } catch (error) {
+              console.warn('⚠️ Could not load order data:', error);
+            }
+          }
+          
           const response = await fetch(`${baseUrl}/api/payment-intent/${paymentIntentId}`);
           console.log('🔍 Backend response status:', response.status);
           
@@ -68,23 +96,45 @@ const CheckoutSuccess = () => {
             // Usar el monto guardado si está disponible, sino usar el del backend
             let finalAmount = savedPaymentAmount ? parseFloat(savedPaymentAmount) : (paymentData.amount / 100);
             
-            // Si el monto sigue siendo 0, calcular desde el shippingInfo
-            if (finalAmount === 0 && shippingInfo?.cost) {
-              // Intentar calcular el total desde el shipping info
-              finalAmount = shippingInfo.cost || 0;
-              console.log('⚠️ Using shipping cost as total:', finalAmount);
+            // Si tenemos datos de la orden, usar el total de la orden (más confiable)
+            if (orderData?.total) {
+              finalAmount = parseFloat(orderData.total);
+              console.log('💰 Using total from order data:', finalAmount);
             }
             
-            // Asegurar que shippingInfo tiene el cost correctamente parseado
-            const shippingCost = shippingInfo?.cost ? parseFloat(shippingInfo.cost) : 0;
+            // Obtener el costo de envío real desde shippingInfo o orderData
+            let shippingCost = 0;
+            
+            // Prioridad 1: shippingInfo del localStorage (el que se seleccionó)
+            if (parsedShippingInfo?.cost) {
+              shippingCost = parseFloat(parsedShippingInfo.cost);
+              console.log('📦 Shipping cost from localStorage shippingInfo:', shippingCost);
+            }
+            // Prioridad 2: shippingInfo de la orden guardada
+            else if (orderData?.shippingInfo?.cost) {
+              shippingCost = parseFloat(orderData.shippingInfo.cost);
+              console.log('📦 Shipping cost from order shippingInfo:', shippingCost);
+            }
+            // Prioridad 3: calcular desde orderData.total y subtotal
+            else if (orderData?.total && orderData?.cartItems) {
+              const itemsSubtotal = orderData.cartItems.reduce((sum, item) => {
+                return sum + (parseFloat(item.price) * parseInt(item.quantity));
+              }, 0);
+              shippingCost = parseFloat(orderData.total) - itemsSubtotal;
+              console.log('📦 Shipping cost calculated from order total:', shippingCost);
+            }
+            
+            // Calcular subtotal correctamente
             const subtotal = finalAmount - shippingCost;
             
             console.log('💰 Payment calculation:', {
               savedPaymentAmount,
               paymentDataAmount: paymentData.amount,
+              orderTotal: orderData?.total,
               finalAmount,
               shippingCost,
-              subtotal
+              subtotal,
+              shippingInfoSource: parsedShippingInfo?.cost ? 'localStorage' : orderData?.shippingInfo?.cost ? 'order' : 'calculated'
             });
             
             setOrderDetails({
@@ -93,7 +143,7 @@ const CheckoutSuccess = () => {
               currency: paymentData.currency || 'USD',
               customerEmail: paymentData.receipt_email || paymentData.customer_email,
               paymentStatus: paymentData.status,
-              shipping: shippingCost,
+              shipping: shippingCost, // Usar el costo de envío real
               subtotal: subtotal
             });
           } else {
@@ -241,7 +291,7 @@ const CheckoutSuccess = () => {
                     Subtotal:
                   </Typography>
                   <Typography variant="body2" sx={{ fontSize: '0.8rem', color: '#666' }}>
-                    ${orderDetails.subtotal || (orderDetails.amount - (orderDetails.shipping || 0))} {orderDetails.currency?.toUpperCase()}
+                    ${(orderDetails.subtotal || (orderDetails.amount - (orderDetails.shipping || 0))).toFixed(2)} {orderDetails.currency?.toUpperCase()}
                   </Typography>
                 </Box>
                 
@@ -250,7 +300,7 @@ const CheckoutSuccess = () => {
                     Envío:
                   </Typography>
                   <Typography variant="body2" sx={{ fontSize: '0.8rem', color: '#666' }}>
-                    ${orderDetails.shipping || 12.50} {orderDetails.currency?.toUpperCase()}
+                    ${(orderDetails.shipping || 0).toFixed(2)} {orderDetails.currency?.toUpperCase()}
                   </Typography>
                 </Box>
                 
@@ -260,7 +310,7 @@ const CheckoutSuccess = () => {
                       Total Paid:
                     </Typography>
                     <Typography variant="h6" sx={{ fontWeight: 700, color: '#c8626d', fontSize: '1rem' }}>
-                      ${orderDetails.amount} {orderDetails.currency?.toUpperCase()}
+                      ${orderDetails.amount.toFixed(2)} {orderDetails.currency?.toUpperCase()}
                     </Typography>
                   </Box>
                 </Box>

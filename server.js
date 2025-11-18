@@ -43,7 +43,6 @@ console.log('🔑 Shippo mode:', shippoToken?.startsWith('shippo_live_') ? 'PROD
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
-const nodemailer = require('nodemailer');
 const { initializeApp } = require('firebase/app');
 const { getFirestore, collection, addDoc, doc, getDoc, updateDoc, query, orderBy } = require('firebase/firestore');
 
@@ -106,6 +105,243 @@ app.use(express.json({
   }
 }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+// ==================== EMAIL CONFIGURATION ====================
+// Configuración de EmailJS
+const EMAILJS_SERVICE_ID = process.env.REACT_APP_EMAILJS_SERVICE_ID || 'service_7biylnb';
+const EMAILJS_TEMPLATE_ID = process.env.REACT_APP_EMAILJS_TEMPLATE_ID || 'template_poovxvk';
+const EMAILJS_PUBLIC_KEY = process.env.REACT_APP_EMAILJS_PUBLIC_KEY || 'woa-DlbiNozuQWT44';
+const EMAILJS_API_URL = 'https://api.emailjs.com/api/v1.0/email/send';
+
+// Función para enviar correo usando EmailJS API
+async function sendEmailViaEmailJS(templateParams) {
+  try {
+    console.log('📧 [Email] ========================================');
+    console.log('📧 [Email] Iniciando envío de correo vía EmailJS');
+    console.log('📧 [Email] ========================================');
+    console.log('📧 [Email] Configuración EmailJS:');
+    console.log('   - Service ID:', EMAILJS_SERVICE_ID);
+    console.log('   - Template ID:', EMAILJS_TEMPLATE_ID);
+    console.log('   - Public Key:', EMAILJS_PUBLIC_KEY ? EMAILJS_PUBLIC_KEY.substring(0, 10) + '...' : 'NOT SET');
+    console.log('   - API URL:', EMAILJS_API_URL);
+    console.log('📧 [Email] Parámetros del template:');
+    console.log('   - to_email:', templateParams.to_email);
+    console.log('   - to_name:', templateParams.to_name);
+    console.log('   - order_id:', templateParams.order_id);
+    console.log('   - subject:', templateParams.subject);
+    console.log('   - Total campos:', Object.keys(templateParams).length);
+    console.log('   - Todos los campos:', Object.keys(templateParams).join(', '));
+    console.log('   - Template params completo:', JSON.stringify(templateParams, null, 2));
+    
+    const requestBody = {
+      service_id: EMAILJS_SERVICE_ID,
+      template_id: EMAILJS_TEMPLATE_ID,
+      user_id: EMAILJS_PUBLIC_KEY,
+      template_params: templateParams
+    };
+    
+    console.log('📧 [Email] Request body (sin template_params completo):', {
+      service_id: requestBody.service_id,
+      template_id: requestBody.template_id,
+      user_id: requestBody.user_id ? requestBody.user_id.substring(0, 10) + '...' : 'NOT SET',
+      template_params_keys: Object.keys(requestBody.template_params),
+      template_params_count: Object.keys(requestBody.template_params).length
+    });
+    
+    console.log('📧 [Email] Enviando request a EmailJS API...');
+    const startTime = Date.now();
+    
+    const response = await fetch(EMAILJS_API_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(requestBody)
+    });
+
+    const endTime = Date.now();
+    const duration = endTime - startTime;
+    
+    console.log('📧 [Email] Response recibida:');
+    console.log('   - Status:', response.status);
+    console.log('   - Status Text:', response.statusText);
+    console.log('   - Duration:', duration + 'ms');
+    console.log('   - Headers:', Object.fromEntries(response.headers.entries()));
+
+    const responseText = await response.text();
+    console.log('📧 [Email] Response body:', responseText);
+    
+    let responseData;
+    try {
+      responseData = JSON.parse(responseText);
+      console.log('📧 [Email] Response parsed:', JSON.stringify(responseData, null, 2));
+    } catch (parseError) {
+      console.warn('⚠️ [Email] No se pudo parsear response como JSON:', parseError);
+      console.log('📧 [Email] Response raw:', responseText);
+    }
+
+    if (!response.ok) {
+      console.error('❌ [Email] EmailJS API error:');
+      console.error('   - Status:', response.status);
+      console.error('   - Response:', responseText);
+      throw new Error(`EmailJS API error: ${response.status} - ${responseText}`);
+    }
+
+    console.log('✅ [Email] EmailJS API respondió exitosamente');
+    console.log('📧 [Email] ========================================');
+    
+    return {
+      success: true,
+      status: response.status,
+      response: responseData || responseText
+    };
+  } catch (error) {
+    console.error('❌ [Email] ========================================');
+    console.error('❌ [Email] Error enviando correo vía EmailJS:');
+    console.error('   - Error message:', error.message);
+    console.error('   - Error stack:', error.stack);
+    if (error.response) {
+      console.error('   - Error response status:', error.response.status);
+      console.error('   - Error response data:', error.response.data);
+    }
+    console.error('❌ [Email] ========================================');
+    throw error;
+  }
+}
+
+// Función para enviar correo de confirmación de compra al cliente
+async function sendOrderConfirmationEmail(orderData, orderId) {
+  try {
+    const customerEmail = orderData.customerInfo?.email;
+    if (!customerEmail) {
+      console.warn('⚠️ [Email] No customer email provided, skipping customer email');
+      return false;
+    }
+
+    const shippingCost = orderData.shippingInfo?.cost || 0;
+    const subtotal = orderData.total - shippingCost;
+    const total = orderData.total;
+
+    // Preparar datos para EmailJS
+    const itemsListText = orderData.cartItems.map(item => 
+      `${item.quantity}x ${item.name} - $${parseFloat(item.price).toFixed(2)} cada uno = $${(parseFloat(item.price) * item.quantity).toFixed(2)}`
+    ).join('\n');
+
+    // Preparar parámetros para EmailJS - usar solo los campos que el template necesita
+    // Basado en el test exitoso de EmailJS que solo requiere to_email
+    const templateParams = {
+      to_email: customerEmail,
+      // Campos adicionales que el template puede usar (opcionales)
+      to_name: `${orderData.customerInfo?.firstName || ''} ${orderData.customerInfo?.lastName || ''}`.trim() || 'Cliente',
+      order_id: orderId,
+      customer_name: `${orderData.customerInfo?.firstName || ''} ${orderData.customerInfo?.lastName || ''}`.trim() || 'Cliente',
+      customer_email: customerEmail,
+      customer_phone: orderData.customerInfo?.phone || 'N/A',
+      customer_address: `${orderData.customerInfo?.address?.line1 || ''}, ${orderData.customerInfo?.address?.city || ''}, ${orderData.customerInfo?.address?.state || ''} ${orderData.customerInfo?.address?.postal_code || ''}`,
+      order_total: `$${total.toFixed(2)}`,
+      shipping_cost: shippingCost > 0 ? `$${shippingCost.toFixed(2)}` : '$0.00',
+      subtotal: `$${subtotal.toFixed(2)}`,
+      items_count: orderData.cartItems.length.toString(),
+      items_list: itemsListText,
+      payment_method: 'PayPal',
+      payment_id: orderData.paymentIntentId || orderData.sessionId || 'N/A',
+      order_date: new Date().toLocaleString('es-ES', { 
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric', 
+        hour: '2-digit', 
+        minute: '2-digit' 
+      }),
+      subject: `¡Confirmación de tu pedido #${orderId}!`,
+      message: `¡Gracias por tu compra en Delizukar! Tu pedido #${orderId} ha sido recibido y está siendo procesado.\n\nDetalles del pedido:\n${itemsListText}\n\nSubtotal: $${subtotal.toFixed(2)}\n${shippingCost > 0 ? `Envío: $${shippingCost.toFixed(2)}\n` : ''}Total: $${total.toFixed(2)}`,
+      // Campos adicionales que pueden estar en el template
+      tracking_code: 'PENDING',
+      tracking_url: '',
+      label_url: ''
+    };
+
+    console.log('📧 [Email] ========================================');
+    console.log('📧 [Email] ENVIANDO CORREO DE CONFIRMACIÓN AL CLIENTE');
+    console.log('📧 [Email] ========================================');
+    console.log('📧 [Email] Email del cliente:', customerEmail);
+    console.log('📧 [Email] Order ID:', orderId);
+    
+    const emailResult = await sendEmailViaEmailJS(templateParams);
+    
+    console.log('📧 [Email] Resultado del envío:', emailResult);
+    console.log(`✅ [Email] Order confirmation email sent to customer: ${customerEmail}`);
+    console.log('📧 [Email] ========================================');
+    
+    return true;
+  } catch (error) {
+    console.error('❌ [Email] Error sending order confirmation email to customer:', error);
+    return false;
+  }
+}
+
+// Función para enviar notificación de nueva orden al administrador
+async function sendAdminOrderNotification(orderData, orderId) {
+  try {
+    const adminEmail = 'delizukar@gmail.com';
+    
+    const itemsListText = orderData.cartItems.map(item => 
+      `${item.quantity}x ${item.name} - $${parseFloat(item.price).toFixed(2)} cada uno = $${(parseFloat(item.price) * item.quantity).toFixed(2)}`
+    ).join('\n');
+
+    const shippingCost = orderData.shippingInfo?.cost || 0;
+    const subtotal = orderData.total - shippingCost;
+    const total = orderData.total;
+
+    // Preparar parámetros para EmailJS - usar solo los campos que el template necesita
+    const templateParams = {
+      to_email: adminEmail,
+      // Campos adicionales que el template puede usar (opcionales)
+      to_name: 'Delizukar Admin',
+      order_id: orderId,
+      customer_name: `${orderData.customerInfo?.firstName || ''} ${orderData.customerInfo?.lastName || ''}`.trim() || 'Cliente',
+      customer_email: orderData.customerInfo?.email || 'N/A',
+      customer_phone: orderData.customerInfo?.phone || 'No proporcionado',
+      customer_address: `${orderData.customerInfo?.address?.line1 || ''}, ${orderData.customerInfo?.address?.city || ''}, ${orderData.customerInfo?.address?.state || ''} ${orderData.customerInfo?.address?.postal_code || ''}`,
+      order_total: `$${total.toFixed(2)}`,
+      shipping_cost: shippingCost > 0 ? `$${shippingCost.toFixed(2)}` : '$0.00',
+      subtotal: `$${subtotal.toFixed(2)}`,
+      items_count: orderData.cartItems.length.toString(),
+      items_list: itemsListText,
+      payment_method: 'PayPal',
+      payment_id: orderData.paymentIntentId || orderData.sessionId || 'N/A',
+      order_date: new Date().toLocaleString('es-ES', { 
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric', 
+        hour: '2-digit', 
+        minute: '2-digit' 
+      }),
+      subject: `🛒 Nueva Orden Recibida - #${orderId}`,
+      message: `⚠️ ACCIÓN REQUERIDA: Nueva orden recibida\n\nID de pedido: ${orderId}\nID de pago: ${orderData.paymentIntentId || orderData.sessionId || 'N/A'}\nEstado: ${orderData.paymentStatus || 'paid'}\n\nCliente: ${orderData.customerInfo?.firstName} ${orderData.customerInfo?.lastName}\nEmail: ${orderData.customerInfo?.email}\nTeléfono: ${orderData.customerInfo?.phone || 'No proporcionado'}\n\nDirección:\n${orderData.customerInfo?.address?.line1}\n${orderData.customerInfo?.address?.city}, ${orderData.customerInfo?.address?.state} ${orderData.customerInfo?.address?.postal_code}\n${orderData.customerInfo?.address?.country}\n\nProductos:\n${itemsListText}\n\nSubtotal: $${subtotal.toFixed(2)}\n${shippingCost > 0 ? `Envío: $${shippingCost.toFixed(2)}\n` : ''}Total: $${total.toFixed(2)}\n\n${orderData.shippingInfo ? `Transportista: ${orderData.shippingInfo.carrier || 'N/A'}\nServicio: ${orderData.shippingInfo.serviceLevel || 'N/A'}\n` : ''}\nPor favor, procesa esta orden en el panel de administración.`,
+      // Campos adicionales que pueden estar en el template
+      tracking_code: 'PENDING',
+      tracking_url: '',
+      label_url: ''
+    };
+
+    console.log('📧 [Email] ========================================');
+    console.log('📧 [Email] ENVIANDO NOTIFICACIÓN AL ADMINISTRADOR');
+    console.log('📧 [Email] ========================================');
+    console.log('📧 [Email] Email del administrador:', adminEmail);
+    console.log('📧 [Email] Order ID:', orderId);
+    
+    const emailResult = await sendEmailViaEmailJS(templateParams);
+    
+    console.log('📧 [Email] Resultado del envío:', emailResult);
+    console.log(`✅ [Email] Admin notification email sent to: ${adminEmail}`);
+    console.log('📧 [Email] ========================================');
+    
+    return true;
+  } catch (error) {
+    console.error('❌ [Email] Error sending admin notification email:', error);
+    return false;
+  }
+}
 
 // Enhanced security headers
 app.use((req, res, next) => {
@@ -2305,6 +2541,79 @@ app.post('/api/send-test-email', async (req, res) => {
   }
 });
 
+// ==================== EMAIL TEST ENDPOINT ====================
+// Endpoint para probar el envío de correos desde el navegador
+app.post('/api/test-email-send', async (req, res) => {
+  try {
+    const { to_email, order_id } = req.body;
+    
+    if (!to_email) {
+      return res.status(400).json({
+        success: false,
+        error: 'to_email es requerido'
+      });
+    }
+
+    console.log('📧 [Test Email] ========================================');
+    console.log('📧 [Test Email] Endpoint de prueba de correo llamado');
+    console.log('📧 [Test Email] ========================================');
+    console.log('📧 [Test Email] To Email:', to_email);
+    console.log('📧 [Test Email] Order ID:', order_id || 'TEST-' + Date.now());
+
+    const testOrderId = order_id || 'TEST-' + Date.now();
+    
+    const templateParams = {
+      to_email: to_email,
+      to_name: 'Test User',
+      order_id: testOrderId,
+      customer_name: 'Test User',
+      customer_email: to_email,
+      customer_phone: 'N/A',
+      customer_address: '123 Test St, Test City, TS 12345',
+      order_total: '$100.00',
+      shipping_cost: '$10.00',
+      subtotal: '$90.00',
+      items_count: 1,
+      items_list: '1x Test Product - $90.00 cada uno = $90.00',
+      payment_method: 'Test',
+      payment_id: 'test_payment_' + Date.now(),
+      order_date: new Date().toLocaleString('es-ES', { 
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric', 
+        hour: '2-digit', 
+        minute: '2-digit' 
+      }),
+      subject: `🧪 Test Email - ${testOrderId}`,
+      message: `Este es un correo de prueba para verificar que EmailJS está funcionando correctamente.\n\nOrder ID: ${testOrderId}\nFecha: ${new Date().toLocaleString()}`
+    };
+
+    console.log('📧 [Test Email] Enviando correo de prueba...');
+    const emailResult = await sendEmailViaEmailJS(templateParams);
+    
+    console.log('📧 [Test Email] Resultado:', emailResult);
+    console.log('📧 [Test Email] ========================================');
+
+    res.json({
+      success: true,
+      message: 'Correo de prueba enviado',
+      emailResult: emailResult,
+      templateParams: {
+        to_email: templateParams.to_email,
+        order_id: templateParams.order_id,
+        subject: templateParams.subject
+      }
+    });
+  } catch (error) {
+    console.error('❌ [Test Email] Error:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message,
+      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+    });
+  }
+});
+
 // ==================== ORDER MANAGEMENT ENDPOINTS ====================
 
 // 1. Obtener información de pago (solo PayPal)
@@ -2537,6 +2846,58 @@ app.post('/api/create-order', async (req, res) => {
     console.log('   - Total:', savedData.total);
     console.log('   - Customer Email:', savedData.customerInfo?.email);
     
+    // Enviar correos automáticamente después de crear la orden
+    console.log('📧 [Backend] ========================================');
+    console.log('📧 [Backend] INICIANDO ENVÍO DE CORREOS AUTOMÁTICOS');
+    console.log('📧 [Backend] ========================================');
+    console.log('📧 [Backend] Order ID:', docRef.id);
+    console.log('📧 [Backend] Customer Email:', orderData.customerInfo?.email);
+    console.log('📧 [Backend] Total:', orderData.total);
+    console.log('📧 [Backend] Shipping Cost:', orderData.shippingInfo?.cost || 0);
+    
+    // Variables para rastrear el estado de los correos
+    let customerEmailStatus = { sent: false, error: null };
+    let adminEmailStatus = { sent: false, error: null };
+    
+    // Enviar correo al cliente (no bloquear la respuesta si falla)
+    console.log('📧 [Backend] Enviando correo al cliente...');
+    sendOrderConfirmationEmail(orderData, docRef.id)
+      .then(result => {
+        customerEmailStatus.sent = true;
+        console.log('✅ [Backend] Correo al cliente enviado exitosamente:', result);
+      })
+      .catch(err => {
+        customerEmailStatus.error = err.message;
+        console.error('❌ [Backend] ========================================');
+        console.error('❌ [Backend] ERROR ENVIANDO CORREO AL CLIENTE');
+        console.error('❌ [Backend] ========================================');
+        console.error('❌ [Backend] Error:', err.message);
+        console.error('❌ [Backend] Stack:', err.stack);
+        console.error('❌ [Backend] ========================================');
+      });
+    
+    // Enviar notificación al administrador (no bloquear la respuesta si falla)
+    console.log('📧 [Backend] Enviando notificación al administrador...');
+    sendAdminOrderNotification(orderData, docRef.id)
+      .then(result => {
+        adminEmailStatus.sent = true;
+        console.log('✅ [Backend] Notificación al administrador enviada exitosamente:', result);
+      })
+      .catch(err => {
+        adminEmailStatus.error = err.message;
+        console.error('❌ [Backend] ========================================');
+        console.error('❌ [Backend] ERROR ENVIANDO NOTIFICACIÓN AL ADMINISTRADOR');
+        console.error('❌ [Backend] ========================================');
+        console.error('❌ [Backend] Error:', err.message);
+        console.error('❌ [Backend] Stack:', err.stack);
+        console.error('❌ [Backend] ========================================');
+      });
+    
+    console.log('📧 [Backend] ========================================');
+    
+    // Esperar un momento para que los correos se envíen (máximo 2 segundos)
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    
     // Retornar respuesta exitosa con más información
     res.json({ 
       success: true,
@@ -2546,7 +2907,22 @@ app.post('/api/create-order', async (req, res) => {
         paymentStatus: savedData.paymentStatus,
         status: savedData.status
       },
-      message: 'Order created successfully'
+      message: 'Order created successfully',
+      emailStatus: {
+        customerEmail: orderData.customerInfo?.email,
+        adminEmail: 'delizukar@gmail.com',
+        customerEmailSent: customerEmailStatus.sent,
+        customerEmailError: customerEmailStatus.error,
+        adminEmailSent: adminEmailStatus.sent,
+        adminEmailError: adminEmailStatus.error,
+        status: customerEmailStatus.sent && adminEmailStatus.sent ? 'sent' : 
+                customerEmailStatus.error || adminEmailStatus.error ? 'error' : 'sending',
+        message: customerEmailStatus.sent && adminEmailStatus.sent 
+          ? 'Los correos fueron enviados exitosamente' 
+          : customerEmailStatus.error || adminEmailStatus.error
+          ? `Error: ${customerEmailStatus.error || adminEmailStatus.error}`
+          : 'Los correos se están enviando en segundo plano'
+      }
     });
   } catch (error) {
     console.error('❌ [Backend] Error creating order:', error);
