@@ -2,6 +2,7 @@
   "name": "delizukar",
   "version": "0.1.0",
   "private": true,
+  "description": "Delizukar Bakery - E-commerce platform",
   "dependencies": {
     "@craco/craco": "^7.1.0",
     "@emailjs/browser": "^4.4.1",
