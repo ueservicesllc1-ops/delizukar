@@ -439,7 +439,7 @@ const PayPalSimple = ({
   });
 
   // Agregar callback de error para capturar errores de carga del script
-  const onError = (err) => {
+  const handleScriptError = (err) => {
     console.error('❌ [PayPal] PayPalScriptProvider Error:', err);
     console.error('❌ [PayPal] Error details:', JSON.stringify(err, null, 2));
   };
@@ -447,7 +447,7 @@ const PayPalSimple = ({
   return (
     <PayPalScriptProvider 
       options={paypalOptions}
-      onError={onError}
+      onError={handleScriptError}
     >
       <Box sx={{ p: 3, textAlign: 'center' }}>
         <Typography variant="h6" sx={{ mb: 2 }}>
