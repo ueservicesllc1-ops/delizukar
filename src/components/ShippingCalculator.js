@@ -66,6 +66,24 @@ const ShippingCalculator = ({
       console.log('✅ [Calculate Rates] Order data structure is valid');
       
       // CRÍTICO: Log detallado de los datos del paquete que se enviarán a Shippo
+      // Log detallado de las direcciones que se usarán
+      console.log('📍 [Calculate Rates] Direcciones que se usarán para calcular rates:');
+      console.log('   📤 Origen (From):', {
+        ciudad: orderData.address_from.city,
+        estado: orderData.address_from.state,
+        zip: orderData.address_from.zip || orderData.address_from.zipCode,
+        calle: orderData.address_from.street1 || orderData.address_from.street
+      });
+      console.log('   📥 Destino (To):', {
+        ciudad: orderData.address_to.city,
+        estado: orderData.address_to.state,
+        zip: orderData.address_to.zip || orderData.address_to.zipCode,
+        calle: orderData.address_to.street1 || orderData.address_to.street,
+        nombre: orderData.address_to.name
+      });
+      console.log('   ✅ Los rates se calcularán basándose en estas direcciones específicas');
+      console.log('   ✅ Si cambias la dirección de destino, los rates cambiarán automáticamente');
+      
       console.log('📦 [Calculate Rates] Datos del paquete que se enviarán a Shippo:');
       orderData.parcels.forEach((parcel, idx) => {
         console.log(`   Paquete ${idx + 1}:`);
@@ -75,8 +93,8 @@ const ShippingCalculator = ({
         console.log(`      - Mass Unit: ${parcel.massUnit || parcel.mass_unit || 'lb'}`);
         console.log(`      - Parcel completo:`, JSON.stringify(parcel, null, 2));
       });
-      console.log('⚠️ [Calculate Rates] IMPORTANTE: Estos son los datos EXACTOS que Shippo usará para calcular las tarifas');
-      console.log('⚠️ [Calculate Rates] Si estos datos son diferentes a los reales, los precios serán incorrectos');
+      console.log('✅ [Calculate Rates] Estos son los datos EXACTOS que Shippo usará para calcular las tarifas');
+      console.log('✅ [Calculate Rates] Los rates son dinámicos y cambiarán según la dirección de destino');
       
       // Obtener tarifas de Shippo
       console.log('📦 [Calculate Rates] Getting rates from Shippo...');

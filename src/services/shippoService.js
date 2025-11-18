@@ -172,11 +172,23 @@ class ShippoService {
       };
 
       console.log('📦 [ShippoService] Enviando datos a Shippo para calcular rates:');
-      console.log('   Address From:', formattedFromAddress.city, formattedFromAddress.state, formattedFromAddress.zip);
-      console.log('   Address To:', formattedToAddress.city, formattedToAddress.state, formattedToAddress.zip);
-      console.log('   Parcels:', JSON.stringify(formattedParcels, null, 2));
-      console.log('   ⚠️ IMPORTANTE: Shippo calculará los rates usando estos datos del paquete');
-      console.log('   ⚠️ Si estos datos son diferentes cuando se crea el shipment después, los precios serán diferentes');
+      console.log('   📤 Address From (Origen - Tienda):', {
+        ciudad: formattedFromAddress.city,
+        estado: formattedFromAddress.state,
+        zip: formattedFromAddress.zip,
+        calle: formattedFromAddress.street1
+      });
+      console.log('   📥 Address To (Destino - Cliente):', {
+        ciudad: formattedToAddress.city,
+        estado: formattedToAddress.state,
+        zip: formattedToAddress.zip,
+        calle: formattedToAddress.street1,
+        nombre: formattedToAddress.name
+      });
+      console.log('   📦 Parcels:', JSON.stringify(formattedParcels, null, 2));
+      console.log('   ✅ Los rates se calculan dinámicamente basándose en estas direcciones específicas');
+      console.log('   ✅ Si cambias la dirección de destino, los rates cambiarán automáticamente');
+      console.log('   ✅ Los rates NO están fijos - son calculados en tiempo real por Shippo según la distancia y ubicación');
       
       const response = await this.makeRequest('/api/shippo/shipments', {
         method: 'POST',
