@@ -6,6 +6,7 @@ cmds = ["npm ci"]
 
 [phases.build]
 cmds = ["npm run build"]
+# Ensure REACT_APP_* variables are available during build
 
 [start]
 cmd = "npm run server"
