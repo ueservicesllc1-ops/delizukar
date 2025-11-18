@@ -305,19 +305,18 @@ const PayPalSimple = ({
 
   // Configurar opciones del SDK de PayPal
   // PayPal SDK detecta automáticamente el environment basándose en el Client ID
+  // IMPORTANTE: Usar solo opciones válidas del SDK oficial
   const paypalOptions = {
     "client-id": effectiveClientId,
     currency: currency,
     intent: 'capture',
     components: 'buttons',
     "enable-funding": 'card,credit,paypal',
+    // Opciones estándar del SDK - no agregar opciones personalizadas que puedan causar errores
     vault: false,
     commit: true,
-    "data-sdk-integration-source": "buttonfactory",
-    "buyer-country": "US",
-    "locale": "en_US",
-    // Siempre habilitar debug para ver errores en producción también
-    debug: true,
+    // Solo habilitar debug en desarrollo para evitar problemas en producción
+    debug: process.env.NODE_ENV === 'development',
   };
 
   // Solo modo PRODUCCIÓN
@@ -332,12 +331,46 @@ const PayPalSimple = ({
   const handleScriptError = (err) => {
     console.error('❌ [PayPal] PayPalScriptProvider Error:', err);
     console.error('❌ [PayPal] Error details:', JSON.stringify(err, null, 2));
+    console.error('❌ [PayPal] Error message:', err?.message);
+    console.error('❌ [PayPal] Error name:', err?.name);
+    console.error('❌ [PayPal] Client ID usado:', effectiveClientId ? effectiveClientId.substring(0, 30) + '...' : 'NOT SET');
+    console.error('❌ [PayPal] Environment variable:', process.env.REACT_APP_PAYPAL_ENVIRONMENT || 'NOT SET');
+    console.error('❌ [PayPal] NODE_ENV:', process.env.NODE_ENV);
+    console.error('❌ [PayPal] Is Localhost:', window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+    
+    // Verificar si hay problemas de red
+    if (err?.message?.includes('network') || err?.message?.includes('fetch')) {
+      console.error('❌ [PayPal] Problema de red detectado - verifica conexión a internet');
+    }
+    
+    // Verificar si el Client ID es válido
+    if (err?.message?.includes('client') || err?.message?.includes('invalid')) {
+      console.error('❌ [PayPal] Problema con Client ID - verifica que sea válido y esté activo en PayPal');
+    }
   };
+
+  // Verificar que el script de PayPal se pueda cargar
+  useEffect(() => {
+    // Verificar si hay problemas de CSP o bloqueadores
+    const checkPayPalScript = async () => {
+      try {
+        const response = await fetch('https://www.paypal.com/sdk/js', { method: 'HEAD' });
+        if (!response.ok) {
+          console.warn('⚠️ [PayPal] No se puede acceder al script de PayPal - posible problema de red o CSP');
+        }
+      } catch (error) {
+        console.warn('⚠️ [PayPal] Error al verificar acceso al script de PayPal:', error);
+      }
+    };
+    
+    checkPayPalScript();
+  }, []);
 
   return (
     <PayPalScriptProvider 
       options={paypalOptions}
       onError={handleScriptError}
+      deferLoading={false}
     >
       <Box sx={{ p: 3, textAlign: 'center' }}>
         <Typography variant="h6" sx={{ mb: 2 }}>
