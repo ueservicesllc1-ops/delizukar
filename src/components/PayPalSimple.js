@@ -85,9 +85,8 @@ const PayPalButtonContainer = ({
           variant="outlined" 
           onClick={() => {
             console.log('🔍 [PayPal] Client ID:', process.env.REACT_APP_PAYPAL_CLIENT_ID);
-            console.log('🔍 [PayPal] Client ID Sandbox:', process.env.REACT_APP_PAYPAL_CLIENT_ID_SANDBOX);
-            console.log('🔍 [PayPal] Environment:', process.env.REACT_APP_PAYPAL_ENVIRONMENT);
-            console.log('🔍 [PayPal] Is Localhost:', isLocalhost);
+            console.log('🔍 [PayPal] Environment: PRODUCTION');
+            console.log('🔍 [PayPal] NODE_ENV:', process.env.NODE_ENV);
           }}
           sx={{ borderColor: '#c8626d', color: '#c8626d' }}
         >
@@ -279,11 +278,9 @@ const PayPalSimple = ({
   
   console.log('🔧 [PayPal] Configuration:', {
     clientId: effectiveClientId ? effectiveClientId.substring(0, 20) + '...' : 'NOT SET',
-    originalClientId: clientId ? clientId.substring(0, 20) + '...' : 'NOT SET',
     environment: environment,
-    isLocalhost: isLocalhost,
     currency: currency,
-    isProduction: environment === 'production' && !isLocalhost,
+    isProduction: true,
     fullClientId: effectiveClientId,
     clientIdLength: effectiveClientId ? effectiveClientId.length : 0
   });
@@ -292,26 +289,22 @@ const PayPalSimple = ({
   if (effectiveClientId) {
     const startsWithA = effectiveClientId.startsWith('A');
     const startsWithB = effectiveClientId.startsWith('B');
-    const startsWithSb = effectiveClientId.startsWith('sb');
     
     console.log('🔍 [PayPal] Client ID format check:', {
       startsWithA,
       startsWithB,
-      startsWithSb,
       firstChars: effectiveClientId.substring(0, 5),
-      environment: environment,
-      isLocalhost: isLocalhost
+      environment: environment
     });
     
     // Advertencia si el formato no es el esperado
-    if (!startsWithA && !startsWithSb && !startsWithB) {
-      console.warn('⚠️ [PayPal] Client ID no tiene el formato esperado (debe empezar con "A", "B" o "sb")');
+    if (!startsWithA && !startsWithB) {
+      console.warn('⚠️ [PayPal] Client ID no tiene el formato esperado (debe empezar con "A" o "B")');
     }
   }
 
   // Configurar opciones del SDK de PayPal
-  // NOTA: PayPal SDK detecta automáticamente el environment basándose en el Client ID
-  // Si el Client ID es de sandbox, usa sandbox automáticamente, sin importar la variable
+  // PayPal SDK detecta automáticamente el environment basándose en el Client ID
   const paypalOptions = {
     "client-id": effectiveClientId,
     currency: currency,
