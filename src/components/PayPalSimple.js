@@ -19,14 +19,27 @@ const PayPalButtonContainer = ({
   shippingAddress,
   shippingInfo
 }) => {
-  const [{ isResolved, isRejected, isPending, options }] = usePayPalScriptReducer();
+  const [{ isResolved, isRejected, isPending, options, error }] = usePayPalScriptReducer();
 
   console.log('🔄 [PayPal] SDK State:', { 
     isResolved, 
     isRejected, 
     isPending,
-    clientId: options?.["client-id"] ? options["client-id"].substring(0, 20) + '...' : 'NOT SET'
+    clientId: options?.["client-id"] ? options["client-id"].substring(0, 20) + '...' : 'NOT SET',
+    error: error ? JSON.stringify(error, null, 2) : 'NO ERROR',
+    errorMessage: error?.message || 'NO ERROR MESSAGE',
+    errorDetails: error
   });
+  
+  // Si hay un error, log detallado
+  if (error) {
+    console.error('❌ [PayPal] SDK Error Details:', {
+      message: error.message,
+      name: error.name,
+      stack: error.stack,
+      fullError: error
+    });
+  }
 
   // Detectar si estamos en localhost
   const isLocalhost = window.location.hostname === 'localhost' || 
@@ -425,9 +438,16 @@ const PayPalSimple = ({
     "client-id": clientId ? clientId.substring(0, 20) + '...' : 'NOT SET'
   });
 
+  // Agregar callback de error para capturar errores de carga del script
+  const onError = (err) => {
+    console.error('❌ [PayPal] PayPalScriptProvider Error:', err);
+    console.error('❌ [PayPal] Error details:', JSON.stringify(err, null, 2));
+  };
+
   return (
     <PayPalScriptProvider 
       options={paypalOptions}
+      onError={onError}
     >
       <Box sx={{ p: 3, textAlign: 'center' }}>
         <Typography variant="h6" sx={{ mb: 2 }}>
