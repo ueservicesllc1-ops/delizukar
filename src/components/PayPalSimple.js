@@ -41,69 +41,37 @@ const PayPalButtonContainer = ({
     });
   }
 
-  // Detectar si estamos en localhost
-  const isLocalhost = window.location.hostname === 'localhost' || 
-                      window.location.hostname === '127.0.0.1' ||
-                      window.location.hostname.includes('localhost');
-  
   // Log adicional cuando se rechaza
   if (isRejected) {
     const clientIdUsed = options?.["client-id"] ? options["client-id"].substring(0, 30) + '...' : 'NOT SET';
-    const isProductionClientId = clientIdUsed && clientIdUsed.startsWith('B') && !clientIdUsed.startsWith('sb');
     
     console.error('❌ [PayPal] SDK Rejected - PayPal no está disponible');
     console.error('❌ [PayPal] Client ID usado:', clientIdUsed);
-    console.error('❌ [PayPal] Environment variable:', process.env.REACT_APP_PAYPAL_ENVIRONMENT || 'NOT SET');
+    console.error('❌ [PayPal] Environment: PRODUCTION (LIVE)');
     console.error('❌ [PayPal] NODE_ENV:', process.env.NODE_ENV);
-    console.error('❌ [PayPal] Is Localhost:', isLocalhost);
-    
-    if (isLocalhost && isProductionClientId) {
-      console.error('❌ [PayPal] PROBLEMA DETECTADO: Client ID de PRODUCCIÓN en localhost');
-      console.error('❌ [PayPal] PayPal PRODUCTION no funciona en localhost');
-      console.error('❌ [PayPal] SOLUCIÓN: Agrega REACT_APP_PAYPAL_CLIENT_ID_SANDBOX en .env.local');
-      console.error('❌ [PayPal] En producción (Railway), PayPal funcionará correctamente');
-    } else {
-      console.error('❌ [PayPal] Verifica:');
-      console.error('   1. Client ID configurado correctamente en Railway ANTES del build');
-      console.error('   2. Client ID corresponde al environment (sandbox/production)');
-      console.error('   3. Las variables REACT_APP_* deben estar configuradas ANTES de hacer build en Railway');
-      console.error('   4. Si cambiaste las variables, debes hacer un REDEPLOY completo en Railway');
-      console.error('   5. Conexión a internet activa');
-      console.error('   6. No hay bloqueadores de anuncios o extensiones que interfieran');
-    }
+    console.error('❌ [PayPal] Verifica:');
+    console.error('   1. Client ID configurado correctamente en Railway ANTES del build');
+    console.error('   2. Client ID es válido y está activo en PayPal');
+    console.error('   3. Las variables REACT_APP_* deben estar configuradas ANTES de hacer build en Railway');
+    console.error('   4. Si cambiaste las variables, debes hacer un REDEPLOY completo en Railway');
+    console.error('   5. Conexión a internet activa');
+    console.error('   6. No hay bloqueadores de anuncios o extensiones que interfieran');
     
     return (
       <Box sx={{ textAlign: 'center', py: 4 }}>
         <Alert severity="error" sx={{ mb: 2 }}>
-          {isLocalhost && isProductionClientId 
-            ? 'PayPal no está disponible en localhost con Client ID de PRODUCCIÓN'
-            : 'PayPal is not available. Please check your internet connection and try again.'}
+          PayPal no está disponible. Por favor verifica tu conexión a internet e intenta de nuevo.
         </Alert>
         <Alert severity="info" sx={{ mb: 2, textAlign: 'left' }}>
           <Typography variant="body2" sx={{ mb: 1 }}>
-            <strong>
-              {isLocalhost && isProductionClientId 
-                ? 'Problema detectado:'
-                : 'Posibles causas:'}
-            </strong>
+            <strong>Posibles causas:</strong>
           </Typography>
           <Typography variant="body2" component="ul" sx={{ pl: 2, mb: 0 }}>
-            {isLocalhost && isProductionClientId ? (
-              <>
-                <li>PayPal PRODUCTION no funciona en localhost</li>
-                <li>Necesitas un Client ID de SANDBOX para desarrollo</li>
-                <li>Agrega REACT_APP_PAYPAL_CLIENT_ID_SANDBOX en .env.local</li>
-                <li>En producción (Railway), PayPal funcionará correctamente</li>
-                <li>Mientras tanto, usa el botón "🧪 Simular Compra Exitosa" para probar</li>
-              </>
-            ) : (
-              <>
-                <li>Client ID no válido o no coincide con el environment (sandbox/production)</li>
-                <li>Problema de conexión a internet</li>
-                <li>Bloqueador de anuncios o extensión del navegador</li>
-                <li>Firewall o proxy bloqueando PayPal</li>
-              </>
-            )}
+            <li>Client ID no válido o no está activo en PayPal</li>
+            <li>Problema de conexión a internet</li>
+            <li>Bloqueador de anuncios o extensión del navegador</li>
+            <li>Firewall o proxy bloqueando PayPal</li>
+            <li>Variables REACT_APP_* no configuradas antes del build</li>
           </Typography>
         </Alert>
         <Button 
@@ -271,108 +239,43 @@ const PayPalSimple = ({
   shippingInfo = null
 }) => {
   // DEBUG: Log todas las variables de entorno al inicio
-  console.log('🔍 [PayPal] DEBUG - Todas las variables process.env:', {
-    'REACT_APP_PAYPAL_CLIENT_ID': process.env.REACT_APP_PAYPAL_CLIENT_ID || 'NOT SET',
-    'REACT_APP_PAYPAL_CLIENT_ID_SANDBOX': process.env.REACT_APP_PAYPAL_CLIENT_ID_SANDBOX || 'NOT SET',
+  console.log('🔍 [PayPal] DEBUG - Variables de entorno:', {
+    'REACT_APP_PAYPAL_CLIENT_ID': process.env.REACT_APP_PAYPAL_CLIENT_ID ? 'SET' : 'NOT SET',
     'REACT_APP_PAYPAL_ENVIRONMENT': process.env.REACT_APP_PAYPAL_ENVIRONMENT || 'NOT SET',
-    'REACT_APP_PAYPAL_CURRENCY': process.env.REACT_APP_PAYPAL_CURRENCY || 'NOT SET',
-    'REACT_APP_PAYPAL_INTENT': process.env.REACT_APP_PAYPAL_INTENT || 'NOT SET',
-    'NODE_ENV': process.env.NODE_ENV || 'NOT SET',
-    'hostname': window.location.hostname,
-    'all_REACT_APP_keys': Object.keys(process.env).filter(key => key.startsWith('REACT_APP_'))
+    'NODE_ENV': process.env.NODE_ENV || 'NOT SET'
   });
   
-  // Detectar si estamos en localhost/desarrollo
-  const isLocalhost = window.location.hostname === 'localhost' || 
-                      window.location.hostname === '127.0.0.1' ||
-                      window.location.hostname.includes('localhost');
+  // Solo usar modo PRODUCCIÓN - obtener Client ID de producción
+  const clientId = process.env.REACT_APP_PAYPAL_CLIENT_ID;
   
-  // Obtener configuración desde variables de entorno
-  // En localhost, intentar usar Client ID de sandbox si está disponible
-  const clientId = isLocalhost 
-    ? (process.env.REACT_APP_PAYPAL_CLIENT_ID_SANDBOX || process.env.REACT_APP_PAYPAL_CLIENT_ID)
-    : process.env.REACT_APP_PAYPAL_CLIENT_ID;
-  
-  console.log('🔍 [PayPal] DEBUG - clientId obtenido:', clientId ? clientId.substring(0, 30) + '...' : 'NOT SET');
+  console.log('🔍 [PayPal] Client ID obtenido:', clientId ? clientId.substring(0, 30) + '...' : 'NOT SET');
 
-  // Verificar configuración
+  // Verificar configuración - solo modo PRODUCCIÓN
   if (!clientId || clientId === 'sb' || clientId === 'TU_PAYPAL_CLIENT_ID_LIVE') {
-    console.error('❌ [PayPal] Client ID no configurado o inválido:', clientId);
-    console.error('❌ [PayPal] REACT_APP_PAYPAL_CLIENT_ID:', process.env.REACT_APP_PAYPAL_CLIENT_ID);
-    console.error('❌ [PayPal] REACT_APP_PAYPAL_CLIENT_ID_SANDBOX:', process.env.REACT_APP_PAYPAL_CLIENT_ID_SANDBOX);
-    console.error('❌ [PayPal] Is Localhost:', isLocalhost);
-    console.error('❌ [PayPal] Todas las variables REACT_APP_*:', {
-      REACT_APP_PAYPAL_CLIENT_ID: process.env.REACT_APP_PAYPAL_CLIENT_ID ? 'SET' : 'NOT SET',
-      REACT_APP_PAYPAL_CLIENT_ID_SANDBOX: process.env.REACT_APP_PAYPAL_CLIENT_ID_SANDBOX ? 'SET' : 'NOT SET',
-      REACT_APP_PAYPAL_ENVIRONMENT: process.env.REACT_APP_PAYPAL_ENVIRONMENT || 'NOT SET',
-      NODE_ENV: process.env.NODE_ENV
-    });
+    console.error('❌ [PayPal] Client ID de PRODUCCIÓN no configurado o inválido:', clientId);
+    console.error('❌ [PayPal] REACT_APP_PAYPAL_CLIENT_ID:', process.env.REACT_APP_PAYPAL_CLIENT_ID ? 'SET' : 'NOT SET');
     
     return (
       <Box sx={{ textAlign: 'center', py: 4 }}>
         <Alert severity="error" sx={{ mb: 2 }}>
-          PayPal Client ID not configured
+          PayPal Client ID no configurado
         </Alert>
         <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-          {isLocalhost 
-            ? 'Para desarrollo en localhost, configura REACT_APP_PAYPAL_CLIENT_ID_SANDBOX en .env.local'
-            : 'Please configure REACT_APP_PAYPAL_CLIENT_ID in Railway environment variables'}
+          Por favor configura REACT_APP_PAYPAL_CLIENT_ID en Railway environment variables
         </Typography>
         <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.75rem' }}>
           Current value: {clientId || 'NOT SET'}
         </Typography>
         <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.75rem', mt: 1 }}>
-          {isLocalhost 
-            ? 'Nota: PayPal PRODUCTION no funciona en localhost. Usa un Client ID de SANDBOX para desarrollo.'
-            : 'Note: In Railway, REACT_APP_* variables must be set before building the app'}
+          Nota: Las variables REACT_APP_* deben estar configuradas ANTES de hacer build en Railway
         </Typography>
       </Box>
     );
   }
 
-  // Obtener el environment de las variables de entorno
-  // IMPORTANTE: En localhost, forzar sandbox porque PayPal PRODUCTION no funciona en localhost
-  let environment = process.env.REACT_APP_PAYPAL_ENVIRONMENT || 'sandbox';
-  
-  // Si estamos en localhost y el environment es production, usar sandbox
-  if (isLocalhost && environment === 'production') {
-    console.warn('⚠️ [PayPal] Detectado localhost con environment=production');
-    console.warn('⚠️ [PayPal] PayPal PRODUCTION no funciona en localhost');
-    console.warn('⚠️ [PayPal] Cambiando automáticamente a SANDBOX para desarrollo');
-    console.warn('⚠️ [PayPal] En producción (Railway), se usará PRODUCTION automáticamente');
-    environment = 'sandbox';
-  }
-  
-  // Si estamos en producción (no localhost) y el environment es production, usar el Client ID de producción
-  // Si estamos en localhost, necesitamos un Client ID de sandbox
-  let effectiveClientId = clientId;
-  
-  // Si estamos en localhost y el Client ID es de producción (empieza con 'B'), 
-  // intentar usar un Client ID de sandbox si está disponible
-  if (isLocalhost && clientId && clientId.startsWith('B') && !clientId.startsWith('sb')) {
-    console.warn('⚠️ [PayPal] Client ID de PRODUCCIÓN detectado en localhost');
-    console.warn('⚠️ [PayPal] PayPal PRODUCTION no funciona en localhost');
-    console.warn('⚠️ [PayPal] Para probar en localhost, necesitas un Client ID de SANDBOX');
-    console.warn('⚠️ [PayPal] El Client ID de sandbox normalmente empieza con "sb" o "A"');
-    console.warn('⚠️ [PayPal] En producción (Railway), este Client ID funcionará correctamente');
-    
-    // Intentar usar un Client ID de sandbox si está disponible en las variables de entorno
-    const sandboxClientId = process.env.REACT_APP_PAYPAL_CLIENT_ID_SANDBOX;
-    if (sandboxClientId && (sandboxClientId.startsWith('sb') || sandboxClientId.startsWith('A'))) {
-      console.log('✅ [PayPal] Usando Client ID de SANDBOX para localhost:', sandboxClientId.substring(0, 20) + '...');
-      effectiveClientId = sandboxClientId;
-      environment = 'sandbox'; // Forzar sandbox en localhost
-    } else {
-      // Si no hay sandbox Client ID, mostrar mensaje pero permitir que intente usar el de producción
-      // PayPal SDK rechazará la conexión, pero al menos el código estará listo para producción
-      console.warn('⚠️ [PayPal] No hay Client ID de SANDBOX disponible');
-      console.warn('⚠️ [PayPal] PayPal no funcionará en localhost con Client ID de PRODUCCIÓN');
-      console.warn('⚠️ [PayPal] Solución temporal: Usa el botón de prueba "🧪 Simular Compra Exitosa" para probar el flujo');
-      console.warn('⚠️ [PayPal] Solución permanente: Agrega REACT_APP_PAYPAL_CLIENT_ID_SANDBOX en .env.local para desarrollo');
-      console.warn('⚠️ [PayPal] En producción (Railway), PayPal funcionará correctamente con el Client ID de PRODUCCIÓN');
-      // No cambiar effectiveClientId, dejar que PayPal SDK rechace y muestre el error apropiado
-    }
-  }
+  // Solo modo PRODUCCIÓN - no hay detección automática
+  const environment = 'production';
+  const effectiveClientId = clientId;
   
   console.log('🔧 [PayPal] Configuration:', {
     clientId: effectiveClientId ? effectiveClientId.substring(0, 20) + '...' : 'NOT SET',
@@ -424,14 +327,8 @@ const PayPalSimple = ({
     debug: true,
   };
 
-  // En modo production, agregar configuración adicional si es necesario
-  if (environment === 'production' && !isLocalhost) {
-    console.log('✅ Configurando PayPal en modo PRODUCTION (LIVE) - Producción');
-    // El SDK detecta automáticamente el environment basándose en el Client ID
-    // Pero podemos asegurarnos de que no hay opciones de sandbox
-  } else {
-    console.log('🧪 Configurando PayPal en modo SANDBOX - Desarrollo');
-  }
+  // Solo modo PRODUCCIÓN
+  console.log('✅ Configurando PayPal en modo PRODUCTION (LIVE)');
 
   console.log('📦 PayPal Options:', {
     ...paypalOptions,
