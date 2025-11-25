@@ -40,3 +40,4 @@ Verifica en: https://github.com/ueservicesllc1-ops/delizukar/commits/main
 - ⚠️ Railway no está detectando los cambios automáticamente
 - 🔧 **Solución recomendada:** Redeploy manual o reconectar el repositorio
 
+

@@ -983,7 +983,8 @@ const Checkout = () => {
           </Typography>
         </motion.div>
 
-        {/* Botón de prueba de correo - Siempre visible en la parte superior */}
+        {/* Botón de prueba de correo - OCULTO */}
+        {false && (
         <Box sx={{ mb: 3, p: 2, backgroundColor: '#fff3cd', borderRadius: '12px', border: '2px dashed #ffc107' }}>
           <Typography variant="body2" sx={{ color: '#856404', mb: 1, fontWeight: 600 }}>
             📧 Probar Envío de Correo
@@ -1082,6 +1083,7 @@ const Checkout = () => {
             📧 Probar Envío de Correo
           </Button>
         </Box>
+        )}
 
         <form onSubmit={handleSubmit}>
           <Grid container spacing={2}>
@@ -1513,7 +1515,8 @@ const Checkout = () => {
                       </Typography>
                     </Box>
                     
-                    {/* Botón de prueba de correo - Siempre visible */}
+                    {/* Botón de prueba de correo - OCULTO */}
+                    {false && (
                     <Box sx={{ mb: 2, p: 2, backgroundColor: '#fff3cd', borderRadius: '12px', border: '2px dashed #ffc107' }}>
                       <Typography variant="body2" sx={{ color: '#856404', mb: 1, fontWeight: 600 }}>
                         📧 Probar Envío de Correo
@@ -1611,6 +1614,7 @@ const Checkout = () => {
                         📧 Probar Envío de Correo
                       </Button>
                     </Box>
+                    )}
 
                     {/* Método de pago con PayPal - Solo mostrar si hay datos completos */}
                     {(() => {
@@ -1627,7 +1631,8 @@ const Checkout = () => {
                       return hasAllFields;
                     })() ? (
                       <>
-                      {/* Botón de prueba para simular compra exitosa */}
+                      {/* Botón de prueba para simular compra exitosa - OCULTO */}
+                      {false && (
                       <Box sx={{ mb: 2, p: 2, backgroundColor: '#fff3cd', borderRadius: '12px', border: '2px dashed #ffc107' }}>
                         <Typography variant="body2" sx={{ color: '#856404', mb: 1, fontWeight: 600 }}>
                           🧪 Modo Prueba - Simular Compra
@@ -1652,6 +1657,7 @@ const Checkout = () => {
                           🧪 Simular Compra Exitosa (Prueba)
                         </Button>
                       </Box>
+                      )}
                       
                       <PayPalPaymentForm 
                         key={`paypal-${formData.email}-${cartTotal}`}

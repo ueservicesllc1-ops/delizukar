@@ -43,6 +43,7 @@ console.log('🔑 Shippo mode:', shippoToken?.startsWith('shippo_live_') ? 'PROD
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
+const http = require('http');
 const { initializeApp } = require('firebase/app');
 const { getFirestore, collection, addDoc, doc, getDoc, updateDoc, query, orderBy } = require('firebase/firestore');
 
@@ -253,7 +254,7 @@ async function sendOrderConfirmationEmail(orderData, orderId) {
         minute: '2-digit' 
       }),
       subject: `¡Confirmación de tu pedido #${orderId}!`,
-      message: `¡Gracias por tu compra en Delizukar! Tu pedido #${orderId} ha sido recibido y está siendo procesado.\n\nDetalles del pedido:\n${itemsListText}\n\nSubtotal: $${subtotal.toFixed(2)}\n${shippingCost > 0 ? `Envío: $${shippingCost.toFixed(2)}\n` : ''}Total: $${total.toFixed(2)}`,
+      message: `¡Felicidades! Tu pedido #${orderId} fue generado con éxito. Muy pronto te notificaremos cuando tu pedido sea enviado.\n\nDetalles del pedido:\n${itemsListText}\n\nSubtotal: $${subtotal.toFixed(2)}\n${shippingCost > 0 ? `Envío: $${shippingCost.toFixed(2)}\n` : ''}Total: $${total.toFixed(2)}`,
       // Campos adicionales que pueden estar en el template
       tracking_code: 'PENDING',
       tracking_url: '',
@@ -269,13 +270,19 @@ async function sendOrderConfirmationEmail(orderData, orderId) {
     const emailResult = await sendEmailViaEmailJS(templateParams);
     
     console.log('📧 [Email] Resultado del envío:', emailResult);
-    console.log(`✅ [Email] Order confirmation email sent to customer: ${customerEmail}`);
-    console.log('📧 [Email] ========================================');
     
-    return true;
+    if (emailResult && emailResult.success) {
+      console.log(`✅ [Email] Order confirmation email sent to customer: ${customerEmail}`);
+      console.log('📧 [Email] ========================================');
+      return true;
+    } else {
+      throw new Error('EmailJS no retornó éxito en el envío');
+    }
   } catch (error) {
     console.error('❌ [Email] Error sending order confirmation email to customer:', error);
-    return false;
+    console.error('❌ [Email] Error message:', error.message);
+    console.error('❌ [Email] Error stack:', error.stack);
+    throw error; // Propagar el error para que el endpoint de prueba lo capture
   }
 }
 
@@ -333,13 +340,19 @@ async function sendAdminOrderNotification(orderData, orderId) {
     const emailResult = await sendEmailViaEmailJS(templateParams);
     
     console.log('📧 [Email] Resultado del envío:', emailResult);
-    console.log(`✅ [Email] Admin notification email sent to: ${adminEmail}`);
-    console.log('📧 [Email] ========================================');
     
-    return true;
+    if (emailResult && emailResult.success) {
+      console.log(`✅ [Email] Admin notification email sent to: ${adminEmail}`);
+      console.log('📧 [Email] ========================================');
+      return true;
+    } else {
+      throw new Error('EmailJS no retornó éxito en el envío');
+    }
   } catch (error) {
     console.error('❌ [Email] Error sending admin notification email:', error);
-    return false;
+    console.error('❌ [Email] Error message:', error.message);
+    console.error('❌ [Email] Error stack:', error.stack);
+    throw error; // Propagar el error para que el endpoint de prueba lo capture
   }
 }
 
@@ -1299,6 +1312,45 @@ app.post('/api/shippo/elements/authz', async (req, res) => {
   } catch (error) {
     console.error('❌ Shippo Elements authz error:', error);
     res.status(500).json({ error: error.message || 'Error generating JWT for Shipping Elements' });
+  }
+});
+
+// 8. Proxy para descargar PDF de etiqueta (evita problemas de CORS)
+app.get('/api/shippo/label-pdf', async (req, res) => {
+  try {
+    const { url } = req.query;
+    
+    if (!url) {
+      return res.status(400).json({ error: 'URL del PDF es requerida' });
+    }
+
+    console.log('📄 Descargando PDF de etiqueta desde:', url);
+
+    // Descargar el PDF desde Shippo
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Accept': 'application/pdf'
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error(`Error al descargar PDF: ${response.status} ${response.statusText}`);
+    }
+
+    // Obtener el PDF como buffer
+    const pdfBuffer = await response.arrayBuffer();
+    
+    // Configurar headers para devolver el PDF
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', 'inline; filename="label.pdf"');
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    
+    // Enviar el PDF
+    res.send(Buffer.from(pdfBuffer));
+  } catch (error) {
+    console.error('❌ Error al descargar PDF de etiqueta:', error);
+    res.status(500).json({ error: error.message || 'Error al descargar PDF' });
   }
 });
 
@@ -2488,6 +2540,298 @@ app.post('/api/create-shipment-complete', async (req, res) => {
 
 // ==================== EMAIL ENDPOINTS ====================
 
+// Endpoint: Obtener balance de PayPal
+app.get('/api/paypal/balance', async (req, res) => {
+  try {
+    const PAYPAL_ENVIRONMENT = process.env.REACT_APP_PAYPAL_ENVIRONMENT || 'sandbox';
+    const PAYPAL_BASE_URL = PAYPAL_ENVIRONMENT === 'production' 
+      ? 'https://api-m.paypal.com' 
+      : 'https://api-m.sandbox.paypal.com';
+    
+    const PAYPAL_CLIENT_ID = process.env.REACT_APP_PAYPAL_CLIENT_ID;
+    const PAYPAL_CLIENT_SECRET = process.env.PAYPAL_CLIENT_SECRET;
+
+    // Validar credenciales
+    if (!PAYPAL_CLIENT_ID || PAYPAL_CLIENT_ID === 'sb' || !PAYPAL_CLIENT_SECRET) {
+      return res.status(400).json({
+        success: false,
+        error: 'PayPal credentials not configured',
+        message: 'Las credenciales de PayPal no están configuradas. Por favor, configura REACT_APP_PAYPAL_CLIENT_ID y PAYPAL_CLIENT_SECRET en las variables de entorno.'
+      });
+    }
+
+    // Obtener access token
+    const credentials = Buffer.from(`${PAYPAL_CLIENT_ID}:${PAYPAL_CLIENT_SECRET}`).toString('base64');
+    const tokenResponse = await fetch(`${PAYPAL_BASE_URL}/v1/oauth2/token`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Basic ${credentials}`,
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: 'grant_type=client_credentials',
+    });
+
+    if (!tokenResponse.ok) {
+      const errorData = await tokenResponse.json().catch(() => ({}));
+      throw new Error(`Failed to get access token: ${tokenResponse.statusText}. ${errorData.error_description || ''}`);
+    }
+
+    const tokenData = await tokenResponse.json();
+    const accessToken = tokenData.access_token;
+
+    // Obtener balance usando la API de Reporting de PayPal
+    // La API de balances requiere permisos específicos en la aplicación de PayPal
+    // Endpoint: /v1/reporting/balances (puede requerir permisos de "Read Balance" o "Read Financial Data")
+    try {
+      const balanceResponse = await fetch(`${PAYPAL_BASE_URL}/v1/reporting/balances`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+      });
+
+      const responseText = await balanceResponse.text();
+      let balanceData;
+      
+      try {
+        balanceData = JSON.parse(responseText);
+      } catch (parseError) {
+        console.error('Error parsing balance response:', responseText);
+        throw new Error(`Invalid response from PayPal API: ${responseText.substring(0, 200)}`);
+      }
+
+      if (balanceResponse.ok) {
+        // PayPal puede devolver el balance en diferentes formatos
+        // Intentar diferentes estructuras de respuesta
+        let available = 0;
+        let pending = 0;
+        let currency = 'USD';
+
+        // Formato 1: balanceData.available_balance y balanceData.pending_balance
+        if (balanceData.available_balance) {
+          available = parseFloat(balanceData.available_balance.value || balanceData.available_balance) || 0;
+          currency = balanceData.available_balance.currency_code || balanceData.currency_code || 'USD';
+        }
+        if (balanceData.pending_balance) {
+          pending = parseFloat(balanceData.pending_balance.value || balanceData.pending_balance) || 0;
+        }
+
+        // Formato 2: balanceData.balances (array)
+        if (balanceData.balances && Array.isArray(balanceData.balances)) {
+          balanceData.balances.forEach(bal => {
+            if (bal.primary) {
+              available = parseFloat(bal.available_balance?.value || bal.available_balance || 0);
+              pending = parseFloat(bal.pending_balance?.value || bal.pending_balance || 0);
+              currency = bal.currency_code || bal.currency || 'USD';
+            }
+          });
+        }
+
+        // Formato 3: balanceData directamente
+        if (balanceData.available !== undefined) {
+          available = parseFloat(balanceData.available) || 0;
+        }
+        if (balanceData.pending !== undefined) {
+          pending = parseFloat(balanceData.pending) || 0;
+        }
+        if (balanceData.currency) {
+          currency = balanceData.currency;
+        }
+
+        const formattedBalance = {
+          available: available,
+          pending: pending,
+          currency: currency,
+          lastUpdated: new Date().toISOString()
+        };
+
+        console.log('✅ Balance obtenido exitosamente:', formattedBalance);
+
+        return res.json({
+          success: true,
+          balance: formattedBalance
+        });
+      } else {
+        // Si la API de balances no está disponible o requiere permisos adicionales
+        const errorMessage = balanceData.message || balanceData.error_description || balanceResponse.statusText;
+        console.log('⚠️ Balance API response:', balanceResponse.status, errorMessage);
+        
+        // Si es un error 403 o 401, probablemente falta de permisos
+        if (balanceResponse.status === 403 || balanceResponse.status === 401) {
+          return res.json({
+            success: true,
+            balance: {
+              available: 0,
+              pending: 0,
+              currency: 'USD',
+              lastUpdated: new Date().toISOString(),
+              note: 'Se requieren permisos adicionales en tu aplicación de PayPal para ver el balance. Ve a PayPal Developer Dashboard > Tu App > Permisos y habilita "Read Balance" o "Read Financial Data".'
+            },
+            message: 'La conexión con PayPal funciona, pero se requieren permisos adicionales para ver el balance.'
+          });
+        }
+        
+        throw new Error(`PayPal API error: ${balanceResponse.status} - ${errorMessage}`);
+      }
+    } catch (balanceError) {
+      console.error('❌ Error en API de balances:', balanceError);
+      // Si falla, retornar un mensaje informativo
+      return res.status(200).json({
+        success: true,
+        balance: {
+          available: 0,
+          pending: 0,
+          currency: 'USD',
+          lastUpdated: new Date().toISOString(),
+          note: `No se pudo obtener el balance: ${balanceError.message}. Verifica que tu aplicación de PayPal tenga los permisos necesarios (Read Balance o Read Financial Data) en PayPal Developer Dashboard.`
+        },
+        message: balanceError.message
+      });
+    }
+  } catch (error) {
+    console.error('❌ Error obteniendo balance de PayPal:', error);
+    // Asegurar que siempre devolvemos JSON
+    return res.status(500).json({
+      success: false,
+      error: error.message || 'Error al obtener el balance de PayPal',
+      message: 'No se pudo obtener el balance. Verifica que las credenciales de PayPal estén correctamente configuradas y que tu aplicación tenga los permisos necesarios.'
+    });
+  }
+});
+
+// Endpoint: Probar envío de correos de PayPal (cliente y admin)
+app.post('/api/test-paypal-email', async (req, res) => {
+  try {
+    const { customerEmail } = req.body;
+    
+    if (!customerEmail) {
+      return res.status(400).json({
+        success: false,
+        error: 'Email del cliente es requerido'
+      });
+    }
+
+    console.log('📧 [Test] ========================================');
+    console.log('📧 [Test] PROBANDO ENVÍO DE CORREOS DE PAYPAL');
+    console.log('📧 [Test] ========================================');
+    console.log('📧 [Test] Email del cliente:', customerEmail);
+    console.log('📧 [Test] Email del admin (hardcodeado): delizukar@gmail.com');
+
+    // Crear datos de orden de prueba
+    const testOrderId = 'TEST-' + Date.now();
+    const testOrderData = {
+      customerInfo: {
+        firstName: 'Cliente',
+        lastName: 'Prueba',
+        email: customerEmail,
+        phone: '123-456-7890',
+        address: {
+          line1: '123 Calle de Prueba',
+          city: 'Ciudad de Prueba',
+          state: 'PR',
+          postal_code: '12345',
+          country: 'US'
+        }
+      },
+      cartItems: [
+        {
+          id: '1',
+          name: 'Producto de Prueba 1',
+          price: 25.99,
+          quantity: 2,
+          image: ''
+        },
+        {
+          id: '2',
+          name: 'Producto de Prueba 2',
+          price: 15.50,
+          quantity: 1,
+          image: ''
+        }
+      ],
+      total: 67.48,
+      shippingInfo: {
+        cost: 5.00,
+        carrier: 'USPS',
+        serviceLevel: 'Priority Mail'
+      },
+      paymentStatus: 'paid',
+      status: 'pending'
+    };
+
+    // Variables para rastrear el estado de los correos
+    let customerEmailStatus = { sent: false, error: null };
+    let adminEmailStatus = { sent: false, error: null };
+
+    // Enviar correo al cliente
+    console.log('📧 [Test] Enviando correo al cliente...');
+    try {
+      const customerResult = await sendOrderConfirmationEmail(testOrderData, testOrderId);
+      if (customerResult === true) {
+        customerEmailStatus.sent = true;
+        console.log('✅ [Test] Correo al cliente enviado exitosamente');
+      } else {
+        customerEmailStatus.error = 'La función retornó false';
+        console.error('❌ [Test] Error: La función de envío retornó false');
+      }
+    } catch (err) {
+      customerEmailStatus.error = err.message || err.toString();
+      console.error('❌ [Test] Error enviando correo al cliente:', err);
+      console.error('❌ [Test] Stack:', err.stack);
+    }
+
+    // Enviar notificación al administrador
+    console.log('📧 [Test] Enviando notificación al administrador...');
+    try {
+      const adminResult = await sendAdminOrderNotification(testOrderData, testOrderId);
+      if (adminResult === true) {
+        adminEmailStatus.sent = true;
+        console.log('✅ [Test] Notificación al administrador enviada exitosamente');
+      } else {
+        adminEmailStatus.error = 'La función retornó false';
+        console.error('❌ [Test] Error: La función de envío retornó false');
+      }
+    } catch (err) {
+      adminEmailStatus.error = err.message || err.toString();
+      console.error('❌ [Test] Error enviando notificación al administrador:', err);
+      console.error('❌ [Test] Stack:', err.stack);
+    }
+
+    console.log('📧 [Test] ========================================');
+    console.log('📧 [Test] RESULTADOS:');
+    console.log('📧 [Test] - Correo cliente:', customerEmailStatus.sent ? '✅ Enviado' : `❌ Error: ${customerEmailStatus.error}`);
+    console.log('📧 [Test] - Correo admin:', adminEmailStatus.sent ? '✅ Enviado' : `❌ Error: ${adminEmailStatus.error}`);
+    console.log('📧 [Test] ========================================');
+
+    res.json({
+      success: true,
+      message: 'Prueba de correos completada',
+      results: {
+        customerEmail: {
+          email: customerEmail,
+          sent: customerEmailStatus.sent,
+          error: customerEmailStatus.error
+        },
+        adminEmail: {
+          email: 'delizukar@gmail.com',
+          sent: adminEmailStatus.sent,
+          error: adminEmailStatus.error
+        },
+        allSent: customerEmailStatus.sent && adminEmailStatus.sent,
+        hasErrors: !!customerEmailStatus.error || !!adminEmailStatus.error
+      }
+    });
+  } catch (error) {
+    console.error('❌ [Test] Error en prueba de correos:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message || 'Error al probar envío de correos'
+    });
+  }
+});
+
 // Endpoint: Enviar email de prueba (retorna los datos, el frontend usa EmailJS)
 app.post('/api/send-test-email', async (req, res) => {
   try {
@@ -3071,12 +3415,18 @@ app.use((err, req, res, next) => {
 
 // ==================== START SERVER ====================
 
-app.listen(PORT, '0.0.0.0', () => {
+// Crear servidor HTTP con límite aumentado de headers para evitar error 431
+const server = http.createServer({
+  maxHeaderSize: 16384 // 16KB (por defecto es 8KB)
+}, app);
+
+server.listen(PORT, '0.0.0.0', () => {
   console.log(`🚀 Server running on port ${PORT}`);
   console.log(`🔥 Firebase connected to project: ${process.env.REACT_APP_FIREBASE_PROJECT_ID}`);
   console.log(`🔍 Health check available at: /health and /api/health`);
   console.log(`📁 Static files served from: ${path.join(__dirname, 'build')}`);
   console.log(`✅ Server is ready for Railway healthcheck`);
+  console.log(`📏 Max header size: 16KB (configurado para evitar error 431)`);
 });
 
 module.exports = app;

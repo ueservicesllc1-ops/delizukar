@@ -79,3 +79,5 @@ temp/
 # Railway environment variables (contain secrets)
 railway-env-variables.json
 railway-env-variables.txt
+railway-env-variables-complete.json
+railway-env-variables-updated.json

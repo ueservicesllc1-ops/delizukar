@@ -35,24 +35,56 @@ const PayPalBalance = ({ open, onClose }) => {
     setError(null);
     
     try {
-      // En producción esto vendría de la API de PayPal
-      // Por ahora mostramos datos vacíos o un mensaje de configuración
-      const emptyBalance = {
-        available: 0,
-        pending: 0,
-        currency: 'USD',
-        lastUpdated: new Date().toISOString()
-      };
-
-      const emptyTransactions = [];
-
-      // Simular delay de API
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Llamar al endpoint del backend para obtener el balance real de PayPal
+      const baseUrl = process.env.NODE_ENV === 'production' 
+        ? window.location.origin 
+        : '';
       
-      setBalance(emptyBalance);
-      setTransactions(emptyTransactions);
+      const response = await fetch(`${baseUrl}/api/paypal/balance`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      // Verificar el Content-Type antes de parsear JSON
+      const contentType = response.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        const text = await response.text();
+        console.error('❌ Respuesta no es JSON:', text.substring(0, 200));
+        throw new Error(`El servidor devolvió una respuesta no válida (${response.status}). Verifica que el servidor esté corriendo y que el endpoint /api/paypal/balance exista.`);
+      }
+
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        throw new Error(data.message || data.error || 'Error al obtener el balance de PayPal');
+      }
+
+      if (data.balance) {
+        setBalance({
+          available: parseFloat(data.balance.available) || 0,
+          pending: parseFloat(data.balance.pending) || 0,
+          currency: data.balance.currency || 'USD',
+          lastUpdated: data.balance.lastUpdated || new Date().toISOString(),
+          note: data.balance.note
+        });
+      } else {
+        throw new Error('No se recibieron datos de balance');
+      }
+
+      // Por ahora, las transacciones no están implementadas
+      setTransactions([]);
     } catch (err) {
-      setError('Error al obtener el balance de PayPal: ' + err.message);
+      console.error('Error fetching PayPal balance:', err);
+      // Si el error es de parsing JSON, mostrar un mensaje más claro
+      if (err.message.includes('JSON') || err.message.includes('<!DOCTYPE')) {
+        setError('Error de conexión con el servidor. Verifica que el servidor esté corriendo en el puerto 5000.');
+      } else {
+        setError(err.message || 'Error al obtener el balance de PayPal');
+      }
+      // En caso de error, no establecer balance para que se muestre el mensaje de error
+      setBalance(null);
     } finally {
       setLoading(false);
     }
@@ -123,13 +155,11 @@ const PayPalBalance = ({ open, onClose }) => {
 
         {balance && !loading && (
           <Box>
-            {/* Información sobre configuración */}
-            {balance.available === 0 && balance.pending === 0 && (
+            {/* Información sobre configuración o permisos */}
+            {balance.note && (
               <Alert severity="info" sx={{ mb: 3 }}>
                 <Typography variant="body2">
-                  <strong>Nota:</strong> Para mostrar datos reales del balance de PayPal, 
-                  es necesario configurar la integración completa con la API de PayPal. 
-                  Actualmente se muestran datos de ejemplo.
+                  <strong>Nota:</strong> {balance.note}
                 </Typography>
               </Alert>
             )}

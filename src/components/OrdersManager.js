@@ -20,7 +20,8 @@ import {
   Alert,
   TextField,
   Tabs,
-  Tab
+  Tab,
+  Grid
 } from '@mui/material';
 import {
   Close,
@@ -30,12 +31,16 @@ import {
   CheckCircle,
   Pending,
   Email,
-  Receipt
+  Receipt,
+  Visibility,
+  Info,
+  PictureAsPdf
 } from '@mui/icons-material';
 import { collection, getDocs, updateDoc, deleteDoc, doc, query, orderBy, where } from 'firebase/firestore';
 import { db } from '../firebase/config';
 import emailjs from '@emailjs/browser';
 import ShippoShippingElements from './ShippoShippingElements';
+import jsPDF from 'jspdf';
 
 const OrdersManager = ({ open, onClose, initialTab = 'all' }) => {
   const [orders, setOrders] = useState([]);
@@ -45,12 +50,15 @@ const OrdersManager = ({ open, onClose, initialTab = 'all' }) => {
   const [creatingForOrderId, setCreatingForOrderId] = useState(null);
   const [labelDialogOpen, setLabelDialogOpen] = useState(false);
   const [labelData, setLabelData] = useState(null);
+  const [labelVerticalPdfUrl, setLabelVerticalPdfUrl] = useState(null);
   const [testEmailDialog, setTestEmailDialog] = useState(false);
   const [testEmail, setTestEmail] = useState('');
   const [sendingTestEmail, setSendingTestEmail] = useState(false);
   const [addressDetailsDialog, setAddressDetailsDialog] = useState(false);
   const [addressDetails, setAddressDetails] = useState(null);
   const [shippoElementsOpen, setShippoElementsOpen] = useState(false);
+  const [orderDetailsDialog, setOrderDetailsDialog] = useState(false);
+  const [selectedOrderDetails, setSelectedOrderDetails] = useState(null);
   const [shippoOrderData, setShippoOrderData] = useState(null);
   const [currentTab, setCurrentTab] = useState(initialTab);
 
@@ -73,6 +81,128 @@ const OrdersManager = ({ open, onClose, initialTab = 'all' }) => {
       console.warn('⚠️ REACT_APP_EMAILJS_PUBLIC_KEY no está configurada');
     }
   }, []);
+
+  // Generar PDF vertical cuando se abre el diálogo con una etiqueta
+  useEffect(() => {
+    const generateVerticalPdf = async () => {
+      if (!labelDialogOpen || !labelData?.postage_label?.label_url || labelData?.pendingPayment) {
+        setLabelVerticalPdfUrl(null);
+        return;
+      }
+
+      try {
+        // Importar pdfjs-dist dinámicamente
+        const pdfjsLib = await import('pdfjs-dist');
+        pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
+
+        // Descargar el PDF a través del backend para evitar problemas de CORS
+        // En desarrollo usa directamente localhost:5000, en producción usa window.location.origin
+        const baseURL = process.env.NODE_ENV === 'production' 
+          ? window.location.origin 
+          : 'http://localhost:5000'; // Usa directamente el backend en desarrollo
+        const proxyUrl = `${baseURL}/api/shippo/label-pdf?url=${encodeURIComponent(labelData.postage_label.label_url)}`;
+        
+        const response = await fetch(proxyUrl, {
+          method: 'GET',
+          headers: {
+            'Accept': 'application/pdf'
+          }
+        });
+        
+        if (!response.ok) {
+          throw new Error('Error al descargar el PDF');
+        }
+
+        const arrayBuffer = await response.arrayBuffer();
+        const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+        const numPages = pdf.numPages;
+
+        // Crear un canvas temporal para renderizar cada página
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        
+        // Crear nuevo PDF en formato vertical (portrait)
+        const outputPdf = new jsPDF('p', 'mm', 'a4');
+        
+        const pdfWidth = 210; // Ancho A4 en mm (vertical)
+        const pdfHeight = 297; // Alto A4 en mm (vertical)
+
+        // Renderizar cada página del PDF original
+        for (let pageNum = 1; pageNum <= numPages; pageNum++) {
+          const page = await pdf.getPage(pageNum);
+          const viewport = page.getViewport({ scale: 2.0 });
+          
+          canvas.height = viewport.height;
+          canvas.width = viewport.width;
+          
+          await page.render({
+            canvasContext: ctx,
+            viewport: viewport
+          }).promise;
+
+          const imgData = canvas.toDataURL('image/png', 1.0);
+          const isLandscape = viewport.width > viewport.height;
+          let imgWidth, imgHeight;
+          
+          if (isLandscape) {
+            imgHeight = pdfWidth;
+            imgWidth = (viewport.width * pdfWidth) / viewport.height;
+            
+            if (imgWidth > pdfHeight) {
+              imgWidth = pdfHeight;
+              imgHeight = (viewport.height * pdfHeight) / viewport.width;
+            }
+            
+            const tempWidth = imgWidth;
+            imgWidth = imgHeight;
+            imgHeight = tempWidth;
+          } else {
+            imgWidth = pdfWidth;
+            imgHeight = (viewport.height * pdfWidth) / viewport.width;
+            
+            if (imgHeight > pdfHeight) {
+              imgHeight = pdfHeight;
+              imgWidth = (viewport.width * pdfHeight) / viewport.height;
+            }
+          }
+          
+          if (pageNum > 1) {
+            outputPdf.addPage();
+          }
+          
+          const x = (pdfWidth - imgWidth) / 2;
+          const y = (pdfHeight - imgHeight) / 2;
+          
+          if (isLandscape) {
+            outputPdf.saveGraphicsState();
+            outputPdf.translate(pdfWidth / 2, pdfHeight / 2);
+            outputPdf.rotate(90 * Math.PI / 180);
+            outputPdf.addImage(imgData, 'PNG', -imgHeight / 2, -imgWidth / 2, imgHeight, imgWidth);
+            outputPdf.restoreGraphicsState();
+          } else {
+            outputPdf.addImage(imgData, 'PNG', x, y, imgWidth, imgHeight);
+          }
+        }
+
+        // Generar blob del PDF vertical
+        const pdfBlob = outputPdf.output('blob');
+        const pdfUrl = URL.createObjectURL(pdfBlob);
+        setLabelVerticalPdfUrl(pdfUrl);
+      } catch (error) {
+        console.error('Error al generar PDF vertical para vista previa:', error);
+        setLabelVerticalPdfUrl(null);
+      }
+    };
+
+    generateVerticalPdf();
+
+    // Limpiar URL cuando se cierra el diálogo
+    return () => {
+      if (labelVerticalPdfUrl) {
+        URL.revokeObjectURL(labelVerticalPdfUrl);
+      }
+    };
+  }, [labelDialogOpen, labelData?.postage_label?.label_url, labelData?.pendingPayment]);
 
   const loadOrders = async () => {
     setLoading(true);
@@ -426,18 +556,636 @@ const OrdersManager = ({ open, onClose, initialTab = 'all' }) => {
     }
   };
 
-  const handlePrintLabel = () => {
-    if (labelData?.postage_label?.label_url) {
+  const handlePrintLabel = async () => {
+    if (!labelData?.postage_label?.label_url) return;
+
+    try {
+      // Importar pdfjs-dist dinámicamente
+      const pdfjsLib = await import('pdfjs-dist');
+      // Configurar el worker para pdf.js
+      pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
+
+      // Descargar el PDF a través del backend para evitar problemas de CORS
+      // En desarrollo usa directamente localhost:5000, en producción usa window.location.origin
+      const baseURL = process.env.NODE_ENV === 'production' 
+        ? window.location.origin 
+        : 'http://localhost:5000'; // Usa directamente el backend en desarrollo
+      const proxyUrl = `${baseURL}/api/shippo/label-pdf?url=${encodeURIComponent(labelData.postage_label.label_url)}`;
+      
+      const response = await fetch(proxyUrl, {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/pdf'
+        }
+      });
+      
+      if (!response.ok) {
+        throw new Error('Error al descargar el PDF');
+      }
+
+      const arrayBuffer = await response.arrayBuffer();
+      
+      // Cargar el PDF
+      const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+      const numPages = pdf.numPages;
+
+      // Crear un canvas temporal para renderizar cada página
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      
+      // Crear nuevo PDF en formato vertical (portrait)
+      const outputPdf = new jsPDF('p', 'mm', 'a4');
+      
+      const pdfWidth = 210; // Ancho A4 en mm (vertical)
+      const pdfHeight = 297; // Alto A4 en mm (vertical)
+
+      // Renderizar cada página del PDF original
+      for (let pageNum = 1; pageNum <= numPages; pageNum++) {
+        const page = await pdf.getPage(pageNum);
+        const viewport = page.getViewport({ scale: 2.0 });
+        
+        // Configurar el canvas
+        canvas.height = viewport.height;
+        canvas.width = viewport.width;
+        
+        // Renderizar la página en el canvas
+        await page.render({
+          canvasContext: ctx,
+          viewport: viewport
+        }).promise;
+
+        // Convertir canvas a imagen
+        const imgData = canvas.toDataURL('image/png', 1.0);
+        
+        // Calcular dimensiones manteniendo la proporción
+        const isLandscape = viewport.width > viewport.height;
+        let imgWidth, imgHeight;
+        
+        if (isLandscape) {
+          // Si es horizontal, ajustamos para formato vertical
+          imgHeight = pdfWidth;
+          imgWidth = (viewport.width * pdfWidth) / viewport.height;
+          
+          if (imgWidth > pdfHeight) {
+            imgWidth = pdfHeight;
+            imgHeight = (viewport.height * pdfHeight) / viewport.width;
+          }
+          
+          // Intercambiar dimensiones para la rotación
+          const tempWidth = imgWidth;
+          imgWidth = imgHeight;
+          imgHeight = tempWidth;
+        } else {
+          // Si ya es vertical, mantener proporción
+          imgWidth = pdfWidth;
+          imgHeight = (viewport.height * pdfWidth) / viewport.width;
+          
+          if (imgHeight > pdfHeight) {
+            imgHeight = pdfHeight;
+            imgWidth = (viewport.width * pdfHeight) / viewport.height;
+          }
+        }
+        
+        // Si es la primera página, no agregar nueva página
+        if (pageNum > 1) {
+          outputPdf.addPage();
+        }
+        
+        // Centrar la imagen en la página
+        const x = (pdfWidth - imgWidth) / 2;
+        const y = (pdfHeight - imgHeight) / 2;
+        
+        if (isLandscape) {
+          // Para imágenes horizontales, rotar 90 grados
+          outputPdf.saveGraphicsState();
+          outputPdf.translate(pdfWidth / 2, pdfHeight / 2);
+          outputPdf.rotate(90 * Math.PI / 180);
+          outputPdf.addImage(imgData, 'PNG', -imgHeight / 2, -imgWidth / 2, imgHeight, imgWidth);
+          outputPdf.restoreGraphicsState();
+        } else {
+          // Para imágenes verticales, agregar normalmente
+          outputPdf.addImage(imgData, 'PNG', x, y, imgWidth, imgHeight);
+        }
+      }
+
+      // Generar blob del PDF vertical y abrirlo en nueva ventana
+      const pdfBlob = outputPdf.output('blob');
+      const pdfUrl = URL.createObjectURL(pdfBlob);
+      window.open(pdfUrl, '_blank');
+      
+      // Limpiar la URL después de un tiempo
+      setTimeout(() => URL.revokeObjectURL(pdfUrl), 1000);
+    } catch (error) {
+      console.error('Error al generar PDF vertical para imprimir:', error);
+      // Fallback: abrir el PDF original si hay error
       window.open(labelData.postage_label.label_url, '_blank');
     }
   };
 
-  const handleDownloadLabel = () => {
-    if (labelData?.postage_label?.label_url) {
+  const handleDownloadLabel = async () => {
+    if (!labelData?.postage_label?.label_url) return;
+
+    try {
+      // Importar pdfjs-dist dinámicamente
+      const pdfjsLib = await import('pdfjs-dist');
+      // Configurar el worker para pdf.js
+      pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
+
+      // Descargar el PDF a través del backend para evitar problemas de CORS
+      // En desarrollo usa directamente localhost:5000, en producción usa window.location.origin
+      const baseURL = process.env.NODE_ENV === 'production' 
+        ? window.location.origin 
+        : 'http://localhost:5000'; // Usa directamente el backend en desarrollo
+      const proxyUrl = `${baseURL}/api/shippo/label-pdf?url=${encodeURIComponent(labelData.postage_label.label_url)}`;
+      
+      const response = await fetch(proxyUrl, {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/pdf'
+        }
+      });
+      
+      if (!response.ok) {
+        throw new Error('Error al descargar el PDF');
+      }
+
+      const arrayBuffer = await response.arrayBuffer();
+      
+      // Cargar el PDF
+      const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+      const numPages = pdf.numPages;
+
+      // Crear un canvas temporal para renderizar cada página
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      
+      // Crear nuevo PDF en formato vertical (portrait)
+      // 'p' = portrait (vertical), 'mm' = milímetros, 'a4' = tamaño A4
+      const outputPdf = new jsPDF('p', 'mm', 'a4');
+      
+      const pdfWidth = 210; // Ancho A4 en mm (vertical)
+      const pdfHeight = 297; // Alto A4 en mm (vertical)
+
+      // Renderizar cada página del PDF original
+      for (let pageNum = 1; pageNum <= numPages; pageNum++) {
+        const page = await pdf.getPage(pageNum);
+        const viewport = page.getViewport({ scale: 2.0 });
+        
+        // Configurar el canvas
+        canvas.height = viewport.height;
+        canvas.width = viewport.width;
+        
+        // Renderizar la página en el canvas
+        await page.render({
+          canvasContext: ctx,
+          viewport: viewport
+        }).promise;
+
+        // Convertir canvas a imagen
+        const imgData = canvas.toDataURL('image/png', 1.0);
+        
+        // Calcular dimensiones manteniendo la proporción
+        // Si la imagen original es horizontal, la ajustamos para formato vertical
+        const isLandscape = viewport.width > viewport.height;
+        let imgWidth, imgHeight;
+        
+        if (isLandscape) {
+          // Si es horizontal, rotamos 90 grados mentalmente
+          // El ancho original se convierte en alto, y viceversa
+          // Ajustamos para que quepa en formato vertical A4
+          imgHeight = pdfWidth; // Usamos el ancho del PDF como altura máxima
+          imgWidth = (viewport.width * pdfWidth) / viewport.height;
+          
+          // Si es muy ancho después del cálculo, ajustamos
+          if (imgWidth > pdfHeight) {
+            imgWidth = pdfHeight;
+            imgHeight = (viewport.height * pdfHeight) / viewport.width;
+          }
+          
+          // Intercambiar dimensiones para la rotación
+          // Rotamos la imagen 90 grados, así que intercambiamos ancho y alto
+          const tempWidth = imgWidth;
+          imgWidth = imgHeight;
+          imgHeight = tempWidth;
+        } else {
+          // Si ya es vertical, mantener proporción
+          imgWidth = pdfWidth;
+          imgHeight = (viewport.height * pdfWidth) / viewport.width;
+          
+          // Si es muy alto, ajustar al alto de la página
+          if (imgHeight > pdfHeight) {
+            imgHeight = pdfHeight;
+            imgWidth = (viewport.width * pdfHeight) / viewport.height;
+          }
+        }
+        
+        // Si es la primera página, no agregar nueva página
+        if (pageNum > 1) {
+          outputPdf.addPage();
+        }
+        
+        // Centrar la imagen en la página
+        const x = (pdfWidth - imgWidth) / 2;
+        const y = (pdfHeight - imgHeight) / 2;
+        
+        if (isLandscape) {
+          // Para imágenes horizontales, rotar 90 grados
+          // Guardar el estado actual del contexto
+          outputPdf.saveGraphicsState();
+          // Mover el origen al centro de la página
+          outputPdf.translate(pdfWidth / 2, pdfHeight / 2);
+          // Rotar 90 grados (en radianes)
+          outputPdf.rotate(90 * Math.PI / 180);
+          // Dibujar la imagen rotada (intercambiamos ancho y alto)
+          outputPdf.addImage(imgData, 'PNG', -imgHeight / 2, -imgWidth / 2, imgHeight, imgWidth);
+          // Restaurar el estado
+          outputPdf.restoreGraphicsState();
+        } else {
+          // Para imágenes verticales, agregar normalmente
+          outputPdf.addImage(imgData, 'PNG', x, y, imgWidth, imgHeight);
+        }
+      }
+
+      // Descargar el PDF vertical
+      outputPdf.save(`label-${labelData.tracking_code}.pdf`);
+    } catch (error) {
+      console.error('Error al generar PDF vertical:', error);
+      // Fallback: descargar el PDF original si hay error
+      alert('No se pudo convertir a formato vertical. Descargando PDF original...');
       const link = document.createElement('a');
       link.href = labelData.postage_label.label_url;
       link.download = `label-${labelData.tracking_code}.pdf`;
+      link.target = '_blank';
       link.click();
+    }
+  };
+
+  const handlePrintOrderDetails = () => {
+    if (!selectedOrderDetails) return;
+
+    try {
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const pageWidth = 210;
+      const pageHeight = 297;
+      let yPosition = 20;
+      const margin = 15;
+      const lineHeight = 6;
+      const sectionSpacing = 8;
+      const col1X = margin;
+      const col2X = pageWidth / 2 + 5;
+      const colWidth = (pageWidth - 2 * margin - 10) / 2;
+
+      // Función auxiliar para agregar texto con wrap
+      const addText = (text, x, y, maxWidth, fontSize = 9, isBold = false, color = [0, 0, 0]) => {
+        pdf.setFontSize(fontSize);
+        pdf.setFont('helvetica', isBold ? 'bold' : 'normal');
+        pdf.setTextColor(color[0], color[1], color[2]);
+        const lines = pdf.splitTextToSize(text, maxWidth);
+        pdf.text(lines, x, y);
+        return lines.length * (fontSize * 0.4);
+      };
+
+      // Encabezado
+      pdf.setFillColor(200, 98, 109); // #C8626D
+      pdf.rect(0, 0, pageWidth, 20, 'F');
+      pdf.setTextColor(255, 255, 255);
+      pdf.setFontSize(16);
+      pdf.setFont('helvetica', 'bold');
+      pdf.text('Detalles de la Orden', margin, 14);
+      pdf.setTextColor(0, 0, 0);
+      yPosition = 28;
+
+      // Información General
+      pdf.setFontSize(12);
+      pdf.setFont('helvetica', 'bold');
+      pdf.setTextColor(200, 98, 109);
+      pdf.text('Información General', margin, yPosition);
+      yPosition += 5;
+      pdf.setDrawColor(200, 98, 109);
+      pdf.line(margin, yPosition, pageWidth - margin, yPosition);
+      yPosition += 6;
+
+      const orderId = selectedOrderDetails.id || 'N/A';
+      const status = selectedOrderDetails.status || 'pending';
+      const paymentStatus = selectedOrderDetails.paymentStatus || 'unknown';
+      const total = selectedOrderDetails.total?.toFixed(2) || '0.00';
+      const createdAt = selectedOrderDetails.createdAt 
+        ? new Date(selectedOrderDetails.createdAt.seconds ? selectedOrderDetails.createdAt.seconds * 1000 : selectedOrderDetails.createdAt).toLocaleString('es-ES')
+        : '-';
+      const updatedAt = selectedOrderDetails.updatedAt 
+        ? new Date(selectedOrderDetails.updatedAt.seconds ? selectedOrderDetails.updatedAt.seconds * 1000 : selectedOrderDetails.updatedAt).toLocaleString('es-ES')
+        : '-';
+
+      // Dos columnas para información general
+      let yCol1 = yPosition;
+      let yCol2 = yPosition;
+
+      // Columna 1
+      pdf.setFontSize(9);
+      pdf.setFont('helvetica', 'bold');
+      pdf.setTextColor(102, 102, 102); // #666
+      pdf.text('ID de Orden:', col1X, yCol1);
+      yCol1 += lineHeight;
+      pdf.setFont('helvetica', 'normal');
+      pdf.setTextColor(0, 0, 0);
+      pdf.setFont('courier', 'normal');
+      pdf.setFontSize(9);
+      pdf.text(orderId, col1X, yCol1);
+      yCol1 += lineHeight + 2;
+
+      pdf.setFont('helvetica', 'bold');
+      pdf.setTextColor(102, 102, 102);
+      pdf.text('Estado:', col1X, yCol1);
+      yCol1 += lineHeight;
+      pdf.setFont('helvetica', 'normal');
+      pdf.setTextColor(0, 0, 0);
+      pdf.text(status, col1X, yCol1);
+      yCol1 += lineHeight + 2;
+
+      pdf.setFont('helvetica', 'bold');
+      pdf.setTextColor(102, 102, 102);
+      pdf.text('Estado de Pago:', col1X, yCol1);
+      yCol1 += lineHeight;
+      pdf.setFont('helvetica', 'normal');
+      pdf.setTextColor(0, 0, 0);
+      pdf.text(paymentStatus, col1X, yCol1);
+      yCol1 += lineHeight + 2;
+
+      pdf.setFont('helvetica', 'bold');
+      pdf.setTextColor(102, 102, 102);
+      pdf.text('Total:', col1X, yCol1);
+      yCol1 += lineHeight;
+      pdf.setFont('helvetica', 'bold');
+      pdf.setTextColor(200, 98, 109);
+      pdf.setFontSize(11);
+      pdf.text(`$${total}`, col1X, yCol1);
+      yCol1 += lineHeight + 2;
+
+      // Columna 2
+      pdf.setFontSize(9);
+      pdf.setFont('helvetica', 'bold');
+      pdf.setTextColor(102, 102, 102);
+      pdf.text('Fecha de Creación:', col2X, yCol2);
+      yCol2 += lineHeight;
+      pdf.setFont('helvetica', 'normal');
+      pdf.setTextColor(0, 0, 0);
+      pdf.text(createdAt, col2X, yCol2);
+      yCol2 += lineHeight + 2;
+
+      pdf.setFont('helvetica', 'bold');
+      pdf.setTextColor(102, 102, 102);
+      pdf.text('Última Actualización:', col2X, yCol2);
+      yCol2 += lineHeight;
+      pdf.setFont('helvetica', 'normal');
+      pdf.setTextColor(0, 0, 0);
+      pdf.text(updatedAt, col2X, yCol2);
+      yCol2 += lineHeight + 2;
+      
+      if (selectedOrderDetails.sessionId) {
+        pdf.setFont('helvetica', 'bold');
+        pdf.setTextColor(102, 102, 102);
+        pdf.text('Session ID:', col2X, yCol2);
+        yCol2 += lineHeight;
+        pdf.setFont('courier', 'normal');
+        pdf.setFontSize(8);
+        pdf.setTextColor(0, 0, 0);
+        pdf.text(selectedOrderDetails.sessionId, col2X, yCol2);
+        yCol2 += lineHeight + 2;
+      }
+      if (selectedOrderDetails.paymentIntentId) {
+        pdf.setFont('helvetica', 'bold');
+        pdf.setFontSize(9);
+        pdf.setTextColor(102, 102, 102);
+        pdf.text('Payment Intent ID:', col2X, yCol2);
+        yCol2 += lineHeight;
+        pdf.setFont('courier', 'normal');
+        pdf.setFontSize(8);
+        pdf.setTextColor(0, 0, 0);
+        pdf.text(selectedOrderDetails.paymentIntentId, col2X, yCol2);
+        yCol2 += lineHeight + 2;
+      }
+
+      // Usar el máximo Y de ambas columnas
+      yPosition = Math.max(yCol1, yCol2) + sectionSpacing;
+
+      // Información del Cliente
+      if (selectedOrderDetails.customerInfo) {
+        pdf.setFontSize(12);
+        pdf.setFont('helvetica', 'bold');
+        pdf.setTextColor(200, 98, 109);
+        pdf.text('Información del Cliente', margin, yPosition);
+        yPosition += 5;
+        pdf.line(margin, yPosition, pageWidth - margin, yPosition);
+        yPosition += 6;
+
+        const customer = selectedOrderDetails.customerInfo;
+        const fullName = `${customer.firstName || ''} ${customer.lastName || ''}`.trim() || 'N/A';
+        const email = customer.email || 'N/A';
+        const phone = customer.phone || 'N/A';
+
+        pdf.setFontSize(9);
+        pdf.setFont('helvetica', 'bold');
+        pdf.setTextColor(102, 102, 102);
+        pdf.text('Nombre:', col1X, yPosition);
+        yPosition += lineHeight;
+        pdf.setFont('helvetica', 'normal');
+        pdf.setTextColor(0, 0, 0);
+        pdf.text(fullName, col1X, yPosition);
+        yPosition += lineHeight + 2;
+
+        pdf.setFont('helvetica', 'bold');
+        pdf.setTextColor(102, 102, 102);
+        pdf.text('Email:', col1X, yPosition);
+        yPosition += lineHeight;
+        pdf.setFont('helvetica', 'normal');
+        pdf.setTextColor(0, 0, 0);
+        pdf.text(email, col1X, yPosition);
+        yPosition += lineHeight + 2;
+
+        pdf.setFont('helvetica', 'bold');
+        pdf.setTextColor(102, 102, 102);
+        pdf.text('Teléfono:', col1X, yPosition);
+        yPosition += lineHeight;
+        pdf.setFont('helvetica', 'normal');
+        pdf.setTextColor(0, 0, 0);
+        pdf.text(phone, col1X, yPosition);
+        yPosition += lineHeight + 2;
+
+        if (customer.address) {
+          const addr = customer.address;
+          pdf.setFont('helvetica', 'bold');
+          pdf.setTextColor(102, 102, 102);
+          pdf.text('Dirección:', col1X, yPosition);
+          yPosition += lineHeight;
+          pdf.setFont('helvetica', 'normal');
+          pdf.setTextColor(0, 0, 0);
+          const addressLines = [
+            `${addr.line1 || ''}${addr.line2 ? ', ' + addr.line2 : ''}`,
+            `${addr.city || ''}, ${addr.state || ''} ${addr.postal_code || ''}`,
+            addr.country || ''
+          ];
+          addressLines.forEach(line => {
+            if (line.trim()) {
+              pdf.text(line, col1X, yPosition);
+              yPosition += lineHeight;
+            }
+          });
+        }
+        yPosition += sectionSpacing;
+      }
+
+      // Productos - Tabla
+      if (selectedOrderDetails.cartItems && selectedOrderDetails.cartItems.length > 0) {
+        pdf.setFontSize(12);
+        pdf.setFont('helvetica', 'bold');
+        pdf.setTextColor(200, 98, 109);
+        pdf.text(`Productos (${selectedOrderDetails.cartItems.length})`, margin, yPosition);
+        yPosition += 5;
+        pdf.line(margin, yPosition, pageWidth - margin, yPosition);
+        yPosition += 6;
+
+        // Encabezados de tabla
+        pdf.setFontSize(9);
+        pdf.setFont('helvetica', 'bold');
+        pdf.setTextColor(0, 0, 0);
+        pdf.text('Producto', margin, yPosition);
+        pdf.text('Cantidad', margin + 100, yPosition, { align: 'right' });
+        pdf.text('Precio Unit.', margin + 140, yPosition, { align: 'right' });
+        pdf.text('Subtotal', pageWidth - margin, yPosition, { align: 'right' });
+        yPosition += 4;
+        pdf.setDrawColor(200, 98, 109);
+        pdf.line(margin, yPosition, pageWidth - margin, yPosition);
+        yPosition += 5;
+
+        // Filas de productos
+        pdf.setFont('helvetica', 'normal');
+        pdf.setFontSize(9);
+        selectedOrderDetails.cartItems.forEach((item) => {
+          const itemName = item.name || 'Producto sin nombre';
+          const quantity = item.quantity || 0;
+          const price = parseFloat(item.price || 0).toFixed(2);
+          const subtotal = (parseFloat(item.price || 0) * (item.quantity || 0)).toFixed(2);
+
+          // Nombre del producto (puede ser largo, usar wrap)
+          const nameLines = pdf.splitTextToSize(itemName, 90);
+          pdf.text(nameLines, margin, yPosition);
+          pdf.text(String(quantity), margin + 100, yPosition, { align: 'right' });
+          pdf.text(`$${price}`, margin + 140, yPosition, { align: 'right' });
+          pdf.text(`$${subtotal}`, pageWidth - margin, yPosition, { align: 'right' });
+          yPosition += Math.max(nameLines.length * 5, 6) + 2;
+        });
+        yPosition += sectionSpacing;
+      }
+
+      // Información de Envío
+      if (selectedOrderDetails.shippingInfo) {
+        pdf.setFontSize(12);
+        pdf.setFont('helvetica', 'bold');
+        pdf.setTextColor(200, 98, 109);
+        pdf.text('Información de Envío', margin, yPosition);
+        yPosition += 5;
+        pdf.line(margin, yPosition, pageWidth - margin, yPosition);
+        yPosition += 6;
+
+        const shipping = selectedOrderDetails.shippingInfo;
+        let yCol1 = yPosition;
+        let yCol2 = yPosition;
+        
+        pdf.setFontSize(9);
+        if (shipping.carrier) {
+          pdf.setFont('helvetica', 'bold');
+          pdf.setTextColor(102, 102, 102);
+          pdf.text('Transportista:', col1X, yCol1);
+          yCol1 += lineHeight;
+          pdf.setFont('helvetica', 'normal');
+          pdf.setTextColor(0, 0, 0);
+          pdf.text(shipping.carrier, col1X, yCol1);
+          yCol1 += lineHeight + 2;
+        }
+        if (shipping.serviceLevel) {
+          pdf.setFont('helvetica', 'bold');
+          pdf.setTextColor(102, 102, 102);
+          pdf.text('Servicio:', col1X, yCol1);
+          yCol1 += lineHeight;
+          pdf.setFont('helvetica', 'normal');
+          pdf.setTextColor(0, 0, 0);
+          pdf.text(shipping.serviceLevel, col1X, yCol1);
+          yCol1 += lineHeight + 2;
+        }
+        if (shipping.cost) {
+          pdf.setFont('helvetica', 'bold');
+          pdf.setTextColor(102, 102, 102);
+          pdf.text('Costo de Envío:', col1X, yCol1);
+          yCol1 += lineHeight;
+          pdf.setFont('helvetica', 'bold');
+          pdf.setTextColor(200, 98, 109);
+          pdf.text(`$${parseFloat(shipping.cost).toFixed(2)}`, col1X, yCol1);
+          yCol1 += lineHeight + 2;
+        }
+        if (selectedOrderDetails.trackingCode) {
+          pdf.setFont('helvetica', 'bold');
+          pdf.setTextColor(102, 102, 102);
+          pdf.text('Código de Seguimiento:', col1X, yCol1);
+          yCol1 += lineHeight;
+          pdf.setFont('helvetica', 'bold');
+          pdf.setFont('courier', 'normal');
+          pdf.setTextColor(0, 0, 0);
+          pdf.text(selectedOrderDetails.trackingCode, col1X, yCol1);
+          yCol1 += lineHeight + 2;
+        }
+
+        // Segunda columna para Rate ID si existe
+        if (shipping.rateId) {
+          pdf.setFont('helvetica', 'bold');
+          pdf.setFontSize(9);
+          pdf.setTextColor(102, 102, 102);
+          pdf.text('Rate ID:', col2X, yCol2);
+          yCol2 += lineHeight;
+          pdf.setFont('courier', 'normal');
+          pdf.setFontSize(8);
+          pdf.setTextColor(0, 0, 0);
+          pdf.text(shipping.rateId, col2X, yCol2);
+        }
+        
+        yPosition = Math.max(yCol1, yCol2) + sectionSpacing;
+      }
+
+      // Información del Paquete
+      if (selectedOrderDetails.packageInfo && yPosition < pageHeight - 30) {
+        pdf.setFontSize(12);
+        pdf.setFont('helvetica', 'bold');
+        pdf.setTextColor(200, 98, 109);
+        pdf.text('Información del Paquete', margin, yPosition);
+        yPosition += 5;
+        pdf.line(margin, yPosition, pageWidth - margin, yPosition);
+        yPosition += 6;
+
+        const pkg = selectedOrderDetails.packageInfo;
+        pdf.setFontSize(9);
+        pdf.setFont('helvetica', 'bold');
+        pdf.setTextColor(102, 102, 102);
+        pdf.text('Peso:', col1X, yPosition);
+        yPosition += lineHeight;
+        pdf.setFont('helvetica', 'normal');
+        pdf.setTextColor(0, 0, 0);
+        pdf.text(`${pkg.weight} ${pkg.weightUnit || 'lb'}`, col1X, yPosition);
+        yPosition += lineHeight + 2;
+
+        pdf.setFont('helvetica', 'bold');
+        pdf.setTextColor(102, 102, 102);
+        pdf.text('Dimensiones:', col1X, yPosition);
+        yPosition += lineHeight;
+        pdf.setFont('helvetica', 'normal');
+        pdf.setTextColor(0, 0, 0);
+        pdf.text(`${pkg.length} × ${pkg.width} × ${pkg.height} ${pkg.distanceUnit || 'in'}`, col1X, yPosition);
+      }
+
+      // Descargar el PDF
+      const fileName = `orden-${orderId.substring(0, 8)}-${new Date().toISOString().split('T')[0]}.pdf`;
+      pdf.save(fileName);
+    } catch (error) {
+      console.error('Error al generar PDF de detalles:', error);
+      alert('Error al generar el PDF: ' + error.message);
     }
   };
 
@@ -695,68 +1443,91 @@ const OrdersManager = ({ open, onClose, initialTab = 'all' }) => {
                         </TableCell>
                       )}
                       <TableCell align="center">
-                        {currentTab === 'labels' ? (
-                          // En la pestaña de etiquetas, mostrar botón para ver/imprimir
-                          order.labelUrl && (
-                            <Button
-                              variant="contained"
-                              size="small"
-                              startIcon={<Print />}
-                              onClick={() => {
-                                setLabelData({
-                                  tracking_code: order.trackingCode,
-                                  id: order.id,
-                                  postage_label: {
-                                    label_url: order.labelUrl
-                                  }
-                                });
-                                setLabelDialogOpen(true);
-                              }}
-                              sx={{
-                                backgroundColor: '#C8626D',
-                                '&:hover': { backgroundColor: '#b8555a' }
-                              }}
-                            >
-                              Ver Etiqueta
-                            </Button>
-                          )
-                        ) : (
-                          // En la pestaña de todas las órdenes, mostrar botones Auto/Widget
-                          (order.status === 'pending' || !order.status || order.status === 'processing') && (
-                            <Box sx={{ display: 'flex', gap: 1, justifyContent: 'center' }}>
+                        <Box sx={{ display: 'flex', gap: 1, justifyContent: 'center', flexWrap: 'wrap' }}>
+                          {/* Botón Ver Detalles - Siempre visible */}
+                          <Button
+                            variant="outlined"
+                            size="small"
+                            startIcon={<Visibility />}
+                            onClick={() => {
+                              setSelectedOrderDetails(order);
+                              setOrderDetailsDialog(true);
+                            }}
+                            sx={{
+                              borderColor: '#C8626D',
+                              color: '#C8626D',
+                              '&:hover': { 
+                                borderColor: '#b8555a',
+                                backgroundColor: '#C8626D10'
+                              }
+                            }}
+                          >
+                            Ver Detalles
+                          </Button>
+                          
+                          {currentTab === 'labels' ? (
+                            // En la pestaña de etiquetas, mostrar botón para ver/imprimir
+                            order.labelUrl && (
                               <Button
                                 variant="contained"
                                 size="small"
-                                startIcon={<LocalShipping />}
-                                onClick={() => handleCreateShipment(order)}
-                                disabled={creatingLabel || creatingForOrderId === order.id}
+                                startIcon={<Print />}
+                                onClick={() => {
+                                  setLabelData({
+                                    tracking_code: order.trackingCode,
+                                    id: order.id,
+                                    postage_label: {
+                                      label_url: order.labelUrl
+                                    }
+                                  });
+                                  setLabelDialogOpen(true);
+                                }}
                                 sx={{
                                   backgroundColor: '#C8626D',
                                   '&:hover': { backgroundColor: '#b8555a' }
                                 }}
                               >
-                                {creatingForOrderId === order.id ? 'Creando...' : 'Auto'}
+                                Ver Etiqueta
                               </Button>
-                              <Button
-                                variant="outlined"
-                                size="small"
-                                startIcon={<LocalShipping />}
-                                onClick={() => handleOpenShippoElements(order)}
-                                disabled={shippoElementsOpen}
-                                sx={{
-                                  borderColor: '#C8626D',
-                                  color: '#C8626D',
-                                  '&:hover': { 
-                                    borderColor: '#b8555a',
-                                    backgroundColor: '#C8626D10'
-                                  }
-                                }}
-                              >
-                                Widget
-                              </Button>
-                            </Box>
-                          )
-                        )}
+                            )
+                          ) : (
+                            // En la pestaña de todas las órdenes, mostrar botones Auto/Widget
+                            (order.status === 'pending' || !order.status || order.status === 'processing') && (
+                              <>
+                                <Button
+                                  variant="contained"
+                                  size="small"
+                                  startIcon={<LocalShipping />}
+                                  onClick={() => handleCreateShipment(order)}
+                                  disabled={creatingLabel || creatingForOrderId === order.id}
+                                  sx={{
+                                    backgroundColor: '#C8626D',
+                                    '&:hover': { backgroundColor: '#b8555a' }
+                                  }}
+                                >
+                                  {creatingForOrderId === order.id ? 'Creando...' : 'Auto'}
+                                </Button>
+                                <Button
+                                  variant="outlined"
+                                  size="small"
+                                  startIcon={<LocalShipping />}
+                                  onClick={() => handleOpenShippoElements(order)}
+                                  disabled={shippoElementsOpen}
+                                  sx={{
+                                    borderColor: '#C8626D',
+                                    color: '#C8626D',
+                                    '&:hover': { 
+                                      borderColor: '#b8555a',
+                                      backgroundColor: '#C8626D10'
+                                    }
+                                  }}
+                                >
+                                  Widget
+                                </Button>
+                              </>
+                            )
+                          )}
+                        </Box>
                       </TableCell>
                     </TableRow>
                   ))}
@@ -905,6 +1676,44 @@ const OrdersManager = ({ open, onClose, initialTab = 'all' }) => {
                   </Typography>
                 </Box>
 
+                {/* Vista previa del PDF en formato vertical */}
+                {labelVerticalPdfUrl && (
+                  <Box sx={{ 
+                    mb: 3, 
+                    border: '2px solid #C8626D', 
+                    borderRadius: '8px',
+                    overflow: 'hidden',
+                    backgroundColor: '#fff'
+                  }}>
+                    <Box sx={{ 
+                      backgroundColor: '#C8626D', 
+                      color: 'white', 
+                      p: 1, 
+                      textAlign: 'center',
+                      fontWeight: 600,
+                      fontSize: '0.9rem'
+                    }}>
+                      📄 Vista Previa - Etiqueta en Formato Vertical
+                    </Box>
+                    <Box sx={{ 
+                      width: '100%', 
+                      height: '600px',
+                      overflow: 'auto',
+                      backgroundColor: '#f5f5f5'
+                    }}>
+                      <iframe
+                        src={labelVerticalPdfUrl}
+                        style={{
+                          width: '100%',
+                          height: '100%',
+                          border: 'none'
+                        }}
+                        title="Vista previa de etiqueta"
+                      />
+                    </Box>
+                  </Box>
+                )}
+
                 <Box sx={{ 
                   backgroundColor: '#e8f4fd', 
                   p: 2, 
@@ -915,8 +1724,8 @@ const OrdersManager = ({ open, onClose, initialTab = 'all' }) => {
                     <strong>📋 Instrucciones:</strong>
                   </Typography>
                   <Typography variant="body2" sx={{ color: '#666', fontSize: '0.9rem' }}>
-                    1. Haz clic en <strong>"Imprimir"</strong> para abrir la etiqueta en una nueva ventana<br/>
-                    2. O haz clic en <strong>"Descargar PDF"</strong> para guardarla en tu computadora<br/>
+                    1. Haz clic en <strong>"Imprimir"</strong> para abrir la etiqueta en formato vertical en una nueva ventana<br/>
+                    2. O haz clic en <strong>"Descargar PDF"</strong> para guardarla en formato vertical en tu computadora<br/>
                     3. Imprime la etiqueta y pégala en el paquete
                   </Typography>
                 </Box>
@@ -1054,6 +1863,323 @@ const OrdersManager = ({ open, onClose, initialTab = 'all' }) => {
             ) : (
               'Enviar'
             )}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Dialog para ver detalles completos de la orden */}
+      <Dialog
+        open={orderDetailsDialog}
+        onClose={() => setOrderDetailsDialog(false)}
+        maxWidth="md"
+        fullWidth
+        sx={{
+          zIndex: 18000, // Muy alto para estar por encima de todo
+          '& .MuiDialog-paper': {
+            zIndex: 18000
+          },
+          '& .MuiBackdrop-root': {
+            zIndex: 17999
+          }
+        }}
+        BackdropProps={{
+          sx: {
+            zIndex: 17999
+          }
+        }}
+      >
+        <DialogTitle sx={{ backgroundColor: '#C8626D', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Info />
+            <Typography variant="h6" sx={{ fontWeight: 600 }}>
+              Detalles de la Orden
+            </Typography>
+          </Box>
+          <IconButton
+            onClick={() => setOrderDetailsDialog(false)}
+            sx={{ color: 'white' }}
+          >
+            <Close />
+          </IconButton>
+        </DialogTitle>
+        <DialogContent sx={{ p: 3 }}>
+          {selectedOrderDetails && (
+            <Box>
+              {/* Información General */}
+              <Box sx={{ mb: 3 }}>
+                <Typography variant="h6" sx={{ color: '#C8626D', mb: 2, fontWeight: 600, borderBottom: '2px solid #C8626D', pb: 1 }}>
+                  📋 Información General
+                </Typography>
+                <Grid container spacing={2}>
+                  <Grid item xs={12} sm={6}>
+                    <Typography variant="body2" sx={{ color: '#666', mb: 0.5 }}><strong>ID de Orden:</strong></Typography>
+                    <Typography variant="body1" sx={{ fontFamily: 'monospace', mb: 2 }}>{selectedOrderDetails.id}</Typography>
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <Typography variant="body2" sx={{ color: '#666', mb: 0.5 }}><strong>Estado:</strong></Typography>
+                    <Chip
+                      icon={getStatusIcon(selectedOrderDetails.status)}
+                      label={selectedOrderDetails.status || 'pending'}
+                      color={getStatusColor(selectedOrderDetails.status)}
+                      size="small"
+                      sx={{ mb: 2 }}
+                    />
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <Typography variant="body2" sx={{ color: '#666', mb: 0.5 }}><strong>Estado de Pago:</strong></Typography>
+                    <Chip
+                      label={selectedOrderDetails.paymentStatus || 'unknown'}
+                      color={selectedOrderDetails.paymentStatus === 'paid' ? 'success' : 'warning'}
+                      size="small"
+                      sx={{ mb: 2 }}
+                    />
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <Typography variant="body2" sx={{ color: '#666', mb: 0.5 }}><strong>Total:</strong></Typography>
+                    <Typography variant="h6" sx={{ color: '#C8626D', mb: 2, fontWeight: 600 }}>
+                      ${selectedOrderDetails.total?.toFixed(2) || '0.00'}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <Typography variant="body2" sx={{ color: '#666', mb: 0.5 }}><strong>Fecha de Creación:</strong></Typography>
+                    <Typography variant="body1" sx={{ mb: 2 }}>
+                      {selectedOrderDetails.createdAt 
+                        ? new Date(selectedOrderDetails.createdAt.seconds ? selectedOrderDetails.createdAt.seconds * 1000 : selectedOrderDetails.createdAt).toLocaleString('es-ES')
+                        : '-'}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <Typography variant="body2" sx={{ color: '#666', mb: 0.5 }}><strong>Última Actualización:</strong></Typography>
+                    <Typography variant="body1" sx={{ mb: 2 }}>
+                      {selectedOrderDetails.updatedAt 
+                        ? new Date(selectedOrderDetails.updatedAt.seconds ? selectedOrderDetails.updatedAt.seconds * 1000 : selectedOrderDetails.updatedAt).toLocaleString('es-ES')
+                        : '-'}
+                    </Typography>
+                  </Grid>
+                  {selectedOrderDetails.sessionId && (
+                    <Grid item xs={12} sm={6}>
+                      <Typography variant="body2" sx={{ color: '#666', mb: 0.5 }}><strong>Session ID:</strong></Typography>
+                      <Typography variant="body1" sx={{ fontFamily: 'monospace', mb: 2, fontSize: '0.9rem' }}>
+                        {selectedOrderDetails.sessionId}
+                      </Typography>
+                    </Grid>
+                  )}
+                  {selectedOrderDetails.paymentIntentId && (
+                    <Grid item xs={12} sm={6}>
+                      <Typography variant="body2" sx={{ color: '#666', mb: 0.5 }}><strong>Payment Intent ID:</strong></Typography>
+                      <Typography variant="body1" sx={{ fontFamily: 'monospace', mb: 2, fontSize: '0.9rem' }}>
+                        {selectedOrderDetails.paymentIntentId}
+                      </Typography>
+                    </Grid>
+                  )}
+                </Grid>
+              </Box>
+
+              {/* Información del Cliente */}
+              {selectedOrderDetails.customerInfo && (
+                <Box sx={{ mb: 3 }}>
+                  <Typography variant="h6" sx={{ color: '#C8626D', mb: 2, fontWeight: 600, borderBottom: '2px solid #C8626D', pb: 1 }}>
+                    👤 Información del Cliente
+                  </Typography>
+                  <Grid container spacing={2}>
+                    <Grid item xs={12} sm={6}>
+                      <Typography variant="body2" sx={{ color: '#666', mb: 0.5 }}><strong>Nombre:</strong></Typography>
+                      <Typography variant="body1" sx={{ mb: 2 }}>
+                        {selectedOrderDetails.customerInfo.firstName || ''} {selectedOrderDetails.customerInfo.lastName || ''}
+                      </Typography>
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                      <Typography variant="body2" sx={{ color: '#666', mb: 0.5 }}><strong>Email:</strong></Typography>
+                      <Typography variant="body1" sx={{ mb: 2 }}>{selectedOrderDetails.customerInfo.email || '-'}</Typography>
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                      <Typography variant="body2" sx={{ color: '#666', mb: 0.5 }}><strong>Teléfono:</strong></Typography>
+                      <Typography variant="body1" sx={{ mb: 2 }}>{selectedOrderDetails.customerInfo.phone || '-'}</Typography>
+                    </Grid>
+                    {selectedOrderDetails.customerInfo.address && (
+                      <Grid item xs={12}>
+                        <Typography variant="body2" sx={{ color: '#666', mb: 0.5 }}><strong>Dirección:</strong></Typography>
+                        <Typography variant="body1" sx={{ mb: 2 }}>
+                          {selectedOrderDetails.customerInfo.address.line1 || ''}
+                          {selectedOrderDetails.customerInfo.address.line2 ? `, ${selectedOrderDetails.customerInfo.address.line2}` : ''}
+                          <br />
+                          {selectedOrderDetails.customerInfo.address.city || ''}, {selectedOrderDetails.customerInfo.address.state || ''} {selectedOrderDetails.customerInfo.address.postal_code || ''}
+                          <br />
+                          {selectedOrderDetails.customerInfo.address.country || ''}
+                        </Typography>
+                      </Grid>
+                    )}
+                  </Grid>
+                </Box>
+              )}
+
+              {/* Productos */}
+              {selectedOrderDetails.cartItems && selectedOrderDetails.cartItems.length > 0 && (
+                <Box sx={{ mb: 3 }}>
+                  <Typography variant="h6" sx={{ color: '#C8626D', mb: 2, fontWeight: 600, borderBottom: '2px solid #C8626D', pb: 1 }}>
+                    🛒 Productos ({selectedOrderDetails.cartItems.length})
+                  </Typography>
+                  <TableContainer component={Paper} variant="outlined">
+                    <Table size="small">
+                      <TableHead>
+                        <TableRow>
+                          <TableCell><strong>Producto</strong></TableCell>
+                          <TableCell align="right"><strong>Cantidad</strong></TableCell>
+                          <TableCell align="right"><strong>Precio Unit.</strong></TableCell>
+                          <TableCell align="right"><strong>Subtotal</strong></TableCell>
+                        </TableRow>
+                      </TableHead>
+                      <TableBody>
+                        {selectedOrderDetails.cartItems.map((item, index) => (
+                          <TableRow key={index}>
+                            <TableCell>
+                              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                {item.image && (
+                                  <img 
+                                    src={item.image} 
+                                    alt={item.name} 
+                                    style={{ width: 40, height: 40, objectFit: 'cover', borderRadius: 4 }}
+                                  />
+                                )}
+                                <Typography variant="body2">{item.name || 'Producto sin nombre'}</Typography>
+                              </Box>
+                            </TableCell>
+                            <TableCell align="right">{item.quantity || 0}</TableCell>
+                            <TableCell align="right">${parseFloat(item.price || 0).toFixed(2)}</TableCell>
+                            <TableCell align="right">
+                              ${(parseFloat(item.price || 0) * (item.quantity || 0)).toFixed(2)}
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </TableContainer>
+                </Box>
+              )}
+
+              {/* Información de Envío */}
+              {selectedOrderDetails.shippingInfo && (
+                <Box sx={{ mb: 3 }}>
+                  <Typography variant="h6" sx={{ color: '#C8626D', mb: 2, fontWeight: 600, borderBottom: '2px solid #C8626D', pb: 1 }}>
+                    📦 Información de Envío
+                  </Typography>
+                  <Grid container spacing={2}>
+                    {selectedOrderDetails.shippingInfo.carrier && (
+                      <Grid item xs={12} sm={6}>
+                        <Typography variant="body2" sx={{ color: '#666', mb: 0.5 }}><strong>Transportista:</strong></Typography>
+                        <Typography variant="body1" sx={{ mb: 2 }}>{selectedOrderDetails.shippingInfo.carrier}</Typography>
+                      </Grid>
+                    )}
+                    {selectedOrderDetails.shippingInfo.serviceLevel && (
+                      <Grid item xs={12} sm={6}>
+                        <Typography variant="body2" sx={{ color: '#666', mb: 0.5 }}><strong>Servicio:</strong></Typography>
+                        <Typography variant="body1" sx={{ mb: 2 }}>{selectedOrderDetails.shippingInfo.serviceLevel}</Typography>
+                      </Grid>
+                    )}
+                    {selectedOrderDetails.shippingInfo.cost && (
+                      <Grid item xs={12} sm={6}>
+                        <Typography variant="body2" sx={{ color: '#666', mb: 0.5 }}><strong>Costo de Envío:</strong></Typography>
+                        <Typography variant="body1" sx={{ mb: 2, fontWeight: 600, color: '#C8626D' }}>
+                          ${parseFloat(selectedOrderDetails.shippingInfo.cost).toFixed(2)}
+                        </Typography>
+                      </Grid>
+                    )}
+                    {selectedOrderDetails.trackingCode && (
+                      <Grid item xs={12} sm={6}>
+                        <Typography variant="body2" sx={{ color: '#666', mb: 0.5 }}><strong>Código de Seguimiento:</strong></Typography>
+                        <Typography variant="body1" sx={{ fontFamily: 'monospace', mb: 2, fontWeight: 600 }}>
+                          {selectedOrderDetails.trackingCode}
+                        </Typography>
+                      </Grid>
+                    )}
+                    {selectedOrderDetails.shippingInfo.rateId && (
+                      <Grid item xs={12}>
+                        <Typography variant="body2" sx={{ color: '#666', mb: 0.5 }}><strong>Rate ID:</strong></Typography>
+                        <Typography variant="body1" sx={{ fontFamily: 'monospace', mb: 2, fontSize: '0.9rem' }}>
+                          {selectedOrderDetails.shippingInfo.rateId}
+                        </Typography>
+                      </Grid>
+                    )}
+                  </Grid>
+                </Box>
+              )}
+
+              {/* Información del Paquete */}
+              {selectedOrderDetails.packageInfo && (
+                <Box sx={{ mb: 3 }}>
+                  <Typography variant="h6" sx={{ color: '#C8626D', mb: 2, fontWeight: 600, borderBottom: '2px solid #C8626D', pb: 1 }}>
+                    📏 Información del Paquete
+                  </Typography>
+                  <Grid container spacing={2}>
+                    <Grid item xs={12} sm={6}>
+                      <Typography variant="body2" sx={{ color: '#666', mb: 0.5 }}><strong>Peso:</strong></Typography>
+                      <Typography variant="body1" sx={{ mb: 2 }}>
+                        {selectedOrderDetails.packageInfo.weight} {selectedOrderDetails.packageInfo.weightUnit || 'lb'}
+                      </Typography>
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                      <Typography variant="body2" sx={{ color: '#666', mb: 0.5 }}><strong>Dimensiones:</strong></Typography>
+                      <Typography variant="body1" sx={{ mb: 2 }}>
+                        {selectedOrderDetails.packageInfo.length} × {selectedOrderDetails.packageInfo.width} × {selectedOrderDetails.packageInfo.height} {selectedOrderDetails.packageInfo.distanceUnit || 'in'}
+                      </Typography>
+                    </Grid>
+                  </Grid>
+                </Box>
+              )}
+
+              {/* Datos JSON completos (para debugging) - OCULTO */}
+              {false && (
+              <Box sx={{ mb: 2 }}>
+                <Typography variant="h6" sx={{ color: '#C8626D', mb: 2, fontWeight: 600, borderBottom: '2px solid #C8626D', pb: 1 }}>
+                  🔍 Datos Completos (JSON)
+                </Typography>
+                <Box sx={{ 
+                  backgroundColor: '#f5f5f5', 
+                  p: 2, 
+                  borderRadius: '8px',
+                  maxHeight: '400px',
+                  overflow: 'auto'
+                }}>
+                  <pre style={{ 
+                    margin: 0, 
+                    fontSize: '0.85rem',
+                    fontFamily: 'monospace',
+                    whiteSpace: 'pre-wrap',
+                    wordBreak: 'break-word'
+                  }}>
+                    {JSON.stringify(selectedOrderDetails, null, 2)}
+                  </pre>
+                </Box>
+              </Box>
+              )}
+            </Box>
+          )}
+        </DialogContent>
+        <DialogActions sx={{ p: 2, gap: 1 }}>
+          <Button
+            onClick={() => setOrderDetailsDialog(false)}
+            variant="outlined"
+            sx={{
+              borderColor: '#C8626D',
+              color: '#C8626D',
+              '&:hover': {
+                borderColor: '#b8555a',
+                backgroundColor: 'rgba(200, 98, 109, 0.04)'
+              }
+            }}
+          >
+            Cerrar
+          </Button>
+          <Button
+            onClick={handlePrintOrderDetails}
+            variant="contained"
+            startIcon={<PictureAsPdf />}
+            sx={{
+              backgroundColor: '#C8626D',
+              '&:hover': { backgroundColor: '#b8555a' }
+            }}
+          >
+            Descargar PDF
           </Button>
         </DialogActions>
       </Dialog>

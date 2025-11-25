@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import {
   Box,
@@ -46,6 +46,7 @@ const BannerPhotoManager = ({ open, onClose }) => {
   });
   const [editingPhoto, setEditingPhoto] = useState(null);
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
+  const progressIntervalRef = useRef(null);
 
   // Cargar fotos del banner al abrir
   useEffect(() => {
@@ -53,6 +54,25 @@ const BannerPhotoManager = ({ open, onClose }) => {
       loadBannerPhotos();
     }
   }, [open]);
+
+  // Limpiar timer cuando se desmonte el componente o cambie el archivo seleccionado
+  useEffect(() => {
+    return () => {
+      if (progressIntervalRef.current) {
+        clearInterval(progressIntervalRef.current);
+        progressIntervalRef.current = null;
+      }
+    };
+  }, []);
+
+  // Limpiar timer cuando se selecciona un nuevo archivo
+  useEffect(() => {
+    if (!selectedFile && progressIntervalRef.current) {
+      clearInterval(progressIntervalRef.current);
+      progressIntervalRef.current = null;
+      setUploadProgress(0);
+    }
+  }, [selectedFile]);
 
   const loadBannerPhotos = async () => {
     try {
@@ -71,6 +91,12 @@ const BannerPhotoManager = ({ open, onClose }) => {
   const handleFileSelect = (event) => {
     const file = event.target.files[0];
     if (file) {
+      // Limpiar timer anterior si existe
+      if (progressIntervalRef.current) {
+        clearInterval(progressIntervalRef.current);
+        progressIntervalRef.current = null;
+      }
+      
       // Validar tipo de archivo
       if (!file.type.startsWith('image/')) {
         showSnackbar('Por favor selecciona un archivo de imagen', 'error');
@@ -84,6 +110,7 @@ const BannerPhotoManager = ({ open, onClose }) => {
       }
 
       setSelectedFile(file);
+      setUploadProgress(0);
       setPhotoData({
         title: '',
         description: '',
@@ -96,6 +123,12 @@ const BannerPhotoManager = ({ open, onClose }) => {
   const uploadPhoto = async () => {
     if (!selectedFile) return;
 
+    // Limpiar timer anterior si existe
+    if (progressIntervalRef.current) {
+      clearInterval(progressIntervalRef.current);
+      progressIntervalRef.current = null;
+    }
+
     setUploading(true);
     setUploadProgress(0);
 
@@ -106,13 +139,18 @@ const BannerPhotoManager = ({ open, onClose }) => {
       // Subir archivo
       const uploadTask = uploadBytes(storageRef, selectedFile);
       
-      // Simular progreso
-      const progressInterval = setInterval(() => {
+      // Inicializar y guardar referencia del timer para simular progreso
+      progressIntervalRef.current = setInterval(() => {
         setUploadProgress(prev => Math.min(prev + 10, 90));
       }, 200);
 
       await uploadTask;
-      clearInterval(progressInterval);
+      
+      // Limpiar timer después de completar la subida
+      if (progressIntervalRef.current) {
+        clearInterval(progressIntervalRef.current);
+        progressIntervalRef.current = null;
+      }
       setUploadProgress(100);
 
       // Obtener URL de descarga
@@ -141,6 +179,12 @@ const BannerPhotoManager = ({ open, onClose }) => {
     } catch (error) {
       console.error('Error subiendo foto:', error);
       showSnackbar('Error subiendo foto', 'error');
+      
+      // Limpiar timer en caso de error
+      if (progressIntervalRef.current) {
+        clearInterval(progressIntervalRef.current);
+        progressIntervalRef.current = null;
+      }
     } finally {
       setUploading(false);
       setUploadProgress(0);

@@ -120,6 +120,10 @@ const AdminDashboard = () => {
   const [ordersManagerTab, setOrdersManagerTab] = useState('all');
   const [voucherManagerOpen, setVoucherManagerOpen] = useState(false);
   const [subscriptionManagerOpen, setSubscriptionManagerOpen] = useState(false);
+  const [paypalEmailTestOpen, setPaypalEmailTestOpen] = useState(false);
+  const [testCustomerEmail, setTestCustomerEmail] = useState('');
+  const [testingEmail, setTestingEmail] = useState(false);
+  const [emailTestResult, setEmailTestResult] = useState(null);
   const navigate = useNavigate();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
@@ -157,6 +161,46 @@ const AdminDashboard = () => {
       navigate('/');
     } catch (error) {
       console.error('Error al cerrar sesión:', error);
+    }
+  };
+
+  const handleTestPayPalEmail = async () => {
+    if (!testCustomerEmail || !testCustomerEmail.includes('@')) {
+      setEmailTestResult({
+        success: false,
+        error: 'Por favor ingresa un correo válido'
+      });
+      return;
+    }
+
+    setTestingEmail(true);
+    setEmailTestResult(null);
+
+    try {
+      // En desarrollo usa directamente localhost:5000, en producción usa window.location.origin
+      const baseUrl = process.env.NODE_ENV === 'production' 
+        ? window.location.origin 
+        : 'http://localhost:5000';
+      const response = await fetch(`${baseUrl}/api/test-paypal-email`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          customerEmail: testCustomerEmail
+        })
+      });
+
+      const result = await response.json();
+      setEmailTestResult(result);
+    } catch (error) {
+      console.error('Error probando correos:', error);
+      setEmailTestResult({
+        success: false,
+        error: error.message || 'Error al probar envío de correos'
+      });
+    } finally {
+      setTestingEmail(false);
     }
   };
 
@@ -730,15 +774,15 @@ const AdminDashboard = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
         >
-          <Box sx={{ mt: 12, pt: 6 }}>
+            <Box sx={{ mt: 12, pt: 6 }}>
             <Grid container spacing={0} sx={{ maxWidth: '1000px', mx: 'auto' }}>
-              {Array.from({ length: 21 }, (_, index) => {
+              {Array.from({ length: 22 }, (_, index) => {
                 const colors = [
                   '#c8626d', '#be8782', '#b5555a', '#c8626d',
                   '#c8626d', '#c8626d', '#c8626d', '#c8626d',
                   '#BC8F8F', '#F5DEB3', '#DDA0DD', '#98FB98',
                   '#F0E68C', '#FFB6C1', '#87CEEB', '#FFA07A',
-                  '#C8626D', '#7C2815', '#EB8B8B', '#8D9A7D', '#C8626D'
+                  '#C8626D', '#7C2815', '#EB8B8B', '#8D9A7D', '#C8626D', '#c8626d'
                 ];
                 const color = colors[index];
                 
@@ -779,6 +823,11 @@ const AdminDashboard = () => {
                               index === 20 ? () => {
                                 setOrdersManagerTab('labels');
                                 setOrdersManagerOpen(true);
+                              } :
+                              index === 21 ? () => {
+                                setTestCustomerEmail('');
+                                setEmailTestResult(null);
+                                setPaypalEmailTestOpen(true);
                               } :
                               undefined
                             }
@@ -1087,6 +1136,22 @@ const AdminDashboard = () => {
                                   }}
                                 >
                                   Etiquetas Compradas
+                                </Typography>
+                              </Box>
+                            ) : index === 21 ? (
+                              <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1 }}>
+                                <Email sx={{ color: 'white', fontSize: '2rem' }} />
+                                <Typography
+                                  variant="body2"
+                                  sx={{
+                                    color: 'white',
+                                    fontWeight: 600,
+                                    textShadow: '1px 1px 2px rgba(0,0,0,0.5)',
+                                    textAlign: 'center',
+                                    fontSize: '0.85rem'
+                                  }}
+                                >
+                                  Probar Correos PayPal
                                 </Typography>
                               </Box>
                             ) : (
@@ -2266,6 +2331,142 @@ const AdminDashboard = () => {
               }}
             >
               Cerrar
+            </Button>
+          </DialogActions>
+        </Dialog>
+
+        {/* Dialog para probar correos de PayPal */}
+        <Dialog
+          open={paypalEmailTestOpen}
+          onClose={() => setPaypalEmailTestOpen(false)}
+          maxWidth="sm"
+          fullWidth
+        >
+          <DialogTitle sx={{ backgroundColor: '#c8626d', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <Email />
+              <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                Probar Correos de PayPal
+              </Typography>
+            </Box>
+            <IconButton
+              onClick={() => setPaypalEmailTestOpen(false)}
+              sx={{ color: 'white' }}
+            >
+              <Close />
+            </IconButton>
+          </DialogTitle>
+          <DialogContent sx={{ p: 3 }}>
+            <Alert severity="info" sx={{ mb: 3 }}>
+              Esta herramienta envía correos de prueba simulando un pago exitoso de PayPal.
+              Se enviará un correo al cliente y una notificación al administrador (delizukar@gmail.com).
+            </Alert>
+
+            <TextField
+              fullWidth
+              label="Correo del Cliente"
+              type="email"
+              value={testCustomerEmail}
+              onChange={(e) => setTestCustomerEmail(e.target.value)}
+              placeholder="cliente@ejemplo.com"
+              sx={{ mb: 3 }}
+              disabled={testingEmail}
+            />
+
+            {emailTestResult && (
+              <Box sx={{ mb: 3 }}>
+                {emailTestResult.success ? (
+                  <Alert severity="success" sx={{ mb: 2 }}>
+                    <Box>
+                      <Typography variant="body2" sx={{ fontWeight: 600, mb: 1 }}>
+                        ✅ Prueba completada
+                      </Typography>
+                      {emailTestResult.results && (
+                        <Box>
+                          <Box sx={{ mb: 1, display: 'flex', alignItems: 'center', flexWrap: 'wrap' }}>
+                            <Typography variant="body2" component="span">
+                              <strong>Correo Cliente ({emailTestResult.results.customerEmail.email}):</strong>
+                            </Typography>
+                            {emailTestResult.results.customerEmail.sent ? (
+                              <Chip label="✅ Enviado" size="small" color="success" sx={{ ml: 1 }} />
+                            ) : (
+                              <Chip label="❌ Error" size="small" color="error" sx={{ ml: 1 }} />
+                            )}
+                          </Box>
+                          {emailTestResult.results.customerEmail.error && (
+                            <Typography variant="caption" sx={{ color: 'error.main', display: 'block', ml: 2, mb: 1 }}>
+                              {emailTestResult.results.customerEmail.error}
+                            </Typography>
+                          )}
+                          <Box sx={{ mt: 1, mb: 1, display: 'flex', alignItems: 'center', flexWrap: 'wrap' }}>
+                            <Typography variant="body2" component="span">
+                              <strong>Correo Admin ({emailTestResult.results.adminEmail.email}):</strong>
+                            </Typography>
+                            {emailTestResult.results.adminEmail.sent ? (
+                              <Chip label="✅ Enviado" size="small" color="success" sx={{ ml: 1 }} />
+                            ) : (
+                              <Chip label="❌ Error" size="small" color="error" sx={{ ml: 1 }} />
+                            )}
+                          </Box>
+                          {emailTestResult.results.adminEmail.error && (
+                            <Typography variant="caption" sx={{ color: 'error.main', display: 'block', ml: 2 }}>
+                              {emailTestResult.results.adminEmail.error}
+                            </Typography>
+                          )}
+                        </Box>
+                      )}
+                    </Box>
+                  </Alert>
+                ) : (
+                  <Alert severity="error">
+                    <Typography variant="body2" component="div">
+                      <strong>Error:</strong> {emailTestResult.error || 'Error desconocido'}
+                    </Typography>
+                  </Alert>
+                )}
+              </Box>
+            )}
+
+            <Box sx={{ 
+              backgroundColor: '#f5f5f5', 
+              p: 2, 
+              borderRadius: '8px',
+              border: '1px solid #e0e0e0'
+            }}>
+              <Typography variant="body2" sx={{ color: '#666', mb: 1, fontWeight: 600 }}>
+                📋 Información:
+              </Typography>
+              <Typography variant="body2" sx={{ color: '#666', fontSize: '0.9rem', mb: 0.5 }}>
+                • Correo del cliente: Se enviará a la dirección ingresada
+              </Typography>
+              <Typography variant="body2" sx={{ color: '#666', fontSize: '0.9rem', mb: 0.5 }}>
+                • Correo del admin: Se enviará a <strong>delizukar@gmail.com</strong> (hardcodeado)
+              </Typography>
+              <Typography variant="body2" sx={{ color: '#666', fontSize: '0.9rem' }}>
+                • Los correos simulan una orden de prueba con productos ficticios
+              </Typography>
+            </Box>
+          </DialogContent>
+          <DialogActions sx={{ p: 2, gap: 1 }}>
+            <Button
+              onClick={() => setPaypalEmailTestOpen(false)}
+              variant="outlined"
+              sx={{ borderColor: '#c8626d', color: '#c8626d' }}
+            >
+              Cerrar
+            </Button>
+            <Button
+              onClick={handleTestPayPalEmail}
+              variant="contained"
+              disabled={testingEmail || !testCustomerEmail}
+              startIcon={testingEmail ? <CircularProgress size={20} /> : <Email />}
+              sx={{
+                backgroundColor: '#c8626d',
+                '&:hover': { backgroundColor: '#b8555a' },
+                '&:disabled': { backgroundColor: '#ccc' }
+              }}
+            >
+              {testingEmail ? 'Enviando...' : 'Probar Envío'}
             </Button>
           </DialogActions>
         </Dialog>
