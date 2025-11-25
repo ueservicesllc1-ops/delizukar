@@ -19,7 +19,8 @@ import {
   IconButton,
   Chip,
   Avatar,
-  LinearProgress
+  LinearProgress,
+  Alert
 } from '@mui/material';
 import {
   Add,
@@ -45,8 +46,12 @@ const CostAnalysisIngredients = () => {
   const [previewUrl, setPreviewUrl] = useState('');
   const [newIngredient, setNewIngredient] = useState({
     name: '',
-    price: 0,
-    unit: 'kg',
+    totalPrice: 0,          // Precio total del producto (ej: $2 por el litro de leche)
+    totalQuantity: 0,       // Cantidad total (ej: 1000ml o 1000g)
+    baseUnit: 'g',          // Unidad base: 'g', 'kg', 'ml', 'l'
+    pricePerUnit: 0,        // Precio por gramo o mililitro (calculado automáticamente)
+    price: 0,               // Mantener para compatibilidad
+    unit: 'kg',             // Mantener para compatibilidad
     category: 'materia_prima',
     description: '',
     image: '',
@@ -58,6 +63,35 @@ const CostAnalysisIngredients = () => {
   useEffect(() => {
     loadIngredients();
   }, []);
+
+  // Recalcular precio por unidad cuando cambian los valores en el formulario
+  useEffect(() => {
+    if (newIngredient.totalPrice > 0 && newIngredient.totalQuantity > 0) {
+      const pricePerUnit = calculatePricePerUnit(
+        newIngredient.totalPrice,
+        newIngredient.totalQuantity,
+        newIngredient.baseUnit || 'g'
+      );
+      setNewIngredient(prev => ({
+        ...prev,
+        pricePerUnit: pricePerUnit
+      }));
+    }
+  }, [newIngredient.totalPrice, newIngredient.totalQuantity, newIngredient.baseUnit]);
+
+  useEffect(() => {
+    if (editingIngredient && editingIngredient.totalPrice > 0 && editingIngredient.totalQuantity > 0) {
+      const pricePerUnit = calculatePricePerUnit(
+        editingIngredient.totalPrice,
+        editingIngredient.totalQuantity,
+        editingIngredient.baseUnit || 'g'
+      );
+      setEditingIngredient(prev => ({
+        ...prev,
+        pricePerUnit: pricePerUnit
+      }));
+    }
+  }, [editingIngredient?.totalPrice, editingIngredient?.totalQuantity, editingIngredient?.baseUnit]);
 
   // Función para manejar la selección de archivo
   const handleFileSelect = (event) => {
@@ -107,6 +141,45 @@ const CostAnalysisIngredients = () => {
     }
   };
 
+  // Función para calcular el precio por gramo o mililitro
+  const calculatePricePerUnit = (totalPrice, totalQuantity, baseUnit) => {
+    if (!totalPrice || !totalQuantity || totalQuantity <= 0) return 0;
+    
+    // Convertir la cantidad total a la unidad más pequeña (g o ml)
+    let quantityInSmallestUnit = totalQuantity;
+    
+    if (baseUnit === 'kg') {
+      quantityInSmallestUnit = totalQuantity * 1000; // Convertir kg a gramos
+    } else if (baseUnit === 'l') {
+      quantityInSmallestUnit = totalQuantity * 1000; // Convertir litros a mililitros
+    }
+    
+    // Calcular precio por gramo o mililitro
+    const pricePerUnit = totalPrice / quantityInSmallestUnit;
+    return Math.round(pricePerUnit * 1000000) / 1000000; // Redondear a 6 decimales
+  };
+
+  // Función para actualizar el precio por unidad cuando cambian los valores
+  const updatePricePerUnit = (ingredientData, isEditing = false) => {
+    const pricePerUnit = calculatePricePerUnit(
+      ingredientData.totalPrice || 0,
+      ingredientData.totalQuantity || 0,
+      ingredientData.baseUnit || 'g'
+    );
+    
+    if (isEditing) {
+      setEditingIngredient({
+        ...ingredientData,
+        pricePerUnit: pricePerUnit
+      });
+    } else {
+      setNewIngredient({
+        ...ingredientData,
+        pricePerUnit: pricePerUnit
+      });
+    }
+  };
+
   const loadIngredients = async () => {
     try {
       setLoading(true);
@@ -119,11 +192,28 @@ const CostAnalysisIngredients = () => {
       const ingredientsList = [];
       querySnapshot.forEach((doc) => {
         const data = doc.data();
+        // Compatibilidad con datos antiguos
+        const totalPrice = parseFloat(data.totalPrice || data.price || 0);
+        const totalQuantity = parseFloat(data.totalQuantity || (data.baseUnit === 'kg' ? 1000 : data.baseUnit === 'l' ? 1000 : 1000));
+        const baseUnit = data.baseUnit || data.unit || 'g';
+        
+        // Calcular precio por unidad si no existe
+        let pricePerUnit = parseFloat(data.pricePerUnit || 0);
+        if (!pricePerUnit || pricePerUnit === 0) {
+          pricePerUnit = calculatePricePerUnit(totalPrice, totalQuantity, baseUnit);
+        }
+        
         ingredientsList.push({
           id: doc.id,
           ...data,
-          // Asegurar que los campos numéricos estén bien formateados
-          price: parseFloat(data.price) || 0,
+          // Campos nuevos
+          totalPrice: totalPrice,
+          totalQuantity: totalQuantity,
+          baseUnit: baseUnit,
+          pricePerUnit: pricePerUnit,
+          // Campos antiguos para compatibilidad
+          price: parseFloat(data.price || data.totalPrice || 0),
+          unit: data.unit || baseUnit,
           stock: parseFloat(data.stock) || 0,
           minStock: parseFloat(data.minStock) || 0
         });
@@ -146,8 +236,8 @@ const CostAnalysisIngredients = () => {
   };
 
   const handleAddIngredient = async () => {
-    if (!newIngredient.name.trim() || newIngredient.price <= 0) {
-      alert('Por favor completa el nombre y precio del ingrediente');
+    if (!newIngredient.name.trim() || !newIngredient.totalPrice || newIngredient.totalPrice <= 0 || !newIngredient.totalQuantity || newIngredient.totalQuantity <= 0) {
+      alert('Por favor completa el nombre, precio total y cantidad total del ingrediente');
       return;
     }
 
@@ -163,6 +253,15 @@ const CostAnalysisIngredients = () => {
         console.log('✅ Imagen subida exitosamente:', imageUrl);
       }
       
+      // Calcular precio por unidad
+      const pricePerUnit = calculatePricePerUnit(
+        newIngredient.totalPrice,
+        newIngredient.totalQuantity,
+        newIngredient.baseUnit || 'g'
+      );
+      
+      console.log('💰 Precio calculado por unidad:', pricePerUnit, `$$/${newIngredient.baseUnit || 'g'}`);
+      
       const ingredientsRef = collection(db, 'ingredients');
       const docRef = await addDoc(ingredientsRef, {
         ...newIngredient,
@@ -170,8 +269,13 @@ const CostAnalysisIngredients = () => {
         addedBy: 'admin',
         // Asegurar que todos los campos estén presentes
         name: newIngredient.name.trim(),
-        price: parseFloat(newIngredient.price) || 0,
-        unit: newIngredient.unit || 'kg',
+        totalPrice: parseFloat(newIngredient.totalPrice) || 0,
+        totalQuantity: parseFloat(newIngredient.totalQuantity) || 0,
+        baseUnit: newIngredient.baseUnit || 'g',
+        pricePerUnit: pricePerUnit,
+        // Mantener campos antiguos para compatibilidad
+        price: parseFloat(newIngredient.totalPrice) || 0,
+        unit: newIngredient.baseUnit || 'g',
         category: newIngredient.category || 'materia_prima',
         description: newIngredient.description || '',
         image: imageUrl,
@@ -185,6 +289,10 @@ const CostAnalysisIngredients = () => {
       // Limpiar el formulario
       setNewIngredient({
         name: '',
+        totalPrice: 0,
+        totalQuantity: 0,
+        baseUnit: 'g',
+        pricePerUnit: 0,
         price: 0,
         unit: 'kg',
         category: 'materia_prima',
@@ -217,19 +325,33 @@ const CostAnalysisIngredients = () => {
   };
 
   const handleEditIngredient = async () => {
-    if (!editingIngredient.name.trim() || editingIngredient.price <= 0) {
-      alert('Por favor completa el nombre y precio del ingrediente');
+    if (!editingIngredient.name.trim() || !editingIngredient.totalPrice || editingIngredient.totalPrice <= 0 || !editingIngredient.totalQuantity || editingIngredient.totalQuantity <= 0) {
+      alert('Por favor completa el nombre, precio total y cantidad total del ingrediente');
       return;
     }
 
     try {
       console.log('🔄 Actualizando ingrediente en Firestore...', editingIngredient);
       
+      // Calcular precio por unidad
+      const pricePerUnit = calculatePricePerUnit(
+        editingIngredient.totalPrice || 0,
+        editingIngredient.totalQuantity || 0,
+        editingIngredient.baseUnit || 'g'
+      );
+      
+      console.log('💰 Precio calculado por unidad:', pricePerUnit, `$$/${editingIngredient.baseUnit || 'g'}`);
+      
       const ingredientRef = doc(db, 'ingredients', editingIngredient.id);
       await updateDoc(ingredientRef, {
         name: editingIngredient.name.trim(),
-        price: parseFloat(editingIngredient.price) || 0,
-        unit: editingIngredient.unit || 'kg',
+        totalPrice: parseFloat(editingIngredient.totalPrice) || 0,
+        totalQuantity: parseFloat(editingIngredient.totalQuantity) || 0,
+        baseUnit: editingIngredient.baseUnit || 'g',
+        pricePerUnit: pricePerUnit,
+        // Mantener campos antiguos para compatibilidad
+        price: parseFloat(editingIngredient.totalPrice) || 0,
+        unit: editingIngredient.baseUnit || 'g',
         category: editingIngredient.category || 'materia_prima',
         description: editingIngredient.description || '',
         image: editingIngredient.image || '',
@@ -283,7 +405,26 @@ const CostAnalysisIngredients = () => {
   };
 
   const openEditDialog = (ingredient) => {
-    setEditingIngredient({ ...ingredient });
+    // Inicializar campos nuevos si no existen (compatibilidad con datos antiguos)
+    const ingredientData = {
+      ...ingredient,
+      totalPrice: ingredient.totalPrice || ingredient.price || 0,
+      // Si no tiene totalQuantity, intentar inferirla o poner un valor por defecto
+      totalQuantity: ingredient.totalQuantity || (ingredient.baseUnit === 'kg' ? 1 : ingredient.baseUnit === 'l' ? 1 : ingredient.unit === 'kg' ? 1 : ingredient.unit === 'l' ? 1 : 1000),
+      baseUnit: ingredient.baseUnit || ingredient.unit || 'g',
+      pricePerUnit: ingredient.pricePerUnit || 0
+    };
+    
+    // Calcular precio por unidad si no existe o si hay valores válidos
+    if (ingredientData.totalPrice > 0 && ingredientData.totalQuantity > 0) {
+      ingredientData.pricePerUnit = calculatePricePerUnit(
+        ingredientData.totalPrice,
+        ingredientData.totalQuantity,
+        ingredientData.baseUnit
+      );
+    }
+    
+    setEditingIngredient(ingredientData);
     setDialogOpen(true);
   };
 
@@ -464,15 +605,26 @@ const CostAnalysisIngredients = () => {
                       fontFamily: '"Asap", sans-serif',
                       color: '#4CAF50'
                     }}>
-                      ${ingredient.price}
+                      ${ingredient.pricePerUnit ? ingredient.pricePerUnit.toFixed(6) : (ingredient.price || 0).toFixed(2)}
                     </Typography>
                     <Typography variant="body2" sx={{ 
                       color: '#666',
                       fontFamily: '"Asap", sans-serif'
                     }}>
-                      / {ingredient.unit}
+                      / {ingredient.baseUnit || ingredient.unit || 'g'}
                     </Typography>
                   </Box>
+                  {/* Información del producto completo */}
+                  {ingredient.totalPrice > 0 && ingredient.totalQuantity > 0 && (
+                    <Typography variant="caption" sx={{ 
+                      color: '#999',
+                      fontFamily: '"Asap", sans-serif',
+                      display: 'block',
+                      mb: 0.5
+                    }}>
+                      Producto: ${ingredient.totalPrice.toFixed(2)} por {ingredient.totalQuantity} {ingredient.baseUnit || ingredient.unit}
+                    </Typography>
+                  )}
 
                   {/* Descripción */}
                   {ingredient.description && (
@@ -641,19 +793,39 @@ const CostAnalysisIngredients = () => {
                   />
                 </Grid>
                 
-                <Grid item xs={6}>
+                <Grid item xs={12}>
+                  <Alert severity="info" sx={{ mb: 2, fontFamily: '"Asap", sans-serif' }}>
+                    <Typography variant="body2" sx={{ fontFamily: '"Asap", sans-serif', fontWeight: 600, mb: 0.5 }}>
+                      Información del producto que compras
+                    </Typography>
+                    <Typography variant="caption" sx={{ fontFamily: '"Asap", sans-serif' }}>
+                      Ejemplo: Si compras mantequilla a $4.60 y el paquete trae 436 gramos, pon: Precio $4.60, Cantidad 436, Unidad g
+                    </Typography>
+                    <Typography variant="caption" sx={{ fontFamily: '"Asap", sans-serif', display: 'block', mt: 0.5 }}>
+                      Ejemplo: Si compras leche a $4.00 y el envase trae 1 litro, pon: Precio $4.00, Cantidad 1, Unidad l
+                    </Typography>
+                  </Alert>
+                </Grid>
+                
+                <Grid item xs={4}>
                   <TextField
                     fullWidth
-                    label="Precio"
+                    label="Precio que pagaste"
                     type="number"
-                    value={editingIngredient ? editingIngredient.price : newIngredient.price}
+                    inputProps={{ step: "0.01" }}
+                    value={editingIngredient ? (editingIngredient.totalPrice || editingIngredient.price || 0) : newIngredient.totalPrice}
                     onChange={(e) => {
+                      const value = parseFloat(e.target.value) || 0;
                       if (editingIngredient) {
-                        setEditingIngredient({...editingIngredient, price: parseFloat(e.target.value) || 0});
+                        const updated = {...editingIngredient, totalPrice: value, price: value};
+                        updatePricePerUnit(updated, true);
                       } else {
-                        setNewIngredient({...newIngredient, price: parseFloat(e.target.value) || 0});
+                        const updated = {...newIngredient, totalPrice: value, price: value};
+                        updatePricePerUnit(updated, false);
                       }
                     }}
+                    helperText="Ej: 4.60 (para $4.60)"
+                    placeholder="0.00"
                     sx={{ 
                       fontFamily: '"Asap", sans-serif',
                       '& .MuiOutlinedInput-root': {
@@ -663,32 +835,86 @@ const CostAnalysisIngredients = () => {
                   />
                 </Grid>
                 
-                <Grid item xs={6}>
+                <Grid item xs={4}>
+                  <TextField
+                    fullWidth
+                    label="Cantidad que trae el producto"
+                    type="number"
+                    inputProps={{ step: "0.01" }}
+                    value={editingIngredient ? (editingIngredient.totalQuantity || 0) : newIngredient.totalQuantity}
+                    onChange={(e) => {
+                      const value = parseFloat(e.target.value) || 0;
+                      if (editingIngredient) {
+                        const updated = {...editingIngredient, totalQuantity: value};
+                        updatePricePerUnit(updated, true);
+                      } else {
+                        const updated = {...newIngredient, totalQuantity: value};
+                        updatePricePerUnit(updated, false);
+                      }
+                    }}
+                    helperText="Ej: 436 (gramos) o 1 (litro)"
+                    placeholder="0"
+                    sx={{ 
+                      fontFamily: '"Asap", sans-serif',
+                      '& .MuiOutlinedInput-root': {
+                        borderRadius: '12px'
+                      }
+                    }}
+                  />
+                </Grid>
+                
+                <Grid item xs={4}>
                   <FormControl fullWidth>
-                    <InputLabel>Unidad</InputLabel>
+                    <InputLabel>Unidad del producto</InputLabel>
                     <Select
-                      value={editingIngredient ? editingIngredient.unit : newIngredient.unit}
+                      value={editingIngredient ? (editingIngredient.baseUnit || editingIngredient.unit || 'g') : newIngredient.baseUnit}
                       onChange={(e) => {
+                        const value = e.target.value;
                         if (editingIngredient) {
-                          setEditingIngredient({...editingIngredient, unit: e.target.value});
+                          const updated = {...editingIngredient, baseUnit: value, unit: value};
+                          updatePricePerUnit(updated, true);
                         } else {
-                          setNewIngredient({...newIngredient, unit: e.target.value});
+                          const updated = {...newIngredient, baseUnit: value, unit: value};
+                          updatePricePerUnit(updated, false);
                         }
                       }}
-                      label="Unidad"
+                      label="Unidad del producto"
                       sx={{
                         borderRadius: '12px',
                         fontFamily: '"Asap", sans-serif'
                       }}
                     >
-                      <MenuItem value="kg">kg</MenuItem>
-                      <MenuItem value="g">g</MenuItem>
-                      <MenuItem value="lb">lb</MenuItem>
-                      <MenuItem value="oz">oz</MenuItem>
-                      <MenuItem value="unit">unidad</MenuItem>
+                      <MenuItem value="g">Gramos (g) - Ej: 436g</MenuItem>
+                      <MenuItem value="kg">Kilogramos (kg) - Ej: 1kg</MenuItem>
+                      <MenuItem value="ml">Mililitros (ml) - Ej: 500ml</MenuItem>
+                      <MenuItem value="l">Litros (l) - Ej: 1l</MenuItem>
                     </Select>
                   </FormControl>
                 </Grid>
+                
+                {/* Mostrar precio calculado por unidad */}
+                {((editingIngredient && editingIngredient.totalPrice > 0 && editingIngredient.totalQuantity > 0) || 
+                  (newIngredient && newIngredient.totalPrice > 0 && newIngredient.totalQuantity > 0)) && (
+                  <Grid item xs={12}>
+                    <Alert severity="success" sx={{ fontFamily: '"Asap", sans-serif' }}>
+                      <Typography variant="body2" sx={{ fontFamily: '"Asap", sans-serif', fontWeight: 600, mb: 0.5 }}>
+                        ✓ Precio calculado automáticamente:
+                      </Typography>
+                      <Typography variant="body2" sx={{ fontFamily: '"Asap", sans-serif' }}>
+                        ${(editingIngredient ? (editingIngredient.pricePerUnit || 0) : (newIngredient.pricePerUnit || 0)).toFixed(6)} por {
+                          (editingIngredient || newIngredient).baseUnit === 'kg' ? 'gramo' :
+                          (editingIngredient || newIngredient).baseUnit === 'l' ? 'mililitro' :
+                          (editingIngredient || newIngredient).baseUnit === 'g' ? 'gramo' :
+                          (editingIngredient || newIngredient).baseUnit === 'ml' ? 'mililitro' :
+                          'unidad'
+                        }
+                      </Typography>
+                      <Typography variant="caption" sx={{ fontFamily: '"Asap", sans-serif', display: 'block', mt: 0.5, fontStyle: 'italic' }}>
+                        Este precio se usará automáticamente al calcular costos en tus recetas
+                      </Typography>
+                    </Alert>
+                  </Grid>
+                )}
                 
                 <Grid item xs={12}>
                   <FormControl fullWidth>

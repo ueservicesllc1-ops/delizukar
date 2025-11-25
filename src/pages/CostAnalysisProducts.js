@@ -320,33 +320,75 @@ const CostAnalysisProducts = ({ selectedProduct, onProductSelect }) => {
     return 'error';
   };
 
-  // Función para calcular el costo de un ingrediente
+  // Función para calcular el costo de un ingrediente usando precio por gramo/ml
   const calculateIngredientCost = (ingredient, quantity, unit) => {
     if (!ingredient || !quantity || quantity <= 0) return 0;
     
-    // Convertir la cantidad a la unidad base del ingrediente
-    let quantityInBaseUnit = quantity;
+    // Obtener precio por unidad base (gramo o mililitro)
+    let pricePerUnit = ingredient.pricePerUnit || 0;
     
-    // Si la unidad del ingrediente es diferente a la unidad seleccionada
-    if (ingredient.unit !== unit) {
-      // Conversiones básicas (puedes expandir esto)
-      const conversions = {
-        'g': { 'kg': 0.001, 'lb': 0.00220462, 'oz': 0.035274 },
-        'kg': { 'g': 1000, 'lb': 2.20462, 'oz': 35.274 },
-        'ml': { 'l': 0.001, 'oz': 0.033814 },
-        'l': { 'ml': 1000, 'oz': 33.814 },
-        'unit': { 'unit': 1 }
-      };
+    // Si no existe pricePerUnit, calcularlo
+    if (!pricePerUnit || pricePerUnit === 0) {
+      const totalPrice = ingredient.totalPrice || ingredient.price || 0;
+      const totalQuantity = ingredient.totalQuantity || 0;
+      const baseUnit = ingredient.baseUnit || ingredient.unit || 'g';
       
-      if (conversions[unit] && conversions[unit][ingredient.unit]) {
-        quantityInBaseUnit = quantity * conversions[unit][ingredient.unit];
-      } else if (conversions[ingredient.unit] && conversions[ingredient.unit][unit]) {
-        quantityInBaseUnit = quantity / conversions[ingredient.unit][unit];
+      if (totalPrice > 0 && totalQuantity > 0) {
+        let quantityInSmallestUnit = totalQuantity;
+        
+        // Convertir a unidad más pequeña (g o ml)
+        if (baseUnit === 'kg') {
+          quantityInSmallestUnit = totalQuantity * 1000; // kg a gramos
+        } else if (baseUnit === 'l') {
+          quantityInSmallestUnit = totalQuantity * 1000; // litros a mililitros
+        }
+        
+        pricePerUnit = totalPrice / quantityInSmallestUnit;
       }
     }
     
-    // Calcular el costo
-    const cost = ingredient.price * quantityInBaseUnit;
+    // Convertir la cantidad de la receta a gramos o mililitros
+    let quantityInSmallestUnit = quantity;
+    
+    // Conversiones de unidades a gramos o mililitros
+    const conversionsToSmallest = {
+      'g': 1,
+      'kg': 1000,      // 1 kg = 1000 g
+      'lb': 453.592,   // 1 lb = 453.592 g
+      'oz': 28.3495,   // 1 oz = 28.3495 g
+      'ml': 1,
+      'l': 1000,       // 1 l = 1000 ml
+      'unit': 1        // unidades no se convierten
+    };
+    
+    // Determinar si el ingrediente es por peso (g/kg) o volumen (ml/l)
+    const baseUnit = ingredient.baseUnit || ingredient.unit || 'g';
+    const isWeight = baseUnit === 'g' || baseUnit === 'kg';
+    const isVolume = baseUnit === 'ml' || baseUnit === 'l';
+    
+    // Convertir la cantidad de la receta según la unidad
+    if (isWeight) {
+      // Es un ingrediente por peso
+      if (unit === 'kg') {
+        quantityInSmallestUnit = quantity * 1000; // kg a gramos
+      } else if (unit === 'g') {
+        quantityInSmallestUnit = quantity; // ya está en gramos
+      } else if (unit === 'lb') {
+        quantityInSmallestUnit = quantity * 453.592; // lb a gramos
+      } else if (unit === 'oz') {
+        quantityInSmallestUnit = quantity * 28.3495; // oz a gramos
+      }
+    } else if (isVolume) {
+      // Es un ingrediente por volumen
+      if (unit === 'l') {
+        quantityInSmallestUnit = quantity * 1000; // litros a mililitros
+      } else if (unit === 'ml') {
+        quantityInSmallestUnit = quantity; // ya está en mililitros
+      }
+    }
+    
+    // Calcular el costo: precio por gramo/ml * cantidad en gramos/ml
+    const cost = pricePerUnit * quantityInSmallestUnit;
     return Math.round(cost * 100) / 100; // Redondear a 2 decimales
   };
 
@@ -383,28 +425,37 @@ const CostAnalysisProducts = ({ selectedProduct, onProductSelect }) => {
       // Actualizar cantidad existente
       const newQuantity = existingIngredient.quantity + newIngredient.quantity;
       const newCost = calculateIngredientCost(ingredient, newQuantity, newIngredient.unit);
+      const pricePerUnit = ingredient.pricePerUnit || 0;
+      const baseUnit = ingredient.baseUnit || ingredient.unit || 'g';
       
       setRecipeIngredients(recipeIngredients.map(ing => 
         ing.ingredientId === newIngredient.ingredientId 
           ? { 
               ...ing, 
               quantity: newQuantity,
-              unitCost: newCost,
-              totalCost: newCost
+              unitCost: pricePerUnit, // Precio por gramo/ml
+              totalCost: newCost,
+              ingredientPrice: pricePerUnit,
+              ingredientUnit: baseUnit,
+              baseUnit: baseUnit
             }
           : ing
       ));
     } else {
       // Agregar nuevo ingrediente
+      const pricePerUnit = ingredient.pricePerUnit || 0;
+      const baseUnit = ingredient.baseUnit || ingredient.unit || 'g';
+      
       setRecipeIngredients([...recipeIngredients, {
         ingredientId: newIngredient.ingredientId,
         ingredientName: ingredient.name,
         quantity: newIngredient.quantity,
         unit: newIngredient.unit,
-        unitCost: ingredient.price,
+        unitCost: pricePerUnit, // Precio por gramo/ml
         totalCost: ingredientCost,
-        ingredientUnit: ingredient.unit,
-        ingredientPrice: ingredient.price
+        ingredientUnit: baseUnit, // Unidad base (g o ml)
+        ingredientPrice: pricePerUnit, // Precio por unidad base
+        baseUnit: baseUnit
       }]);
     }
 
