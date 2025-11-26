@@ -145,13 +145,37 @@ const CostAnalysisIngredients = () => {
   const calculatePricePerUnit = (totalPrice, totalQuantity, baseUnit) => {
     if (!totalPrice || !totalQuantity || totalQuantity <= 0) return 0;
     
+    // Si es por unidad, el precio por unidad es simplemente precio total / cantidad
+    if (baseUnit === 'unid') {
+      return Math.round((totalPrice / totalQuantity) * 1000000) / 1000000;
+    }
+    
     // Convertir la cantidad total a la unidad más pequeña (g o ml)
     let quantityInSmallestUnit = totalQuantity;
     
+    // Conversiones de peso
     if (baseUnit === 'kg') {
-      quantityInSmallestUnit = totalQuantity * 1000; // Convertir kg a gramos
-    } else if (baseUnit === 'l') {
-      quantityInSmallestUnit = totalQuantity * 1000; // Convertir litros a mililitros
+      quantityInSmallestUnit = totalQuantity * 1000; // kg a gramos
+    } else if (baseUnit === 'lb') {
+      quantityInSmallestUnit = totalQuantity * 453.592; // libras a gramos
+    } else if (baseUnit === 'oz') {
+      quantityInSmallestUnit = totalQuantity * 28.3495; // onzas a gramos
+    } else if (baseUnit === 'g') {
+      quantityInSmallestUnit = totalQuantity; // ya está en gramos
+    }
+    // Conversiones de volumen
+    else if (baseUnit === 'l') {
+      quantityInSmallestUnit = totalQuantity * 1000; // litros a mililitros
+    } else if (baseUnit === 'fl oz') {
+      quantityInSmallestUnit = totalQuantity * 29.5735; // onzas líquidas a mililitros
+    } else if (baseUnit === 'cup') {
+      quantityInSmallestUnit = totalQuantity * 236.588; // tazas a mililitros
+    } else if (baseUnit === 'tbsp') {
+      quantityInSmallestUnit = totalQuantity * 14.7868; // cucharadas a mililitros
+    } else if (baseUnit === 'tsp') {
+      quantityInSmallestUnit = totalQuantity * 4.92892; // cucharaditas a mililitros
+    } else if (baseUnit === 'ml') {
+      quantityInSmallestUnit = totalQuantity; // ya está en mililitros
     }
     
     // Calcular precio por gramo o mililitro
@@ -852,7 +876,7 @@ const CostAnalysisIngredients = () => {
                         updatePricePerUnit(updated, false);
                       }
                     }}
-                    helperText="Ej: 436 (gramos) o 1 (litro)"
+                    helperText="Ej: 453.59 (gramos - 1 libra) o 1 (litro)"
                     placeholder="0"
                     sx={{ 
                       fontFamily: '"Asap", sans-serif',
@@ -884,10 +908,17 @@ const CostAnalysisIngredients = () => {
                         fontFamily: '"Asap", sans-serif'
                       }}
                     >
-                      <MenuItem value="g">Gramos (g) - Ej: 436g</MenuItem>
+                      <MenuItem value="unid">Unidad (unid) - Ej: 1 pasa, 1 manzana, 1 lata</MenuItem>
+                      <MenuItem value="g">Gramos (g) - Ej: 453.59g (1 libra)</MenuItem>
                       <MenuItem value="kg">Kilogramos (kg) - Ej: 1kg</MenuItem>
+                      <MenuItem value="lb">Libras (lb) - Ej: 1lb</MenuItem>
+                      <MenuItem value="oz">Onzas (oz) - Ej: 16oz</MenuItem>
                       <MenuItem value="ml">Mililitros (ml) - Ej: 500ml</MenuItem>
                       <MenuItem value="l">Litros (l) - Ej: 1l</MenuItem>
+                      <MenuItem value="fl oz">Onzas líquidas (fl oz) - Ej: 16fl oz</MenuItem>
+                      <MenuItem value="cup">Tazas (cup) - Ej: 2cup</MenuItem>
+                      <MenuItem value="tsp">Cucharaditas (tsp) - Ej: 1tsp</MenuItem>
+                      <MenuItem value="tbsp">Cucharadas (tbsp) - Ej: 1tbsp</MenuItem>
                     </Select>
                   </FormControl>
                 </Grid>
@@ -902,11 +933,19 @@ const CostAnalysisIngredients = () => {
                       </Typography>
                       <Typography variant="body2" sx={{ fontFamily: '"Asap", sans-serif' }}>
                         ${(editingIngredient ? (editingIngredient.pricePerUnit || 0) : (newIngredient.pricePerUnit || 0)).toFixed(6)} por {
-                          (editingIngredient || newIngredient).baseUnit === 'kg' ? 'gramo' :
-                          (editingIngredient || newIngredient).baseUnit === 'l' ? 'mililitro' :
-                          (editingIngredient || newIngredient).baseUnit === 'g' ? 'gramo' :
-                          (editingIngredient || newIngredient).baseUnit === 'ml' ? 'mililitro' :
-                          'unidad'
+                          (() => {
+                            const unit = (editingIngredient || newIngredient).baseUnit;
+                            // Si es por unidad
+                            if (unit === 'unid') return 'unidad';
+                            // Unidades de peso - convertir a gramo
+                            if (['kg', 'lb', 'oz'].includes(unit)) return 'gramo';
+                            // Unidades de volumen - convertir a mililitro
+                            if (['l', 'fl oz', 'cup', 'tbsp', 'tsp'].includes(unit)) return 'mililitro';
+                            // Unidades base
+                            if (unit === 'g') return 'gramo';
+                            if (unit === 'ml') return 'mililitro';
+                            return 'unidad';
+                          })()
                         }
                       </Typography>
                       <Typography variant="caption" sx={{ fontFamily: '"Asap", sans-serif', display: 'block', mt: 0.5, fontStyle: 'italic' }}>
