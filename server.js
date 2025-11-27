@@ -1791,33 +1791,54 @@ app.post('/api/pirateship/get-rates', async (req, res) => {
 // Endpoint para exportar pedido a formato CSV compatible con Pirate Ship
 app.post('/api/pirateship/export-order', async (req, res) => {
   try {
+    console.log('🔍 [Pirate Ship Export] Request recibido');
+    console.log('📦 Body recibido:', JSON.stringify(req.body, null, 2));
+    
     const { order } = req.body;
     
-    if (!order || !order.customerInfo) {
-      return res.status(400).json({ error: 'Datos del pedido incompletos' });
+    if (!order) {
+      console.error('❌ [Pirate Ship Export] No hay objeto order en el body');
+      return res.status(400).json({ error: 'Datos del pedido incompletos: falta objeto order' });
     }
 
-    const customerInfo = order.customerInfo || {};
+    // Manejar diferentes estructuras de datos
+    const customerInfo = order.customerInfo || order.customer || {};
     const address = customerInfo.address || {};
     
-    // Extraer información de dirección
-    const street1 = address.line1 || address.street1 || customerInfo.street1 || address.address || '';
-    const street2 = address.line2 || address.street2 || customerInfo.street2 || '';
+    console.log('👤 [Pirate Ship Export] Customer info:', JSON.stringify(customerInfo, null, 2));
+    console.log('📍 [Pirate Ship Export] Address:', JSON.stringify(address, null, 2));
+    
+    // Extraer información de dirección - manejar múltiples formatos
+    const street1 = address.line1 || address.street1 || customerInfo.street1 || address.address || customerInfo.address_1 || '';
+    const street2 = address.line2 || address.street2 || customerInfo.street2 || address.address_2 || '';
     const city = address.city || customerInfo.city || '';
     const state = address.state || customerInfo.state || '';
-    const zip = address.postal_code || address.zipCode || customerInfo.zipCode || customerInfo.zip || '';
+    const zip = address.postal_code || address.zipCode || customerInfo.zipCode || customerInfo.zip || address.zip || '';
     const country = address.country || customerInfo.country || 'US';
     
     // Calcular peso y dimensiones del paquete
-    const packageInfo = order.packageInfo || {};
-    const weight = packageInfo.weight || 1;
-    const weightUnit = packageInfo.weightUnit || 'lb';
-    const length = packageInfo.length || 8;
-    const width = packageInfo.width || 6;
-    const height = packageInfo.height || 4;
+    const packageInfo = order.packageInfo || order.shipping || {};
+    const weight = packageInfo.weight || order.shipping?.weight || 1;
+    const weightUnit = packageInfo.weightUnit || order.shipping?.weight_unit || 'lb';
+    const length = packageInfo.length || order.shipping?.dimensions?.length || 8;
+    const width = packageInfo.width || order.shipping?.dimensions?.width || 6;
+    const height = packageInfo.height || order.shipping?.dimensions?.height || 4;
+    
+    console.log('📦 [Pirate Ship Export] Package info:', { weight, weightUnit, length, width, height });
     
     // Convertir peso a onzas si está en libras (Pirate Ship generalmente usa onzas)
-    const weightInOunces = weightUnit === 'lb' ? (parseFloat(weight) * 16) : parseFloat(weight);
+    let weightInOunces;
+    try {
+      const weightNum = parseFloat(weight);
+      weightInOunces = weightUnit === 'lb' ? (weightNum * 16) : weightNum;
+      if (isNaN(weightInOunces)) {
+        console.warn('⚠️ [Pirate Ship Export] Peso inválido, usando 16 onzas por defecto');
+        weightInOunces = 16;
+      }
+    } catch (e) {
+      console.warn('⚠️ [Pirate Ship Export] Error calculando peso:', e);
+      weightInOunces = 16;
+    }
     
     // Formato CSV compatible con Pirate Ship
     // Campos típicos: Name, Company, Street1, Street2, City, State, Zip, Country, Phone, Email, Weight, Length, Width, Height
@@ -1826,41 +1847,52 @@ app.post('/api/pirateship/export-order', async (req, res) => {
     // Header
     csvRows.push('Name,Company,Street1,Street2,City,State,Zip,Country,Phone,Email,Weight,Length,Width,Height,OrderNumber');
     
-    // Data row
+    // Data row - asegurar que todos los valores sean strings válidos
+    const customerName = `${(customerInfo.firstName || customerInfo.first_name || '')} ${(customerInfo.lastName || customerInfo.last_name || '')}`.trim() || 'Cliente';
+    const orderNumber = order.id || order.orderNumber || order.order_number || 'N/A';
+    
     const csvRow = [
-      `"${(customerInfo.firstName || '')} ${(customerInfo.lastName || '')}"`.trim(),
-      `"${customerInfo.company || ''}"`,
-      `"${street1}"`,
-      `"${street2}"`,
-      `"${city}"`,
-      `"${state}"`,
-      `"${zip}"`,
-      `"${country}"`,
-      `"${customerInfo.phone || ''}"`,
-      `"${customerInfo.email || ''}"`,
+      `"${customerName.replace(/"/g, '""')}"`, // Escapar comillas dobles
+      `"${(customerInfo.company || '').replace(/"/g, '""')}"`,
+      `"${street1.replace(/"/g, '""')}"`,
+      `"${street2.replace(/"/g, '""')}"`,
+      `"${city.replace(/"/g, '""')}"`,
+      `"${state.replace(/"/g, '""')}"`,
+      `"${zip.replace(/"/g, '""')}"`,
+      `"${country.replace(/"/g, '""')}"`,
+      `"${(customerInfo.phone || '').replace(/"/g, '""')}"`,
+      `"${(customerInfo.email || '').replace(/"/g, '""')}"`,
       weightInOunces.toFixed(2),
-      length,
-      width,
-      height,
-      `"${order.id || order.orderNumber || ''}"`
+      String(length || 8),
+      String(width || 6),
+      String(height || 4),
+      `"${orderNumber.replace(/"/g, '""')}"`
     ];
     
     csvRows.push(csvRow.join(','));
     
     const csvContent = csvRows.join('\n');
     
+    console.log('✅ [Pirate Ship Export] CSV generado:', csvContent.substring(0, 200) + '...');
+    
     // Configurar headers para descarga de CSV
     res.setHeader('Content-Type', 'text/csv; charset=utf-8');
-    res.setHeader('Content-Disposition', `attachment; filename="pirateship-export-${order.id || 'order'}.csv"`);
+    res.setHeader('Content-Disposition', `attachment; filename="pirateship-export-${orderNumber}.csv"`);
+    res.setHeader('Access-Control-Allow-Origin', '*');
     
     // Enviar BOM para Excel
     res.write('\ufeff');
     res.end(csvContent);
     
-    console.log('✅ CSV exportado para Pirate Ship:', order.id);
+    console.log('✅ [Pirate Ship Export] CSV exportado exitosamente para pedido:', orderNumber);
   } catch (error) {
-    console.error('❌ Error exportando a Pirate Ship:', error);
-    res.status(500).json({ error: error.message || 'Error al exportar pedido' });
+    console.error('❌ [Pirate Ship Export] Error exportando a Pirate Ship:', error);
+    console.error('   Stack:', error.stack);
+    console.error('   Body recibido:', JSON.stringify(req.body, null, 2));
+    res.status(500).json({ 
+      error: error.message || 'Error al exportar pedido',
+      details: process.env.NODE_ENV === 'development' ? error.stack : undefined
+    });
   }
 });
 
