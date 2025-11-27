@@ -1792,48 +1792,70 @@ app.post('/api/pirateship/get-rates', async (req, res) => {
 app.post('/api/pirateship/export-order', async (req, res) => {
   try {
     console.log('🔍 [Pirate Ship Export] Request recibido');
-    console.log('📦 Body recibido:', JSON.stringify(req.body, null, 2));
+    console.log('📦 Body completo:', JSON.stringify(req.body, null, 2));
     
-    const { order } = req.body;
+    // Aceptar datos directamente del body o dentro de order
+    let order = req.body.order || req.body;
     
     if (!order) {
-      console.error('❌ [Pirate Ship Export] No hay objeto order en el body');
-      return res.status(400).json({ error: 'Datos del pedido incompletos: falta objeto order' });
+      console.error('❌ [Pirate Ship Export] Body vacío');
+      return res.status(400).json({ error: 'Datos del pedido incompletos: body vacío' });
     }
 
-    // Manejar diferentes estructuras de datos
+    console.log('📋 [Pirate Ship Export] Order recibido:', JSON.stringify(order, null, 2));
+
+    // Manejar diferentes estructuras de datos - ser muy flexible
     const customerInfo = order.customerInfo || order.customer || {};
-    const address = customerInfo.address || {};
+    const address = customerInfo.address || order.address || {};
     
-    console.log('👤 [Pirate Ship Export] Customer info:', JSON.stringify(customerInfo, null, 2));
-    console.log('📍 [Pirate Ship Export] Address:', JSON.stringify(address, null, 2));
+    // Extraer nombre - múltiples formatos
+    const firstName = customerInfo.firstName || customerInfo.first_name || '';
+    const lastName = customerInfo.lastName || customerInfo.last_name || '';
+    const customerName = `${firstName} ${lastName}`.trim() || 'Cliente';
     
-    // Extraer información de dirección - manejar múltiples formatos
-    const street1 = address.line1 || address.street1 || customerInfo.street1 || address.address || customerInfo.address_1 || '';
-    const street2 = address.line2 || address.street2 || customerInfo.street2 || address.address_2 || '';
+    // Extraer información de dirección - manejar TODOS los formatos posibles
+    const street1 = address.line1 || address.street1 || address.address_1 || customerInfo.street1 || customerInfo.address_1 || address.address || '';
+    const street2 = address.line2 || address.street2 || address.address_2 || customerInfo.street2 || customerInfo.address_2 || '';
     const city = address.city || customerInfo.city || '';
     const state = address.state || customerInfo.state || '';
-    const zip = address.postal_code || address.zipCode || customerInfo.zipCode || customerInfo.zip || address.zip || '';
+    const zip = address.postal_code || address.zipCode || address.zip || customerInfo.zipCode || customerInfo.zip || '';
     const country = address.country || customerInfo.country || 'US';
+    const phone = customerInfo.phone || '';
+    const email = customerInfo.email || '';
     
-    // Calcular peso y dimensiones del paquete
+    // Calcular peso y dimensiones - múltiples formatos
     const packageInfo = order.packageInfo || order.shipping || {};
-    const weight = packageInfo.weight || order.shipping?.weight || 1;
-    const weightUnit = packageInfo.weightUnit || order.shipping?.weight_unit || 'lb';
-    const length = packageInfo.length || order.shipping?.dimensions?.length || 8;
-    const width = packageInfo.width || order.shipping?.dimensions?.width || 6;
-    const height = packageInfo.height || order.shipping?.dimensions?.height || 4;
+    const shipping = order.shipping || {};
+    const dimensions = packageInfo.dimensions || shipping.dimensions || {};
     
-    console.log('📦 [Pirate Ship Export] Package info:', { weight, weightUnit, length, width, height });
+    let weight = packageInfo.weight || shipping.weight || 1;
+    const weightUnit = packageInfo.weightUnit || shipping.weight_unit || packageInfo.weight_unit || 'lb';
+    const length = packageInfo.length || dimensions.length || shipping.length || 8;
+    const width = packageInfo.width || dimensions.width || shipping.width || 6;
+    const height = packageInfo.height || dimensions.height || shipping.height || 4;
     
-    // Convertir peso a onzas si está en libras (Pirate Ship generalmente usa onzas)
+    // Asegurar que weight sea un número
+    weight = parseFloat(weight) || 1;
+    
+    console.log('📦 [Pirate Ship Export] Datos extraídos:', {
+      customerName,
+      street1,
+      city,
+      state,
+      zip,
+      weight,
+      weightUnit,
+      length,
+      width,
+      height
+    });
+    
+    // Convertir peso a onzas si está en libras
     let weightInOunces;
     try {
-      const weightNum = parseFloat(weight);
-      weightInOunces = weightUnit === 'lb' ? (weightNum * 16) : weightNum;
-      if (isNaN(weightInOunces)) {
-        console.warn('⚠️ [Pirate Ship Export] Peso inválido, usando 16 onzas por defecto');
-        weightInOunces = 16;
+      weightInOunces = weightUnit === 'lb' ? (weight * 16) : weight;
+      if (isNaN(weightInOunces) || weightInOunces <= 0) {
+        weightInOunces = 16; // Default: 1 libra = 16 onzas
       }
     } catch (e) {
       console.warn('⚠️ [Pirate Ship Export] Error calculando peso:', e);
@@ -1847,26 +1869,36 @@ app.post('/api/pirateship/export-order', async (req, res) => {
     // Header
     csvRows.push('Name,Company,Street1,Street2,City,State,Zip,Country,Phone,Email,Weight,Length,Width,Height,OrderNumber');
     
-    // Data row - asegurar que todos los valores sean strings válidos
-    const customerName = `${(customerInfo.firstName || customerInfo.first_name || '')} ${(customerInfo.lastName || customerInfo.last_name || '')}`.trim() || 'Cliente';
+    // Data row - asegurar que todos los valores sean strings válidos y manejar null/undefined
+    const safeString = (val) => {
+      if (val === null || val === undefined) return '';
+      return String(val).replace(/"/g, '""'); // Escapar comillas dobles
+    };
+    
+    const safeNumber = (val, defaultValue = 0) => {
+      const num = parseFloat(val);
+      return isNaN(num) ? defaultValue : num;
+    };
+    
+    const finalCustomerName = customerName || 'Cliente';
     const orderNumber = order.id || order.orderNumber || order.order_number || 'N/A';
     
     const csvRow = [
-      `"${customerName.replace(/"/g, '""')}"`, // Escapar comillas dobles
-      `"${(customerInfo.company || '').replace(/"/g, '""')}"`,
-      `"${street1.replace(/"/g, '""')}"`,
-      `"${street2.replace(/"/g, '""')}"`,
-      `"${city.replace(/"/g, '""')}"`,
-      `"${state.replace(/"/g, '""')}"`,
-      `"${zip.replace(/"/g, '""')}"`,
-      `"${country.replace(/"/g, '""')}"`,
-      `"${(customerInfo.phone || '').replace(/"/g, '""')}"`,
-      `"${(customerInfo.email || '').replace(/"/g, '""')}"`,
-      weightInOunces.toFixed(2),
-      String(length || 8),
-      String(width || 6),
-      String(height || 4),
-      `"${orderNumber.replace(/"/g, '""')}"`
+      `"${safeString(finalCustomerName)}"`,
+      `"${safeString(customerInfo.company)}"`,
+      `"${safeString(street1)}"`,
+      `"${safeString(street2)}"`,
+      `"${safeString(city)}"`,
+      `"${safeString(state)}"`,
+      `"${safeString(zip)}"`,
+      `"${safeString(country)}"`,
+      `"${safeString(phone)}"`,
+      `"${safeString(email)}"`,
+      safeNumber(weightInOunces, 16).toFixed(2),
+      String(safeNumber(length, 8)),
+      String(safeNumber(width, 6)),
+      String(safeNumber(height, 4)),
+      `"${safeString(orderNumber)}"`
     ];
     
     csvRows.push(csvRow.join(','));
