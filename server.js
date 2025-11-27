@@ -45,7 +45,7 @@ const cors = require('cors');
 const path = require('path');
 const http = require('http');
 const { initializeApp } = require('firebase/app');
-const { getFirestore, collection, addDoc, doc, getDoc, updateDoc, query, orderBy } = require('firebase/firestore');
+const { getFirestore, collection, addDoc, doc, getDoc, updateDoc, query, orderBy, where, getDocs } = require('firebase/firestore');
 
 const app = express();
 // En Railway usa PORT de la variable de entorno (Railway la configura automáticamente)
