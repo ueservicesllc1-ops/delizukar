@@ -34,13 +34,15 @@ import {
   Receipt,
   Visibility,
   Info,
-  PictureAsPdf
+  PictureAsPdf,
+  FileDownload
 } from '@mui/icons-material';
 import { collection, getDocs, updateDoc, deleteDoc, doc, query, orderBy, where } from 'firebase/firestore';
 import { db } from '../firebase/config';
 import emailjs from '@emailjs/browser';
 import ShippoShippingElements from './ShippoShippingElements';
 import jsPDF from 'jspdf';
+import shippoService from '../services/shippoService';
 
 const OrdersManager = ({ open, onClose, initialTab = 'all' }) => {
   const [orders, setOrders] = useState([]);
@@ -392,6 +394,130 @@ const OrdersManager = ({ open, onClose, initialTab = 'all' }) => {
       console.log('✅ Etiqueta comprada desde Shippo Elements:', labelData);
       // Recargar órdenes para ver los cambios
       loadOrders();
+    }
+  };
+
+  const [pirateShipDialogOpen, setPirateShipDialogOpen] = useState(false);
+  const [pirateShipOrder, setPirateShipOrder] = useState(null);
+  const [shippingRates, setShippingRates] = useState([]);
+  const [loadingRates, setLoadingRates] = useState(false);
+
+  // Calcular tarifas de envío para mostrar antes de exportar (USPS/UPS - las mismas que Pirate Ship)
+  const calculateShippingRatesForPirateShip = async (order) => {
+    try {
+      setLoadingRates(true);
+      setShippingRates([]);
+
+      // Preparar datos del pedido para calcular tarifas
+      const customerInfo = order.customerInfo || {};
+      const address = customerInfo.address || {};
+      const packageInfo = order.packageInfo || {};
+
+      // Dirección de origen (tienda)
+      const fromAddress = {
+        name: 'Delizukar',
+        street1: '123 Delizukar St',
+        city: 'Miami',
+        state: 'FL',
+        zip: '33101',
+        country: 'US'
+      };
+
+      // Dirección de destino (cliente)
+      const toAddress = {
+        name: `${customerInfo.firstName || ''} ${customerInfo.lastName || ''}`.trim(),
+        street1: address.line1 || address.street1 || customerInfo.street1 || address.address || '',
+        city: address.city || customerInfo.city || '',
+        state: address.state || customerInfo.state || '',
+        zip: address.postal_code || address.zipCode || customerInfo.zipCode || customerInfo.zip || '',
+        country: address.country || customerInfo.country || 'US'
+      };
+
+      // Peso y dimensiones
+      const weight = {
+        value: packageInfo.weight || 1,
+        unit: packageInfo.weightUnit || 'lb'
+      };
+
+      const dimensions = {
+        length: packageInfo.length || 8,
+        width: packageInfo.width || 6,
+        height: packageInfo.height || 4
+      };
+
+      // Obtener tarifas de USPS/UPS (las mismas que usa Pirate Ship)
+      const baseUrl = process.env.NODE_ENV === 'production' ? window.location.origin : '';
+      const response = await fetch(`${baseUrl}/api/pirateship/get-rates`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          fromAddress,
+          toAddress,
+          weight,
+          dimensions
+        })
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setShippingRates(data.rates || []);
+        console.log('✅ Tarifas de USPS/UPS obtenidas:', data.rates);
+      } else {
+        throw new Error('Error al obtener tarifas');
+      }
+    } catch (error) {
+      console.error('❌ Error calculando tarifas:', error);
+      // Si falla, continuar sin tarifas
+      setShippingRates([]);
+    } finally {
+      setLoadingRates(false);
+    }
+  };
+
+  // Abrir diálogo de Pirate Ship con opciones de envío
+  const handleOpenPirateShipDialog = async (order) => {
+    setPirateShipOrder(order);
+    setPirateShipDialogOpen(true);
+    await calculateShippingRatesForPirateShip(order);
+  };
+
+  // Exportar pedido a Pirate Ship (CSV)
+  const handleExportToPirateShip = async (order) => {
+    try {
+      console.log('🏴‍☠️ Exportando pedido a Pirate Ship:', order.id);
+      
+      const baseUrl = process.env.NODE_ENV === 'production' ? window.location.origin : '';
+      const response = await fetch(`${baseUrl}/api/pirateship/export-order`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ order })
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Error al exportar pedido');
+      }
+
+      // Descargar el CSV
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `pirateship-export-${order.id}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+      
+      setPirateShipDialogOpen(false);
+      alert('✅ Pedido exportado a Pirate Ship. Descarga el CSV e impórtalo en Pirate Ship para ver las opciones de envío y generar la etiqueta.');
+    } catch (error) {
+      console.error('❌ Error exportando a Pirate Ship:', error);
+      alert('❌ Error: ' + (error.message || 'Error al exportar pedido'));
     }
   };
 
@@ -1669,9 +1795,23 @@ const OrdersManager = ({ open, onClose, initialTab = 'all' }) => {
                               </Button>
                             )
                           ) : (
-                            // En la pestaña de todas las órdenes, mostrar botones Auto/Widget
+                            // En la pestaña de todas las órdenes, mostrar botones
                             (order.status === 'pending' || !order.status || order.status === 'processing') && (
                               <>
+                                <Button
+                                  variant="contained"
+                                  size="small"
+                                  startIcon={<FileDownload />}
+                                  onClick={() => handleOpenPirateShipDialog(order)}
+                                  sx={{
+                                    backgroundColor: '#4a90e2',
+                                    '&:hover': { backgroundColor: '#357abd' },
+                                    marginRight: 1
+                                  }}
+                                >
+                                  Pirate Ship
+                                </Button>
+                                {/* Botón Shippo ocultado - ahora usamos Pirate Ship
                                 <Button
                                   variant="contained"
                                   size="small"
@@ -1685,6 +1825,7 @@ const OrdersManager = ({ open, onClose, initialTab = 'all' }) => {
                                 >
                                   {creatingForOrderId === order.id ? 'Creando...' : 'Comprar'}
                                 </Button>
+                                */}
                                 {/* Botón Widget ocultado
                                 <Button
                                   variant="outlined"
@@ -2356,10 +2497,22 @@ const OrdersManager = ({ open, onClose, initialTab = 'all' }) => {
             startIcon={<PictureAsPdf />}
             sx={{
               backgroundColor: '#C8626D',
-              '&:hover': { backgroundColor: '#b8555a' }
+              '&:hover': { backgroundColor: '#b8555a' },
+              marginRight: 1
             }}
           >
             Descargar PDF
+          </Button>
+          <Button
+            onClick={() => selectedOrderDetails && handleOpenPirateShipDialog(selectedOrderDetails)}
+            variant="contained"
+            startIcon={<FileDownload />}
+            sx={{
+              backgroundColor: '#4a90e2',
+              '&:hover': { backgroundColor: '#357abd' }
+            }}
+          >
+            Exportar a Pirate Ship
           </Button>
         </DialogActions>
       </Dialog>
@@ -2450,6 +2603,115 @@ const OrdersManager = ({ open, onClose, initialTab = 'all' }) => {
         onClose={handleShippoElementsClose}
         orderData={shippoOrderData}
       />
+
+      {/* Dialog para Pirate Ship con opciones de envío */}
+      <Dialog
+        open={pirateShipDialogOpen}
+        onClose={() => {
+          setPirateShipDialogOpen(false);
+          setPirateShipOrder(null);
+          setShippingRates([]);
+        }}
+        maxWidth="md"
+        fullWidth
+      >
+        <DialogTitle sx={{ backgroundColor: '#4a90e2', color: 'white', display: 'flex', alignItems: 'center', gap: 1 }}>
+          🏴‍☠️ Exportar a Pirate Ship
+        </DialogTitle>
+        <DialogContent sx={{ p: 3 }}>
+          {pirateShipOrder && (
+            <>
+              <Typography variant="h6" gutterBottom>
+                Pedido #{pirateShipOrder.id}
+              </Typography>
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+                Cliente: {pirateShipOrder.customerInfo?.firstName} {pirateShipOrder.customerInfo?.lastName}
+              </Typography>
+
+              <Typography variant="h6" gutterBottom sx={{ mt: 2, mb: 2 }}>
+                Opciones de Envío Disponibles (USPS & UPS)
+              </Typography>
+              <Alert severity="success" sx={{ mb: 2 }}>
+                <strong>Estas son las tarifas comerciales de USPS y UPS</strong> - las mismas que usa Pirate Ship. 
+                Los precios mostrados son los que verás en Pirate Ship.
+              </Alert>
+
+              {loadingRates ? (
+                <Box sx={{ display: 'flex', justifyContent: 'center', p: 3 }}>
+                  <CircularProgress />
+                </Box>
+              ) : shippingRates.length > 0 ? (
+                <Box sx={{ mb: 3 }}>
+                  {shippingRates.map((rate, index) => {
+                    const carrier = rate.provider || rate.carrier || 'N/A';
+                    const service = rate.servicelevel?.name || rate.service || 'Standard';
+                    const amount = parseFloat(rate.amount_local || rate.amount || 0);
+                    const estimatedDays = rate.estimated_days || rate.estimatedDays || 'N/A';
+                    
+                    return (
+                      <Card key={index} sx={{ mb: 2, border: '1px solid #e0e0e0' }}>
+                        <CardContent>
+                          <Grid container spacing={2} alignItems="center">
+                            <Grid item xs={12} sm={6}>
+                              <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                                {carrier.toUpperCase()}
+                              </Typography>
+                              <Typography variant="body2" color="text.secondary">
+                                {service}
+                              </Typography>
+                              {estimatedDays !== 'N/A' && (
+                                <Typography variant="caption" color="text.secondary">
+                                  Tiempo estimado: {estimatedDays} días
+                                </Typography>
+                              )}
+                            </Grid>
+                            <Grid item xs={12} sm={6} sx={{ textAlign: { xs: 'left', sm: 'right' } }}>
+                              <Typography variant="h5" sx={{ color: '#4a90e2', fontWeight: 700 }}>
+                                ${amount.toFixed(2)}
+                              </Typography>
+                            </Grid>
+                          </Grid>
+                        </CardContent>
+                      </Card>
+                    );
+                  })}
+                </Box>
+              ) : (
+                <Alert severity="warning" sx={{ mb: 2 }}>
+                  No se pudieron calcular las tarifas. Puedes exportar el pedido e importarlo en Pirate Ship para ver todas las opciones disponibles.
+                </Alert>
+              )}
+
+              <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
+                <strong>Nota:</strong> Al exportar, se generará un archivo CSV que puedes importar en Pirate Ship. 
+                Allí podrás ver todas las opciones de envío disponibles (USPS, UPS) y generar la etiqueta.
+              </Typography>
+            </>
+          )}
+        </DialogContent>
+        <DialogActions sx={{ p: 2 }}>
+          <Button
+            onClick={() => {
+              setPirateShipDialogOpen(false);
+              setPirateShipOrder(null);
+              setShippingRates([]);
+            }}
+          >
+            Cancelar
+          </Button>
+          <Button
+            onClick={() => pirateShipOrder && handleExportToPirateShip(pirateShipOrder)}
+            variant="contained"
+            startIcon={<FileDownload />}
+            sx={{
+              backgroundColor: '#4a90e2',
+              '&:hover': { backgroundColor: '#357abd' }
+            }}
+          >
+            Exportar CSV
+          </Button>
+        </DialogActions>
+      </Dialog>
     </>
   );
 };
