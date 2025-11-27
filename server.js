@@ -1472,10 +1472,22 @@ app.get('/api/pirateship/orders', async (req, res) => {
   } catch (error) {
     console.error('❌ [Pirate Ship API] Error obteniendo pedidos:', error);
     console.error('   Stack:', error.stack);
-    res.status(500).json({ 
+    console.error('   Request query:', req.query);
+    console.error('   Request headers:', req.headers);
+    
+    // Enviar respuesta de error más detallada
+    const errorResponse = {
       error: error.message || 'Error al obtener pedidos',
-      details: process.env.NODE_ENV === 'development' ? error.stack : undefined
-    });
+      timestamp: new Date().toISOString()
+    };
+    
+    // Solo incluir detalles en desarrollo
+    if (process.env.NODE_ENV === 'development') {
+      errorResponse.details = error.stack;
+      errorResponse.query = req.query;
+    }
+    
+    res.status(500).json(errorResponse);
   }
 });
 
