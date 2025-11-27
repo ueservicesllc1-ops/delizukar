@@ -93,7 +93,7 @@ const OrdersManager = ({ open, onClose, initialTab = 'all' }) => {
       try {
         // Importar pdfjs-dist dinámicamente
         const pdfjsLib = await import('pdfjs-dist');
-        pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
+        pdfjsLib.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.js`;
 
         // Descargar el PDF a través del backend para evitar problemas de CORS
         // En desarrollo usa directamente localhost:5000, en producción usa window.location.origin
@@ -563,7 +563,7 @@ const OrdersManager = ({ open, onClose, initialTab = 'all' }) => {
       // Importar pdfjs-dist dinámicamente
       const pdfjsLib = await import('pdfjs-dist');
       // Configurar el worker para pdf.js
-      pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
+      pdfjsLib.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.js`;
 
       // Descargar el PDF a través del backend para evitar problemas de CORS
       // En desarrollo usa directamente localhost:5000, en producción usa window.location.origin
@@ -689,7 +689,7 @@ const OrdersManager = ({ open, onClose, initialTab = 'all' }) => {
       // Importar pdfjs-dist dinámicamente
       const pdfjsLib = await import('pdfjs-dist');
       // Configurar el worker para pdf.js
-      pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
+      pdfjsLib.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.js`;
 
       // Descargar el PDF a través del backend para evitar problemas de CORS
       // En desarrollo usa directamente localhost:5000, en producción usa window.location.origin
@@ -1683,8 +1683,9 @@ const OrdersManager = ({ open, onClose, initialTab = 'all' }) => {
                                     '&:hover': { backgroundColor: '#b8555a' }
                                   }}
                                 >
-                                  {creatingForOrderId === order.id ? 'Creando...' : 'Auto'}
+                                  {creatingForOrderId === order.id ? 'Creando...' : 'Comprar'}
                                 </Button>
+                                {/* Botón Widget ocultado
                                 <Button
                                   variant="outlined"
                                   size="small"
@@ -1702,6 +1703,7 @@ const OrdersManager = ({ open, onClose, initialTab = 'all' }) => {
                                 >
                                   Widget
                                 </Button>
+                                */}
                               </>
                             )
                           )}
