@@ -1356,6 +1356,550 @@ app.get('/api/shippo/label-pdf', async (req, res) => {
 
 // ==================== ORDER MANAGEMENT ENDPOINTS ====================
 
+// ==================== PIRATE SHIP API (Webhook/Integration Endpoints) ====================
+// Estos endpoints exponen los pedidos en formato estándar para integraciones externas
+// Similar a cómo Shopify/WooCommerce exponen sus APIs
+
+// Endpoint para obtener pedidos pendientes (formato compatible con integraciones)
+// GET /api/pirateship/orders?status=pending&limit=50
+app.get('/api/pirateship/orders', async (req, res) => {
+  try {
+    const status = req.query.status || 'pending';
+    const limit = parseInt(req.query.limit) || 50;
+    const apiKey = req.query.api_key || req.headers['x-api-key'] || '';
+    
+    // Validar API key (opcional, para seguridad)
+    const validApiKey = process.env.PIRATESHIP_API_KEY || '';
+    if (validApiKey && apiKey !== validApiKey) {
+      return res.status(401).json({ error: 'Invalid API key' });
+    }
+
+    // Obtener pedidos de Firestore
+    const ordersRef = collection(db, 'orders');
+    let q = query(ordersRef, orderBy('createdAt', 'desc'));
+    
+    if (status !== 'all') {
+      q = query(ordersRef, where('status', '==', status), orderBy('createdAt', 'desc'));
+    }
+    
+    const snapshot = await getDocs(q);
+    const orders = [];
+    
+    snapshot.forEach((doc) => {
+      const orderData = doc.data();
+      if (orderData.paymentStatus === 'paid' || orderData.status === 'paid') {
+        orders.push({
+          id: doc.id,
+          order_number: orderData.orderNumber || doc.id,
+          created_at: orderData.createdAt?.toDate?.()?.toISOString() || new Date().toISOString(),
+          status: orderData.status || 'pending',
+          customer: {
+            first_name: orderData.customerInfo?.firstName || '',
+            last_name: orderData.customerInfo?.lastName || '',
+            email: orderData.customerInfo?.email || '',
+            phone: orderData.customerInfo?.phone || '',
+            address: {
+              address_1: orderData.customerInfo?.address?.line1 || orderData.customerInfo?.address?.street1 || '',
+              address_2: orderData.customerInfo?.address?.line2 || orderData.customerInfo?.address?.street2 || '',
+              city: orderData.customerInfo?.address?.city || '',
+              state: orderData.customerInfo?.address?.state || '',
+              postal_code: orderData.customerInfo?.address?.postal_code || orderData.customerInfo?.address?.zipCode || orderData.customerInfo?.zip || '',
+              country: orderData.customerInfo?.address?.country || 'US'
+            }
+          },
+          line_items: (orderData.cartItems || []).map(item => ({
+            name: item.name || 'Product',
+            quantity: item.quantity || 1,
+            price: parseFloat(item.price || 0)
+          })),
+          shipping: {
+            weight: orderData.packageInfo?.weight || 1,
+            weight_unit: orderData.packageInfo?.weightUnit || 'lb',
+            dimensions: {
+              length: orderData.packageInfo?.length || 8,
+              width: orderData.packageInfo?.width || 6,
+              height: orderData.packageInfo?.height || 4,
+              unit: 'in'
+            }
+          },
+          total: parseFloat(orderData.total || 0),
+          shipping_cost: parseFloat(orderData.shippingInfo?.cost || orderData.shippingInfo?.amount || 0)
+        });
+      }
+    });
+
+    // Limitar resultados
+    const limitedOrders = orders.slice(0, limit);
+
+    res.json({
+      orders: limitedOrders,
+      count: limitedOrders.length,
+      total: orders.length
+    });
+  } catch (error) {
+    console.error('❌ Error obteniendo pedidos:', error);
+    res.status(500).json({ error: error.message || 'Error al obtener pedidos' });
+  }
+});
+
+// Endpoint para obtener un pedido específico
+// GET /api/pirateship/orders/:orderId
+app.get('/api/pirateship/orders/:orderId', async (req, res) => {
+  try {
+    const { orderId } = req.params;
+    const apiKey = req.query.api_key || req.headers['x-api-key'] || '';
+    
+    const validApiKey = process.env.PIRATESHIP_API_KEY || '';
+    if (validApiKey && apiKey !== validApiKey) {
+      return res.status(401).json({ error: 'Invalid API key' });
+    }
+
+    const orderRef = doc(db, 'orders', orderId);
+    const orderSnap = await getDoc(orderRef);
+    
+    if (!orderSnap.exists()) {
+      return res.status(404).json({ error: 'Order not found' });
+    }
+
+    const orderData = orderSnap.data();
+    
+    const order = {
+      id: orderSnap.id,
+      order_number: orderData.orderNumber || orderSnap.id,
+      created_at: orderData.createdAt?.toDate?.()?.toISOString() || new Date().toISOString(),
+      status: orderData.status || 'pending',
+      customer: {
+        first_name: orderData.customerInfo?.firstName || '',
+        last_name: orderData.customerInfo?.lastName || '',
+        email: orderData.customerInfo?.email || '',
+        phone: orderData.customerInfo?.phone || '',
+        address: {
+          address_1: orderData.customerInfo?.address?.line1 || orderData.customerInfo?.address?.street1 || '',
+          address_2: orderData.customerInfo?.address?.line2 || orderData.customerInfo?.address?.street2 || '',
+          city: orderData.customerInfo?.address?.city || '',
+          state: orderData.customerInfo?.address?.state || '',
+          postal_code: orderData.customerInfo?.address?.postal_code || orderData.customerInfo?.address?.zipCode || orderData.customerInfo?.zip || '',
+          country: orderData.customerInfo?.address?.country || 'US'
+        }
+      },
+      line_items: (orderData.cartItems || []).map(item => ({
+        name: item.name || 'Product',
+        quantity: item.quantity || 1,
+        price: parseFloat(item.price || 0)
+      })),
+      shipping: {
+        weight: orderData.packageInfo?.weight || 1,
+        weight_unit: orderData.packageInfo?.weightUnit || 'lb',
+        dimensions: {
+          length: orderData.packageInfo?.length || 8,
+          width: orderData.packageInfo?.width || 6,
+          height: orderData.packageInfo?.height || 4,
+          unit: 'in'
+        }
+      },
+      total: parseFloat(orderData.total || 0),
+      shipping_cost: parseFloat(orderData.shippingInfo?.cost || orderData.shippingInfo?.amount || 0)
+    };
+
+    res.json({ order });
+  } catch (error) {
+    console.error('❌ Error obteniendo pedido:', error);
+    res.status(500).json({ error: error.message || 'Error al obtener pedido' });
+  }
+});
+
+// Webhook endpoint - Notifica cuando hay un nuevo pedido
+// POST /api/pirateship/webhook/order-created
+app.post('/api/pirateship/webhook/order-created', async (req, res) => {
+  try {
+    const { orderId } = req.body;
+    
+    if (!orderId) {
+      return res.status(400).json({ error: 'orderId is required' });
+    }
+
+    // Obtener el pedido
+    const orderRef = doc(db, 'orders', orderId);
+    const orderSnap = await getDoc(orderRef);
+    
+    if (!orderSnap.exists()) {
+      return res.status(404).json({ error: 'Order not found' });
+    }
+
+    const orderData = orderSnap.data();
+    
+    // Formatear pedido para webhook
+    const webhookData = {
+      event: 'order.created',
+      order: {
+        id: orderSnap.id,
+        order_number: orderData.orderNumber || orderSnap.id,
+        created_at: orderData.createdAt?.toDate?.()?.toISOString() || new Date().toISOString(),
+        status: orderData.status || 'pending',
+        customer: {
+          first_name: orderData.customerInfo?.firstName || '',
+          last_name: orderData.customerInfo?.lastName || '',
+          email: orderData.customerInfo?.email || '',
+          phone: orderData.customerInfo?.phone || '',
+          address: {
+            address_1: orderData.customerInfo?.address?.line1 || orderData.customerInfo?.address?.street1 || '',
+            address_2: orderData.customerInfo?.address?.line2 || orderData.customerInfo?.address?.street2 || '',
+            city: orderData.customerInfo?.address?.city || '',
+            state: orderData.customerInfo?.address?.state || '',
+            postal_code: orderData.customerInfo?.address?.postal_code || orderData.customerInfo?.address?.zipCode || orderData.customerInfo?.zip || '',
+            country: orderData.customerInfo?.address?.country || 'US'
+          }
+        },
+        shipping: {
+          weight: orderData.packageInfo?.weight || 1,
+          weight_unit: orderData.packageInfo?.weightUnit || 'lb',
+          dimensions: {
+            length: orderData.packageInfo?.length || 8,
+            width: orderData.packageInfo?.width || 6,
+            height: orderData.packageInfo?.height || 4,
+            unit: 'in'
+          }
+        }
+      }
+    };
+
+    // Aquí puedes enviar el webhook a servicios externos (Zapier, Make.com, etc.)
+    // Por ahora, solo retornamos los datos
+    res.json({ 
+      success: true, 
+      webhook_data: webhookData,
+      message: 'Webhook data ready. Configure Zapier/Make.com to listen to this endpoint.'
+    });
+  } catch (error) {
+    console.error('❌ Error en webhook:', error);
+    res.status(500).json({ error: error.message || 'Error processing webhook' });
+  }
+});
+
+// ==================== PIRATE SHIP EXPORT ====================
+// Endpoint para obtener tarifas de USPS y UPS (las mismas que usa Pirate Ship)
+app.post('/api/pirateship/get-rates', async (req, res) => {
+  try {
+    const { fromAddress, toAddress, weight, dimensions } = req.body;
+    
+    if (!fromAddress || !toAddress || !weight) {
+      return res.status(400).json({ error: 'Datos incompletos: se requieren fromAddress, toAddress y weight' });
+    }
+
+    const rates = [];
+    
+    // USPS RateV4 API - Tarifas comerciales (las que usa Pirate Ship)
+    try {
+      const uspsUserId = process.env.USPS_USER_ID || '';
+      
+      if (uspsUserId) {
+        // Preparar datos para USPS RateV4
+        const weightInOunces = weight.unit === 'lb' ? (parseFloat(weight.value) * 16) : parseFloat(weight.value);
+        const weightInPounds = weight.unit === 'oz' ? (parseFloat(weight.value) / 16) : parseFloat(weight.value);
+        
+        // Construir XML para USPS RateV4 API
+        const uspsXml = `<?xml version="1.0"?>
+<RateV4Request USERID="${uspsUserId}">
+  <Package ID="1">
+    <Service>ALL</Service>
+    <ZipOrigination>${fromAddress.zip || fromAddress.postalCode || ''}</ZipOrigination>
+    <ZipDestination>${toAddress.zip || toAddress.postalCode || ''}</ZipDestination>
+    <Pounds>${Math.floor(weightInPounds)}</Pounds>
+    <Ounces>${Math.round((weightInPounds % 1) * 16)}</Ounces>
+    ${dimensions ? `<Container>RECTANGULAR</Container>
+    <Size>REGULAR</Size>
+    <Width>${dimensions.width || ''}</Width>
+    <Length>${dimensions.length || ''}</Length>
+    <Height>${dimensions.height || ''}</Height>` : '<Container>VARIABLE</Container>'}
+    <Machinable>true</Machinable>
+  </Package>
+</RateV4Request>`;
+
+        const uspsResponse = await fetch(`https://secure.shippingapis.com/ShippingAPI.dll?API=RateV4&XML=${encodeURIComponent(uspsXml)}`);
+        const uspsText = await uspsResponse.text();
+        
+        // Parsear respuesta XML de USPS
+        if (uspsText.includes('<Error>')) {
+          console.warn('⚠️ USPS API Error:', uspsText);
+        } else {
+          // Extraer tarifas de la respuesta XML
+          const rateMatches = uspsText.match(/<Postage CLASSID="(\d+)">[\s\S]*?<MailService>(.*?)<\/MailService>[\s\S]*?<Rate>(.*?)<\/Rate>/g);
+          if (rateMatches) {
+            rateMatches.forEach(match => {
+              const serviceMatch = match.match(/<MailService>(.*?)<\/MailService>/);
+              const rateMatch = match.match(/<Rate>(.*?)<\/Rate>/);
+              const classIdMatch = match.match(/CLASSID="(\d+)"/);
+              
+              if (serviceMatch && rateMatch) {
+                const serviceName = serviceMatch[1].trim();
+                const rate = parseFloat(rateMatch[1].trim());
+                
+                // Filtrar solo servicios relevantes
+                if (serviceName.includes('Priority') || serviceName.includes('First-Class') || serviceName.includes('Parcel') || serviceName.includes('Ground')) {
+                  rates.push({
+                    carrier: 'USPS',
+                    service: serviceName,
+                    amount: rate.toFixed(2),
+                    amount_local: rate.toFixed(2),
+                    provider: 'usps',
+                    estimated_days: serviceName.includes('Express') ? 1 : serviceName.includes('Priority') ? 2 : 3
+                  });
+                }
+              }
+            });
+          }
+        }
+      }
+    } catch (uspsError) {
+      console.warn('⚠️ Error obteniendo tarifas USPS:', uspsError.message);
+    }
+
+    // UPS API - Tarifas comerciales
+    try {
+      const upsAccessKey = process.env.UPS_ACCESS_KEY || '';
+      const upsUsername = process.env.UPS_USERNAME || '';
+      const upsPassword = process.env.UPS_PASSWORD || '';
+      
+      if (upsAccessKey && upsUsername && upsPassword) {
+        // UPS requiere autenticación OAuth primero, luego Rate API
+        // Por ahora, agregamos estructura para UPS si tienen credenciales
+        // Nota: UPS API es más compleja y requiere múltiples pasos
+      }
+    } catch (upsError) {
+      console.warn('⚠️ Error obteniendo tarifas UPS:', upsError.message);
+    }
+
+    // Si no hay tarifas de APIs directas, usar Shippo como fallback (que también tiene tarifas comerciales)
+    if (rates.length === 0) {
+      console.log('📦 Usando Shippo como fallback para obtener tarifas comerciales...');
+      
+      const shippoToken = process.env.SHIPPO_API_TOKEN || process.env.REACT_APP_SHIPPO_API_TOKEN || '';
+      
+      if (shippoToken) {
+        try {
+          const shippoModule = require('shippo');
+          const shippoClient = new shippoModule.Shippo({ apiKeyHeader: shippoToken });
+          
+          // Crear direcciones en Shippo
+          const fromAddr = await shippoClient.addresses.create({
+            name: fromAddress.name || 'Delizukar',
+            street1: fromAddress.street1 || fromAddress.address_line_1 || '',
+            city: fromAddress.city || '',
+            state: fromAddress.state || '',
+            zip: fromAddress.zip || fromAddress.postalCode || '',
+            country: fromAddress.country || 'US',
+            is_residential: false
+          });
+          
+          const toAddr = await shippoClient.addresses.create({
+            name: toAddress.name || '',
+            street1: toAddress.street1 || toAddress.address_line_1 || '',
+            city: toAddress.city || '',
+            state: toAddress.state || '',
+            zip: toAddress.zip || toAddress.postalCode || '',
+            country: toAddress.country || 'US',
+            is_residential: true
+          });
+          
+          const fromAddrId = fromAddr.id || fromAddr.objectId || fromAddr.object_id;
+          const toAddrId = toAddr.id || toAddr.objectId || toAddr.object_id;
+          
+          // Crear shipment
+          const shipment = await shippoClient.shipments.create({
+            addressFrom: fromAddrId,
+            addressTo: toAddrId,
+            parcels: [{
+              length: String(dimensions?.length || 8),
+              width: String(dimensions?.width || 6),
+              height: String(dimensions?.height || 4),
+              distanceUnit: 'in',
+              weight: String(weight.unit === 'lb' ? weight.value : (weight.value / 16)),
+              massUnit: 'lb'
+            }],
+            async: false
+          });
+          
+          // Filtrar solo USPS y UPS (los que usa Pirate Ship)
+          if (shipment.rates) {
+            shipment.rates.forEach(rate => {
+              const provider = rate.provider || rate.carrier || '';
+              if (provider.toUpperCase() === 'USPS' || provider.toUpperCase() === 'UPS') {
+                rates.push({
+                  carrier: provider.toUpperCase(),
+                  service: rate.servicelevel?.name || rate.service || 'Standard',
+                  amount: parseFloat(rate.amount_local || rate.amount || 0).toFixed(2),
+                  amount_local: parseFloat(rate.amount_local || rate.amount || 0).toFixed(2),
+                  provider: provider.toLowerCase(),
+                  estimated_days: rate.estimated_days || rate.estimatedDays || 3
+                });
+              }
+            });
+          }
+        } catch (shippoError) {
+          console.warn('⚠️ Error usando Shippo como fallback:', shippoError.message);
+        }
+      }
+    }
+
+    // Ordenar por precio
+    rates.sort((a, b) => parseFloat(a.amount) - parseFloat(b.amount));
+
+    res.json({ rates });
+  } catch (error) {
+    console.error('❌ Error obteniendo tarifas:', error);
+    res.status(500).json({ error: error.message || 'Error al obtener tarifas' });
+  }
+});
+
+// Endpoint para exportar pedido a formato CSV compatible con Pirate Ship
+app.post('/api/pirateship/export-order', async (req, res) => {
+  try {
+    const { order } = req.body;
+    
+    if (!order || !order.customerInfo) {
+      return res.status(400).json({ error: 'Datos del pedido incompletos' });
+    }
+
+    const customerInfo = order.customerInfo || {};
+    const address = customerInfo.address || {};
+    
+    // Extraer información de dirección
+    const street1 = address.line1 || address.street1 || customerInfo.street1 || address.address || '';
+    const street2 = address.line2 || address.street2 || customerInfo.street2 || '';
+    const city = address.city || customerInfo.city || '';
+    const state = address.state || customerInfo.state || '';
+    const zip = address.postal_code || address.zipCode || customerInfo.zipCode || customerInfo.zip || '';
+    const country = address.country || customerInfo.country || 'US';
+    
+    // Calcular peso y dimensiones del paquete
+    const packageInfo = order.packageInfo || {};
+    const weight = packageInfo.weight || 1;
+    const weightUnit = packageInfo.weightUnit || 'lb';
+    const length = packageInfo.length || 8;
+    const width = packageInfo.width || 6;
+    const height = packageInfo.height || 4;
+    
+    // Convertir peso a onzas si está en libras (Pirate Ship generalmente usa onzas)
+    const weightInOunces = weightUnit === 'lb' ? (parseFloat(weight) * 16) : parseFloat(weight);
+    
+    // Formato CSV compatible con Pirate Ship
+    // Campos típicos: Name, Company, Street1, Street2, City, State, Zip, Country, Phone, Email, Weight, Length, Width, Height
+    const csvRows = [];
+    
+    // Header
+    csvRows.push('Name,Company,Street1,Street2,City,State,Zip,Country,Phone,Email,Weight,Length,Width,Height,OrderNumber');
+    
+    // Data row
+    const csvRow = [
+      `"${(customerInfo.firstName || '')} ${(customerInfo.lastName || '')}"`.trim(),
+      `"${customerInfo.company || ''}"`,
+      `"${street1}"`,
+      `"${street2}"`,
+      `"${city}"`,
+      `"${state}"`,
+      `"${zip}"`,
+      `"${country}"`,
+      `"${customerInfo.phone || ''}"`,
+      `"${customerInfo.email || ''}"`,
+      weightInOunces.toFixed(2),
+      length,
+      width,
+      height,
+      `"${order.id || order.orderNumber || ''}"`
+    ];
+    
+    csvRows.push(csvRow.join(','));
+    
+    const csvContent = csvRows.join('\n');
+    
+    // Configurar headers para descarga de CSV
+    res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+    res.setHeader('Content-Disposition', `attachment; filename="pirateship-export-${order.id || 'order'}.csv"`);
+    
+    // Enviar BOM para Excel
+    res.write('\ufeff');
+    res.end(csvContent);
+    
+    console.log('✅ CSV exportado para Pirate Ship:', order.id);
+  } catch (error) {
+    console.error('❌ Error exportando a Pirate Ship:', error);
+    res.status(500).json({ error: error.message || 'Error al exportar pedido' });
+  }
+});
+
+// Endpoint para exportar múltiples pedidos a Pirate Ship
+app.post('/api/pirateship/export-orders', async (req, res) => {
+  try {
+    const { orders } = req.body;
+    
+    if (!orders || !Array.isArray(orders) || orders.length === 0) {
+      return res.status(400).json({ error: 'No hay pedidos para exportar' });
+    }
+
+    const csvRows = [];
+    
+    // Header
+    csvRows.push('Name,Company,Street1,Street2,City,State,Zip,Country,Phone,Email,Weight,Length,Width,Height,OrderNumber');
+    
+    // Procesar cada pedido
+    orders.forEach(order => {
+      if (!order || !order.customerInfo) return;
+      
+      const customerInfo = order.customerInfo || {};
+      const address = customerInfo.address || {};
+      
+      const street1 = address.line1 || address.street1 || customerInfo.street1 || address.address || '';
+      const street2 = address.line2 || address.street2 || customerInfo.street2 || '';
+      const city = address.city || customerInfo.city || '';
+      const state = address.state || customerInfo.state || '';
+      const zip = address.postal_code || address.zipCode || customerInfo.zipCode || customerInfo.zip || '';
+      const country = address.country || customerInfo.country || 'US';
+      
+      const packageInfo = order.packageInfo || {};
+      const weight = packageInfo.weight || 1;
+      const weightUnit = packageInfo.weightUnit || 'lb';
+      const length = packageInfo.length || 8;
+      const width = packageInfo.width || 6;
+      const height = packageInfo.height || 4;
+      
+      const weightInOunces = weightUnit === 'lb' ? (parseFloat(weight) * 16) : parseFloat(weight);
+      
+      const csvRow = [
+        `"${(customerInfo.firstName || '')} ${(customerInfo.lastName || '')}"`.trim(),
+        `"${customerInfo.company || ''}"`,
+        `"${street1}"`,
+        `"${street2}"`,
+        `"${city}"`,
+        `"${state}"`,
+        `"${zip}"`,
+        `"${country}"`,
+        `"${customerInfo.phone || ''}"`,
+        `"${customerInfo.email || ''}"`,
+        weightInOunces.toFixed(2),
+        length,
+        width,
+        height,
+        `"${order.id || order.orderNumber || ''}"`
+      ];
+      
+      csvRows.push(csvRow.join(','));
+    });
+    
+    const csvContent = csvRows.join('\n');
+    
+    res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+    res.setHeader('Content-Disposition', `attachment; filename="pirateship-export-${orders.length}-orders.csv"`);
+    
+    res.write('\ufeff');
+    res.end(csvContent);
+    
+    console.log(`✅ ${orders.length} pedidos exportados para Pirate Ship`);
+  } catch (error) {
+    console.error('❌ Error exportando pedidos a Pirate Ship:', error);
+    res.status(500).json({ error: error.message || 'Error al exportar pedidos' });
+  }
+});
+
 // Helper function to automatically buy shipping label after payment (usando Shippo)
 async function buyShippingLabelForOrder(shippingInfo) {
   try {
