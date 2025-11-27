@@ -71,99 +71,111 @@ Headers:
 
 ### Módulo 3: Set Variables (Formatear datos)
 
+**📍 IMPORTANTE:** Este módulo va DESPUÉS del Iterator y ANTES del módulo HTTP que llama a `/api/pirateship/export-order`.
+
 1. Haz clic en **"+"** después del Iterator
 2. Busca: **"Tools"** → **"Set Variables"**
-3. Agrega estas variables (una por una):
+3. Haz clic en **"Add variable"** para cada variable
+4. **Para cada variable, haz clic en el ícono de lista 📋 junto al campo "Value"** para seleccionar los datos del Iterator
 
-```
-Variable 1:
-  Name: customer_name
-  Value: {{customer.first_name}} {{customer.last_name}}
+**Configuración de Variables:**
 
-Variable 2:
-  Name: street1
-  Value: {{customer.address.address_1}}
+**Paso a paso para cada variable:**
 
-Variable 3:
-  Name: street2
-  Value: {{customer.address.address_2}}
+1. Haz clic en **"Add variable"**
+2. En el campo **"Variable name"**, escribe el nombre (ej: `id`)
+3. En el campo **"Value"**, haz clic en el ícono 📋 (selector de campos)
+4. En el menú desplegable, busca y selecciona el campo del Iterator
 
-Variable 4:
-  Name: city
-  Value: {{customer.address.city}}
+**Tabla de Variables a Configurar:**
 
-Variable 5:
-  Name: state
-  Value: {{customer.address.state}}
+| # | Variable Name | Value (del Iterator) | Ruta en Make.com |
+|---|--------------|---------------------|------------------|
+| 1 | `id` | `{{id}}` | Iterator → `id` |
+| 2 | `order_number` | `{{order_number}}` | Iterator → `order_number` |
+| 3 | `customer_first_name` | `{{customer.first_name}}` | Iterator → `customer` → `first_name` |
+| 4 | `customer_last_name` | `{{customer.last_name}}` | Iterator → `customer` → `last_name` |
+| 5 | `customer_email` | `{{customer.email}}` | Iterator → `customer` → `email` |
+| 6 | `customer_phone` | `{{customer.phone}}` | Iterator → `customer` → `phone` |
+| 7 | `address_street1` | `{{customer.address.address_1}}` | Iterator → `customer` → `address` → `address_1` |
+| 8 | `address_street2` | `{{customer.address.address_2}}` | Iterator → `customer` → `address` → `address_2` |
+| 9 | `address_city` | `{{customer.address.city}}` | Iterator → `customer` → `address` → `city` |
+| 10 | `address_state` | `{{customer.address.state}}` | Iterator → `customer` → `address` → `state` |
+| 11 | `address_zip` | `{{customer.address.postal_code}}` | Iterator → `customer` → `address` → `postal_code` |
+| 12 | `address_country` | `{{customer.address.country}}` | Iterator → `customer` → `address` → `country` |
+| 13 | `shipping_weight` | `{{shipping.weight}}` | Iterator → `shipping` → `weight` |
+| 14 | `shipping_length` | `{{shipping.dimensions.length}}` | Iterator → `shipping` → `dimensions` → `length` |
+| 15 | `shipping_width` | `{{shipping.dimensions.width}}` | Iterator → `shipping` → `dimensions` → `width` |
+| 16 | `shipping_height` | `{{shipping.dimensions.height}}` | Iterator → `shipping` → `dimensions` → `height` |
 
-Variable 6:
-  Name: zip
-  Value: {{customer.address.postal_code}}
+**💡 Ejemplo Visual:**
 
-Variable 7:
-  Name: country
-  Value: {{customer.address.country}}
+Cuando configures la variable `customer_first_name`:
+1. Variable name: `customer_first_name`
+2. Value: Haz clic en 📋 → Selecciona: `Iterator` → `customer` → `first_name`
+3. Make.com mostrará: `{{customer.first_name}}`
 
-Variable 8:
-  Name: phone
-  Value: {{customer.phone}}
+**⚠️ IMPORTANTE:** 
+- Los nombres de las variables (Variable Name) son los que usarás después en el módulo HTTP
+- Los valores (Value) deben venir del Iterator usando el selector 📋
+- Si no ves algún campo, haz clic en el módulo Iterator para ver qué datos está devolviendo
 
-Variable 9:
-  Name: email
-  Value: {{customer.email}}
+**💡 Tip:** Si no ves algún campo, haz clic en el módulo Iterator para ver qué datos está devolviendo.
 
-Variable 10:
-  Name: weight
-  Value: {{shipping.weight}}
-
-Variable 11:
-  Name: length
-  Value: {{shipping.dimensions.length}}
-
-Variable 12:
-  Name: width
-  Value: {{shipping.dimensions.width}}
-
-Variable 13:
-  Name: height
-  Value: {{shipping.dimensions.height}}
-
-Variable 14:
-  Name: order_number
-  Value: {{order_number}}
-```
-
-4. Haz clic en **"OK"**
+5. Haz clic en **"OK"** para guardar
 
 ### Módulo 4: Text Parser (Generar CSV)
 
+**📍 IMPORTANTE:** Este módulo va DESPUÉS de "Set Variables" y genera el CSV directamente en Make.com.
+
+**⚠️ NO uses el módulo HTTP POST** - Genera el CSV directamente aquí.
+
 1. Haz clic en **"+"** después de Set Variables
-2. Busca: **"Text parser"** → **"Text aggregator"**
-3. En **"Text"**, pega esto:
+2. Busca: **"Text parser"** → **"Text aggregator"** (o **"Text"** → **"Create text"**)
+3. En el campo **"Text"**, pega esto y **usa las variables del módulo "Set Variables"**:
 
 ```
 Name,Company,Street1,Street2,City,State,Zip,Country,Phone,Email,Weight,Length,Width,Height,OrderNumber
-"{{customer_name}}","","{{street1}}","{{street2}}","{{city}}","{{state}}","{{zip}}","{{country}}","{{phone}}","{{email}}",{{weight}},{{length}},{{width}},{{height}},"{{order_number}}"
+"{{customer_first_name}} {{customer_last_name}}","","{{address_street1}}","{{address_street2}}","{{address_city}}","{{address_state}}","{{address_zip}}","{{address_country}}","{{customer_phone}}","{{customer_email}}",{{shipping_weight}},{{shipping_length}},{{shipping_width}},{{shipping_height}},"{{order_number}}"
 ```
 
-4. Haz clic en **"OK"**
+**💡 IMPORTANTE:** 
+- Para usar las variables, haz clic en el ícono 📋 junto al campo y selecciona las variables del módulo "Set Variables"
+- O escribe `{{` y Make.com te mostrará las variables disponibles
+- Asegúrate de usar los nombres exactos de las variables que configuraste en "Set Variables"
+
+4. Haz clic en **"OK"** para guardar
 
 ### Módulo 5: Email (Enviar CSV)
+
+**📍 IMPORTANTE:** Este módulo envía el CSV generado por email.
 
 1. Haz clic en **"+"** después de Text Parser
 2. Busca: **"Email"** → **"Send an email"**
 3. Configura:
 
 ```
-To: tu-email@delizukar.com
+To: delizukar@gmail.com (o tu email)
 Subject: Pedido Pirate Ship - {{order_number}}
-Text: Se adjunta el CSV para importar en Pirate Ship
-Attachment:
-  - File name: order_{{order_number}}.csv
-  - File content: {{text}} (del módulo Text Parser)
+Content Type: Plain text
+Content: Nuevo pedido para importar en Pirate Ship
+
+Pedido: {{order_number}}
+Cliente: {{customer_first_name}} {{customer_last_name}}
+
+Se adjunta el CSV para importar en Pirate Ship.
 ```
 
-4. Haz clic en **"OK"**
+4. En la sección **"Attachments"**, haz clic en **"Add attachment"**:
+   - **File name:** `order_{{order_number}}.csv`
+   - **Data:** Haz clic en 📋 → Selecciona el campo `text` del módulo Text Parser (o `output` dependiendo de cómo se llame)
+
+**💡 IMPORTANTE:** 
+- El CSV viene del módulo Text Parser
+- Usa el selector 📋 para seleccionar el texto CSV generado
+- Asegúrate de que el nombre del archivo termine en `.csv`
+
+5. Haz clic en **"OK"** para guardar
 
 ---
 
@@ -236,8 +248,8 @@ En cada módulo, puedes hacer clic para ver:
 
 ```
 ┌─────────────────────────────┐
-│  HTTP Request               │ ← Obtiene pedidos
-│  GET /api/pirateship/orders │   cada 15 minutos
+│  HTTP Request (GET)         │ ← Obtiene pedidos
+│  /api/pirateship/orders     │   cada 15 minutos
 └──────────────┬──────────────┘
                │
                ▼
@@ -248,20 +260,20 @@ En cada módulo, puedes hacer clic para ver:
                │
                ▼
 ┌─────────────────────────────┐
-│  Set Variables               │ ← Formatea datos
-│  14 variables                │
+│  Set Variables               │ ← Extrae y formatea datos
+│  16 variables                │   del Iterator
 └──────────────┬──────────────┘
                │
                ▼
 ┌─────────────────────────────┐
 │  Text Parser                 │ ← Genera CSV
-│  CSV format                  │
+│  CSV format                  │   directamente
 └──────────────┬──────────────┘
                │
                ▼
 ┌─────────────────────────────┐
-│  Email                       │ ← Envía CSV
-│  Send email                  │   por email
+│  Email                       │ ← Envía CSV por email
+│  Send email                  │
 └─────────────────────────────┘
 ```
 
@@ -274,11 +286,12 @@ Antes de activar, verifica:
 - [ ] API key configurada en `.env.local`
 - [ ] Servidor reiniciado
 - [ ] URL correcta en Make.com
-- [ ] Módulo HTTP configurado correctamente
+- [ ] Módulo HTTP (GET) configurado correctamente
 - [ ] Iterator configurado con `orders`
-- [ ] Todas las variables configuradas
-- [ ] CSV generado correctamente
-- [ ] Email configurado
+- [ ] Todas las variables configuradas en Set Variables
+- [ ] Text Parser generando CSV correctamente
+- [ ] Email configurado con adjunto CSV
+- [ ] **NO** hay módulo HTTP POST (debe estar eliminado)
 - [ ] Schedule configurado (15 minutos)
 - [ ] Probado con "Run once"
 - [ ] Sin errores en ningún módulo
