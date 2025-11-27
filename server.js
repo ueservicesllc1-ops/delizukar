@@ -1364,6 +1364,12 @@ app.get('/api/shippo/label-pdf', async (req, res) => {
 // GET /api/pirateship/orders?status=pending&limit=50
 app.get('/api/pirateship/orders', async (req, res) => {
   try {
+    console.log('🔍 [Pirate Ship API] Request recibido:', {
+      status: req.query.status,
+      limit: req.query.limit,
+      hasApiKey: !!req.query.api_key
+    });
+
     const status = req.query.status || 'pending';
     const limit = parseInt(req.query.limit) || 50;
     const apiKey = req.query.api_key || req.headers['x-api-key'] || '';
@@ -1371,65 +1377,92 @@ app.get('/api/pirateship/orders', async (req, res) => {
     // Validar API key (opcional, para seguridad)
     const validApiKey = process.env.PIRATESHIP_API_KEY || '';
     if (validApiKey && apiKey !== validApiKey) {
+      console.log('❌ [Pirate Ship API] Invalid API key');
       return res.status(401).json({ error: 'Invalid API key' });
     }
 
-    // Obtener pedidos de Firestore
+    console.log('✅ [Pirate Ship API] API key válida, obteniendo pedidos...');
+
+    // Obtener pedidos de Firestore - usar consulta más simple y robusta
     const ordersRef = collection(db, 'orders');
-    let q = query(ordersRef, orderBy('createdAt', 'desc'));
     
-    if (status !== 'all') {
-      q = query(ordersRef, where('status', '==', status), orderBy('createdAt', 'desc'));
-    }
+    // Primero obtener todos los pedidos pagados, luego filtrar por status
+    let q = query(ordersRef, orderBy('createdAt', 'desc'));
     
     const snapshot = await getDocs(q);
     const orders = [];
     
+    console.log(`📦 [Pirate Ship API] Total documentos en Firestore: ${snapshot.size}`);
+    
     snapshot.forEach((doc) => {
-      const orderData = doc.data();
-      if (orderData.paymentStatus === 'paid' || orderData.status === 'paid') {
-        orders.push({
-          id: doc.id,
-          order_number: orderData.orderNumber || doc.id,
-          created_at: orderData.createdAt?.toDate?.()?.toISOString() || new Date().toISOString(),
-          status: orderData.status || 'pending',
-          customer: {
-            first_name: orderData.customerInfo?.firstName || '',
-            last_name: orderData.customerInfo?.lastName || '',
-            email: orderData.customerInfo?.email || '',
-            phone: orderData.customerInfo?.phone || '',
-            address: {
-              address_1: orderData.customerInfo?.address?.line1 || orderData.customerInfo?.address?.street1 || '',
-              address_2: orderData.customerInfo?.address?.line2 || orderData.customerInfo?.address?.street2 || '',
-              city: orderData.customerInfo?.address?.city || '',
-              state: orderData.customerInfo?.address?.state || '',
-              postal_code: orderData.customerInfo?.address?.postal_code || orderData.customerInfo?.address?.zipCode || orderData.customerInfo?.zip || '',
-              country: orderData.customerInfo?.address?.country || 'US'
+      try {
+        const orderData = doc.data();
+        
+        // Filtrar solo pedidos pagados
+        const isPaid = orderData.paymentStatus === 'paid' || orderData.status === 'paid';
+        const matchesStatus = status === 'all' || orderData.status === status || (!orderData.status && status === 'pending');
+        
+        if (isPaid && matchesStatus) {
+          // Convertir fecha de Firestore a ISO string de forma segura
+          let createdAt = new Date().toISOString();
+          if (orderData.createdAt) {
+            if (orderData.createdAt.toDate) {
+              createdAt = orderData.createdAt.toDate().toISOString();
+            } else if (orderData.createdAt.seconds) {
+              createdAt = new Date(orderData.createdAt.seconds * 1000).toISOString();
+            } else if (orderData.createdAt instanceof Date) {
+              createdAt = orderData.createdAt.toISOString();
             }
-          },
-          line_items: (orderData.cartItems || []).map(item => ({
-            name: item.name || 'Product',
-            quantity: item.quantity || 1,
-            price: parseFloat(item.price || 0)
-          })),
-          shipping: {
-            weight: orderData.packageInfo?.weight || 1,
-            weight_unit: orderData.packageInfo?.weightUnit || 'lb',
-            dimensions: {
-              length: orderData.packageInfo?.length || 8,
-              width: orderData.packageInfo?.width || 6,
-              height: orderData.packageInfo?.height || 4,
-              unit: 'in'
-            }
-          },
-          total: parseFloat(orderData.total || 0),
-          shipping_cost: parseFloat(orderData.shippingInfo?.cost || orderData.shippingInfo?.amount || 0)
-        });
+          }
+          
+          orders.push({
+            id: doc.id,
+            order_number: orderData.orderNumber || doc.id,
+            created_at: createdAt,
+            status: orderData.status || 'pending',
+            customer: {
+              first_name: orderData.customerInfo?.firstName || '',
+              last_name: orderData.customerInfo?.lastName || '',
+              email: orderData.customerInfo?.email || '',
+              phone: orderData.customerInfo?.phone || '',
+              address: {
+                address_1: orderData.customerInfo?.address?.line1 || orderData.customerInfo?.address?.street1 || orderData.customerInfo?.street1 || '',
+                address_2: orderData.customerInfo?.address?.line2 || orderData.customerInfo?.address?.street2 || orderData.customerInfo?.street2 || '',
+                city: orderData.customerInfo?.address?.city || orderData.customerInfo?.city || '',
+                state: orderData.customerInfo?.address?.state || orderData.customerInfo?.state || '',
+                postal_code: orderData.customerInfo?.address?.postal_code || orderData.customerInfo?.address?.zipCode || orderData.customerInfo?.zip || orderData.customerInfo?.zipCode || '',
+                country: orderData.customerInfo?.address?.country || orderData.customerInfo?.country || 'US'
+              }
+            },
+            line_items: (orderData.cartItems || []).map(item => ({
+              name: item.name || 'Product',
+              quantity: item.quantity || 1,
+              price: parseFloat(item.price || 0)
+            })),
+            shipping: {
+              weight: orderData.packageInfo?.weight || 1,
+              weight_unit: orderData.packageInfo?.weightUnit || 'lb',
+              dimensions: {
+                length: orderData.packageInfo?.length || 8,
+                width: orderData.packageInfo?.width || 6,
+                height: orderData.packageInfo?.height || 4,
+                unit: 'in'
+              }
+            },
+            total: parseFloat(orderData.total || 0),
+            shipping_cost: parseFloat(orderData.shippingInfo?.cost || orderData.shippingInfo?.amount || 0)
+          });
+        }
+      } catch (docError) {
+        console.error(`⚠️ [Pirate Ship API] Error procesando documento ${doc.id}:`, docError);
+        // Continuar con el siguiente documento
       }
     });
 
     // Limitar resultados
     const limitedOrders = orders.slice(0, limit);
+
+    console.log(`✅ [Pirate Ship API] Pedidos encontrados: ${limitedOrders.length} de ${orders.length} totales`);
 
     res.json({
       orders: limitedOrders,
@@ -1437,8 +1470,12 @@ app.get('/api/pirateship/orders', async (req, res) => {
       total: orders.length
     });
   } catch (error) {
-    console.error('❌ Error obteniendo pedidos:', error);
-    res.status(500).json({ error: error.message || 'Error al obtener pedidos' });
+    console.error('❌ [Pirate Ship API] Error obteniendo pedidos:', error);
+    console.error('   Stack:', error.stack);
+    res.status(500).json({ 
+      error: error.message || 'Error al obtener pedidos',
+      details: process.env.NODE_ENV === 'development' ? error.stack : undefined
+    });
   }
 });
 
