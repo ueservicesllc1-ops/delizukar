@@ -4335,33 +4335,46 @@ async function autoPurchaseUSPSLabel(orderId, order) {
 
     console.log('📦 Intentando comprar etiqueta USPS automáticamente para pedido:', orderId);
 
-    // Obtener tarifas primero
-    const fromAddress = {
-      postal_code: '07011', // Clifton, NJ
-    };
-    const toAddress = {
-      postal_code: order.customerInfo.address?.postal_code || order.customerInfo.address?.zip || '',
-    };
-    const weight = {
-      value: parseFloat(order.packageInfo.weight || 1),
-    };
-    const dimensions = {
-      length: parseFloat(order.packageInfo.length || 8),
-      width: parseFloat(order.packageInfo.width || 6),
-      height: parseFloat(order.packageInfo.height || 4),
-    };
+    // Si hay shippingInfo con rate seleccionado, usar ese
+    let selectedRate = null;
+    if (order.shippingInfo && order.shippingInfo.rate) {
+      console.log('✅ Usando rate seleccionado en el checkout');
+      const rate = order.shippingInfo.rate;
+      selectedRate = {
+        service: rate.service || rate.servicelevel?.token || rate.uspsRateData?.mailClass || 'USPS_GROUND_ADVANTAGE',
+        amount: rate.amount || rate.amount_local || order.shippingInfo.cost || '0.00',
+        uspsRateData: rate.uspsRateData || rate
+      };
+    } else {
+      // Si no hay rate seleccionado, obtener tarifas y seleccionar la más económica
+      console.log('⚠️ No hay rate seleccionado, obteniendo tarifas y seleccionando la más económica');
+      const fromAddress = {
+        postal_code: '07011', // Clifton, NJ
+      };
+      const toAddress = {
+        postal_code: order.customerInfo.address?.postal_code || order.customerInfo.address?.zip || '',
+      };
+      const weight = {
+        value: parseFloat(order.packageInfo.weight || 1),
+      };
+      const dimensions = {
+        length: parseFloat(order.packageInfo.length || 8),
+        width: parseFloat(order.packageInfo.width || 6),
+        height: parseFloat(order.packageInfo.height || 4),
+      };
 
-    // Obtener tarifas usando función interna
-    const rates = await getUSPSRatesInternal(fromAddress, toAddress, weight, dimensions);
+      // Obtener tarifas usando función interna
+      const rates = await getUSPSRatesInternal(fromAddress, toAddress, weight, dimensions);
 
-    if (rates.length === 0) {
-      throw new Error('No se encontraron tarifas USPS');
+      if (rates.length === 0) {
+        throw new Error('No se encontraron tarifas USPS');
+      }
+
+      // Seleccionar la tarifa más económica
+      selectedRate = rates.reduce((cheapest, current) => {
+        return parseFloat(current.amount) < parseFloat(cheapest.amount) ? current : cheapest;
+      });
     }
-
-    // Seleccionar la tarifa más económica
-    const selectedRate = rates.reduce((cheapest, current) => {
-      return parseFloat(current.amount) < parseFloat(cheapest.amount) ? current : cheapest;
-    });
 
     // Comprar etiqueta usando la misma lógica del endpoint
     const token = await getUSPSOAuthToken();
