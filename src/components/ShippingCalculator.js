@@ -16,7 +16,6 @@ import {
 } from '@mui/material';
 import { LocalShipping, CheckCircle, Close } from '@mui/icons-material';
  
-import shippoService from '../services/shippoService';
 import useIphone16 from '../hooks/useIphone16';
 
 const ShippingCalculator = ({ 
@@ -84,7 +83,7 @@ const ShippingCalculator = ({
       console.log('   ✅ Los rates se calcularán basándose en estas direcciones específicas');
       console.log('   ✅ Si cambias la dirección de destino, los rates cambiarán automáticamente');
       
-      console.log('📦 [Calculate Rates] Datos del paquete que se enviarán a Shippo:');
+      console.log('📦 [Calculate Rates] Datos del paquete que se enviarán a USPS:');
       orderData.parcels.forEach((parcel, idx) => {
         console.log(`   Paquete ${idx + 1}:`);
         console.log(`      - Peso: ${parcel.weight || parcel.mass} ${parcel.massUnit || parcel.mass_unit || 'lb'}`);
@@ -93,152 +92,106 @@ const ShippingCalculator = ({
         console.log(`      - Mass Unit: ${parcel.massUnit || parcel.mass_unit || 'lb'}`);
         console.log(`      - Parcel completo:`, JSON.stringify(parcel, null, 2));
       });
-      console.log('✅ [Calculate Rates] Estos son los datos EXACTOS que Shippo usará para calcular las tarifas');
+      console.log('✅ [Calculate Rates] Estos son los datos EXACTOS que USPS usará para calcular las tarifas');
       console.log('✅ [Calculate Rates] Los rates son dinámicos y cambiarán según la dirección de destino');
       
-      // Obtener tarifas de Shippo
-      console.log('📦 [Calculate Rates] Getting rates from Shippo...');
-      const rates = await shippoService.getShippingRates(
-        orderData.address_from,
-        orderData.address_to,
-        orderData.parcels
-      );
+      // Obtener tarifas de USPS
+      console.log('📦 [Calculate Rates] Getting rates from USPS...');
       
-      console.log('📦 [Rates] Rates recibidos de Shippo (SIN FILTRAR):', rates);
-      console.log('📦 [Rates] Cantidad total de rates:', rates.length);
-      
-      // Log detallado de cada rate recibido
-      rates.forEach((rate, idx) => {
-        const rateId = rate.id || rate.objectId || rate.object_id;
-        const carrier = rate.provider || rate.carrier;
-        const service = rate.servicelevel?.name || rate.service;
-        const amount = rate.amount_local || rate.amount;
-        const amountOriginal = rate.amount;
-        const amountLocal = rate.amount_local;
-        console.log(`   Rate ${idx + 1}:`);
-        console.log(`      ID: ${rateId}`);
-        console.log(`      Carrier: ${carrier}`);
-        console.log(`      Service: ${service}`);
-        console.log(`      Amount (original): $${amountOriginal}`);
-        console.log(`      Amount (local): $${amountLocal}`);
-        console.log(`      Amount (usado): $${amount}`);
-        console.log(`      Rate completo:`, JSON.stringify(rate, null, 2));
-      });
-      
-      // Log los carriers/providers disponibles para debugging
-      const carriers = rates.map(rate => ({
-        carrier: rate.carrier,
-        provider: rate.provider,
-        service: rate.service || rate.servicelevel?.name
-      }));
-      console.log('Available carriers/providers:', carriers);
-      
-      // Filtrar solo USPS, UPS, FedEx y DHL
-      // Shippo puede usar 'provider' o 'carrier' en diferentes versiones de la API
-      // También puede tener diferentes formatos de nombres
-      const filteredRates = rates.filter(rate => {
-        const carrierName = (rate.provider || rate.carrier || rate.servicelevel?.token || '').toLowerCase();
-        const serviceName = (rate.service || rate.servicelevel?.name || '').toLowerCase();
-        
-        // Buscar en el nombre del carrier/provider y también en el servicio
-        const searchText = `${carrierName} ${serviceName}`;
-        
-        const isUSPS = searchText.includes('usps') || 
-                      searchText.includes('united states postal service') ||
-                      searchText.includes('united states post');
-        const isUPS = (searchText.includes('ups') || searchText.includes('united parcel')) && 
-                     !searchText.includes('usps');
-        const isFedEx = searchText.includes('fedex') || 
-                       searchText.includes('federal express') ||
-                       searchText.includes('fedex_');
-        const isDHL = searchText.includes('dhl') || 
-                     searchText.includes('dhl_') ||
-                     searchText.includes('dhlecommerce') ||
-                     searchText.includes('dhl ecommerce');
-        
-        return isUSPS || isUPS || isFedEx || isDHL;
-      });
-      
-      // Log detallado para debugging
-      console.log('🔍 Debugging carriers:');
-      rates.forEach((rate, idx) => {
-        const carrierName = rate.provider || rate.carrier || 'N/A';
-        const serviceName = rate.service || rate.servicelevel?.name || 'N/A';
-        console.log(`  Rate ${idx}: provider="${carrierName}", carrier="${rate.carrier}", service="${serviceName}"`);
-      });
-      
-      // Separar por carrier y limitar a 3 opciones por carrier
-      const groupedRates = {
-        usps: [],
-        ups: [],
-        fedex: [],
-        dhl: []
+      // Preparar datos para USPS API
+      const firstParcel = orderData.parcels[0];
+      const fromAddress = {
+        postal_code: orderData.address_from.zip || orderData.address_from.zipCode || orderData.address_from.postal_code || '07011'
+      };
+      const toAddress = {
+        postal_code: orderData.address_to.zip || orderData.address_to.zipCode || orderData.address_to.postal_code || ''
+      };
+      const weight = {
+        value: parseFloat(firstParcel.weight || firstParcel.mass || 1),
+        unit: firstParcel.massUnit || firstParcel.mass_unit || 'lb'
+      };
+      const dimensions = {
+        length: parseFloat(firstParcel.length || 8),
+        width: parseFloat(firstParcel.width || 6),
+        height: parseFloat(firstParcel.height || 4)
       };
       
-      filteredRates.forEach(rate => {
-        const carrierName = (rate.provider || rate.carrier || rate.servicelevel?.token || '').toLowerCase();
-        const serviceName = (rate.service || rate.servicelevel?.name || '').toLowerCase();
-        const searchText = `${carrierName} ${serviceName}`;
-        const amount = parseFloat(rate.amount || rate.amount_local || 0);
+      // Llamar a USPS API
+      const baseUrl = process.env.NODE_ENV === 'production' 
+        ? window.location.origin 
+        : '';
+      
+      const response = await fetch(`${baseUrl}/api/usps/get-rates`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          fromAddress,
+          toAddress,
+          weight,
+          dimensions
+        }),
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Error obteniendo tarifas USPS');
+      }
+      
+      const data = await response.json();
+      const uspsRates = data.rates || [];
+      
+      console.log('📦 [Rates] Rates recibidos de USPS:', uspsRates);
+      console.log('📦 [Rates] Cantidad total de rates:', uspsRates.length);
+      
+      // Formatear rates de USPS al formato esperado por el componente
+      const formattedRates = uspsRates.map((rate, idx) => {
+        // Mapear nombres de servicio de USPS a nombres más legibles
+        const serviceName = rate.service || 'USPS Ground Advantage';
+        let displayName = serviceName;
         
-        if (searchText.includes('usps') || searchText.includes('united states postal service') || searchText.includes('united states post')) {
-          groupedRates.usps.push(rate);
-        } else if ((searchText.includes('ups') || searchText.includes('united parcel')) && !searchText.includes('usps')) {
-          groupedRates.ups.push(rate);
-        } else if (searchText.includes('fedex') || searchText.includes('federal express') || searchText.includes('fedex_')) {
-          groupedRates.fedex.push(rate);
-        } else if (searchText.includes('dhl') || searchText.includes('dhl_') || searchText.includes('dhlecommerce') || searchText.includes('dhl ecommerce')) {
-          groupedRates.dhl.push(rate);
+        if (serviceName.includes('GROUND_ADVANTAGE')) {
+          displayName = 'USPS Ground Advantage';
+        } else if (serviceName.includes('PRIORITY_MAIL')) {
+          displayName = 'USPS Priority Mail';
+        } else if (serviceName.includes('PRIORITY_MAIL_EXPRESS')) {
+          displayName = 'USPS Priority Mail Express';
         }
+        
+        return {
+          id: `usps_${idx}_${Date.now()}`,
+          objectId: `usps_${idx}_${Date.now()}`,
+          carrier: 'USPS',
+          provider: 'usps',
+          service: displayName,
+          servicelevel: {
+            name: displayName,
+            token: rate.service
+          },
+          amount: rate.amount,
+          amount_local: rate.amount_local || rate.amount,
+          estimated_days: rate.estimated_days || 3,
+          uspsRateData: rate.uspsRateData || rate // Guardar datos completos de USPS
+        };
       });
       
-      console.log('📊 Rates agrupados:', {
-        usps: groupedRates.usps.length,
-        ups: groupedRates.ups.length,
-        fedex: groupedRates.fedex.length,
-        dhl: groupedRates.dhl.length
+      // Ordenar por precio (más barato primero)
+      const finalRates = formattedRates.sort((a, b) => {
+        const priceA = parseFloat(a.amount || a.amount_local || 0);
+        const priceB = parseFloat(b.amount || b.amount_local || 0);
+        return priceA - priceB;
       });
       
-      // Ordenar por precio (más barato primero) y limitar a 3 por carrier
-      const limitRates = (ratesArray, limit = 3) => {
-        return ratesArray
-          .sort((a, b) => {
-            const priceA = parseFloat(a.amount || a.amount_local || 0);
-            const priceB = parseFloat(b.amount || b.amount_local || 0);
-            return priceA - priceB;
-          })
-          .slice(0, limit);
-      };
-      
-      // Limitar a 3 opciones de cada carrier (las 3 más baratas)
-      const finalRates = [
-        ...limitRates(groupedRates.usps, 3), // Máximo 3 de USPS
-        ...limitRates(groupedRates.ups, 3),  // Máximo 3 de UPS
-        ...limitRates(groupedRates.fedex, 3), // Máximo 3 de FedEx
-        ...limitRates(groupedRates.dhl, 3)   // Máximo 3 de DHL
-      ];
-      
-      console.log('📦 [Rates] Filtered rates (máximo 3 de cada carrier):', finalRates);
-      console.log(`📦 [Rates] Found ${finalRates.length} rates: USPS(${limitRates(groupedRates.usps, 3).length}), UPS(${limitRates(groupedRates.ups, 3).length}), FedEx(${limitRates(groupedRates.fedex, 3).length}), DHL(${limitRates(groupedRates.dhl, 3).length})`);
-      
-      // Log detallado de los rates finales que se mostrarán al usuario
-      console.log('📦 [Rates] Rates FINALES que se mostrarán al usuario:');
+      console.log('📦 [Rates] Rates FINALES que se mostrarán al usuario:', finalRates);
       finalRates.forEach((rate, idx) => {
-        const rateId = rate.id || rate.objectId || rate.object_id;
-        const carrier = rate.provider || rate.carrier;
-        const service = rate.servicelevel?.name || rate.service;
-        const amount = parseFloat(rate.amount || rate.amount_local || 0);
-        console.log(`   ${idx + 1}. ${carrier} - ${service}: $${amount.toFixed(2)}`);
-        console.log(`      Rate ID: ${rateId}`);
-        console.log(`      Amount original: $${rate.amount}`);
-        console.log(`      Amount local: $${rate.amount_local}`);
-        console.log(`      Amount usado: $${amount}`);
+        console.log(`   ${idx + 1}. ${rate.carrier} - ${rate.service}: $${parseFloat(rate.amount || rate.amount_local || 0).toFixed(2)}`);
       });
       
       setRates(finalRates);
     } catch (err) {
       console.error('Error calculating rates:', err);
-      setError('No se pudieron obtener las tarifas de envío. Por favor, verifica la configuración de Shippo.');
+      setError('No se pudieron obtener las tarifas de envío. Por favor, verifica la configuración de USPS.');
     } finally {
       setLoading(false);
     }
@@ -250,8 +203,8 @@ const ShippingCalculator = ({
 
   const handleConfirmShipping = () => {
     if (selectedRate) {
-      // Obtener el ID del rate para guardarlo directamente
-      const rateId = selectedRate.id || selectedRate.objectId || selectedRate.object_id;
+      // Para USPS, usar el service como identificador (no hay rateId como en Shippo)
+      const rateId = selectedRate.uspsRateData?.mailClass || selectedRate.servicelevel?.token || selectedRate.service || 'USPS_GROUND_ADVANTAGE';
       
       // CRÍTICO: Guardar el packageInfo exacto que se usó para calcular estos rates
       // Esto asegura que cuando se cree el shipment, use las mismas dimensiones/peso
@@ -346,19 +299,22 @@ const ShippingCalculator = ({
               id: rateId,
               objectId: selectedRate.objectId || selectedRate.id,
               object_id: selectedRate.object_id || selectedRate.id,
-              provider: selectedRate.provider,
-              carrier: selectedRate.carrier,
+              provider: selectedRate.provider || 'usps',
+              carrier: selectedRate.carrier || 'USPS',
               service: selectedRate.service,
               servicelevel: selectedRate.servicelevel,
               amount: selectedRate.amount,
               amount_local: selectedRate.amount_local,
               // Guardar información única para identificación
-              carrier_token: selectedRate.carrier_token || selectedRate.provider,
-              servicelevel_token: selectedRate.servicelevel_token || selectedRate.servicelevel?.token,
-              // Guardar el rate completo como referencia
-              fullRate: selectedRate
+              carrier_token: selectedRate.carrier_token || selectedRate.provider || 'usps',
+              servicelevel_token: selectedRate.servicelevel_token || selectedRate.servicelevel?.token || rateId,
+              // Guardar el rate completo como referencia (incluye datos de USPS)
+              fullRate: selectedRate,
+              // Guardar datos específicos de USPS para comprar etiqueta
+              uspsRateData: selectedRate.uspsRateData || selectedRate
             },
             // Guardar el rateId directamente para uso en el backend (prioridad alta)
+            // Para USPS, esto es el mailClass (ej: USPS_GROUND_ADVANTAGE)
             rateId: rateId,
             // CRÍTICO: Guardar packageInfo exacto usado para estos rates
             packageInfo: packageInfo,
