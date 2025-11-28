@@ -3877,6 +3877,22 @@ app.post('/api/create-order', async (req, res) => {
         console.error('❌ [Backend] ========================================');
       });
     
+    // Comprar etiqueta USPS automáticamente si está configurado
+    if (process.env.USPS_AUTO_PURCHASE_LABELS === 'true') {
+      console.log('📦 [Backend] Intentando comprar etiqueta USPS automáticamente...');
+      autoPurchaseUSPSLabel(docRef.id, orderData)
+        .then(labelData => {
+          if (labelData) {
+            console.log('✅ [Backend] Etiqueta USPS comprada automáticamente:', labelData.trackingNumber);
+          } else {
+            console.log('⚠️ [Backend] No se pudo comprar etiqueta USPS automáticamente');
+          }
+        })
+        .catch(err => {
+          console.error('❌ [Backend] Error comprando etiqueta USPS automáticamente:', err);
+        });
+    }
+
     // Enviar notificación al administrador (no bloquear la respuesta si falla)
     console.log('📧 [Backend] Enviando notificación al administrador...');
     sendAdminOrderNotification(orderData, docRef.id)
@@ -4069,6 +4085,369 @@ app.use((err, req, res, next) => {
     message: process.env.NODE_ENV === 'development' ? err.message : 'Something went wrong'
   });
 });
+
+// ==================== USPS API v3 INTEGRATION ====================
+// Integración directa con USPS API para obtener tarifas y comprar etiquetas automáticamente
+
+// Cache para OAuth token (evitar obtenerlo en cada request)
+let uspsOAuthToken = null;
+let uspsTokenExpiry = null;
+
+// Función para obtener OAuth token de USPS
+async function getUSPSOAuthToken() {
+  try {
+    // Si tenemos un token válido, usarlo
+    if (uspsOAuthToken && uspsTokenExpiry && Date.now() < uspsTokenExpiry) {
+      return uspsOAuthToken;
+    }
+
+    const clientId = process.env.USPS_OAUTH_CLIENT_ID || '';
+    const clientSecret = process.env.USPS_OAUTH_CLIENT_SECRET || '';
+
+    if (!clientId || !clientSecret) {
+      throw new Error('USPS OAuth credentials not configured');
+    }
+
+    // Obtener token usando OAuth 2.0 Client Credentials flow
+    const response = await fetch('https://api.usps.com/oauth2/v3/token', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: new URLSearchParams({
+        grant_type: 'client_credentials',
+        client_id: clientId,
+        client_secret: clientSecret,
+      }),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`USPS OAuth error: ${response.status} - ${errorText}`);
+    }
+
+    const data = await response.json();
+    uspsOAuthToken = data.access_token;
+    // Expira en expires_in segundos (normalmente 3600 = 1 hora)
+    uspsTokenExpiry = Date.now() + (data.expires_in - 60) * 1000; // -60 segundos de margen
+
+    console.log('✅ USPS OAuth token obtenido exitosamente');
+    return uspsOAuthToken;
+  } catch (error) {
+    console.error('❌ Error obteniendo USPS OAuth token:', error);
+    throw error;
+  }
+}
+
+// Endpoint para obtener tarifas de USPS usando Domestic Prices 3.0
+app.post('/api/usps/get-rates', async (req, res) => {
+  try {
+    const { fromAddress, toAddress, weight, dimensions } = req.body;
+
+    if (!fromAddress || !toAddress || !weight) {
+      return res.status(400).json({ error: 'Datos incompletos: se requieren fromAddress, toAddress y weight' });
+    }
+
+    const rates = await getUSPSRatesInternal(fromAddress, toAddress, weight, dimensions);
+    res.json({ rates });
+  } catch (error) {
+    console.error('❌ Error obteniendo tarifas USPS:', error);
+    res.status(500).json({ error: error.message || 'Error obteniendo tarifas USPS' });
+  }
+});
+
+// Endpoint para comprar etiqueta de USPS usando Domestic Labels 3.0
+app.post('/api/usps/create-label', async (req, res) => {
+  try {
+    const { orderId, order, selectedRate } = req.body;
+
+    if (!order || !order.customerInfo) {
+      return res.status(400).json({ error: 'Datos del pedido incompletos' });
+    }
+
+    const token = await getUSPSOAuthToken();
+    const crid = process.env.USPS_CRID || '';
+    const labelMid = process.env.USPS_LABEL_MID || '';
+
+    if (!crid || !labelMid) {
+      return res.status(500).json({ error: 'USPS CRID o Label MID no configurados' });
+    }
+
+    const customerInfo = order.customerInfo || {};
+    const address = customerInfo.address || {};
+    const packageInfo = order.packageInfo || {};
+
+    // Preparar request para Domestic Labels 3.0
+    const requestBody = {
+      mailClass: selectedRate?.service || selectedRate?.mailClass || 'USPS_GROUND_ADVANTAGE',
+      weight: parseFloat(packageInfo.weight || 1),
+      length: parseFloat(packageInfo.length || 8),
+      width: parseFloat(packageInfo.width || 6),
+      height: parseFloat(packageInfo.height || 4),
+      processingCategory: 'MACHINABLE',
+      rateIndicator: 'SP',
+      destinationEntryFacilityType: 'NONE',
+      priceType: 'COMMERCIAL',
+      accountType: 'EPS',
+      accountNumber: labelMid,
+      mailingDate: new Date().toISOString().split('T')[0],
+      hasNonstandardCharacteristics: false,
+      fromAddress: {
+        name: 'Delizukar',
+        street1: '29 E 7TH ST',
+        city: 'CLIFTON',
+        state: 'NJ',
+        zip: '07011',
+        country: 'US',
+      },
+      toAddress: {
+        name: `${customerInfo.firstName || ''} ${customerInfo.lastName || ''}`.trim(),
+        street1: address.line1 || '',
+        street2: address.line2 || '',
+        city: address.city || '',
+        state: address.state || '',
+        zip: address.postal_code || address.zip || '',
+        country: address.country || 'US',
+        phone: customerInfo.phone || '',
+        email: customerInfo.email || '',
+      },
+      labelFormat: 'PDF',
+      labelSize: '4X6',
+    };
+
+    const response = await fetch('https://api.usps.com/shipping/v3/labels', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(requestBody),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('❌ USPS Label API error:', errorText);
+      return res.status(response.status).json({ error: `USPS Label API error: ${errorText}` });
+    }
+
+    const labelData = await response.json();
+
+    // Actualizar pedido en Firestore con información de la etiqueta
+    if (orderId) {
+      const orderRef = doc(db, 'orders', orderId);
+      await updateDoc(orderRef, {
+        uspsLabelId: labelData.labelId || labelData.id,
+        trackingNumber: labelData.trackingNumber,
+        labelUrl: labelData.labelUrl,
+        shippingCost: selectedRate?.amount || '0.00',
+        status: 'shipped',
+        updatedAt: new Date(),
+      });
+    }
+
+    res.json({
+      success: true,
+      data: {
+        labelId: labelData.labelId || labelData.id,
+        trackingNumber: labelData.trackingNumber,
+        labelUrl: labelData.labelUrl,
+        trackingUrl: `https://tools.usps.com/go/TrackConfirmAction?tLabels=${labelData.trackingNumber}`,
+      },
+    });
+  } catch (error) {
+    console.error('❌ Error creando etiqueta USPS:', error);
+    res.status(500).json({ error: error.message || 'Error creando etiqueta USPS' });
+  }
+});
+
+// Función para obtener tarifas USPS (helper interno)
+async function getUSPSRatesInternal(fromAddress, toAddress, weight, dimensions) {
+  try {
+    const token = await getUSPSOAuthToken();
+    const crid = process.env.USPS_CRID || '';
+    const labelMid = process.env.USPS_LABEL_MID || '';
+
+    const requestBody = {
+      originZIPCode: fromAddress.postal_code || fromAddress.zip || fromAddress.postalCode || '',
+      destinationZIPCode: toAddress.postal_code || toAddress.zip || toAddress.postalCode || '',
+      weight: parseFloat(weight.value || weight),
+      length: parseFloat(dimensions?.length || 8),
+      width: parseFloat(dimensions?.width || 6),
+      height: parseFloat(dimensions?.height || 4),
+      mailClasses: ['USPS_GROUND_ADVANTAGE', 'PRIORITY_MAIL', 'PRIORITY_MAIL_EXPRESS'],
+      priceType: 'COMMERCIAL',
+      processingCategory: 'MACHINABLE',
+      rateIndicator: 'SP',
+      destinationEntryFacilityType: 'NONE',
+      mailingDate: new Date().toISOString().split('T')[0],
+      hasNonstandardCharacteristics: false,
+    };
+
+    if (crid && labelMid) {
+      requestBody.accountType = 'EPS';
+      requestBody.accountNumber = labelMid;
+    }
+
+    const response = await fetch('https://api.usps.com/shipping/v3/prices/total-rates/search', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(requestBody),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`USPS API error: ${response.status} - ${errorText}`);
+    }
+
+    const data = await response.json();
+    return (data.rateOptions || []).map(rate => ({
+      carrier: 'USPS',
+      service: rate.mailClass || 'USPS_GROUND_ADVANTAGE',
+      amount: rate.totalPrice?.toString() || '0.00',
+      amount_local: rate.totalPrice?.toString() || '0.00',
+      provider: 'usps',
+      estimated_days: rate.mailClass?.includes('EXPRESS') ? 1 : rate.mailClass?.includes('PRIORITY') ? 2 : 3,
+      uspsRateData: rate,
+    }));
+  } catch (error) {
+    console.error('❌ Error obteniendo tarifas USPS:', error);
+    throw error;
+  }
+}
+
+// Función para comprar etiqueta automáticamente cuando se crea un pedido
+async function autoPurchaseUSPSLabel(orderId, order) {
+  try {
+    const autoPurchase = process.env.USPS_AUTO_PURCHASE_LABELS === 'true';
+    
+    if (!autoPurchase) {
+      console.log('⚠️ USPS auto-purchase está deshabilitado');
+      return null;
+    }
+
+    if (!order || !order.customerInfo || !order.packageInfo) {
+      console.log('⚠️ No hay suficiente información para comprar etiqueta automáticamente');
+      return null;
+    }
+
+    console.log('📦 Intentando comprar etiqueta USPS automáticamente para pedido:', orderId);
+
+    // Obtener tarifas primero
+    const fromAddress = {
+      postal_code: '07011', // Clifton, NJ
+    };
+    const toAddress = {
+      postal_code: order.customerInfo.address?.postal_code || order.customerInfo.address?.zip || '',
+    };
+    const weight = {
+      value: parseFloat(order.packageInfo.weight || 1),
+    };
+    const dimensions = {
+      length: parseFloat(order.packageInfo.length || 8),
+      width: parseFloat(order.packageInfo.width || 6),
+      height: parseFloat(order.packageInfo.height || 4),
+    };
+
+    // Obtener tarifas usando función interna
+    const rates = await getUSPSRatesInternal(fromAddress, toAddress, weight, dimensions);
+
+    if (rates.length === 0) {
+      throw new Error('No se encontraron tarifas USPS');
+    }
+
+    // Seleccionar la tarifa más económica
+    const selectedRate = rates.reduce((cheapest, current) => {
+      return parseFloat(current.amount) < parseFloat(cheapest.amount) ? current : cheapest;
+    });
+
+    // Comprar etiqueta usando la misma lógica del endpoint
+    const token = await getUSPSOAuthToken();
+    const labelMid = process.env.USPS_LABEL_MID || '';
+
+    const customerInfo = order.customerInfo || {};
+    const address = customerInfo.address || {};
+    const packageInfo = order.packageInfo || {};
+
+    const requestBody = {
+      mailClass: selectedRate?.service || selectedRate?.mailClass || 'USPS_GROUND_ADVANTAGE',
+      weight: parseFloat(packageInfo.weight || 1),
+      length: parseFloat(packageInfo.length || 8),
+      width: parseFloat(packageInfo.width || 6),
+      height: parseFloat(packageInfo.height || 4),
+      processingCategory: 'MACHINABLE',
+      rateIndicator: 'SP',
+      destinationEntryFacilityType: 'NONE',
+      priceType: 'COMMERCIAL',
+      accountType: 'EPS',
+      accountNumber: labelMid,
+      mailingDate: new Date().toISOString().split('T')[0],
+      hasNonstandardCharacteristics: false,
+      fromAddress: {
+        name: 'Delizukar',
+        street1: '29 E 7TH ST',
+        city: 'CLIFTON',
+        state: 'NJ',
+        zip: '07011',
+        country: 'US',
+      },
+      toAddress: {
+        name: `${customerInfo.firstName || ''} ${customerInfo.lastName || ''}`.trim(),
+        street1: address.line1 || '',
+        street2: address.line2 || '',
+        city: address.city || '',
+        state: address.state || '',
+        zip: address.postal_code || address.zip || '',
+        country: address.country || 'US',
+        phone: customerInfo.phone || '',
+        email: customerInfo.email || '',
+      },
+      labelFormat: 'PDF',
+      labelSize: '4X6',
+    };
+
+    const response = await fetch('https://api.usps.com/shipping/v3/labels', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(requestBody),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`USPS Label API error: ${errorText}`);
+    }
+
+    const labelData = await response.json();
+
+    // Actualizar pedido en Firestore
+    const orderRef = doc(db, 'orders', orderId);
+    await updateDoc(orderRef, {
+      uspsLabelId: labelData.labelId || labelData.id,
+      trackingNumber: labelData.trackingNumber,
+      labelUrl: labelData.labelUrl,
+      shippingCost: selectedRate?.amount || '0.00',
+      status: 'shipped',
+      updatedAt: new Date(),
+    });
+
+    console.log('✅ Etiqueta USPS comprada automáticamente:', labelData.trackingNumber);
+
+    return {
+      labelId: labelData.labelId || labelData.id,
+      trackingNumber: labelData.trackingNumber,
+      labelUrl: labelData.labelUrl,
+      trackingUrl: `https://tools.usps.com/go/TrackConfirmAction?tLabels=${labelData.trackingNumber}`,
+    };
+  } catch (error) {
+    console.error('❌ Error comprando etiqueta USPS automáticamente:', error);
+    return null;
+  }
+}
 
 // ==================== START SERVER ====================
 
