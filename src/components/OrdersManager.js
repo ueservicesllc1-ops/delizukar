@@ -1155,17 +1155,16 @@ const OrdersManager = ({ open, onClose, initialTab = 'all' }) => {
         console.warn('Error al cargar logo:', logoError);
       }
 
-      // Función auxiliar para generar una página en un idioma - EXACTAMENTE COMO EL MODAL
+      // Función auxiliar para generar una página con el nuevo diseño
       const generatePage = (lang) => {
-        const t = translations[lang];
         let yPosition = 15;
 
-        // Agregar logo arriba
+        // Agregar logo arriba centrado
         if (logoData) {
           try {
             const logoX = (pageWidth - logoWidth) / 2;
             pdf.addImage(logoData, 'PNG', logoX, yPosition, logoWidth, logoHeight);
-            yPosition += logoHeight + 12;
+            yPosition += logoHeight + 15;
           } catch (error) {
             console.warn('Error al agregar logo al PDF:', error);
             yPosition += 10;
@@ -1174,237 +1173,74 @@ const OrdersManager = ({ open, onClose, initialTab = 'all' }) => {
           yPosition += 10;
         }
 
-        // Preparar datos con formato de fecha según idioma
-        const createdAt = selectedOrderDetails.createdAt 
-          ? new Date(selectedOrderDetails.createdAt.seconds ? selectedOrderDetails.createdAt.seconds * 1000 : selectedOrderDetails.createdAt).toLocaleString(lang === 'es' ? 'es-ES' : 'en-US')
-          : '-';
-        const updatedAt = selectedOrderDetails.updatedAt 
-          ? new Date(selectedOrderDetails.updatedAt.seconds ? selectedOrderDetails.updatedAt.seconds * 1000 : selectedOrderDetails.updatedAt).toLocaleString(lang === 'es' ? 'es-ES' : 'en-US')
-          : '-';
+        // SHIP TO y BILL TO - Lado a lado debajo del logo
+        const addressBoxWidth = (pageWidth - 2 * margin - 10) / 2;
+        const shipToX = margin;
+        const billToX = margin + addressBoxWidth + 10;
+        let addressY = yPosition;
 
-        // INFORMACIÓN GENERAL - Igual que el modal
-        pdf.setFontSize(13);
+        // SHIP TO (Izquierda) - Dirección de envío del cliente
+        pdf.setFontSize(11);
         pdf.setFont('helvetica', 'bold');
         pdf.setTextColor(200, 98, 109);
-        pdf.text(t.generalInfo, margin, yPosition);
-        yPosition += 5;
-        
-        // Línea debajo del título
-        pdf.setDrawColor(200, 98, 109);
-        pdf.setLineWidth(2);
-        pdf.line(margin, yPosition, pageWidth - margin, yPosition);
-        yPosition += 6;
+        pdf.text('SHIP TO', shipToX, addressY);
+        addressY += 6;
 
-        // Grid de 2 columnas para Información General
-        const col1X = margin;
-        const col2X = pageWidth / 2 + 5;
-        let col1Y = yPosition;
-        let col2Y = yPosition;
-
-          // Columna 1
-          pdf.setFontSize(9);
-          pdf.setFont('helvetica', 'bold');
-          pdf.setTextColor(102, 102, 102);
-          pdf.text(t.orderId, col1X, col1Y);
-          col1Y += 4;
-          pdf.setFont('courier', 'normal');
-          pdf.setFontSize(9);
-          pdf.setTextColor(0, 0, 0);
-          pdf.text(orderId, col1X, col1Y);
-          col1Y += 6;
-
-          pdf.setFont('helvetica', 'bold');
-          pdf.setFontSize(9);
-          pdf.setTextColor(102, 102, 102);
-          pdf.text(t.status, col1X, col1Y);
-          col1Y += 4;
-          pdf.setFont('helvetica', 'normal');
-          pdf.setTextColor(0, 0, 0);
-          pdf.text(getStatusText(status, lang), col1X, col1Y);
-          col1Y += 6;
-
-          pdf.setFont('helvetica', 'bold');
-          pdf.setFontSize(9);
-          pdf.setTextColor(102, 102, 102);
-          pdf.text(t.paymentStatus, col1X, col1Y);
-          col1Y += 4;
-          pdf.setFont('helvetica', 'normal');
-          pdf.setTextColor(0, 0, 0);
-          pdf.text(getPaymentStatusText(paymentStatus, lang), col1X, col1Y);
-          col1Y += 6;
-
-          pdf.setFont('helvetica', 'bold');
-          pdf.setFontSize(9);
-          pdf.setTextColor(102, 102, 102);
-          pdf.text(t.total, col1X, col1Y);
-          col1Y += 4;
-          pdf.setFont('helvetica', 'bold');
-          pdf.setTextColor(200, 98, 109);
-          pdf.setFontSize(12);
-          pdf.text(`$${total}`, col1X, col1Y);
-          col1Y += 6;
-
-          // Columna 2
-          pdf.setFontSize(9);
-          pdf.setFont('helvetica', 'bold');
-          pdf.setTextColor(102, 102, 102);
-          pdf.text(t.date + ':', col2X, col2Y);
-          col2Y += 4;
-          pdf.setFont('helvetica', 'normal');
-          pdf.setTextColor(0, 0, 0);
-          pdf.text(createdAt, col2X, col2Y);
-          col2Y += 6;
-
-          pdf.setFont('helvetica', 'bold');
-          pdf.setFontSize(9);
-          pdf.setTextColor(102, 102, 102);
-          pdf.text('Última Actualización:', col2X, col2Y);
-          col2Y += 4;
-          pdf.setFont('helvetica', 'normal');
-          pdf.setTextColor(0, 0, 0);
-          pdf.text(updatedAt, col2X, col2Y);
-          col2Y += 6;
-
-          if (selectedOrderDetails.sessionId) {
-            pdf.setFont('helvetica', 'bold');
-            pdf.setFontSize(9);
-            pdf.setTextColor(102, 102, 102);
-            pdf.text('Session ID:', col2X, col2Y);
-            col2Y += 4;
-            pdf.setFont('courier', 'normal');
-            pdf.setFontSize(8);
-            pdf.setTextColor(0, 0, 0);
-            pdf.text(selectedOrderDetails.sessionId, col2X, col2Y);
-            col2Y += 6;
-          }
-
-          if (selectedOrderDetails.paymentIntentId) {
-            pdf.setFont('helvetica', 'bold');
-            pdf.setFontSize(9);
-            pdf.setTextColor(102, 102, 102);
-            pdf.text('Payment Intent ID:', col2X, col2Y);
-            col2Y += 4;
-            pdf.setFont('courier', 'normal');
-            pdf.setFontSize(8);
-            pdf.setTextColor(0, 0, 0);
-            pdf.text(selectedOrderDetails.paymentIntentId, col2X, col2Y);
-            col2Y += 6;
-          }
-
-        yPosition = Math.max(col1Y, col2Y) + sectionSpacing;
-
-        // INFORMACIÓN DEL CLIENTE - Igual que el modal
         if (selectedOrderDetails.customerInfo) {
-          if (yPosition > pageHeight - 100) {
-            pdf.addPage();
-            yPosition = 15;
-          }
-
-          pdf.setFontSize(13);
-          pdf.setFont('helvetica', 'bold');
-          pdf.setTextColor(200, 98, 109);
-          pdf.text(t.customerInfo, margin, yPosition);
-          yPosition += 5;
-          
-          // Línea debajo del título
-          pdf.setDrawColor(200, 98, 109);
-          pdf.setLineWidth(2);
-          pdf.line(margin, yPosition, pageWidth - margin, yPosition);
-          yPosition += 6;
-
           const customer = selectedOrderDetails.customerInfo;
           const fullName = `${customer.firstName || ''} ${customer.lastName || ''}`.trim() || 'N/A';
-          const email = customer.email || 'N/A';
-          const phone = customer.phone || 'N/A';
-
-          // Grid de 2 columnas
-          col1Y = yPosition;
-          col2Y = yPosition;
-
-          // Columna 1
+          
           pdf.setFontSize(9);
-          pdf.setFont('helvetica', 'bold');
-          pdf.setTextColor(102, 102, 102);
-          pdf.text(t.name, col1X, col1Y);
-          col1Y += 4;
           pdf.setFont('helvetica', 'normal');
           pdf.setTextColor(0, 0, 0);
-          pdf.text(fullName, col1X, col1Y);
-          col1Y += 6;
+          pdf.text(fullName, shipToX, addressY);
+          addressY += 5;
 
-          pdf.setFont('helvetica', 'bold');
-          pdf.setFontSize(9);
-          pdf.setTextColor(102, 102, 102);
-          pdf.text(t.email, col1X, col1Y);
-          col1Y += 4;
-          pdf.setFont('helvetica', 'normal');
-          pdf.setTextColor(0, 0, 0);
-          pdf.text(email, col1X, col1Y);
-          col1Y += 6;
-
-          // Columna 2 - Teléfono arriba, Dirección abajo
-          pdf.setFont('helvetica', 'bold');
-          pdf.setFontSize(9);
-          pdf.setTextColor(102, 102, 102);
-          pdf.text(t.phone, col2X, col2Y);
-          col2Y += 4;
-          pdf.setFont('helvetica', 'normal');
-          pdf.setTextColor(0, 0, 0);
-          pdf.text(phone, col2X, col2Y);
-          col2Y += 6;
-
-          // Dirección a la derecha (columna 2)
           if (customer.address) {
             const addr = customer.address;
-            pdf.setFont('helvetica', 'bold');
-            pdf.setFontSize(9);
-            pdf.setTextColor(102, 102, 102);
-            pdf.text(t.address, col2X, col2Y);
-            col2Y += 4;
-            pdf.setFont('helvetica', 'normal');
-            pdf.setFontSize(8);
-            pdf.setTextColor(0, 0, 0);
             const addressLines = [
-              `${addr.line1 || ''}${addr.line2 ? ', ' + addr.line2 : ''}`,
-              `${addr.city || ''}, ${addr.state || ''} ${addr.postal_code || ''}`,
+              addr.line1 || '',
+              addr.line2 || '',
+              `${addr.city || ''}, ${addr.state || ''} ${addr.postal_code || ''}`.trim(),
               addr.country || ''
             ];
             addressLines.forEach(line => {
               if (line.trim()) {
-                pdf.text(line, col2X, col2Y);
-                col2Y += 5;
+                pdf.text(line, shipToX, addressY);
+                addressY += 5;
               }
             });
           }
-
-          yPosition = Math.max(col1Y, col2Y);
-
-          yPosition += sectionSpacing;
         }
 
-        // PRODUCTOS - Igual que el modal
+        // BILL TO (Derecha) - Dirección de facturación (Delizukar)
+        let billToY = yPosition;
+        pdf.setFontSize(11);
+        pdf.setFont('helvetica', 'bold');
+        pdf.setTextColor(200, 98, 109);
+        pdf.text('BILL TO', billToX, billToY);
+        billToY += 6;
+
+        pdf.setFontSize(9);
+        pdf.setFont('helvetica', 'normal');
+        pdf.setTextColor(0, 0, 0);
+        pdf.text('Delizukar', billToX, billToY);
+        billToY += 5;
+        pdf.text('29 E 7TH ST', billToX, billToY);
+        billToY += 5;
+        pdf.text('CLIFTON, NJ 07011', billToX, billToY);
+        billToY += 5;
+        pdf.text('UNITED STATES', billToX, billToY);
+
+        // Actualizar posición Y para la siguiente sección
+        yPosition = Math.max(addressY, billToY) + 15;
+
+        // TABLA DE ITEMS
         if (selectedOrderDetails.cartItems && selectedOrderDetails.cartItems.length > 0) {
           if (yPosition > pageHeight - 100) {
             pdf.addPage();
             yPosition = 15;
           }
-          
-          // Calcular cantidad total de productos
-          const totalProducts = selectedOrderDetails.cartItems.reduce((total, item) => {
-            return total + (item.quantity || 0);
-          }, 0);
-          
-          pdf.setFontSize(13);
-          pdf.setFont('helvetica', 'bold');
-          pdf.setTextColor(200, 98, 109);
-          pdf.text(`${t.products} (${totalProducts})`, margin, yPosition);
-          yPosition += 5;
-          
-          // Línea debajo del título
-          pdf.setDrawColor(200, 98, 109);
-          pdf.setLineWidth(2);
-          pdf.line(margin, yPosition, pageWidth - margin, yPosition);
-          yPosition += 6;
 
           // Encabezados de tabla
           pdf.setFillColor(200, 98, 109);
@@ -1412,21 +1248,24 @@ const OrdersManager = ({ open, onClose, initialTab = 'all' }) => {
           pdf.setFontSize(9);
           pdf.setFont('helvetica', 'bold');
           pdf.setTextColor(255, 255, 255);
-          pdf.text(t.product, margin + 2, yPosition);
-          pdf.text(t.quantity, margin + 110, yPosition, { align: 'right' });
-          pdf.text(t.price, margin + 150, yPosition, { align: 'right' });
-          pdf.text(t.subtotal, pageWidth - margin - 2, yPosition, { align: 'right' });
+          pdf.text('Items', margin + 2, yPosition);
+          pdf.text('Cantidad', margin + 110, yPosition, { align: 'right' });
+          pdf.text('Precio', margin + 150, yPosition, { align: 'right' });
+          pdf.text('Subtotal', pageWidth - margin - 2, yPosition, { align: 'right' });
           yPosition += 6;
           pdf.setTextColor(0, 0, 0);
 
           // Filas de productos
           pdf.setFont('helvetica', 'normal');
           pdf.setFontSize(9);
+          let totalAmount = 0;
+          
           selectedOrderDetails.cartItems.forEach((item) => {
-            const itemName = item.name || (lang === 'es' ? 'Producto sin nombre' : 'Unnamed product');
+            const itemName = item.name || 'Producto sin nombre';
             const quantity = item.quantity || 0;
             const price = parseFloat(item.price || 0).toFixed(2);
             const subtotal = (parseFloat(item.price || 0) * (item.quantity || 0)).toFixed(2);
+            totalAmount += parseFloat(subtotal);
 
             const nameLines = pdf.splitTextToSize(itemName, 95);
             pdf.text(nameLines, margin + 2, yPosition);
@@ -1437,134 +1276,51 @@ const OrdersManager = ({ open, onClose, initialTab = 'all' }) => {
             pdf.setFont('helvetica', 'normal');
             yPosition += Math.max(nameLines.length * 4, 5);
             
-            if (yPosition > pageHeight - 60) {
+            if (yPosition > pageHeight - 80) {
               pdf.addPage();
               yPosition = 15;
             }
           });
+
+          // Total
+          yPosition += 5;
+          pdf.setDrawColor(200, 98, 109);
+          pdf.setLineWidth(0.5);
+          pdf.line(margin, yPosition, pageWidth - margin, yPosition);
+          yPosition += 8;
           
-          yPosition += sectionSpacing;
+          pdf.setFont('helvetica', 'bold');
+          pdf.setFontSize(11);
+          pdf.setTextColor(200, 98, 109);
+          pdf.text('Total:', pageWidth - margin - 50, yPosition);
+          pdf.text(`$${totalAmount.toFixed(2)}`, pageWidth - margin - 2, yPosition, { align: 'right' });
+          yPosition += 10;
         }
 
-        // INFORMACIÓN DE ENVÍO Y PAQUETE - Lado a lado
-        if ((selectedOrderDetails.shippingInfo || selectedOrderDetails.packageInfo) && yPosition < pageHeight - 60) {
-          const boxWidth = (pageWidth - 2 * margin - 5) / 2;
-          const leftBoxX = margin;
-          const rightBoxX = margin + boxWidth + 5;
-          const boxY = yPosition;
-
-          // Información de Envío - Izquierda
-          if (selectedOrderDetails.shippingInfo) {
-            pdf.setFontSize(13);
-            pdf.setFont('helvetica', 'bold');
-            pdf.setTextColor(200, 98, 109);
-            pdf.text(t.shippingInfo, leftBoxX, boxY);
-            let shippingY = boxY + 5;
-            
-            // Línea debajo del título
-            pdf.setDrawColor(200, 98, 109);
-            pdf.setLineWidth(2);
-            pdf.line(leftBoxX, shippingY, leftBoxX + boxWidth, shippingY);
-            shippingY += 6;
-
-            const shipping = selectedOrderDetails.shippingInfo;
-            pdf.setFontSize(9);
-            
-            if (shipping.carrier) {
-              pdf.setFont('helvetica', 'bold');
-              pdf.setTextColor(102, 102, 102);
-              pdf.text(t.carrier, leftBoxX, shippingY);
-              shippingY += 4;
-              pdf.setFont('helvetica', 'normal');
-              pdf.setTextColor(0, 0, 0);
-              pdf.text(shipping.carrier, leftBoxX, shippingY);
-              shippingY += 6;
-            }
-            if (shipping.serviceLevel) {
-              pdf.setFont('helvetica', 'bold');
-              pdf.setFontSize(9);
-              pdf.setTextColor(102, 102, 102);
-              pdf.text(t.service, leftBoxX, shippingY);
-              shippingY += 4;
-              pdf.setFont('helvetica', 'normal');
-              pdf.setTextColor(0, 0, 0);
-              pdf.text(shipping.serviceLevel, leftBoxX, shippingY);
-              shippingY += 6;
-            }
-            if (shipping.cost) {
-              pdf.setFont('helvetica', 'bold');
-              pdf.setFontSize(9);
-              pdf.setTextColor(102, 102, 102);
-              pdf.text('Costo de Envío:', leftBoxX, shippingY);
-              shippingY += 4;
-              pdf.setFont('helvetica', 'bold');
-              pdf.setTextColor(200, 98, 109);
-              pdf.text(`$${parseFloat(shipping.cost).toFixed(2)}`, leftBoxX, shippingY);
-              shippingY += 6;
-            }
-            if (selectedOrderDetails.trackingCode) {
-              pdf.setFont('helvetica', 'bold');
-              pdf.setFontSize(9);
-              pdf.setTextColor(102, 102, 102);
-              pdf.text(t.tracking, leftBoxX, shippingY);
-              shippingY += 4;
-              pdf.setFont('courier', 'normal');
-              pdf.setFontSize(8);
-              pdf.setTextColor(0, 0, 0);
-              pdf.text(selectedOrderDetails.trackingCode, leftBoxX, shippingY);
-            }
-          }
-
-          // Información del Paquete - Derecha
-          if (selectedOrderDetails.packageInfo) {
-            pdf.setFontSize(13);
-            pdf.setFont('helvetica', 'bold');
-            pdf.setTextColor(200, 98, 109);
-            pdf.text(t.packageInfo, rightBoxX, boxY);
-            let packageY = boxY + 5;
-            
-            // Línea debajo del título
-            pdf.setDrawColor(200, 98, 109);
-            pdf.setLineWidth(2);
-            pdf.line(rightBoxX, packageY, rightBoxX + boxWidth, packageY);
-            packageY += 6;
-
-            const pkg = selectedOrderDetails.packageInfo;
-            pdf.setFontSize(9);
-            pdf.setFont('helvetica', 'bold');
-            pdf.setTextColor(102, 102, 102);
-            pdf.text(t.weight, rightBoxX, packageY);
-            packageY += 4;
-            pdf.setFont('helvetica', 'normal');
-            pdf.setTextColor(0, 0, 0);
-            pdf.text(`${pkg.weight} ${pkg.weightUnit || 'lb'}`, rightBoxX, packageY);
-            packageY += 6;
-
-            pdf.setFont('helvetica', 'bold');
-            pdf.setFontSize(9);
-            pdf.setTextColor(102, 102, 102);
-            pdf.text(t.dimensions, rightBoxX, packageY);
-            packageY += 4;
-            pdf.setFont('helvetica', 'normal');
-            pdf.setTextColor(0, 0, 0);
-            pdf.text(`${pkg.length} × ${pkg.width} × ${pkg.height} ${pkg.distanceUnit || 'in'}`, rightBoxX, packageY);
-          }
-        }
-        
         // Pie de página
-        const footerY = pageHeight - 8;
+        let footerY = pageHeight - 25;
+        pdf.setFontSize(10);
+        pdf.setFont('helvetica', 'normal');
+        pdf.setTextColor(0, 0, 0);
+        pdf.text('Gracias por comprar con nosotros', pageWidth / 2, footerY, { align: 'center' });
+        footerY += 5;
+        
+        pdf.setFontSize(9);
+        pdf.setFont('helvetica', 'bold');
+        pdf.setTextColor(200, 98, 109);
+        pdf.text('Delizukar - Galletas estilo New York', pageWidth / 2, footerY, { align: 'center' });
+        footerY += 5;
+        
         pdf.setFontSize(8);
         pdf.setFont('helvetica', 'normal');
-        pdf.setTextColor(150, 150, 150);
-        pdf.text(t.footer, pageWidth / 2, footerY, { align: 'center' });
+        pdf.setTextColor(102, 102, 102);
+        pdf.text('delizukar@gmail.com', pageWidth / 2, footerY, { align: 'center' });
+        footerY += 4;
+        pdf.text('delizukar.com', pageWidth / 2, footerY, { align: 'center' });
       };
 
-      // Generar versión en español
+      // Generar página con el nuevo diseño
       generatePage('es');
-      
-      // Agregar nueva página y generar versión en inglés
-      pdf.addPage();
-      generatePage('en');
 
       // Descargar el PDF
       const fileName = `orden-${orderId.substring(0, 8)}-${new Date().toISOString().split('T')[0]}.pdf`;
