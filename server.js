@@ -4108,13 +4108,21 @@ async function getUSPSOAuthToken() {
       throw new Error('USPS OAuth credentials not configured');
     }
 
+    console.log('🔑 [USPS OAuth] Intentando obtener token con Client ID:', clientId.substring(0, 10) + '...');
+    console.log('🔑 [USPS OAuth] Client ID length:', clientId.length);
+    console.log('🔑 [USPS OAuth] Client Secret length:', clientSecret.length);
+
     // Obtener token usando OAuth 2.0 Client Credentials flow
-    const response = await fetch('https://api.usps.com/oauth2/v3/token', {
+    // Según documentación de USPS: https://developers.usps.com/Oauth
+    // Endpoint correcto: https://apis.usps.com/oauth2/v3/token (con "apis" en plural)
+    // Formato correcto: JSON body (NO form-urlencoded)
+    console.log('🔑 [USPS OAuth] Obteniendo token con JSON body en apis.usps.com...');
+    const response = await fetch('https://apis.usps.com/oauth2/v3/token', {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
+        'Content-Type': 'application/json',
       },
-      body: new URLSearchParams({
+      body: JSON.stringify({
         grant_type: 'client_credentials',
         client_id: clientId,
         client_secret: clientSecret,
@@ -4123,6 +4131,9 @@ async function getUSPSOAuthToken() {
 
     if (!response.ok) {
       const errorText = await response.text();
+      console.error('❌ [USPS OAuth] Error response status:', response.status);
+      console.error('❌ [USPS OAuth] Error response headers:', JSON.stringify([...response.headers.entries()]));
+      console.error('❌ [USPS OAuth] Error response body:', errorText);
       throw new Error(`USPS OAuth error: ${response.status} - ${errorText}`);
     }
 
@@ -4139,6 +4150,160 @@ async function getUSPSOAuthToken() {
   }
 }
 
+// Endpoint para validar dirección usando USPS Address Standardization API 3.0
+// Si OAuth falla, hace validación básica de formato
+app.post('/api/usps/validate-address', async (req, res) => {
+  try {
+    console.log('🔍 [USPS] Validando dirección');
+    console.log('🔍 [USPS] Request body:', JSON.stringify(req.body, null, 2));
+
+    // Extraer datos de dirección del request
+    const addressData = {
+      streetAddress: req.body.street1 || req.body.address_line_1 || req.body.line1 || '',
+      city: req.body.city || req.body.city_locality || '',
+      state: req.body.state || req.body.state_province || '',
+      zipCode: req.body.zip || req.body.postal_code || req.body.zipCode || '',
+      zipPlus4: req.body.zipPlus4 || ''
+    };
+
+    // Validar que tengamos los campos mínimos
+    if (!addressData.streetAddress || !addressData.city || !addressData.state || !addressData.zipCode) {
+      return res.status(400).json({ 
+        error: 'Datos incompletos: se requieren street1, city, state y zip' 
+      });
+    }
+
+    // Validación básica de formato
+    const zipRegex = /^\d{5}(-\d{4})?$/;
+    const stateRegex = /^[A-Z]{2}$/i;
+    
+    if (!zipRegex.test(addressData.zipCode)) {
+      return res.status(400).json({ 
+        error: 'Código postal inválido. Debe ser 5 dígitos o formato ZIP+4 (12345-6789)' 
+      });
+    }
+
+    if (!stateRegex.test(addressData.state)) {
+      return res.status(400).json({ 
+        error: 'Estado inválido. Debe ser código de 2 letras (ej: NJ, NY, CA)' 
+      });
+    }
+
+    // Intentar obtener token OAuth y validar con USPS API
+    let token;
+    let uspsValidation = null;
+    
+    try {
+      token = await getUSPSOAuthToken();
+      console.log('📤 [USPS] Intentando validar con USPS API...');
+
+      // Llamar a USPS Address Standardization API
+      const response = await fetch('https://api.usps.com/addresses/v3/standardize', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          address: {
+            streetAddress: addressData.streetAddress,
+            city: addressData.city,
+            state: addressData.state,
+            zipCode: addressData.zipCode,
+            zipPlus4: addressData.zipPlus4 || undefined
+          }
+        }),
+      });
+
+      if (response.ok) {
+        uspsValidation = await response.json();
+        console.log('✅ [USPS] Dirección validada por USPS API:', uspsValidation);
+      } else {
+        const errorText = await response.text();
+        console.warn('⚠️ [USPS] Error en API, usando validación básica:', response.status, errorText);
+      }
+    } catch (oauthError) {
+      console.warn('⚠️ [USPS] OAuth falló, usando validación básica de formato:', oauthError.message);
+      // Continuar con validación básica
+    }
+
+    // Preparar respuesta compatible con el frontend
+    const originalAddress = {
+      street1: req.body.street1 || req.body.address_line_1 || req.body.line1,
+      city: req.body.city || req.body.city_locality,
+      state: req.body.state || req.body.state_province,
+      zip: req.body.zip || req.body.postal_code || req.body.zipCode,
+      country: req.body.country || req.body.country_code || 'US'
+    };
+
+    let validatedAddress;
+    let isValid = true;
+    let wasCorrected = false;
+
+    if (uspsValidation) {
+      // Usar validación de USPS API
+      const uspsAddress = uspsValidation.address || uspsValidation;
+      isValid = uspsValidation.isValid !== false && uspsValidation.validationStatus !== 'INVALID';
+      
+      validatedAddress = {
+        street1: uspsAddress.streetAddress || uspsAddress.street1 || addressData.streetAddress,
+        street2: uspsAddress.streetAddress2 || uspsAddress.street2 || req.body.street2 || '',
+        city: uspsAddress.city || addressData.city,
+        state: uspsAddress.state || addressData.state,
+        zip: uspsAddress.zipCode || uspsAddress.zip || addressData.zipCode,
+        zipPlus4: uspsAddress.zipPlus4 || '',
+        country: 'US'
+      };
+
+      // Verificar si fue corregida
+      const originalLine1 = originalAddress.street1;
+      const validatedLine1 = validatedAddress.street1;
+      if (validatedLine1 && originalLine1 && validatedLine1 !== originalLine1) {
+        wasCorrected = true;
+        console.log('📝 [USPS] Dirección fue corregida por USPS');
+      }
+    } else {
+      // Usar validación básica (misma dirección, pero normalizada)
+      validatedAddress = {
+        street1: addressData.streetAddress.trim(),
+        street2: (req.body.street2 || req.body.address_line_2 || req.body.line2 || '').trim(),
+        city: addressData.city.trim(),
+        state: addressData.state.toUpperCase().trim(),
+        zip: addressData.zipCode.trim(),
+        zipPlus4: addressData.zipPlus4 || '',
+        country: 'US'
+      };
+      console.log('✅ [USPS] Dirección validada con formato básico (OAuth no disponible)');
+    }
+
+    const validationResponse = {
+      object_id: uspsValidation?.addressId || 'usps_' + Date.now(),
+      objectId: uspsValidation?.addressId || 'usps_' + Date.now(),
+      id: uspsValidation?.addressId || 'usps_' + Date.now(),
+      is_valid: isValid,
+      isValid: isValid,
+      original_address: originalAddress,
+      validated_address: validatedAddress,
+      validation_messages: uspsValidation?.messages || [],
+      corrections: uspsValidation?.corrections || [],
+      was_corrected: wasCorrected
+    };
+
+    res.json(validationResponse);
+  } catch (error) {
+    console.error('❌ [USPS] Error validando dirección:', error);
+    console.error('   Error message:', error.message);
+    console.error('   Error stack:', error.stack);
+    console.error('   Request body:', JSON.stringify(req.body, null, 2));
+
+    res.status(500).json({ 
+      error: error.message || 'Error al validar la dirección',
+      details: error.message || 'Error desconocido al validar la dirección',
+      requestData: req.body
+    });
+  }
+});
+
 // Endpoint para obtener tarifas de USPS usando Domestic Prices 3.0
 app.post('/api/usps/get-rates', async (req, res) => {
   try {
@@ -4148,8 +4313,20 @@ app.post('/api/usps/get-rates', async (req, res) => {
       return res.status(400).json({ error: 'Datos incompletos: se requieren fromAddress, toAddress y weight' });
     }
 
-    const rates = await getUSPSRatesInternal(fromAddress, toAddress, weight, dimensions);
-    res.json({ rates });
+    // Intentar obtener tarifas de USPS API
+    try {
+      const rates = await getUSPSRatesInternal(fromAddress, toAddress, weight, dimensions);
+      if (rates && rates.length > 0) {
+        return res.json({ rates });
+      }
+    } catch (uspsError) {
+      console.error('❌ [USPS] Error obteniendo tarifas de USPS API:', uspsError.message);
+      console.error('❌ [USPS] Error completo:', uspsError);
+      
+      // NO usar tarifas estimadas - lanzar el error para que el usuario vea el problema real
+      // El usuario quiere tarifas REALES, no estimadas
+      throw uspsError;
+    }
   } catch (error) {
     console.error('❌ Error obteniendo tarifas USPS:', error);
     res.status(500).json({ error: error.message || 'Error obteniendo tarifas USPS' });
@@ -4215,7 +4392,8 @@ app.post('/api/usps/create-label', async (req, res) => {
       labelSize: '4X6',
     };
 
-    const response = await fetch('https://api.usps.com/shipping/v3/labels', {
+    // Endpoint correcto según documentación de USPS (apis.usps.com, no api.usps.com)
+    const response = await fetch('https://apis.usps.com/shipping/v3/labels', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -4263,10 +4441,21 @@ app.post('/api/usps/create-label', async (req, res) => {
 // Función para obtener tarifas USPS (helper interno)
 async function getUSPSRatesInternal(fromAddress, toAddress, weight, dimensions) {
   try {
-    const token = await getUSPSOAuthToken();
+    let token;
+    try {
+      token = await getUSPSOAuthToken();
+    } catch (oauthError) {
+      // Lanzar error específico para OAuth que el endpoint puede detectar
+      const oauthErrorMsg = oauthError.message || 'OAuth error';
+      throw new Error(`OAuth error: ${oauthErrorMsg}`);
+    }
+    
     const crid = process.env.USPS_CRID || '';
     const labelMid = process.env.USPS_LABEL_MID || '';
 
+    // Request body según documentación oficial de USPS Domestic Prices 3.0
+    // Endpoint: POST /prices/v3/total-rates/search
+    // Documentación: https://developers.usps.com/domesticpricesv3
     const requestBody = {
       originZIPCode: fromAddress.postal_code || fromAddress.zip || fromAddress.postalCode || '',
       destinationZIPCode: toAddress.postal_code || toAddress.zip || toAddress.postalCode || '',
@@ -4276,19 +4465,26 @@ async function getUSPSRatesInternal(fromAddress, toAddress, weight, dimensions) 
       height: parseFloat(dimensions?.height || 4),
       mailClasses: ['USPS_GROUND_ADVANTAGE', 'PRIORITY_MAIL', 'PRIORITY_MAIL_EXPRESS'],
       priceType: 'COMMERCIAL',
-      processingCategory: 'MACHINABLE',
-      rateIndicator: 'SP',
-      destinationEntryFacilityType: 'NONE',
       mailingDate: new Date().toISOString().split('T')[0],
       hasNonstandardCharacteristics: false,
     };
 
-    if (crid && labelMid) {
-      requestBody.accountType = 'EPS';
-      requestBody.accountNumber = labelMid;
-    }
+    // Solo agregar información de contrato si priceType es CONTRACT
+    // Para COMMERCIAL pricing, NO enviar accountType/accountNumber
+    // El error 403 sugiere que estamos enviando información de contrato cuando no deberíamos
+    // if (crid && labelMid && requestBody.priceType === 'CONTRACT') {
+    //   requestBody.accountType = 'EPS';
+    //   requestBody.accountNumber = labelMid;
+    // }
 
-    const response = await fetch('https://api.usps.com/shipping/v3/prices/total-rates/search', {
+    console.log('📤 [USPS] Request body:', JSON.stringify(requestBody, null, 2));
+
+    // Endpoint correcto según documentación oficial de USPS Domestic Prices 3.0
+    // POST /prices/v3/total-rates/search
+    const endpoint = 'https://apis.usps.com/prices/v3/total-rates/search';
+    
+    console.log(`🔍 [USPS] Llamando a: ${endpoint}`);
+    const response = await fetch(endpoint, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -4299,23 +4495,130 @@ async function getUSPSRatesInternal(fromAddress, toAddress, weight, dimensions) 
 
     if (!response.ok) {
       const errorText = await response.text();
+      console.error('❌ [USPS] Error response:', errorText);
       throw new Error(`USPS API error: ${response.status} - ${errorText}`);
     }
 
     const data = await response.json();
-    return (data.rateOptions || []).map(rate => ({
-      carrier: 'USPS',
-      service: rate.mailClass || 'USPS_GROUND_ADVANTAGE',
-      amount: rate.totalPrice?.toString() || '0.00',
-      amount_local: rate.totalPrice?.toString() || '0.00',
-      provider: 'usps',
-      estimated_days: rate.mailClass?.includes('EXPRESS') ? 1 : rate.mailClass?.includes('PRIORITY') ? 2 : 3,
-      uspsRateData: rate,
-    }));
+    console.log('✅ [USPS] Respuesta recibida:', JSON.stringify(data, null, 2));
+    
+    // La respuesta tiene rateOptions array con objetos que contienen mailClass y precio
+    // USPS puede devolver múltiples opciones para el mismo mailClass (con diferentes extra services)
+    // Necesitamos filtrar para mostrar solo la opción base (más económica) de cada servicio
+    const allRates = (data.rateOptions || []).map(rate => {
+      // Intentar diferentes campos posibles para el precio
+      const price = rate.totalPrice || rate.basePrice || rate.price || rate.totalBasePrice || 0;
+      
+      return {
+        carrier: 'USPS',
+        service: rate.mailClass || 'USPS_GROUND_ADVANTAGE',
+        amount: price ? price.toString() : '0.00',
+        amount_local: price ? price.toString() : '0.00',
+        provider: 'usps',
+        estimated_days: rate.mailClass?.includes('EXPRESS') ? 1 : rate.mailClass?.includes('PRIORITY') ? 2 : 3,
+        uspsRateData: rate,
+        priceValue: parseFloat(price) || 0, // Para ordenar y filtrar
+      };
+    });
+    
+    // Filtrar duplicados: agrupar por servicio y tomar solo la opción más económica (base)
+    const ratesByService = {};
+    allRates.forEach(rate => {
+      const service = rate.service;
+      if (!ratesByService[service] || rate.priceValue < ratesByService[service].priceValue) {
+        ratesByService[service] = rate;
+      }
+    });
+    
+    // Convertir de vuelta a array y eliminar priceValue (solo era para comparar)
+    const uniqueRates = Object.values(ratesByService).map(({ priceValue, ...rate }) => rate);
+    
+    // Ordenar por precio (más económico primero)
+    uniqueRates.sort((a, b) => parseFloat(a.amount) - parseFloat(b.amount));
+    
+    console.log('📊 [USPS] Rates únicos (sin duplicados):', JSON.stringify(uniqueRates, null, 2));
+    return uniqueRates;
   } catch (error) {
     console.error('❌ Error obteniendo tarifas USPS:', error);
     throw error;
   }
+}
+
+// Función para calcular tarifas estimadas de USPS cuando OAuth no está disponible
+function getEstimatedUSPSRates(fromAddress, toAddress, weight, dimensions) {
+  const weightValue = parseFloat(weight.value || weight || 1);
+  const fromZip = fromAddress.postal_code || fromAddress.zip || fromAddress.postalCode || '07011';
+  const toZip = toAddress.postal_code || toAddress.zip || toAddress.postalCode || '00000';
+  
+  // Calcular distancia aproximada basada en códigos postales (muy básico)
+  // Para una estimación más precisa, se necesitaría una API de geocodificación
+  const zipDiff = Math.abs(parseInt(fromZip.substring(0, 3)) - parseInt(toZip.substring(0, 3)));
+  const isLocal = zipDiff < 50; // Mismo área general
+  const isRegional = zipDiff < 200; // Región cercana
+  const isLongDistance = zipDiff >= 200; // Larga distancia
+  
+  // Tarifas estimadas basadas en rangos típicos de USPS (en USD)
+  // Estas son aproximaciones basadas en tarifas comerciales típicas
+  let groundAdvantage = 0;
+  let priority = 0;
+  let express = 0;
+  
+  if (weightValue <= 1) {
+    // Hasta 1 lb
+    groundAdvantage = isLocal ? 4.50 : isRegional ? 5.50 : 7.00;
+    priority = isLocal ? 8.50 : isRegional ? 9.50 : 12.00;
+    express = isLocal ? 26.50 : isRegional ? 28.00 : 35.00;
+  } else if (weightValue <= 2) {
+    // 1-2 lbs
+    groundAdvantage = isLocal ? 5.50 : isRegional ? 6.50 : 8.50;
+    priority = isLocal ? 9.50 : isRegional ? 11.00 : 14.00;
+    express = isLocal ? 28.00 : isRegional ? 30.00 : 38.00;
+  } else if (weightValue <= 5) {
+    // 2-5 lbs
+    groundAdvantage = isLocal ? 7.00 : isRegional ? 8.50 : 11.00;
+    priority = isLocal ? 12.00 : isRegional ? 14.00 : 18.00;
+    express = isLocal ? 32.00 : isRegional ? 35.00 : 45.00;
+  } else if (weightValue <= 10) {
+    // 5-10 lbs
+    groundAdvantage = isLocal ? 9.00 : isRegional ? 11.00 : 15.00;
+    priority = isLocal ? 16.00 : isRegional ? 19.00 : 25.00;
+    express = isLocal ? 38.00 : isRegional ? 42.00 : 55.00;
+  } else {
+    // Más de 10 lbs
+    groundAdvantage = isLocal ? 12.00 : isRegional ? 15.00 : 20.00;
+    priority = isLocal ? 22.00 : isRegional ? 26.00 : 35.00;
+    express = isLocal ? 45.00 : isRegional ? 50.00 : 65.00;
+  }
+  
+  return [
+    {
+      carrier: 'USPS',
+      service: 'USPS_GROUND_ADVANTAGE',
+      amount: groundAdvantage.toFixed(2),
+      amount_local: groundAdvantage.toFixed(2),
+      provider: 'usps',
+      estimated_days: 3,
+      estimated: true
+    },
+    {
+      carrier: 'USPS',
+      service: 'PRIORITY_MAIL',
+      amount: priority.toFixed(2),
+      amount_local: priority.toFixed(2),
+      provider: 'usps',
+      estimated_days: 2,
+      estimated: true
+    },
+    {
+      carrier: 'USPS',
+      service: 'PRIORITY_MAIL_EXPRESS',
+      amount: express.toFixed(2),
+      amount_local: express.toFixed(2),
+      provider: 'usps',
+      estimated_days: 1,
+      estimated: true
+    }
+  ];
 }
 
 // Función para comprar etiqueta automáticamente cuando se crea un pedido
@@ -4421,7 +4724,8 @@ async function autoPurchaseUSPSLabel(orderId, order) {
       labelSize: '4X6',
     };
 
-    const response = await fetch('https://api.usps.com/shipping/v3/labels', {
+    // Endpoint correcto según documentación de USPS (apis.usps.com, no api.usps.com)
+    const response = await fetch('https://apis.usps.com/shipping/v3/labels', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${token}`,

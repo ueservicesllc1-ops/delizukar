@@ -81,3 +81,7 @@ railway-env-variables.json
 railway-env-variables.txt
 railway-env-variables-complete.json
 railway-env-variables-updated.json
+railway-variables-complete*.json
+railway-variables-complete*.txt
+RAILWAY_VARIABLES_COMPLETAS.json
+RAILWAY_VARIABLES_COMPLETAS.txt

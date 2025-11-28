@@ -521,6 +521,88 @@ const OrdersManager = ({ open, onClose, initialTab = 'all' }) => {
     }
   };
 
+  // Función para comprar etiqueta USPS manualmente
+  const handleBuyUSPSLabel = async (order) => {
+    if (!order || !order.customerInfo) {
+      alert('El pedido no tiene información del cliente');
+      return;
+    }
+
+    try {
+      setCreatingLabel(true);
+      setCreatingForOrderId(order.id);
+
+      // Obtener el rate seleccionado del pedido o usar el más económico
+      let selectedRate = null;
+      if (order.shippingInfo && order.shippingInfo.rate) {
+        selectedRate = order.shippingInfo.rate;
+      } else {
+        // Si no hay rate, usar USPS Ground Advantage por defecto
+        selectedRate = {
+          service: 'USPS_GROUND_ADVANTAGE',
+          mailClass: 'USPS_GROUND_ADVANTAGE',
+        };
+      }
+
+      const baseURL = process.env.NODE_ENV === 'production' 
+        ? window.location.origin 
+        : 'http://localhost:5000';
+
+      const response = await fetch(`${baseURL}/api/usps/create-label`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          orderId: order.id,
+          order: order,
+          selectedRate: selectedRate,
+        }),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        alert('Error: ' + (result.error || 'Error al comprar etiqueta USPS'));
+        return;
+      }
+
+      // El endpoint devuelve { success: true, data: { trackingNumber, labelUrl, ... } }
+      const labelInfo = result.data || result;
+
+      // Etiqueta comprada exitosamente
+      setLabelData({
+        tracking_code: labelInfo.trackingNumber || labelInfo.trackingCode,
+        id: order.id,
+        postage_label: {
+          label_url: labelInfo.labelUrl || labelInfo.label_url
+        }
+      });
+      setLabelDialogOpen(true);
+
+      // Actualizar el pedido en Firestore
+      const orderRef = doc(db, 'orders', order.id);
+      await updateDoc(orderRef, {
+        status: 'shipped',
+        trackingCode: labelInfo.trackingNumber || labelInfo.trackingCode,
+        labelUrl: labelInfo.labelUrl || labelInfo.label_url,
+        shippedAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      });
+
+      // Recargar órdenes
+      loadOrders();
+      
+      alert('✅ Etiqueta USPS comprada exitosamente');
+    } catch (error) {
+      console.error('Error comprando etiqueta USPS:', error);
+      alert('Error al comprar etiqueta USPS: ' + error.message);
+    } finally {
+      setCreatingLabel(false);
+      setCreatingForOrderId(null);
+    }
+  };
+
   const handleCreateShipment = async (order) => {
     // Prevenir múltiples clics
     if (creatingLabel || creatingForOrderId === order.id) {
@@ -1743,7 +1825,23 @@ const OrdersManager = ({ open, onClose, initialTab = 'all' }) => {
                                 Ver/Imprimir
                               </Button>
                             </Box>
-                          ) : '-'}
+                          ) : (
+                            <Button
+                              size="small"
+                              variant="contained"
+                              startIcon={creatingForOrderId === order.id ? <CircularProgress size={16} /> : <LocalShipping />}
+                              onClick={() => handleBuyUSPSLabel(order)}
+                              disabled={creatingLabel}
+                              sx={{
+                                backgroundColor: '#4a90e2',
+                                '&:hover': {
+                                  backgroundColor: '#357abd'
+                                }
+                              }}
+                            >
+                              {creatingForOrderId === order.id ? 'Comprando...' : 'Comprar Etiqueta USPS'}
+                            </Button>
+                          )}
                         </TableCell>
                       )}
                       <TableCell align="center">

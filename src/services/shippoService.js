@@ -55,21 +55,21 @@ class ShippoService {
     }
   }
 
-  // Validar dirección (con correcciones automáticas)
+  // Validar dirección (con correcciones automáticas) - Ahora usa USPS
   async validateAddress(addressData) {
     try {
-      console.log('📦 [ShippoService] Validando dirección:', addressData);
+      console.log('📦 [USPS] Validando dirección:', addressData);
       
-      // Usar endpoint específico de validación que devuelve correcciones
-      const response = await this.makeRequest('/api/shippo/validate-address', {
+      // Usar endpoint de USPS para validación
+      const response = await this.makeRequest('/api/usps/validate-address', {
         body: JSON.stringify(addressData),
       });
 
-      console.log('✅ [ShippoService] Respuesta de validación:', response);
+      console.log('✅ [USPS] Respuesta de validación:', response);
 
       // Si hay correcciones, devolver la dirección corregida
       if (response.was_corrected && response.validated_address) {
-        console.log('✅ Dirección corregida por Shippo:', response.validated_address);
+        console.log('✅ Dirección corregida por USPS:', response.validated_address);
         return {
           ...response,
           corrected: true,
@@ -80,7 +80,7 @@ class ShippoService {
 
       return response;
     } catch (error) {
-      console.error('❌ [ShippoService] Error validating address:', error);
+      console.error('❌ [USPS] Error validating address:', error);
       console.error('   Error details:', error.message);
       console.error('   Address data:', addressData);
       
