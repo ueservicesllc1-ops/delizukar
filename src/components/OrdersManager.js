@@ -1893,57 +1893,21 @@ const OrdersManager = ({ open, onClose, initialTab = 'all' }) => {
                               </Button>
                             )
                           ) : (
-                            // En la pestaña de todas las órdenes, mostrar botones
-                            (order.status === 'pending' || !order.status || order.status === 'processing') && (
-                              <>
-                                <Button
-                                  variant="contained"
-                                  size="small"
-                                  startIcon={<FileDownload />}
-                                  onClick={() => handleOpenPirateShipDialog(order)}
-                                  sx={{
-                                    backgroundColor: '#4a90e2',
-                                    '&:hover': { backgroundColor: '#357abd' },
-                                    marginRight: 1
-                                  }}
-                                >
-                                  Pirate Ship
-                                </Button>
-                                {/* Botón Shippo ocultado - ahora usamos Pirate Ship
-                                <Button
-                                  variant="contained"
-                                  size="small"
-                                  startIcon={<LocalShipping />}
-                                  onClick={() => handleCreateShipment(order)}
-                                  disabled={creatingLabel || creatingForOrderId === order.id}
-                                  sx={{
-                                    backgroundColor: '#C8626D',
-                                    '&:hover': { backgroundColor: '#b8555a' }
-                                  }}
-                                >
-                                  {creatingForOrderId === order.id ? 'Creando...' : 'Comprar'}
-                                </Button>
-                                */}
-                                {/* Botón Widget ocultado
-                                <Button
-                                  variant="outlined"
-                                  size="small"
-                                  startIcon={<LocalShipping />}
-                                  onClick={() => handleOpenShippoElements(order)}
-                                  disabled={shippoElementsOpen}
-                                  sx={{
-                                    borderColor: '#C8626D',
-                                    color: '#C8626D',
-                                    '&:hover': { 
-                                      borderColor: '#b8555a',
-                                      backgroundColor: '#C8626D10'
-                                    }
-                                  }}
-                                >
-                                  Widget
-                                </Button>
-                                */}
-                              </>
+                            // En la pestaña de todas las órdenes, mostrar botón para comprar etiqueta USPS
+                            !order.labelUrl && (
+                              <Button
+                                variant="contained"
+                                size="small"
+                                startIcon={creatingForOrderId === order.id ? <CircularProgress size={16} /> : <LocalShipping />}
+                                onClick={() => handleBuyUSPSLabel(order)}
+                                disabled={creatingLabel || creatingForOrderId === order.id}
+                                sx={{
+                                  backgroundColor: '#4a90e2',
+                                  '&:hover': { backgroundColor: '#357abd' }
+                                }}
+                              >
+                                {creatingForOrderId === order.id ? 'Comprando...' : 'Comprar Etiqueta'}
+                              </Button>
                             )
                           )}
                         </Box>
@@ -2601,17 +2565,20 @@ const OrdersManager = ({ open, onClose, initialTab = 'all' }) => {
           >
             Descargar PDF
           </Button>
-          <Button
-            onClick={() => selectedOrderDetails && handleOpenPirateShipDialog(selectedOrderDetails)}
-            variant="contained"
-            startIcon={<FileDownload />}
-            sx={{
-              backgroundColor: '#4a90e2',
-              '&:hover': { backgroundColor: '#357abd' }
-            }}
-          >
-            Exportar a Pirate Ship
-          </Button>
+          {selectedOrderDetails && !selectedOrderDetails.labelUrl && (
+            <Button
+              onClick={() => selectedOrderDetails && handleBuyUSPSLabel(selectedOrderDetails)}
+              variant="contained"
+              startIcon={creatingForOrderId === selectedOrderDetails?.id ? <CircularProgress size={16} /> : <LocalShipping />}
+              disabled={creatingLabel || creatingForOrderId === selectedOrderDetails?.id}
+              sx={{
+                backgroundColor: '#4a90e2',
+                '&:hover': { backgroundColor: '#357abd' }
+              }}
+            >
+              {creatingForOrderId === selectedOrderDetails?.id ? 'Comprando...' : 'Comprar Etiqueta'}
+            </Button>
+          )}
         </DialogActions>
       </Dialog>
 
