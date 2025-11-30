@@ -83,7 +83,7 @@ const ShippingCalculator = ({
       console.log('   ✅ Los rates se calcularán basándose en estas direcciones específicas');
       console.log('   ✅ Si cambias la dirección de destino, los rates cambiarán automáticamente');
       
-      console.log('📦 [Calculate Rates] Datos del paquete que se enviarán a USPS:');
+      console.log('📦 [Calculate Rates] Datos del paquete que se enviarán a EasyPost:');
       orderData.parcels.forEach((parcel, idx) => {
         console.log(`   Paquete ${idx + 1}:`);
         console.log(`      - Peso: ${parcel.weight || parcel.mass} ${parcel.massUnit || parcel.mass_unit || 'lb'}`);
@@ -92,87 +92,76 @@ const ShippingCalculator = ({
         console.log(`      - Mass Unit: ${parcel.massUnit || parcel.mass_unit || 'lb'}`);
         console.log(`      - Parcel completo:`, JSON.stringify(parcel, null, 2));
       });
-      console.log('✅ [Calculate Rates] Estos son los datos EXACTOS que USPS usará para calcular las tarifas');
+      console.log('✅ [Calculate Rates] Estos son los datos EXACTOS que EasyPost usará para calcular las tarifas');
       console.log('✅ [Calculate Rates] Los rates son dinámicos y cambiarán según la dirección de destino');
       
-      // Obtener tarifas de USPS
-      console.log('📦 [Calculate Rates] Getting rates from USPS...');
+      // Obtener tarifas de EasyPost
+      console.log('📦 [Calculate Rates] Getting rates from EasyPost...');
       
-      // Preparar datos para USPS API
-      const firstParcel = orderData.parcels[0];
-      const fromAddress = {
-        postal_code: orderData.address_from.zip || orderData.address_from.zipCode || orderData.address_from.postal_code || '07011'
-      };
-      const toAddress = {
-        postal_code: orderData.address_to.zip || orderData.address_to.zipCode || orderData.address_to.postal_code || ''
-      };
-      const weight = {
-        value: parseFloat(firstParcel.weight || firstParcel.mass || 1),
-        unit: firstParcel.massUnit || firstParcel.mass_unit || 'lb'
-      };
-      const dimensions = {
-        length: parseFloat(firstParcel.length || 8),
-        width: parseFloat(firstParcel.width || 6),
-        height: parseFloat(firstParcel.height || 4)
+      // Preparar datos para EasyPost API (formato compatible con Shippo)
+      const shipmentData = {
+        address_from: orderData.address_from,
+        address_to: orderData.address_to,
+        parcels: orderData.parcels
       };
       
-      // Llamar a USPS API
+      // Llamar a EasyPost API
+      // En desarrollo usa localhost:5000, en producción (Railway) usa window.location.origin
       const baseUrl = process.env.NODE_ENV === 'production' 
         ? window.location.origin 
-        : '';
+        : 'http://localhost:5000';
       
-      const response = await fetch(`${baseUrl}/api/usps/get-rates`, {
+      console.log('🌐 [ShippingCalculator] Llamando a:', `${baseUrl}/api/easypost/shipments`);
+      
+      const response = await fetch(`${baseUrl}/api/easypost/shipments`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          fromAddress,
-          toAddress,
-          weight,
-          dimensions
-        }),
+        body: JSON.stringify(shipmentData),
       });
       
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || 'Error obteniendo tarifas USPS');
+        throw new Error(errorData.error || 'Error obteniendo tarifas de EasyPost');
       }
       
       const data = await response.json();
-      const uspsRates = data.rates || [];
+      const easyPostRates = data.rates || [];
       
-      console.log('📦 [Rates] Rates recibidos de USPS:', uspsRates);
-      console.log('📦 [Rates] Cantidad total de rates:', uspsRates.length);
+      console.log('✅ [EasyPost] Rates recibidos de EasyPost:', easyPostRates);
+      console.log('📊 [EasyPost] Cantidad total de rates:', easyPostRates.length);
+      console.log('📊 [EasyPost] Total disponible antes de filtrar:', data.total_rates_available || easyPostRates.length);
       
-      // Formatear rates de USPS al formato esperado por el componente
-      const formattedRates = uspsRates.map((rate, idx) => {
-        // Mapear nombres de servicio de USPS a nombres más legibles
-        const serviceName = rate.service || 'USPS Ground Advantage';
-        let displayName = serviceName;
+      // Formatear rates de EasyPost al formato esperado por el componente
+      const formattedRates = easyPostRates.map((rate) => {
+        // Formatear nombre del servicio para mejor visualización
+        let displayName = rate.service || rate.servicelevel?.name || 'Standard Shipping';
         
-        if (serviceName.includes('GROUND_ADVANTAGE')) {
+        // Mejorar nombres de servicios comunes
+        if (displayName.includes('GroundAdvantage')) {
           displayName = 'USPS Ground Advantage';
-        } else if (serviceName.includes('PRIORITY_MAIL')) {
-          displayName = 'USPS Priority Mail';
-        } else if (serviceName.includes('PRIORITY_MAIL_EXPRESS')) {
-          displayName = 'USPS Priority Mail Express';
+        } else if (displayName.includes('Priority')) {
+          displayName = displayName.replace('PRIORITY', 'Priority');
+        } else if (displayName.includes('Express')) {
+          displayName = displayName.replace('EXPRESS', 'Express');
         }
         
         return {
-          id: `usps_${idx}_${Date.now()}`,
-          objectId: `usps_${idx}_${Date.now()}`,
-          carrier: 'USPS',
-          provider: 'usps',
+          id: rate.id || rate.object_id || rate.objectId,
+          objectId: rate.id || rate.object_id || rate.objectId,
+          carrier: rate.carrier || rate.provider || 'Unknown',
+          provider: rate.provider || rate.carrier || 'Unknown',
           service: displayName,
           servicelevel: {
             name: displayName,
-            token: rate.service
+            token: rate.id || rate.object_id || rate.objectId
           },
-          amount: rate.amount,
-          amount_local: rate.amount_local || rate.amount,
-          estimated_days: rate.estimated_days || 3,
-          uspsRateData: rate.uspsRateData || rate // Guardar datos completos de USPS
+          amount: parseFloat(rate.amount || rate.amount_local || rate.rate || 0),
+          amount_local: parseFloat(rate.amount_local || rate.amount || rate.rate || 0),
+          estimated_days: rate.estimated_days || rate.estimatedDays || rate.est_delivery_days || 3,
+          currency: rate.currency || 'USD',
+          easypostRateData: rate // Guardar datos completos de EasyPost
         };
       });
       
@@ -183,7 +172,7 @@ const ShippingCalculator = ({
         return priceA - priceB;
       });
       
-      console.log('📦 [Rates] Rates FINALES que se mostrarán al usuario:', finalRates);
+      console.log('✅ [EasyPost] Rates FINALES que se mostrarán al usuario:', finalRates);
       finalRates.forEach((rate, idx) => {
         console.log(`   ${idx + 1}. ${rate.carrier} - ${rate.service}: $${parseFloat(rate.amount || rate.amount_local || 0).toFixed(2)}`);
       });
@@ -191,7 +180,7 @@ const ShippingCalculator = ({
       setRates(finalRates);
     } catch (err) {
       console.error('Error calculating rates:', err);
-      setError('No se pudieron obtener las tarifas de envío. Por favor, verifica la configuración de USPS.');
+      setError('No se pudieron obtener las tarifas de envío. Por favor, verifica la configuración de EasyPost.');
     } finally {
       setLoading(false);
     }
