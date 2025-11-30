@@ -7,38 +7,34 @@ if (typeof fetch === 'undefined') {
   global.fetch = (...args) => import('node-fetch').then(({ default: f }) => f(...args));
 }
 console.log('🔍 Environment variables loaded:');
-console.log('SHIPPO_API_TOKEN:', process.env.SHIPPO_API_TOKEN ? 'SET' : 'NOT SET');
-console.log('REACT_APP_SHIPPO_API_TOKEN:', process.env.REACT_APP_SHIPPO_API_TOKEN ? 'SET' : 'NOT SET');
-console.log('DEFAULT_SHIPPO_TOKEN:', process.env.DEFAULT_SHIPPO_TOKEN ? 'SET' : 'NOT SET');
+console.log('EASYPOST_API_KEY:', process.env.EASYPOST_API_KEY ? 'SET' : 'NOT SET');
+console.log('REACT_APP_EASYPOST_API_KEY:', process.env.REACT_APP_EASYPOST_API_KEY ? 'SET' : 'NOT SET');
 
-const DEFAULT_SHIPPO_TOKEN = process.env.DEFAULT_SHIPPO_TOKEN || '';
-
-const resolveShippoToken = () =>
-  process.env.SHIPPO_API_TOKEN ||
-  process.env.REACT_APP_SHIPPO_API_TOKEN ||
-  DEFAULT_SHIPPO_TOKEN ||
+// Resolver EasyPost API Key
+const resolveEasyPostKey = () =>
+  process.env.EASYPOST_API_KEY ||
+  process.env.REACT_APP_EASYPOST_API_KEY ||
   '';
 
-// Importar Shippo (nueva API v2)
-// Token debe estar en .env como SHIPPO_API_TOKEN o REACT_APP_SHIPPO_API_TOKEN
-const shippoToken = resolveShippoToken();
+// Importar EasyPost
+const EasyPost = require('@easypost/api');
+const easypostApiKey = resolveEasyPostKey();
 
-// Nueva API de Shippo v2: usar new Shippo.Shippo({ apiKeyHeader })
-const shippoModule = require('shippo');
-let shippo = null;
-if (shippoToken) {
+// Inicializar EasyPost
+let easypost = null;
+if (easypostApiKey) {
   try {
-    shippo = new shippoModule.Shippo({ apiKeyHeader: shippoToken });
-    console.log('✅ Shippo client initialized successfully');
+    easypost = new EasyPost(easypostApiKey);
+    console.log('✅ EasyPost client initialized successfully');
   } catch (error) {
-    console.error('❌ Error initializing Shippo client:', error.message);
+    console.error('❌ Error initializing EasyPost client:', error.message);
   }
 } else {
-  console.error('❌ Shippo token not configured. Shippo API calls will fail until a token is provided.');
+  console.error('❌ EasyPost API key not configured. EasyPost API calls will fail until a key is provided.');
 }
 
-console.log('🔑 Shippo token configured:', shippoToken ? `${shippoToken.substring(0, 20)}...` : 'NOT SET');
-console.log('🔑 Shippo mode:', shippoToken?.startsWith('shippo_live_') ? 'PRODUCTION' : shippoToken?.startsWith('shippo_test_') ? 'TEST' : 'UNKNOWN');
+console.log('🔑 EasyPost API key configured:', easypostApiKey ? `${easypostApiKey.substring(0, 20)}...` : 'NOT SET');
+console.log('🔑 EasyPost mode:', easypostApiKey?.startsWith('EZAK') || easypostApiKey?.startsWith('EZTK') ? 'PRODUCTION' : easypostApiKey?.startsWith('TEST') ? 'TEST' : 'UNKNOWN');
 
 const express = require('express');
 const cors = require('cors');
@@ -1354,6 +1350,637 @@ app.get('/api/shippo/label-pdf', async (req, res) => {
   }
 });
 
+// ==================== EASYPOST ENDPOINTS ====================
+
+// 1. Crear dirección en EasyPost (con validación automática)
+app.post('/api/easypost/create-address', async (req, res) => {
+  try {
+    console.log('🔍 DEBUG: Creating address in EasyPost');
+    console.log('🔍 DEBUG: Request body:', JSON.stringify(req.body, null, 2));
+    
+    if (!easypost) {
+      return res.status(500).json({ error: 'EasyPost no está configurado. EASYPOST_API_KEY no está configurada' });
+    }
+
+    const addressData = {
+      name: req.body.name || '',
+      company: req.body.organization || req.body.company || '',
+      street1: req.body.street1 || req.body.address_line_1 || req.body.line1 || '',
+      street2: req.body.street2 || req.body.address_line_2 || req.body.line2 || '',
+      city: req.body.city || req.body.city_locality || '',
+      state: req.body.state || req.body.state_province || '',
+      zip: req.body.zip || req.body.postal_code || req.body.zipCode || '',
+      country: req.body.country || req.body.country_code || 'US',
+      phone: req.body.phone || '',
+      email: req.body.email || ''
+    };
+
+    console.log('📤 Datos de dirección para EasyPost:', JSON.stringify(addressData, null, 2));
+
+    const address = await easypost.Address.create(addressData);
+    
+    console.log('✅ EasyPost address created:', address.id);
+    console.log('📋 Address verified:', address.verifications);
+    
+    const response = {
+      object_id: address.id,
+      objectId: address.id,
+      id: address.id,
+      ...address,
+      is_valid: address.verifications?.delivery?.success !== false,
+      isValid: address.verifications?.delivery?.success !== false,
+      validation_results: address.verifications || null,
+      validationResults: address.verifications || null,
+      corrections_suggested: address.verifications?.delivery?.errors || []
+    };
+    
+    res.json(response);
+  } catch (error) {
+    console.error('❌ EasyPost address error:', error);
+    res.status(500).json({ 
+      error: error.message || 'Error creating address in EasyPost',
+      details: error
+    });
+  }
+});
+
+// 1b. Validar dirección en EasyPost
+app.post('/api/easypost/validate-address', async (req, res) => {
+  try {
+    console.log('🔍 DEBUG: Validating address in EasyPost');
+    console.log('🔍 DEBUG: Request body:', JSON.stringify(req.body, null, 2));
+    
+    if (!easypost) {
+      return res.status(500).json({ error: 'EasyPost no está configurado. EASYPOST_API_KEY no está configurada' });
+    }
+
+    const addressData = {
+      name: req.body.name || '',
+      company: req.body.organization || req.body.company || '',
+      street1: req.body.street1 || req.body.address_line_1 || req.body.line1 || '',
+      street2: req.body.street2 || req.body.address_line_2 || req.body.line2 || '',
+      city: req.body.city || req.body.city_locality || '',
+      state: req.body.state || req.body.state_province || '',
+      zip: req.body.zip || req.body.postal_code || req.body.zipCode || '',
+      country: req.body.country || req.body.country_code || 'US',
+      phone: req.body.phone || '',
+      email: req.body.email || ''
+    };
+    
+    if (!addressData.country || addressData.country.trim() === '') {
+      addressData.country = 'US';
+      console.warn('⚠️ Country no proporcionado, usando US por defecto');
+    }
+    
+    console.log('📤 Datos de dirección para validar:', JSON.stringify(addressData, null, 2));
+
+    const address = await easypost.Address.create(addressData);
+    
+    console.log('✅ Address validated:', address.id);
+    
+    const isValid = address.verifications?.delivery?.success !== false;
+    const verifications = address.verifications || {};
+    
+    console.log('📋 Validation status:', isValid ? 'VALID' : 'INVALID');
+    
+    const validationResponse = {
+      object_id: address.id,
+      objectId: address.id,
+      id: address.id,
+      is_valid: isValid,
+      isValid: isValid,
+      original_address: {
+        street1: req.body.street1 || req.body.address_line_1,
+        city: req.body.city || req.body.city_locality,
+        state: req.body.state || req.body.state_province,
+        zip: req.body.zip || req.body.postal_code,
+        country: req.body.country || req.body.country_code || 'US'
+      },
+      validated_address: {
+        street1: address.street1,
+        street2: address.street2,
+        city: address.city,
+        state: address.state,
+        zip: address.zip,
+        country: address.country
+      },
+      validation_messages: verifications.delivery?.errors || [],
+      corrections: verifications.delivery?.errors || []
+    };
+    
+    if (address.street1 && (req.body.street1 || req.body.address_line_1) && 
+        address.street1 !== (req.body.street1 || req.body.address_line_1)) {
+      validationResponse.was_corrected = true;
+      console.log('📝 Address was corrected by EasyPost');
+    }
+    
+    res.json(validationResponse);
+  } catch (error) {
+    console.error('❌ EasyPost validation error:', error);
+    res.status(500).json({ 
+      error: error.message || 'Error al validar la dirección en EasyPost',
+      details: error.message || 'Error desconocido al validar la dirección',
+      requestData: req.body
+    });
+  }
+});
+
+// 2. Crear shipment y obtener rates en EasyPost
+app.post('/api/easypost/shipments', async (req, res) => {
+  try {
+    console.log('🔍 DEBUG: Creating shipment in EasyPost');
+    console.log('🔍 DEBUG: Request body:', JSON.stringify(req.body, null, 2));
+    
+    if (!easypost) {
+      return res.status(500).json({ error: 'EasyPost no está configurado. EASYPOST_API_KEY no está configurada' });
+    }
+
+    const { address_from, address_to, parcels } = req.body;
+    
+    console.log('🔍 DEBUG: address_from:', JSON.stringify(address_from, null, 2));
+    console.log('🔍 DEBUG: address_to:', JSON.stringify(address_to, null, 2));
+    console.log('🔍 DEBUG: parcels:', JSON.stringify(parcels, null, 2));
+    
+    if (!address_from || !address_to || !parcels || !Array.isArray(parcels) || parcels.length === 0) {
+      console.error('❌ Datos inválidos recibidos:', { address_from: !!address_from, address_to: !!address_to, parcels: !!parcels });
+      return res.status(400).json({ error: 'Datos inválidos: se requieren address_from, address_to y parcels' });
+    }
+
+    // Crear direcciones en EasyPost
+    console.log('📍 Creando direcciones en EasyPost...');
+    
+    const fromAddressData = {
+      name: address_from.name || 'Delizukar',
+      company: address_from.organization || address_from.company || 'Delizukar',
+      street1: address_from.street1 || address_from.address_line_1 || address_from.line1 || '',
+      street2: address_from.street2 || address_from.address_line_2 || address_from.line2 || '',
+      city: address_from.city || address_from.city_locality || '',
+      state: address_from.state || address_from.state_province || '',
+      zip: address_from.zip || address_from.postal_code || address_from.zipCode || '',
+      country: address_from.country || address_from.country_code || 'US',
+      phone: address_from.phone || '',
+      email: address_from.email || 'support@delizukar.com'
+    };
+    
+    const toAddressData = {
+      name: address_to.name || '',
+      company: address_to.organization || address_to.company || '',
+      street1: address_to.street1 || address_to.address_line_1 || address_to.line1 || '',
+      street2: address_to.street2 || address_to.address_line_2 || address_to.line2 || '',
+      city: address_to.city || address_to.city_locality || '',
+      state: address_to.state || address_to.state_province || '',
+      zip: address_to.zip || address_to.postal_code || address_to.zipCode || '',
+      country: address_to.country || address_to.country_code || 'US',
+      phone: address_to.phone || '',
+      email: address_to.email || ''
+    };
+
+    const fromAddress = await easypost.Address.create(fromAddressData);
+    const toAddress = await easypost.Address.create(toAddressData);
+    
+    console.log('✅ Direcciones creadas:', { from: fromAddress.id, to: toAddress.id });
+
+    // Crear parcels (paquetes) - VERIFICAR que usa los valores reales del frontend
+    console.log('📦 Creando información de paquetes...');
+    console.log('📦 [Parcel Data] Datos recibidos del frontend:', JSON.stringify(parcels, null, 2));
+    
+    const easypostParcels = await Promise.all(
+      parcels.map(async (parcel, index) => {
+        // CRÍTICO: Usar los valores reales del parcel que viene del frontend
+        // Solo usar valores por defecto si realmente no existen
+        const length = parcel.length !== undefined && parcel.length !== null && parcel.length !== '' 
+          ? parseFloat(parcel.length) : 10;
+        const width = parcel.width !== undefined && parcel.width !== null && parcel.width !== '' 
+          ? parseFloat(parcel.width) : 10;
+        const height = parcel.height !== undefined && parcel.height !== null && parcel.height !== '' 
+          ? parseFloat(parcel.height) : 5;
+        const weight = parcel.weight !== undefined && parcel.weight !== null && parcel.weight !== '' 
+          ? parseFloat(parcel.weight) : 1;
+        
+        const parcelData = {
+          length: length,
+          width: width,
+          height: height,
+          weight: weight
+        };
+        
+        console.log(`📦 [Parcel ${index + 1}] Datos que se enviarán a EasyPost:`, {
+          length: `${length}"`,
+          width: `${width}"`,
+          height: `${height}"`,
+          weight: `${weight} lb`,
+          source: parcel.weight ? 'Frontend' : 'Default'
+        });
+        
+        return await easypost.Parcel.create(parcelData);
+      })
+    );
+    
+    console.log('✅ Parcels creados:', easypostParcels.length);
+
+    // Crear el shipment
+    console.log('🚀 Creando shipment en EasyPost...');
+    const shipment = await easypost.Shipment.create({
+      to_address: toAddress,
+      from_address: fromAddress,
+      parcel: easypostParcels[0] // EasyPost usa un solo parcel por shipment
+    });
+    
+    console.log('✅ EasyPost shipment created:', shipment.id);
+    console.log('📦 Rates disponibles antes de filtrar:', shipment.rates ? shipment.rates.length : 0);
+    
+    // Formatear rates para compatibilidad con el frontend
+    const allRates = (shipment.rates || []).map(rate => ({
+      ...rate,
+      object_id: rate.id,
+      objectId: rate.id,
+      id: rate.id,
+      amount: parseFloat(rate.rate || 0),
+      amount_local: parseFloat(rate.rate || 0),
+      currency: rate.currency || 'USD',
+      provider: rate.carrier,
+      carrier: rate.carrier,
+      service: rate.service,
+      servicelevel: {
+        name: rate.service,
+        token: rate.id
+      },
+      estimated_days: rate.est_delivery_days,
+      estimatedDays: rate.est_delivery_days
+    }));
+    
+    // FILTRAR: Mostrar solo las 2 opciones más económicas de cada carrier
+    console.log('💰 Filtrando opciones: seleccionando las 2 más económicas de cada carrier...');
+    
+    // Agrupar por carrier
+    const ratesByCarrier = {};
+    allRates.forEach(rate => {
+      const carrier = rate.carrier || 'Unknown';
+      if (!ratesByCarrier[carrier]) {
+        ratesByCarrier[carrier] = [];
+      }
+      ratesByCarrier[carrier].push(rate);
+    });
+    
+    // Seleccionar las 2 más económicas de cada carrier
+    const filteredRates = [];
+    Object.keys(ratesByCarrier).forEach(carrier => {
+      // Ordenar por precio (más económico primero)
+      const sortedRates = ratesByCarrier[carrier].sort((a, b) => a.amount - b.amount);
+      // Tomar las 2 más económicas
+      const top2 = sortedRates.slice(0, 2);
+      filteredRates.push(...top2);
+      
+      console.log(`   ${carrier}: ${sortedRates.length} opciones disponibles, seleccionadas las 2 más económicas:`);
+      top2.forEach((rate, idx) => {
+        console.log(`      ${idx + 1}. ${rate.service}: $${rate.amount.toFixed(2)} ${rate.currency}`);
+      });
+    });
+    
+    // Ordenar todas las opciones filtradas por precio (más económico primero)
+    const rates = filteredRates.sort((a, b) => a.amount - b.amount);
+    
+    console.log(`✅ Total opciones después de filtrar: ${rates.length} (${Object.keys(ratesByCarrier).length} carriers)`);
+    
+    const response = {
+      ...shipment,
+      object_id: shipment.id,
+      objectId: shipment.id,
+      id: shipment.id,
+      rates: rates,
+      rates_count: rates.length,
+      total_rates_available: allRates.length,
+      filtered: true,
+      note: 'Mostrando solo las 2 opciones más económicas de cada carrier'
+    };
+    
+    console.log('📊 [Response] Enviando respuesta al frontend:');
+    console.log(`   • Total rates disponibles: ${allRates.length}`);
+    console.log(`   • Rates filtrados: ${rates.length}`);
+    console.log(`   • Carriers incluidos: ${Object.keys(ratesByCarrier).length}`);
+    
+    res.json(response);
+  } catch (error) {
+    console.error('❌ EasyPost shipment error:', error);
+    res.status(500).json({ 
+      error: error.message || 'Error creating shipment in EasyPost',
+      details: error
+    });
+  }
+});
+
+// 3. Obtener rates de un shipment existente
+app.get('/api/easypost/shipments/:shipmentId/rates', async (req, res) => {
+  try {
+    console.log('🔍 DEBUG: Getting rates for shipment:', req.params.shipmentId);
+    
+    if (!easypost) {
+      return res.status(500).json({ error: 'EasyPost no está configurado. EASYPOST_API_KEY no está configurada' });
+    }
+
+    const shipment = await easypost.Shipment.retrieve(req.params.shipmentId);
+    
+    if (!shipment.rates || shipment.rates.length === 0) {
+      return res.status(404).json({ error: 'No rates found for this shipment' });
+    }
+    
+    // Formatear todos los rates
+    const allRates = shipment.rates.map(rate => ({
+      ...rate,
+      object_id: rate.id,
+      objectId: rate.id,
+      amount: parseFloat(rate.rate || 0),
+      amount_local: parseFloat(rate.rate || 0),
+      provider: rate.carrier,
+      carrier: rate.carrier,
+      service: rate.service,
+      currency: rate.currency || 'USD'
+    }));
+    
+    // FILTRAR: Mostrar solo las 2 opciones más económicas de cada carrier
+    console.log('💰 Filtrando opciones: seleccionando las 2 más económicas de cada carrier...');
+    
+    // Agrupar por carrier
+    const ratesByCarrier = {};
+    allRates.forEach(rate => {
+      const carrier = rate.carrier || 'Unknown';
+      if (!ratesByCarrier[carrier]) {
+        ratesByCarrier[carrier] = [];
+      }
+      ratesByCarrier[carrier].push(rate);
+    });
+    
+    // Seleccionar las 2 más económicas de cada carrier
+    const filteredRates = [];
+    Object.keys(ratesByCarrier).forEach(carrier => {
+      const sortedRates = ratesByCarrier[carrier].sort((a, b) => a.amount - b.amount);
+      const top2 = sortedRates.slice(0, 2);
+      filteredRates.push(...top2);
+      
+      console.log(`   ${carrier}: ${sortedRates.length} opciones disponibles, seleccionadas las 2 más económicas`);
+    });
+    
+    // Ordenar todas las opciones filtradas por precio
+    const rates = filteredRates.sort((a, b) => a.amount - b.amount);
+    
+    console.log(`✅ Total opciones después de filtrar: ${rates.length} (${Object.keys(ratesByCarrier).length} carriers)`);
+    
+    res.json({ 
+      rates: rates,
+      total_rates_available: allRates.length,
+      filtered: true,
+      note: 'Mostrando solo las 2 opciones más económicas de cada carrier'
+    });
+  } catch (error) {
+    console.error('❌ EasyPost rates error:', error);
+    res.status(500).json({ error: error.message || 'Error retrieving rates' });
+  }
+});
+
+// 4. Comprar etiqueta (transaction)
+app.post('/api/easypost/transactions', async (req, res) => {
+  try {
+    console.log('🔍 DEBUG: Creating transaction in EasyPost');
+    console.log('🔍 DEBUG: Request body:', JSON.stringify(req.body, null, 2));
+    
+    if (!easypost) {
+      return res.status(500).json({ error: 'EasyPost no está configurado. EASYPOST_API_KEY no está configurada' });
+    }
+
+    const { rateId } = req.body;
+    
+    if (!rateId) {
+      return res.status(400).json({ error: 'rateId es requerido' });
+    }
+
+    // Recuperar el rate
+    const rate = await easypost.Rate.retrieve(rateId);
+    
+    // Comprar la etiqueta
+    const shipment = await easypost.Shipment.retrieve(rate.shipment_id);
+    await shipment.buy(rate);
+    
+    console.log('✅ Transaction created:', shipment.id);
+    console.log('📦 Tracking code:', shipment.tracking_code);
+    console.log('📄 Label URL:', shipment.postage_label?.label_url);
+    
+    const response = {
+      ...shipment,
+      object_id: shipment.id,
+      objectId: shipment.id,
+      id: shipment.id,
+      tracking_number: shipment.tracking_code,
+      tracking_code: shipment.tracking_code,
+      label_url: shipment.postage_label?.label_url,
+      labelPdf: shipment.postage_label?.label_pdf_url,
+      label_pdf_url: shipment.postage_label?.label_pdf_url
+    };
+    
+    res.json(response);
+  } catch (error) {
+    console.error('❌ EasyPost transaction error:', error);
+    res.status(500).json({ 
+      error: error.message || 'Error creating transaction in EasyPost',
+      details: error
+    });
+  }
+});
+
+// 5. Proxy para descargar PDF de etiqueta (evita problemas de CORS)
+app.get('/api/easypost/label-pdf', async (req, res) => {
+  try {
+    const { url } = req.query;
+    
+    if (!url) {
+      return res.status(400).json({ error: 'URL del PDF es requerida' });
+    }
+
+    console.log('📄 Descargando PDF de etiqueta desde:', url);
+
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Accept': 'application/pdf'
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error(`Error al descargar PDF: ${response.status} ${response.statusText}`);
+    }
+
+    const pdfBuffer = await response.arrayBuffer();
+    
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', 'inline; filename="label.pdf"');
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    
+    res.send(Buffer.from(pdfBuffer));
+  } catch (error) {
+    console.error('❌ Error al descargar PDF de etiqueta:', error);
+    res.status(500).json({ error: error.message || 'Error al descargar PDF' });
+  }
+});
+
+// 6. Obtener opciones de envío disponibles (carriers y servicios)
+app.get('/api/easypost/available-options', async (req, res) => {
+  try {
+    console.log('🔍 DEBUG: Getting available shipping options from EasyPost');
+    
+    if (!easypost) {
+      return res.status(500).json({ error: 'EasyPost no está configurado. EASYPOST_API_KEY no está configurada' });
+    }
+
+    // Crear un shipment de ejemplo para obtener las opciones disponibles
+    // Esto nos dará información real sobre qué carriers y servicios están disponibles
+    console.log('📦 Creando shipment de ejemplo para obtener opciones disponibles...');
+    
+    // Direcciones de ejemplo (Miami, FL -> New York, NY)
+    const fromAddress = await easypost.Address.create({
+      name: 'Delizukar',
+      company: 'Delizukar Bakery',
+      street1: '123 Delizukar St',
+      city: 'Miami',
+      state: 'FL',
+      zip: '33101',
+      country: 'US',
+      phone: '3055551234',
+      email: 'support@delizukar.com'
+    });
+
+    const toAddress = await easypost.Address.create({
+      name: 'Test Customer',
+      street1: '123 Main St',
+      city: 'New York',
+      state: 'NY',
+      zip: '10001',
+      country: 'US',
+      phone: '2125555678'
+    });
+
+    // Parcel de ejemplo (1 lb, 10x10x5 pulgadas)
+    const parcel = await easypost.Parcel.create({
+      length: 10,
+      width: 10,
+      height: 5,
+      weight: 1
+    });
+
+    // Crear shipment
+    const shipment = await easypost.Shipment.create({
+      to_address: toAddress,
+      from_address: fromAddress,
+      parcel: parcel
+    });
+
+    console.log('✅ Shipment de ejemplo creado:', shipment.id);
+    console.log('📦 Rates disponibles:', shipment.rates ? shipment.rates.length : 0);
+
+    // Agrupar rates por carrier y FILTRAR solo las 2 más económicas de cada uno
+    const carriersMap = {};
+    const servicesMap = {};
+
+    if (shipment.rates && shipment.rates.length > 0) {
+      // Primero agrupar todos los rates por carrier
+      const ratesByCarrier = {};
+      shipment.rates.forEach(rate => {
+        const carrier = rate.carrier || 'Unknown';
+        if (!ratesByCarrier[carrier]) {
+          ratesByCarrier[carrier] = [];
+        }
+        ratesByCarrier[carrier].push({
+          service: rate.service || 'Unknown',
+          id: rate.id,
+          price: parseFloat(rate.rate || 0),
+          currency: rate.currency || 'USD',
+          estimated_days: rate.est_delivery_days || null,
+          delivery_date: rate.delivery_date || null
+        });
+      });
+      
+      // Seleccionar solo las 2 más económicas de cada carrier
+      Object.keys(ratesByCarrier).forEach(carrier => {
+        const sortedRates = ratesByCarrier[carrier].sort((a, b) => a.price - b.price);
+        const top2 = sortedRates.slice(0, 2);
+        
+        carriersMap[carrier] = {
+          name: carrier,
+          services: top2,
+          count: top2.length,
+          total_available: sortedRates.length
+        };
+        
+        // También agregar a servicesMap para el resumen
+        top2.forEach(service => {
+          const serviceName = service.service;
+          if (!servicesMap[serviceName]) {
+            servicesMap[serviceName] = {
+              name: serviceName,
+              carriers: [],
+              price_range: { min: Infinity, max: 0 }
+            };
+          }
+          
+          if (!servicesMap[serviceName].carriers.includes(carrier)) {
+            servicesMap[serviceName].carriers.push(carrier);
+          }
+          
+          if (service.price < servicesMap[serviceName].price_range.min) {
+            servicesMap[serviceName].price_range.min = service.price;
+          }
+          if (service.price > servicesMap[serviceName].price_range.max) {
+            servicesMap[serviceName].price_range.max = service.price;
+          }
+        });
+      });
+    }
+
+    // Formatear respuesta
+    const filteredCount = Object.values(carriersMap).reduce((sum, carrier) => sum + carrier.count, 0);
+    const response = {
+      success: true,
+      total_options_available: shipment.rates ? shipment.rates.length : 0,
+      total_options_filtered: filteredCount,
+      filtered: true,
+      filter_note: 'Mostrando solo las 2 opciones más económicas de cada carrier',
+      carriers: Object.values(carriersMap).map(carrier => ({
+        name: carrier.name,
+        services_count_shown: carrier.count,
+        services_available: carrier.total_available,
+        services: carrier.services.sort((a, b) => a.price - b.price)
+      })),
+      services: Object.values(servicesMap).map(service => ({
+        name: service.name,
+        carriers: service.carriers,
+        price_range: {
+          min: service.price_range.min === Infinity ? 0 : service.price_range.min,
+          max: service.price_range.max
+        }
+      })),
+      all_rates: shipment.rates ? shipment.rates.map(rate => ({
+        id: rate.id,
+        carrier: rate.carrier,
+        service: rate.service,
+        rate: parseFloat(rate.rate || 0),
+        currency: rate.currency || 'USD',
+        estimated_days: rate.est_delivery_days || null,
+        delivery_date: rate.delivery_date || null
+      })) : [],
+      example_shipment_id: shipment.id,
+      note: 'Estas opciones son para un paquete de ejemplo (1 lb, 10x10x5 pulgadas) de Miami, FL a New York, NY'
+    };
+
+    console.log(`✅ Opciones disponibles: ${response.total_options} rates de ${Object.keys(carriersMap).length} carriers`);
+    
+    res.json(response);
+  } catch (error) {
+    console.error('❌ EasyPost available options error:', error);
+    res.status(500).json({ 
+      error: error.message || 'Error obteniendo opciones de envío disponibles',
+      details: error
+    });
+  }
+});
+
 // ==================== ORDER MANAGEMENT ENDPOINTS ====================
 
 // ==================== PIRATE SHIP API (Webhook/Integration Endpoints) ====================
@@ -2067,13 +2694,13 @@ async function buyShippingLabelForOrder(shippingInfo) {
   }
 }
 
-// Endpoint: Crear envío completo con Shippo
+// Endpoint: Crear envío completo con EasyPost
 app.post('/api/create-shipment-complete', async (req, res) => {
   try {
     const { orderId, order } = req.body;
     
-    console.log('🚚 Creando envío completo para pedido:', orderId);
-    console.log('📦 Order data:', JSON.stringify(order, null, 2));
+    console.log('🚚 [EasyPost] Creando envío completo para pedido:', orderId);
+    console.log('📦 [EasyPost] Order data:', JSON.stringify(order, null, 2));
     
     if (!order || !order.customerInfo) {
       console.log('❌ Error: Datos del pedido incompletos');
@@ -2085,19 +2712,11 @@ app.post('/api/create-shipment-complete', async (req, res) => {
       });
     }
 
-    const apiToken = resolveShippoToken();
-    
-    if (!apiToken) {
+    if (!easypost) {
       return res.status(500).json({
         success: false,
-        error: 'SHIPPO_API_TOKEN no está configurada'
+        error: 'EasyPost no está configurado. EASYPOST_API_KEY no está configurada'
       });
-    }
-
-    // Inicializar Shippo
-    let shippoClient = shippo;
-    if (!shippoClient) {
-      shippoClient = new shippoModule.Shippo({ apiKeyHeader: apiToken });
     }
     
     // Extraer información del pedido
@@ -2119,16 +2738,17 @@ app.post('/api/create-shipment-complete', async (req, res) => {
       });
     }
     
-    // Crear direcciones en Shippo - usar formato según documentación oficial
+    // Crear direcciones en EasyPost
     const fromAddress = {
       name: 'Delizukar',
+      company: 'Delizukar Bakery',
       street1: '123 Delizukar St',
       city: 'Miami',
       state: 'FL',
       zip: '33101',
       country: 'US',
       email: 'envios@delizukar.com',
-      is_residential: false
+      phone: '3055551234'
     };
     
     // Extraer dirección del customerInfo (puede estar dentro de address object o como propiedades separadas)
@@ -2216,33 +2836,37 @@ app.post('/api/create-shipment-complete', async (req, res) => {
       is_residential: true
     };
     
-    console.log('📍 DIRECCIÓN EXACTA A ENVIAR A SHIPPO:');
-    console.log('   Nombre:', toAddress.name);
-    console.log('   Calle:', toAddress.street1);
-    console.log('   Ciudad:', toAddress.city);
-    console.log('   Estado:', toAddress.state);
-    console.log('   Código Postal:', toAddress.zip);
-    console.log('   País:', toAddress.country);
-    console.log('📮 From Address:', JSON.stringify(fromAddress, null, 2));
-    console.log('📮 To Address:', JSON.stringify(toAddress, null, 2));
+    // Formato para EasyPost
+    const toAddressData = {
+      name: `${customerInfo.firstName || 'Cliente'} ${customerInfo.lastName || ''}`,
+      street1: street1,
+      city: city,
+      state: state,
+      zip: zip,
+      country: country,
+      phone: customerInfo.phone || '',
+      email: customerInfo.email || ''
+    };
     
-    // Crear direcciones en Shippo v2
-    console.log('📦 Creando direcciones en Shippo v2...');
-    let fromAddr, toAddr, fromAddrId, toAddrId;
+    console.log('📍 [EasyPost] DIRECCIÓN EXACTA A ENVIAR:');
+    console.log('   Nombre:', toAddressData.name);
+    console.log('   Calle:', toAddressData.street1);
+    console.log('   Ciudad:', toAddressData.city);
+    console.log('   Estado:', toAddressData.state);
+    console.log('   Código Postal:', toAddressData.zip);
+    console.log('   País:', toAddressData.country);
+    console.log('📮 From Address:', JSON.stringify(fromAddress, null, 2));
+    console.log('📮 To Address:', JSON.stringify(toAddressData, null, 2));
+    
+    // Crear direcciones en EasyPost
+    console.log('📦 [EasyPost] Creando direcciones...');
+    let fromAddr, toAddr;
     
     try {
-      fromAddr = await shippoClient.addresses.create(fromAddress);
-      fromAddrId = fromAddr.id || fromAddr.objectId || fromAddr.object_id;
-      console.log('✅ Dirección origen creada:', fromAddrId);
-      console.log('   Tipo de ID:', typeof fromAddrId);
-      console.log('   Respuesta completa:', JSON.stringify(fromAddr, null, 2));
-      
-      if (!fromAddrId) {
-        throw new Error('No se recibió ID de la dirección origen');
-      }
+      fromAddr = await easypost.Address.create(fromAddress);
+      console.log('✅ [EasyPost] Dirección origen creada:', fromAddr.id);
     } catch (error) {
-      console.error('❌ Error creando dirección origen:', error);
-      console.error('   Error details:', JSON.stringify(error, null, 2));
+      console.error('❌ Error creando dirección origen en EasyPost:', error);
       return res.status(500).json({
         success: false,
         error: 'Error creando dirección origen: ' + (error.message || 'Error desconocido')
@@ -2250,38 +2874,19 @@ app.post('/api/create-shipment-complete', async (req, res) => {
     }
     
     try {
-      toAddr = await shippoClient.addresses.create(toAddress);
-      toAddrId = toAddr.id || toAddr.objectId || toAddr.object_id;
-      console.log('✅ Dirección destino creada:', toAddrId);
-      console.log('   Tipo de ID:', typeof toAddrId);
-      console.log('   Respuesta completa:', JSON.stringify(toAddr, null, 2));
+      toAddr = await easypost.Address.create(toAddressData);
+      console.log('✅ [EasyPost] Dirección destino creada:', toAddr.id);
       
-      if (!toAddrId) {
-        throw new Error('No se recibió ID de la dirección destino');
+      // Verificar validación de EasyPost
+      const isValid = toAddr.verifications?.delivery?.success !== false;
+      if (!isValid) {
+        console.log('⚠️ [EasyPost] Dirección no validada completamente:', toAddr.verifications?.delivery?.errors);
       }
     } catch (error) {
-      console.error('❌ Error creando dirección destino:', error);
-      console.error('   Error details:', JSON.stringify(error, null, 2));
+      console.error('❌ Error creando dirección destino en EasyPost:', error);
       return res.status(500).json({
         success: false,
         error: 'Error creando dirección destino: ' + (error.message || 'Error desconocido')
-      });
-    }
-    
-    // Verificar si Shippo sugirió correcciones - API v2 estructura
-    const toAddrValidation = toAddr.validation_result || toAddr.validation_results || toAddr.validationResult;
-    if (toAddrValidation && toAddrValidation.is_valid === false) {
-      console.log('⚠️ Dirección no validada completamente:', toAddrValidation.messages || toAddrValidation.reasons);
-    }
-    
-    // Validar que los IDs de direcciones estén definidos
-    if (!fromAddrId || !toAddrId) {
-      console.error('❌ Error: IDs de direcciones no válidos');
-      console.error('   fromAddrId:', fromAddrId);
-      console.error('   toAddrId:', toAddrId);
-      return res.status(500).json({
-        success: false,
-        error: 'Error: No se pudieron crear las direcciones en Shippo'
       });
     }
     
@@ -2331,39 +2936,38 @@ app.post('/api/create-shipment-complete', async (req, res) => {
     // Obtener información del precio esperado (shippingInfo ya está declarado arriba en línea 1139)
     const expectedPriceFromCheckout = shippingInfo.cost || shippingInfo.amount || null;
     console.log('💰 [Precio Esperado] El cliente seleccionó un rate de:', expectedPriceFromCheckout || 'N/A');
-    console.log('💰 [Precio Esperado] Este precio viene de Shippo cuando el cliente seleccionó la opción en el checkout');
-    console.log('💰 [Precio Esperado] Shippo calculó ese precio usando los datos del paquete del checkout');
-    console.log('💰 [Precio Esperado] Si los datos del paquete son diferentes ahora, Shippo dará un precio diferente');
+    console.log('💰 [Precio Esperado] Este precio viene de EasyPost cuando el cliente seleccionó la opción en el checkout');
+    console.log('💰 [Precio Esperado] EasyPost calculó ese precio usando los datos del paquete del checkout');
+    console.log('💰 [Precio Esperado] Si los datos del paquete son diferentes ahora, EasyPost dará un precio diferente');
     console.log('');
     
-    // Crear shipment en Shippo - El SDK v2 espera camelCase
-    const shipmentData = {
-      addressFrom: String(fromAddrId).trim(),  // camelCase para SDK v2
-      addressTo: String(toAddrId).trim(),      // camelCase para SDK v2
-      parcels: [{
-        length: packageDimensions.length,
-        width: packageDimensions.width,
-        height: packageDimensions.height,
-        distanceUnit: packageDimensions.distanceUnit,  // camelCase para SDK v2
-        weight: packageWeight,
-        massUnit: 'lb'       // camelCase para SDK v2
-      }],
-      async: false
+    // Crear parcel en EasyPost
+    console.log('📦 [EasyPost] Creando parcel con datos exactos del checkout...');
+    const parcelData = {
+      length: parseFloat(packageDimensions.length || 10),
+      width: parseFloat(packageDimensions.width || 10),
+      height: parseFloat(packageDimensions.height || 5),
+      weight: parseFloat(packageWeight || 1)
     };
     
-    console.log('📦 Shipment data para Shippo (camelCase para SDK v2):');
-    console.log('   addressFrom:', shipmentData.addressFrom, '(tipo:', typeof shipmentData.addressFrom, ')');
-    console.log('   addressTo:', shipmentData.addressTo, '(tipo:', typeof shipmentData.addressTo, ')');
-    console.log('   parcels:', JSON.stringify(shipmentData.parcels, null, 2));
+    console.log('📦 [EasyPost] Parcel data:', JSON.stringify(parcelData, null, 2));
     console.log('   ⚠️ VERIFICA ESTOS DATOS DEL PAQUETE:');
-    console.log('      - Peso:', shipmentData.parcels[0].weight, shipmentData.parcels[0].massUnit);
-    console.log('      - Dimensiones:', `${shipmentData.parcels[0].length}" x ${shipmentData.parcels[0].width}" x ${shipmentData.parcels[0].height}"`);
-    console.log('      - Si el precio cambia en Shippo, estos valores pueden necesitar ajuste');
+    console.log('      - Peso:', parcelData.weight, 'lb');
+    console.log('      - Dimensiones:', `${parcelData.length}" x ${parcelData.width}" x ${parcelData.height}"`);
     
-    console.log('📦 Creando shipment en Shippo...');
-    const shipment = await shippoClient.shipments.create(shipmentData);
-    const shipmentId = shipment.id || shipment.objectId || shipment.object_id;
-    console.log('✅ Shipment creado:', shipmentId);
+    const parcel = await easypost.Parcel.create(parcelData);
+    console.log('✅ [EasyPost] Parcel creado:', parcel.id);
+    
+    // Crear shipment en EasyPost
+    console.log('📦 [EasyPost] Creando shipment...');
+    const shipment = await easypost.Shipment.create({
+      to_address: toAddr,
+      from_address: fromAddr,
+      parcel: parcel
+    });
+    
+    const shipmentId = shipment.id;
+    console.log('✅ [EasyPost] Shipment creado:', shipmentId);
     
     if (!shipment.rates || shipment.rates.length === 0) {
       return res.status(400).json({
@@ -2372,711 +2976,221 @@ app.post('/api/create-shipment-complete', async (req, res) => {
       });
     }
     
-    // CRÍTICO: Si tenemos el rateId del shipment original, usarlo directamente
-    // No crear un nuevo shipment porque los rates pueden ser diferentes
+    // CRÍTICO: Si tenemos el rateId del shipment original, intentar usarlo directamente
     const userSelectedRate = shippingInfo.rate;
     const userSelectedAmount = shippingInfo.cost || shippingInfo.amount;
     const userRateId = shippingInfo.rateId || userSelectedRate?.id || userSelectedRate?.objectId || userSelectedRate?.object_id;
     
-    console.log('🔍 [Rate Selection] Verificando si podemos usar rateId directamente...');
-    console.log('   shippingInfo completo:', JSON.stringify(shippingInfo, null, 2));
-    console.log('   userSelectedRate:', JSON.stringify(userSelectedRate, null, 2));
+    console.log('🔍 [EasyPost] Verificando si podemos usar rateId directamente...');
     console.log('   userRateId (ID del rate guardado):', userRateId);
     console.log('   userSelectedAmount (precio esperado):', userSelectedAmount);
     
-    // Si tenemos el rateId, intentar usarlo directamente sin crear un nuevo shipment
-    // Esto es más confiable porque el rateId es único y válido para crear transacciones
+    // Si tenemos el rateId, intentar usarlo directamente para comprar la etiqueta
     if (userRateId) {
-      console.log('✅ Tenemos rateId del shipment original, intentando usarlo directamente...');
-      console.log('   RateId:', userRateId);
-      console.log('   Precio esperado:', userSelectedAmount);
-      console.log('   Carrier esperado:', userSelectedRate?.carrier || userSelectedRate?.provider);
-      console.log('   Service esperado:', userSelectedRate?.service || userSelectedRate?.servicelevel?.name);
+      console.log('✅ [EasyPost] Tenemos rateId del shipment original, intentando comprar etiqueta directamente...');
       
-      // Verificar que tenemos el precio esperado para validar después
-      const expectedAmount = userSelectedAmount ? parseFloat(userSelectedAmount) : null;
-      
-      // Intentar crear la transacción directamente con el rateId
-      // Si falla, entonces crearemos un nuevo shipment y buscaremos el rate
       try {
-        console.log('💰 Intentando crear transacción directamente con rateId:', userRateId);
+        // Recuperar el rate de EasyPost
+        const rate = await easypost.Rate.retrieve(userRateId);
         
-        let transaction;
-        let trackingNumber = null;
-        let labelUrl = null;
-        let trackingUrl = null;
-        let transactionId = null;
+        // Obtener el shipment asociado al rate
+        const shipmentForRate = await easypost.Shipment.retrieve(rate.shipment_id);
         
-        try {
-          // Crear transacción directamente con el rateId original
-          transaction = await shippoClient.transactions.create({
-            rate: userRateId,
-            async: false
+        // Comprar la etiqueta usando el rate
+        await shipmentForRate.buy(rate);
+        
+        // Verificar que tenemos la información de la etiqueta
+        const trackingNumber = shipmentForRate.tracking_code;
+        const labelUrl = shipmentForRate.postage_label?.label_url;
+        
+        if (trackingNumber && labelUrl) {
+          console.log('✅ [EasyPost] Etiqueta comprada exitosamente usando rateId original:');
+          console.log('   Tracking Number:', trackingNumber);
+          console.log('   Label URL:', labelUrl);
+          
+          // Preparar información del carrier y servicio
+          const carrierName = userSelectedRate?.carrier || rate.carrier || 'N/A';
+          const serviceName = userSelectedRate?.service || rate.service || 'Standard';
+          const shippingCost = userSelectedAmount || parseFloat(rate.rate || 0).toFixed(2);
+          
+          const carrierDisplayName = carrierName.toUpperCase() === 'UPS' ? 'UPS' :
+                                    carrierName.toUpperCase() === 'USPS' ? 'USPS' :
+                                    carrierName.toUpperCase() === 'FEDEX' ? 'FedEx' :
+                                    carrierName.toUpperCase() === 'DHL' ? 'DHL' :
+                                    carrierName;
+          
+          // Actualizar el pedido en Firestore
+          const orderRef = doc(db, 'orders', orderId);
+          await updateDoc(orderRef, {
+            easypostRateId: userRateId,
+            easypostShipmentId: shipmentForRate.id,
+            trackingCode: trackingNumber,
+            labelUrl: labelUrl,
+            selectedCarrier: carrierDisplayName,
+            selectedService: serviceName,
+            shippingCost: shippingCost,
+            status: 'shipped',
+            updatedAt: new Date()
           });
           
-          transactionId = transaction.id || transaction.objectId || transaction.object_id;
-          const transactionStatus = transaction.status || transaction.objectStatus || 'UNKNOWN';
-          console.log('✅ Transacción creada directamente con rateId original:', transactionId);
-          console.log('   Estado:', transactionStatus);
+          // Preparar datos del email
+          const customerInfo = order.customerInfo || {};
+          const trackingUrl = `https://track.easypost.com/d/${trackingNumber}`;
+          const emailData = {
+            to_email: customerInfo.email,
+            to_name: customerInfo.firstName || 'Cliente',
+            to_name_full: `${customerInfo.firstName || ''} ${customerInfo.lastName || ''}`.trim(),
+            order_id: orderId,
+            tracking_code: trackingNumber,
+            tracking_url: trackingUrl,
+            label_url: labelUrl,
+            carrier_name: carrierDisplayName,
+            service_name: serviceName,
+            shipping_cost: `$${parseFloat(shippingCost).toFixed(2)}`,
+            delivery_address: `${toAddressData?.street1 || customerInfo.address?.street1 || ''}\n${toAddressData?.city || customerInfo.address?.city || ''}, ${toAddressData?.state || customerInfo.address?.state || ''} ${toAddressData?.zip || customerInfo.address?.zip || ''}\n${toAddressData?.country || customerInfo.address?.country || 'US'}`,
+            delivery_street: toAddressData?.street1 || customerInfo.address?.street1 || '',
+            delivery_city: toAddressData?.city || customerInfo.address?.city || '',
+            delivery_state: toAddressData?.state || customerInfo.address?.state || '',
+            delivery_zip: toAddressData?.zip || customerInfo.address?.zip || '',
+            delivery_country: toAddressData?.country || customerInfo.address?.country || 'US',
+            products_list: (order.cartItems || []).map(item => {
+              const itemName = item.name || 'Producto';
+              const itemQuantity = item.quantity || 1;
+              const itemPrice = parseFloat(item.price) || 0;
+              return `${itemQuantity}x ${itemName} - $${itemPrice.toFixed(2)}`;
+            }).join('\n'),
+            products_count: (order.cartItems || []).length,
+            order_total: `$${parseFloat(order.total || 0).toFixed(2)}`,
+            subtotal: `$${parseFloat((order.total || 0) - parseFloat(shippingCost)).toFixed(2)}`
+          };
           
-          // Verificar el estado de la transacción
-          if (transactionStatus === 'ERROR' || transactionStatus === 'FAILED') {
-            const errorMsg = transaction.messages?.[0]?.text || transaction.error || 'Error desconocido en la transacción';
-            throw new Error(`Error en la transacción: ${errorMsg}`);
-          }
-          
-          // Extraer información de la etiqueta
-          trackingNumber = transaction.tracking_number || 
-                           transaction.trackingNumber || 
-                           transaction.tracking?.number ||
-                           transaction.tracking_number_provider ||
-                           null;
-          labelUrl = transaction.label_url || 
-                     transaction.labelUrl || 
-                     transaction.label?.url ||
-                     transaction.postage_label?.label_url ||
-                     transaction.postage_label?.labelUrl ||
-                     null;
-          
-          if (trackingNumber) {
-            trackingUrl = `https://goshippo.com/tracking/${trackingNumber}`;
-          }
-          
-          // Verificar que tenemos la información de la etiqueta
-          if (transactionId && (!trackingNumber || !labelUrl)) {
-            console.warn('⚠️ Transacción creada pero sin información de etiqueta');
-            if (transactionStatus === 'ERROR' || transactionStatus === 'FAILED' || 
-                (transactionStatus === 'SUCCESS' && !trackingNumber && !labelUrl)) {
-              throw new Error('You are required to have a valid payment method on file to purchase labels.');
-            }
-            if (transactionStatus === 'QUEUED' || transactionStatus === 'PENDING' || transactionStatus === 'WAITING') {
-              throw new Error('La transacción está en proceso. Por favor, intenta de nuevo en unos momentos.');
-            }
-          }
-          
-          // Si tenemos trackingNumber y labelUrl, éxito!
-          if (trackingNumber && labelUrl) {
-            console.log('✅ Etiqueta pagada exitosamente usando rateId original:');
-            console.log('   Tracking Number:', trackingNumber);
-            console.log('   Label URL:', labelUrl);
-            console.log('   Transaction ID:', transactionId);
-            
-            // Preparar información del carrier y servicio desde el rate original
-            const carrierName = userSelectedRate?.carrier || userSelectedRate?.provider || 'N/A';
-            const serviceName = userSelectedRate?.service || userSelectedRate?.servicelevel?.name || 'Standard';
-            const shippingCost = userSelectedAmount || '0.00';
-            
-            const carrierDisplayName = carrierName.toUpperCase() === 'UPS' ? 'UPS' :
-                                      carrierName.toUpperCase() === 'USPS' ? 'USPS' :
-                                      carrierName.toUpperCase() === 'FEDEX' ? 'FedEx' :
-                                      carrierName.toUpperCase() === 'DHL' ? 'DHL' :
-                                      carrierName;
-            
-            // Actualizar el pedido en Firestore
-            const orderRef = doc(db, 'orders', orderId);
-            await updateDoc(orderRef, {
-              shippoRateId: userRateId,
-              shippoTransactionId: transactionId,
+          return res.json({
+            success: true,
+            data: {
+              orderId: orderId,
               trackingCode: trackingNumber,
               labelUrl: labelUrl,
               trackingUrl: trackingUrl,
-              selectedCarrier: carrierDisplayName,
-              selectedService: serviceName,
+              shipmentId: shipmentForRate.id,
+              carrier: carrierDisplayName,
+              service: serviceName,
               shippingCost: shippingCost,
-              status: 'shipped',
-              updatedAt: new Date()
-            });
-            
-            // Preparar datos del email
-            const customerInfo = order.customerInfo || {};
-            const emailData = {
-              to_email: customerInfo.email,
-              to_name: customerInfo.firstName || 'Cliente',
-              to_name_full: `${customerInfo.firstName || ''} ${customerInfo.lastName || ''}`.trim(),
-              order_id: orderId,
-              tracking_code: trackingNumber,
-              tracking_url: trackingUrl,
-              label_url: labelUrl,
-              carrier_name: carrierDisplayName,
-              service_name: serviceName,
-              shipping_cost: `$${parseFloat(shippingCost).toFixed(2)}`,
-              delivery_address: `${toAddress?.street1 || customerInfo.address?.street1 || ''}\n${toAddress?.city || customerInfo.address?.city || ''}, ${toAddress?.state || customerInfo.address?.state || ''} ${toAddress?.zip || customerInfo.address?.zip || ''}\n${toAddress?.country || customerInfo.address?.country || 'US'}`,
-              delivery_street: toAddress?.street1 || customerInfo.address?.street1 || '',
-              delivery_city: toAddress?.city || customerInfo.address?.city || '',
-              delivery_state: toAddress?.state || customerInfo.address?.state || '',
-              delivery_zip: toAddress?.zip || customerInfo.address?.zip || '',
-              delivery_country: toAddress?.country || customerInfo.address?.country || 'US',
-              products_list: (order.cartItems || []).map(item => {
-                const itemName = item.name || 'Producto';
-                const itemQuantity = item.quantity || 1;
-                const itemPrice = parseFloat(item.price) || 0;
-                return `${itemQuantity}x ${itemName} - $${itemPrice.toFixed(2)}`;
-              }).join('\n'),
-              products_count: (order.cartItems || []).length,
-              order_total: `$${parseFloat(order.total || 0).toFixed(2)}`,
-              subtotal: `$${parseFloat((order.total || 0) - parseFloat(shippingCost)).toFixed(2)}`
-            };
-            
-            return res.json({
-              success: true,
-              data: {
-                orderId: orderId,
-                trackingCode: trackingNumber,
-                labelUrl: labelUrl,
-                trackingUrl: trackingUrl,
-                transactionId: transactionId,
-                shipmentId: null, // No creamos shipment nuevo
-                carrier: carrierDisplayName,
-                service: serviceName,
-                shippingCost: shippingCost,
-                emailData: emailData
-              }
-            });
-          }
-        } catch (transactionError) {
-          console.error('❌ Error al crear transacción con rateId original:', transactionError);
-          console.error('   Error message:', transactionError.message);
-          
-          // Verificar si es error de método de pago
-          const paymentError = transactionError.message || 'Error al pagar la etiqueta';
-          const isPaymentMethodError = paymentError.includes('payment method') || 
-                                       paymentError.includes('billing') ||
-                                       paymentError.includes('You are required to have a valid payment method');
-          
-          if (isPaymentMethodError) {
-            console.error('⚠️ Error: No hay método de pago válido en Shippo');
-            
-            // Preparar información del carrier y servicio
-            const carrierName = userSelectedRate?.carrier || userSelectedRate?.provider || 'N/A';
-            const serviceName = userSelectedRate?.service || userSelectedRate?.servicelevel?.name || 'Standard';
-            const shippingCost = userSelectedAmount || '0.00';
-            const carrierDisplayName = carrierName.toUpperCase() === 'UPS' ? 'UPS' :
-                                      carrierName.toUpperCase() === 'USPS' ? 'USPS' :
-                                      carrierName.toUpperCase() === 'FEDEX' ? 'FedEx' :
-                                      carrierName.toUpperCase() === 'DHL' ? 'DHL' :
-                                      carrierName;
-            
-            // Guardar información en Firestore
-            const orderRef = doc(db, 'orders', orderId);
-            await updateDoc(orderRef, {
-              shippoRateId: userRateId,
-              selectedCarrier: carrierDisplayName,
-              selectedService: serviceName,
-              shippingCost: shippingCost,
-              status: 'pending',
-              updatedAt: new Date()
-            });
-            
-            return res.status(500).json({
-              success: false,
-              error: paymentError || 'Error al pagar la etiqueta',
-              message: 'No se pudo procesar el pago porque no hay un método de pago válido en Shippo. Ve a Shippo para agregar un método de pago y pagar la etiqueta manualmente.',
-              data: {
-                orderId: orderId,
-                shipmentId: null,
-                rateId: userRateId,
-                shippoUrl: `https://goshippo.com/rates/${userRateId}`,
-                carrier: carrierDisplayName,
-                service: serviceName,
-                shippingCost: shippingCost,
-                pendingPayment: true,
-                instructions: 'Ve a Shippo para agregar un método de pago y pagar la etiqueta manualmente.'
-              }
-            });
-          }
-          
-          // Si no es error de método de pago, continuar con la creación de nuevo shipment
-          console.log('⚠️ No se pudo usar rateId directamente, continuando con creación de nuevo shipment...');
-          throw transactionError; // Re-lanzar para que continúe con el flujo normal
+              emailData: emailData
+            }
+          });
         }
-      } catch (error) {
-        // Si falla, continuar con la creación de nuevo shipment
-        console.log('⚠️ Error usando rateId directamente, continuando con búsqueda en nuevo shipment...');
-        console.log('   Error:', error.message);
+      } catch (rateError) {
+        console.error('❌ [EasyPost] Error al usar rateId original:', rateError);
+        console.log('⚠️ Continuando con búsqueda de rate en nuevo shipment...');
       }
     }
     
     // Si no tenemos rateId o falló, buscar en el nuevo shipment
-    console.log('🔍 [Rate Selection] Buscando rate en el nuevo shipment...');
-    console.log('   Rates disponibles en shipment:', shipment.rates.length);
-    console.log('   Precios de rates disponibles:', shipment.rates.map(r => ({
-      id: r.id || r.objectId || r.object_id,
-      carrier: r.provider || r.carrier,
-      service: r.servicelevel?.name || r.service,
-      servicelevel_token: r.servicelevel?.token,
-      amount: r.amount_local || r.amount
-    })));
+    console.log('🔍 [EasyPost] Buscando rate en el nuevo shipment...');
+    console.log('   Rates disponibles en shipment:', shipment.rates ? shipment.rates.length : 0);
     
+    if (!shipment.rates || shipment.rates.length === 0) {
+      return res.status(400).json({
+        success: false,
+        error: 'No hay tarifas disponibles para este envío'
+      });
+    }
+    
+    // Reutilizar variables ya declaradas arriba
+    // Buscar rate en EasyPost por precio y carrier/service
     let selectedRate = null;
     
-    // Estrategia 1: Buscar por precio exacto + carrier + service (MÁS SEGURO)
-    if (!selectedRate && userSelectedAmount && userSelectedRate) {
+    if (userSelectedAmount && userSelectedRate) {
       const expectedAmount = parseFloat(userSelectedAmount);
       const userCarrier = (userSelectedRate.carrier || userSelectedRate.provider || '').toLowerCase();
       const userService = (userSelectedRate.service || userSelectedRate.servicelevel?.name || '').toLowerCase();
       
-      console.log('🔍 Buscando rate por precio + carrier + service:', {
+      console.log('🔍 [EasyPost] Buscando rate por precio + carrier + service:', {
         amount: expectedAmount,
         carrier: userCarrier,
         service: userService
       });
       
-      // Buscar precio exacto + carrier + service juntos
+      // Buscar por precio exacto + carrier + service
       selectedRate = shipment.rates.find(r => {
-        const rateAmount = parseFloat(r.amount_local || r.amount || 0);
-        const rateCarrier = (r.provider || r.carrier || '').toLowerCase();
-        const rateService = (r.servicelevel?.name || r.service || '').toLowerCase();
+        const rateAmount = parseFloat(r.rate || 0);
+        const rateCarrier = (r.carrier || '').toLowerCase();
+        const rateService = (r.service || '').toLowerCase();
         
         const priceMatch = Math.abs(rateAmount - expectedAmount) < 0.01;
-        const carrierMatch = !userCarrier || rateCarrier === userCarrier;
-        const serviceMatch = !userService || rateService === userService;
+        const carrierMatch = !userCarrier || rateCarrier === userCarrier || rateCarrier.includes(userCarrier);
+        const serviceMatch = !userService || rateService === userService || rateService.includes(userService);
         
-        const match = priceMatch && carrierMatch && serviceMatch;
-        
-        if (match) {
-          console.log('   ✅ Match encontrado:', {
-            amount: rateAmount,
-            expected: expectedAmount,
-            carrier: rateCarrier,
-            expectedCarrier: userCarrier,
-            service: rateService,
-            expectedService: userService
-          });
-        }
-        return match;
+        return priceMatch && carrierMatch && serviceMatch;
       });
       
-      if (selectedRate) {
-        console.log('✅ Rate encontrado por precio + carrier + service:', selectedRate.servicelevel?.name || selectedRate.service);
-        console.log('   Precio esperado:', expectedAmount);
-        console.log('   Precio encontrado:', selectedRate.amount_local || selectedRate.amount);
-      } else {
-        console.error('❌ NO se encontró rate con precio + carrier + service:', {
-          amount: expectedAmount,
-          carrier: userCarrier,
-          service: userService
-        });
-        console.error('   Rates disponibles:', shipment.rates.map(r => ({
-          amount: r.amount_local || r.amount,
-          carrier: r.provider || r.carrier,
-          service: r.servicelevel?.name || r.service
-        })));
-      }
-    }
-    
-    // Estrategia 1b: Si no se encontró, buscar solo por precio exacto (fallback)
-    if (!selectedRate && userSelectedAmount) {
-      const expectedAmount = parseFloat(userSelectedAmount);
-      console.log('🔍 Buscando rate SOLO por precio exacto (fallback):', expectedAmount);
-      
-      // Buscar precio exacto (dentro de $0.01)
-      selectedRate = shipment.rates.find(r => {
-        const rateAmount = parseFloat(r.amount_local || r.amount || 0);
-        const diff = Math.abs(rateAmount - expectedAmount);
-        const match = diff < 0.01;
-        if (match) {
-          console.log('   ⚠️ Match encontrado SOLO por precio (sin verificar carrier/service):', {
-            amount: rateAmount,
-            expected: expectedAmount,
-            diff: diff,
-            carrier: r.provider || r.carrier,
-            service: r.servicelevel?.name || r.service
-          });
-        }
-        return match;
-      });
-      
-      if (selectedRate) {
-        console.warn('⚠️ Rate encontrado SOLO por precio - se validará carrier/service después');
-        console.warn('   Precio esperado:', expectedAmount);
-        console.warn('   Precio encontrado:', selectedRate.amount_local || selectedRate.amount);
-      }
-    }
-    
-    // Estrategia 2: Si no se encontró por precio, buscar por carrier_token + servicelevel_token + precio
-    if (!selectedRate && userSelectedRate) {
-      const userCarrierToken = userSelectedRate.carrier_token || userSelectedRate.provider || userSelectedRate.carrier;
-      const userServiceToken = userSelectedRate.servicelevel_token || userSelectedRate.servicelevel?.token;
-      const expectedAmount = userSelectedAmount ? parseFloat(userSelectedAmount) : null;
-      
-      if (userCarrierToken && userServiceToken && expectedAmount) {
+      // Si no se encontró, buscar solo por precio
+      if (!selectedRate && userSelectedAmount) {
         selectedRate = shipment.rates.find(r => {
-          const rateCarrier = (r.carrier_token || r.provider || r.carrier || '').toLowerCase();
-          const rateService = (r.servicelevel?.token || r.servicelevel_token || '').toLowerCase();
-          const rateAmount = parseFloat(r.amount_local || r.amount || 0);
-          
-          return rateCarrier === userCarrierToken.toLowerCase() && 
-                 rateService === userServiceToken.toLowerCase() &&
-                 Math.abs(rateAmount - expectedAmount) < 0.01;
+          const rateAmount = parseFloat(r.rate || 0);
+          return Math.abs(rateAmount - expectedAmount) < 0.01;
         });
-        
-        if (selectedRate) {
-          console.log('✅ Rate encontrado por carrier_token + servicelevel_token + precio:', selectedRate.servicelevel?.name || selectedRate.service);
-        }
       }
     }
     
-    // Estrategia 3: Buscar por precio exacto + carrier + service
-    if (!selectedRate && userSelectedRate && userSelectedAmount) {
-      const expectedAmount = parseFloat(userSelectedAmount);
-      const userCarrier = (userSelectedRate.carrier || userSelectedRate.provider || '').toLowerCase();
-      const userService = (userSelectedRate.service || userSelectedRate.servicelevel?.name || '').toLowerCase();
-      
-      selectedRate = shipment.rates.find(r => {
-        const rateAmount = parseFloat(r.amount_local || r.amount || 0);
-        const rateCarrier = (r.carrier || r.provider || '').toLowerCase();
-        const rateService = (r.service || r.servicelevel?.name || '').toLowerCase();
-        
-        return Math.abs(rateAmount - expectedAmount) < 0.01 &&
-               rateCarrier === userCarrier &&
-               rateService === userService;
-      });
-      
-      if (selectedRate) {
-        console.log('✅ Rate encontrado por precio + carrier + service:', selectedRate.servicelevel?.name || selectedRate.service);
-      }
-    }
-    
-    // Si NO se encontró el rate del usuario, ERROR - no usar fallback
+    // Si no se encontró el rate, usar el más económico disponible
     if (!selectedRate) {
-      console.error('❌ ERROR CRÍTICO: No se pudo encontrar el rate seleccionado por el usuario!');
-      console.error('   Rate esperado:', {
-        rateId: userRateId,
-        carrier: userSelectedRate?.carrier || userSelectedRate?.provider,
-        service: userSelectedRate?.service || userSelectedRate?.servicelevel?.name,
-        amount: userSelectedAmount
-      });
-      console.error('   Rates disponibles en el shipment:', shipment.rates.map(r => ({
-        id: r.id || r.objectId || r.object_id,
-        carrier: r.provider || r.carrier,
-        service: r.servicelevel?.name || r.service,
-        amount: r.amount_local || r.amount
-      })));
-      
+      console.warn('⚠️ [EasyPost] No se encontró rate exacto, usando el más económico disponible');
+      selectedRate = shipment.rates.sort((a, b) => parseFloat(a.rate || 0) - parseFloat(b.rate || 0))[0];
+    }
+    
+    if (!selectedRate) {
       return res.status(400).json({
         success: false,
-        error: `No se pudo encontrar el servicio de envío seleccionado por el cliente. Precio esperado: $${userSelectedAmount ? parseFloat(userSelectedAmount).toFixed(2) : 'N/A'}, Carrier: ${userSelectedRate?.carrier || userSelectedRate?.provider || 'N/A'}, Service: ${userSelectedRate?.service || userSelectedRate?.servicelevel?.name || 'N/A'}.`,
-        message: `El servicio de envío seleccionado por el cliente no está disponible. Esto puede pasar si los rates cambiaron o si el peso/dimensiones del paquete son diferentes. Por favor, usa el botón "Widget" para seleccionar manualmente un servicio de envío.`,
-        data: {
-          expectedAmount: userSelectedAmount,
-          expectedCarrier: userSelectedRate?.carrier || userSelectedRate?.provider,
-          expectedService: userSelectedRate?.service || userSelectedRate?.servicelevel?.name,
-          availableRates: shipment.rates.map(r => ({
-            carrier: r.provider || r.carrier,
-            service: r.servicelevel?.name || r.service,
-            amount: r.amount_local || r.amount
-          }))
-        }
+        error: 'No se pudo encontrar un servicio de envío disponible'
       });
     }
     
-    // CRÍTICO: Verificar que el rate seleccionado tiene el precio EXACTO
-    // Si no coincide, NO usar ese rate - es un error grave
-    // ESTA VALIDACIÓN ES OBLIGATORIA - NO SE PUEDE CREAR UNA TRANSACCIÓN CON UN PRECIO DIFERENTE
-    const selectedAmount = parseFloat(selectedRate.amount_local || selectedRate.amount || 0);
-    const expectedAmount = userSelectedAmount ? parseFloat(userSelectedAmount) : null;
-    
-    console.log('🔍 [Validación Precio] Verificando que el precio coincida exactamente...');
-    console.log('   Precio esperado (cliente seleccionó):', expectedAmount);
-    console.log('   Precio del rate encontrado:', selectedAmount);
-    console.log('   Diferencia:', expectedAmount ? Math.abs(selectedAmount - expectedAmount) : 'N/A');
-    console.log('   Tolerancia permitida: $0.01');
-    
-    if (expectedAmount && Math.abs(selectedAmount - expectedAmount) > 0.01) {
-      console.error('❌ ERROR CRÍTICO: El rate seleccionado tiene un precio diferente al esperado!');
-      console.error('   Precio esperado (seleccionado por cliente):', expectedAmount);
-      console.error('   Precio del rate encontrado:', selectedAmount);
-      console.error('   Diferencia:', Math.abs(selectedAmount - expectedAmount));
-      console.error('   Carrier esperado:', userSelectedRate?.carrier || userSelectedRate?.provider);
-      console.error('   Carrier encontrado:', selectedRate.provider || selectedRate.carrier);
-      console.error('   Service esperado:', userSelectedRate?.service || userSelectedRate?.servicelevel?.name);
-      console.error('   Service encontrado:', selectedRate.servicelevel?.name || selectedRate.service);
-      console.error('   Rate ID encontrado:', selectedRate.id || selectedRate.objectId || selectedRate.object_id);
-      console.error('   ⚠️ NO SE CREARÁ LA TRANSACCIÓN - El precio no coincide');
-      
-      // Mostrar todos los rates disponibles para debugging
-      console.error('   Rates disponibles en el shipment:');
-      shipment.rates.forEach((r, idx) => {
-        const rAmount = parseFloat(r.amount_local || r.amount || 0);
-        const rCarrier = r.provider || r.carrier;
-        const rService = r.servicelevel?.name || r.service;
-        const match = Math.abs(rAmount - expectedAmount) < 0.01 ? '✅ MATCH' : '';
-        console.error(`     ${idx + 1}. ${rCarrier} - ${rService}: $${rAmount.toFixed(2)} ${match}`);
-      });
-      
-      return res.status(400).json({
-        success: false,
-        error: `El precio del servicio de envío no coincide. El cliente seleccionó un servicio de $${expectedAmount.toFixed(2)}, pero el servicio disponible ahora es de $${selectedAmount.toFixed(2)}.`,
-        message: `El precio del servicio de envío cambió. El cliente seleccionó un servicio de $${expectedAmount.toFixed(2)}, pero el servicio disponible ahora es de $${selectedAmount.toFixed(2)}. Por favor, usa el botón "Widget" para seleccionar manualmente un servicio de envío con el precio correcto.`,
-        data: {
-          expectedAmount: expectedAmount,
-          foundAmount: selectedAmount,
-          expectedCarrier: userSelectedRate?.carrier || userSelectedRate?.provider,
-          foundCarrier: selectedRate.provider || selectedRate.carrier,
-          expectedService: userSelectedRate?.service || userSelectedRate?.servicelevel?.name,
-          foundService: selectedRate.servicelevel?.name || selectedRate.service,
-          availableRates: shipment.rates.map(r => ({
-            carrier: r.provider || r.carrier,
-            service: r.servicelevel?.name || r.service,
-            amount: parseFloat(r.amount_local || r.amount || 0)
-          }))
-        }
-      });
-    }
-    
-    console.log('✅ [Validación Precio] El precio coincide correctamente');
-    
-    // Verificar también que el carrier y service coincidan
-    const userCarrier = (userSelectedRate?.carrier || userSelectedRate?.provider || '').toLowerCase();
-    const userService = (userSelectedRate?.service || userSelectedRate?.servicelevel?.name || '').toLowerCase();
-    const foundCarrier = (selectedRate.provider || selectedRate.carrier || '').toLowerCase();
-    const foundService = (selectedRate.servicelevel?.name || selectedRate.service || '').toLowerCase();
-    
-    if (userCarrier && foundCarrier && userCarrier !== foundCarrier) {
-      console.error('❌ ERROR: El carrier no coincide!');
-      console.error('   Carrier esperado:', userCarrier);
-      console.error('   Carrier encontrado:', foundCarrier);
-      
-      return res.status(400).json({
-        success: false,
-        error: `El carrier seleccionado no está disponible. Carrier esperado: ${userCarrier}, carrier disponible: ${foundCarrier}.`,
-        message: `El carrier del servicio de envío no coincide. Por favor, contacta al administrador.`
-      });
-    }
-    
-    if (userService && foundService && userService !== foundService) {
-      console.error('❌ ERROR: El servicio no coincide!');
-      console.error('   Servicio esperado:', userService);
-      console.error('   Servicio encontrado:', foundService);
-      
-      return res.status(400).json({
-        success: false,
-        error: `El servicio seleccionado no está disponible. Servicio esperado: ${userService}, servicio disponible: ${foundService}.`,
-        message: `El servicio de envío no coincide. Por favor, contacta al administrador.`
-      });
-    }
-    
-    console.log('✅ Validación completa: Rate correcto');
-    console.log('   Precio:', selectedAmount, '(esperado:', expectedAmount, ')');
-    console.log('   Carrier:', foundCarrier, '(esperado:', userCarrier, ')');
-    console.log('   Service:', foundService, '(esperado:', userService, ')');
-    
-    console.log('✅ Rate final seleccionado:');
-    console.log('   Carrier:', selectedRate.provider || selectedRate.carrier);
-    console.log('   Service:', selectedRate.servicelevel?.name || selectedRate.service);
-    console.log('   Amount:', selectedRate.amount_local || selectedRate.amount);
+    console.log('✅ [EasyPost] Rate seleccionado:');
+    console.log('   Carrier:', selectedRate.carrier);
+    console.log('   Service:', selectedRate.service);
+    console.log('   Amount:', selectedRate.rate);
     
     // Obtener ID del rate
-    const rateId = selectedRate.id || selectedRate.objectId || selectedRate.object_id;
+    const rateId = selectedRate.id;
     
-    // Intentar crear transacción automáticamente para pagar la etiqueta
-    console.log('💰 Intentando crear transacción para pagar la etiqueta automáticamente...');
+    // Comprar la etiqueta usando EasyPost
+    console.log('💰 [EasyPost] Comprando etiqueta...');
     console.log('   Shipment ID:', shipmentId);
     console.log('   Rate ID:', rateId);
-    console.log('   Carrier:', selectedRate.provider || selectedRate.carrier);
-    console.log('   Service:', selectedRate.servicelevel?.name || selectedRate.service);
-    console.log('   Amount:', selectedRate.amount);
-    
-    let transaction;
-    let trackingNumber = null;
-    let labelUrl = null;
-    let trackingUrl = null;
-    let transactionId = null;
-    let paymentError = null;
+    console.log('   Carrier:', selectedRate.carrier);
+    console.log('   Service:', selectedRate.service);
+    console.log('   Amount:', selectedRate.rate);
     
     try {
-      // Crear transacción para pagar la etiqueta
-      transaction = await shippoClient.transactions.create({
-        rate: rateId,
-        async: false // Síncrono para obtener resultado inmediato
-      });
-      
-      transactionId = transaction.id || transaction.objectId || transaction.object_id;
-      const transactionStatus = transaction.status || transaction.objectStatus || 'UNKNOWN';
-      console.log('✅ Transacción creada exitosamente:', transactionId);
-      console.log('   Estado:', transactionStatus);
-      console.log('   Transaction completa:', JSON.stringify(transaction, null, 2));
-      
-      // Verificar el estado de la transacción
-      if (transactionStatus === 'ERROR' || transactionStatus === 'FAILED') {
-        const errorMsg = transaction.messages?.[0]?.text || transaction.error || 'Error desconocido en la transacción';
-        throw new Error(`Error en la transacción: ${errorMsg}`);
-      }
+      // Comprar la etiqueta usando el rate seleccionado
+      await shipment.buy(selectedRate);
       
       // Extraer información de la etiqueta
-      // Shippo puede usar diferentes campos según la versión de la API
-      trackingNumber = transaction.tracking_number || 
-                       transaction.trackingNumber || 
-                       transaction.tracking?.number ||
-                       transaction.tracking_number_provider ||
-                       null;
-      labelUrl = transaction.label_url || 
-                 transaction.labelUrl || 
-                 transaction.label?.url ||
-                 transaction.postage_label?.label_url ||
-                 transaction.postage_label?.labelUrl ||
-                 null;
+      const trackingNumber = shipment.tracking_code;
+      const labelUrl = shipment.postage_label?.label_url || shipment.postage_label?.label_pdf_url;
+      const trackingUrl = `https://track.easypost.com/d/${trackingNumber}`;
       
-      // Si no hay información de la etiqueta, intentar obtener la transacción nuevamente
-      if (!trackingNumber || !labelUrl) {
-        console.log('⚠️ No se obtuvo información completa de la etiqueta, consultando transacción nuevamente...');
-        
-        // Esperar un poco y consultar la transacción
-        await new Promise(resolve => setTimeout(resolve, 2000)); // Esperar 2 segundos
-        
-        try {
-          const retrievedTransaction = await shippoClient.transactions.retrieve(transactionId);
-          console.log('📥 Transacción recuperada:', JSON.stringify(retrievedTransaction, null, 2));
-          
-          // Intentar extraer información nuevamente
-          trackingNumber = trackingNumber || 
-                           retrievedTransaction.tracking_number || 
-                           retrievedTransaction.trackingNumber || 
-                           retrievedTransaction.tracking?.number ||
-                           retrievedTransaction.tracking_number_provider ||
-                           null;
-          labelUrl = labelUrl || 
-                     retrievedTransaction.label_url || 
-                     retrievedTransaction.labelUrl || 
-                     retrievedTransaction.label?.url ||
-                     retrievedTransaction.postage_label?.label_url ||
-                     retrievedTransaction.postage_label?.labelUrl ||
-                     null;
-          
-          console.log('📋 Información después de recuperar:');
-          console.log('   Tracking Number:', trackingNumber);
-          console.log('   Label URL:', labelUrl);
-        } catch (retrieveError) {
-          console.error('⚠️ Error al recuperar transacción:', retrieveError);
-          // Continuar con la información que tenemos
-        }
-      }
-      
-      // Si no hay tracking number pero la transacción está en proceso, puede estar en estado QUEUED
-      if (!trackingNumber && (transactionStatus === 'QUEUED' || transactionStatus === 'PENDING' || transactionStatus === 'WAITING')) {
-        console.log('⚠️ Transacción en proceso, esperando información de la etiqueta...');
-        throw new Error('La transacción está en proceso. Por favor, intenta de nuevo en unos momentos.');
-      }
-      
-      if (trackingNumber) {
-        trackingUrl = `https://goshippo.com/tracking/${trackingNumber}`;
-      }
-      
-      console.log('✅ Etiqueta pagada exitosamente:');
+      console.log('✅ [EasyPost] Etiqueta comprada exitosamente:');
       console.log('   Tracking Number:', trackingNumber);
       console.log('   Label URL:', labelUrl);
-      console.log('   Transaction ID:', transactionId);
-      console.log('   Transaction Status:', transactionStatus);
-      
-      // Verificar si la transacción se creó pero no tiene información de la etiqueta
-      // Esto puede pasar cuando falta método de pago o la transacción está en proceso
-      if (transactionId && (!trackingNumber || !labelUrl)) {
-        console.warn('⚠️ Transacción creada pero sin información de etiqueta');
-        console.warn('   Transaction ID:', transactionId);
-        console.warn('   Transaction Status:', transactionStatus);
-        console.warn('   Tracking Number:', trackingNumber);
-        console.warn('   Label URL:', labelUrl);
-        
-        // Si el estado es ERROR o FAILED, es definitivamente un error de método de pago
-        // Si el estado es SUCCESS pero no hay información, también puede ser error de método de pago
-        if (transactionStatus === 'ERROR' || transactionStatus === 'FAILED' || 
-            (transactionStatus === 'SUCCESS' && !trackingNumber && !labelUrl)) {
-          throw new Error('You are required to have a valid payment method on file to purchase labels.');
-        }
-        
-        // Si está en proceso (QUEUED, PENDING, WAITING), lanzar error específico
-        if (transactionStatus === 'QUEUED' || transactionStatus === 'PENDING' || transactionStatus === 'WAITING') {
-          throw new Error('La transacción está en proceso. Por favor, intenta de nuevo en unos momentos.');
-        }
-      }
-      
-    } catch (transactionError) {
-      console.error('❌ Error al crear transacción (pagar etiqueta):', transactionError);
-      console.error('   Error message:', transactionError.message);
-      
-      // Capturar el error específico
-      paymentError = transactionError.message || 'Error al pagar la etiqueta';
-      
-      // Verificar si es el error de método de pago
-      const isPaymentMethodError = paymentError.includes('payment method') || 
-                                   paymentError.includes('billing') ||
-                                   paymentError.includes('You are required to have a valid payment method');
       
       // Preparar información del carrier y servicio
-      const carrierName = selectedRate.provider || selectedRate.carrier || 'N/A';
-      const serviceName = selectedRate.servicelevel?.name || selectedRate.service || 'Standard';
-      const shippingCost = selectedRate.amount_local || selectedRate.amount || '0.00';
+      const carrierName = selectedRate.carrier || 'N/A';
+      const serviceName = selectedRate.service || 'Standard';
+      const shippingCost = parseFloat(selectedRate.rate || 0).toFixed(2);
+      
       const carrierDisplayName = carrierName.toUpperCase() === 'UPS' ? 'UPS' :
                                   carrierName.toUpperCase() === 'USPS' ? 'USPS' :
                                   carrierName.toUpperCase() === 'FEDEX' ? 'FedEx' :
                                   carrierName.toUpperCase() === 'DHL' ? 'DHL' :
                                   carrierName;
       
-      const shippoUrl = `https://goshippo.com/shipments/${shipmentId}`;
-      
-      // Si es error de método de pago, retornar información del shipment para pagar manualmente
-      if (isPaymentMethodError) {
-        console.error('⚠️ Error: No hay método de pago válido en Shippo');
-        console.log('📋 Retornando información del shipment para pago manual');
-        
-        // Guardar información del shipment en Firestore
-        const orderRef = doc(db, 'orders', orderId);
-        await updateDoc(orderRef, {
-          shippoShipmentId: shipmentId,
-          shippoRateId: rateId,
-          shippoUrl: shippoUrl,
-          selectedCarrier: carrierDisplayName,
-          selectedService: serviceName,
-          shippingCost: shippingCost,
-          status: 'pending',
-          updatedAt: new Date()
-        });
-        
-        return res.status(500).json({
-          success: false,
-          error: paymentError || 'Error al pagar la etiqueta',
-          message: 'No se pudo procesar el pago porque no hay un método de pago válido en Shippo. Ve a Shippo para agregar un método de pago y pagar la etiqueta manualmente.',
-          data: {
-            orderId: orderId,
-            shipmentId: shipmentId,
-            rateId: rateId,
-            shippoUrl: shippoUrl,
-            carrier: carrierDisplayName,
-            service: serviceName,
-            shippingCost: shippingCost,
-            pendingPayment: true,
-            instructions: 'Ve a Shippo para agregar un método de pago y pagar la etiqueta manualmente.'
-          }
-        });
-      }
-      
-      // Si no es error de método de pago, retornar error genérico
-      return res.status(500).json({
-        success: false,
-        error: paymentError || 'Error al pagar la etiqueta',
-        message: 'Error al pagar la etiqueta: ' + paymentError
-      });
-    }
-    
-    // Preparar información del carrier y servicio
-    const carrierName = selectedRate.provider || selectedRate.carrier || 'N/A';
-    const serviceName = selectedRate.servicelevel?.name || selectedRate.service || 'Standard';
-    const shippingCost = selectedRate.amount || '0.00';
-    
-    // Formatear nombre del carrier para mostrar
-    const carrierDisplayName = carrierName.toUpperCase() === 'UPS' ? 'UPS' :
-                                carrierName.toUpperCase() === 'USPS' ? 'USPS' :
-                                carrierName.toUpperCase() === 'FEDEX' ? 'FedEx' :
-                                carrierName.toUpperCase() === 'DHL' ? 'DHL' :
-                                carrierName;
-    
-    // Si la transacción fue exitosa, actualizar con información completa
-    if (transactionId && trackingNumber) {
+      // Actualizar el pedido en Firestore
       const orderRef = doc(db, 'orders', orderId);
       await updateDoc(orderRef, {
-        shippoShipmentId: shipmentId,
-        shippoRateId: rateId,
-        shippoTransactionId: transactionId,
+        easypostShipmentId: shipmentId,
+        easypostRateId: rateId,
         trackingCode: trackingNumber,
         labelUrl: labelUrl,
         trackingUrl: trackingUrl,
@@ -3099,13 +3213,13 @@ app.post('/api/create-shipment-complete', async (req, res) => {
         label_url: labelUrl,
         carrier_name: carrierDisplayName,
         service_name: serviceName,
-        shipping_cost: `$${parseFloat(shippingCost).toFixed(2)}`,
-        delivery_address: `${toAddress?.street1 || customerInfo.address?.street1 || ''}\n${toAddress?.city || customerInfo.address?.city || ''}, ${toAddress?.state || customerInfo.address?.state || ''} ${toAddress?.zip || customerInfo.address?.zip || ''}\n${toAddress?.country || customerInfo.address?.country || 'US'}`,
-        delivery_street: toAddress?.street1 || customerInfo.address?.street1 || '',
-        delivery_city: toAddress?.city || customerInfo.address?.city || '',
-        delivery_state: toAddress?.state || customerInfo.address?.state || '',
-        delivery_zip: toAddress?.zip || customerInfo.address?.zip || '',
-        delivery_country: toAddress?.country || customerInfo.address?.country || 'US',
+        shipping_cost: `$${shippingCost}`,
+        delivery_address: `${toAddressData?.street1 || customerInfo.address?.street1 || ''}\n${toAddressData?.city || customerInfo.address?.city || ''}, ${toAddressData?.state || customerInfo.address?.state || ''} ${toAddressData?.zip || customerInfo.address?.zip || ''}\n${toAddressData?.country || customerInfo.address?.country || 'US'}`,
+        delivery_street: toAddressData?.street1 || customerInfo.address?.street1 || '',
+        delivery_city: toAddressData?.city || customerInfo.address?.city || '',
+        delivery_state: toAddressData?.state || customerInfo.address?.state || '',
+        delivery_zip: toAddressData?.zip || customerInfo.address?.zip || '',
+        delivery_country: toAddressData?.country || customerInfo.address?.country || 'US',
         products_list: (order.cartItems || []).map(item => {
           const itemName = item.name || 'Producto';
           const itemQuantity = item.quantity || 1;
@@ -3124,7 +3238,6 @@ app.post('/api/create-shipment-complete', async (req, res) => {
           trackingCode: trackingNumber,
           labelUrl: labelUrl,
           trackingUrl: trackingUrl,
-          transactionId: transactionId,
           shipmentId: shipmentId,
           carrier: carrierDisplayName,
           service: serviceName,
@@ -3132,39 +3245,48 @@ app.post('/api/create-shipment-complete', async (req, res) => {
           emailData: emailData
         }
       });
+      
+    } catch (buyError) {
+      console.error('❌ [EasyPost] Error al comprar etiqueta:', buyError);
+      
+      // Preparar información del carrier y servicio
+      const carrierName = selectedRate.carrier || 'N/A';
+      const serviceName = selectedRate.service || 'Standard';
+      const shippingCost = parseFloat(selectedRate.rate || 0).toFixed(2);
+      
+      const carrierDisplayName = carrierName.toUpperCase() === 'UPS' ? 'UPS' :
+                                  carrierName.toUpperCase() === 'USPS' ? 'USPS' :
+                                  carrierName.toUpperCase() === 'FEDEX' ? 'FedEx' :
+                                  carrierName.toUpperCase() === 'DHL' ? 'DHL' :
+                                  carrierName;
+      
+      // Guardar información del shipment en Firestore (sin etiqueta comprada)
+      const orderRef = doc(db, 'orders', orderId);
+      await updateDoc(orderRef, {
+        easypostShipmentId: shipmentId,
+        easypostRateId: rateId,
+        selectedCarrier: carrierDisplayName,
+        selectedService: serviceName,
+        shippingCost: shippingCost,
+        status: 'pending',
+        updatedAt: new Date()
+      });
+      
+      return res.status(500).json({
+        success: false,
+        error: buyError.message || 'Error al pagar la etiqueta',
+        message: 'Error al comprar la etiqueta de envío. Verifica que tu cuenta de EasyPost tenga un método de pago configurado.',
+        data: {
+          orderId: orderId,
+          shipmentId: shipmentId,
+          rateId: rateId,
+          carrier: carrierDisplayName,
+          service: serviceName,
+          shippingCost: shippingCost,
+          pendingPayment: true
+        }
+      });
     }
-    
-    // Si llegamos aquí, la transacción se creó pero no hay trackingNumber ni labelUrl
-    // Esto significa que probablemente falta método de pago o la transacción está en proceso
-    console.error('❌ Error: La transacción se creó pero no se obtuvo información de la etiqueta');
-    console.error('   Transaction ID:', transactionId);
-    console.error('   Tracking Number:', trackingNumber);
-    console.error('   Label URL:', labelUrl);
-    
-    // Preparar información del carrier y servicio (carrierName ya está declarado arriba en línea 2096)
-    // Usar los valores ya declarados o recalcular si es necesario
-    const finalCarrierName = selectedRate.provider || selectedRate.carrier || carrierName || 'N/A';
-    const finalServiceName = selectedRate.servicelevel?.name || selectedRate.service || serviceName || 'Standard';
-    const finalShippingCost = selectedRate.amount_local || selectedRate.amount || shippingCost || '0.00';
-    const finalCarrierDisplayName = finalCarrierName.toUpperCase() === 'UPS' ? 'UPS' :
-                                    finalCarrierName.toUpperCase() === 'USPS' ? 'USPS' :
-                                    finalCarrierName.toUpperCase() === 'FEDEX' ? 'FedEx' :
-                                    finalCarrierName.toUpperCase() === 'DHL' ? 'DHL' :
-                                    finalCarrierName;
-    const shippoUrl = `https://goshippo.com/shipments/${shipmentId}`;
-    
-    // Guardar información del shipment en Firestore
-    const orderRef = doc(db, 'orders', orderId);
-    await updateDoc(orderRef, {
-      shippoShipmentId: shipmentId,
-      shippoRateId: rateId,
-      shippoUrl: shippoUrl,
-      selectedCarrier: finalCarrierDisplayName,
-      selectedService: finalServiceName,
-      shippingCost: finalShippingCost,
-      status: 'pending',
-      updatedAt: new Date()
-    });
     
     // Retornar error de método de pago (más probable cuando no hay información de la etiqueta)
     return res.status(500).json({

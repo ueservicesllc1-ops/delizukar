@@ -102,7 +102,7 @@ const OrdersManager = ({ open, onClose, initialTab = 'all' }) => {
         const baseURL = process.env.NODE_ENV === 'production' 
           ? window.location.origin 
           : 'http://localhost:5000'; // Usa directamente el backend en desarrollo
-        const proxyUrl = `${baseURL}/api/shippo/label-pdf?url=${encodeURIComponent(labelData.postage_label.label_url)}`;
+        const proxyUrl = `${baseURL}/api/easypost/label-pdf?url=${encodeURIComponent(labelData.postage_label.label_url)}`;
         
         const response = await fetch(proxyUrl, {
           method: 'GET',
@@ -391,7 +391,7 @@ const OrdersManager = ({ open, onClose, initialTab = 'all' }) => {
     
     if (labelData) {
       // Si se compró una etiqueta, actualizar el pedido
-      console.log('✅ Etiqueta comprada desde Shippo Elements:', labelData);
+      console.log('✅ Etiqueta comprada desde EasyPost:', labelData);
       // Recargar órdenes para ver los cambios
       loadOrders();
     }
@@ -668,22 +668,22 @@ const OrdersManager = ({ open, onClose, initialTab = 'all' }) => {
             id: order.id,
             shipmentId: result.data.shipmentId,
             rateId: result.data.rateId,
-            shippoUrl: result.data.shippoUrl,
+            easypostUrl: result.data.easypostUrl,
             carrier: result.data.carrier,
             service: result.data.service,
             shippingCost: result.data.shippingCost,
             pendingPayment: true,
             error: result.error || result.message || 'Error al pagar la etiqueta',
-            message: result.message || 'No se pudo procesar el pago porque no hay un método de pago válido en Shippo. Ve a Shippo para agregar un método de pago y pagar la etiqueta manualmente.'
+            message: result.message || 'No se pudo procesar el pago porque no hay un método de pago válido en EasyPost. Ve a EasyPost para agregar un método de pago y pagar la etiqueta manualmente.'
           });
           setLabelDialogOpen(true);
           
           // Guardar información del shipment en Firestore
           const orderRef = doc(db, 'orders', order.id);
           await updateDoc(orderRef, {
-            shippoShipmentId: result.data.shipmentId,
-            shippoRateId: result.data.rateId,
-            shippoUrl: result.data.shippoUrl,
+            easypostShipmentId: result.data.shipmentId,
+            easypostRateId: result.data.rateId,
+            easypostUrl: result.data.easypostUrl,
             selectedCarrier: result.data.carrier,
             selectedService: result.data.service,
             shippingCost: result.data.shippingCost,
@@ -778,7 +778,7 @@ const OrdersManager = ({ open, onClose, initialTab = 'all' }) => {
       const baseURL = process.env.NODE_ENV === 'production' 
         ? window.location.origin 
         : 'http://localhost:5000'; // Usa directamente el backend en desarrollo
-      const proxyUrl = `${baseURL}/api/shippo/label-pdf?url=${encodeURIComponent(labelData.postage_label.label_url)}`;
+      const proxyUrl = `${baseURL}/api/easypost/label-pdf?url=${encodeURIComponent(labelData.postage_label.label_url)}`;
       
       const response = await fetch(proxyUrl, {
         method: 'GET',
@@ -904,7 +904,7 @@ const OrdersManager = ({ open, onClose, initialTab = 'all' }) => {
       const baseURL = process.env.NODE_ENV === 'production' 
         ? window.location.origin 
         : 'http://localhost:5000'; // Usa directamente el backend en desarrollo
-      const proxyUrl = `${baseURL}/api/shippo/label-pdf?url=${encodeURIComponent(labelData.postage_label.label_url)}`;
+      const proxyUrl = `${baseURL}/api/easypost/label-pdf?url=${encodeURIComponent(labelData.postage_label.label_url)}`;
       
       const response = await fetch(proxyUrl, {
         method: 'GET',
@@ -1727,7 +1727,7 @@ const OrdersManager = ({ open, onClose, initialTab = 'all' }) => {
                     <strong>El pago no pudo realizarse porque falta un método de pago válido en tu cuenta de Shippo.</strong>
                   </Typography>
                   <Typography variant="body2">
-                    El shipment se creó correctamente, pero necesitas agregar un método de pago en Shippo para poder pagar la etiqueta de envío. Haz clic en el botón "Ir a Shippo" para agregar tu método de pago y completar el pago manualmente.
+                    El shipment se creó correctamente, pero necesitas agregar un método de pago en EasyPost para poder pagar la etiqueta de envío. Haz clic en el botón "Ir a EasyPost" para agregar tu método de pago y completar el pago manualmente.
                   </Typography>
                 </Alert>
                 
@@ -1769,7 +1769,7 @@ const OrdersManager = ({ open, onClose, initialTab = 'all' }) => {
                     📋 Instrucciones para completar el pago:
                   </Typography>
                   <Typography variant="body2" sx={{ color: '#856404', fontSize: '0.9rem', mb: 1 }}>
-                    <strong>Paso 1:</strong> Haz clic en el botón <strong>"Ir a Shippo"</strong> que aparece abajo
+                    <strong>Paso 1:</strong> Haz clic en el botón <strong>"Ir a EasyPost"</strong> que aparece abajo
                   </Typography>
                   <Typography variant="body2" sx={{ color: '#856404', fontSize: '0.9rem', mb: 1 }}>
                     <strong>Paso 2:</strong> En Shippo, ve a la sección de <strong>"Billing"</strong> o <strong>"Payment Methods"</strong>
@@ -1881,8 +1881,8 @@ const OrdersManager = ({ open, onClose, initialTab = 'all' }) => {
               variant="contained"
               startIcon={<LocalShipping />}
               onClick={() => {
-                if (labelData.shippoUrl) {
-                  window.open(labelData.shippoUrl, '_blank');
+                if (labelData.easypostUrl) {
+                  window.open(labelData.easypostUrl, '_blank');
                 }
               }}
               size="large"

@@ -3,12 +3,16 @@
 
 class ShippoService {
   constructor() {
-    // En producción usa window.location.origin
-    // En desarrollo usa string vacío para que el proxy de React (package.json) redirija a localhost:5000
-    // Si el proxy falla, puedes usar 'http://localhost:5000' directamente
-    this.baseURL = process.env.NODE_ENV === 'production' 
-      ? window.location.origin 
-      : ''; // Usa proxy de React en desarrollo (configurado en package.json para localhost:5000)
+    // Configuración para desarrollo local y producción (Railway)
+    if (process.env.NODE_ENV === 'production') {
+      // En producción (Railway) usa window.location.origin
+      this.baseURL = window.location.origin;
+    } else {
+      // En desarrollo local usa directamente localhost:5000 (más confiable que el proxy)
+      this.baseURL = 'http://localhost:5000';
+    }
+    
+    console.log('🔧 [ShippingService] Base URL configurada:', this.baseURL);
   }
 
   // Método helper para hacer requests
@@ -41,10 +45,10 @@ class ShippoService {
     }
   }
 
-  // Crear dirección en Shippo
+  // Crear dirección en EasyPost
   async createAddress(addressData) {
     try {
-      const response = await this.makeRequest('/api/shippo/create-address', {
+      const response = await this.makeRequest('/api/easypost/create-address', {
         body: JSON.stringify(addressData),
       });
 
@@ -55,21 +59,21 @@ class ShippoService {
     }
   }
 
-  // Validar dirección (con correcciones automáticas) - Ahora usa USPS
+  // Validar dirección (con correcciones automáticas) - Ahora usa EasyPost
   async validateAddress(addressData) {
     try {
-      console.log('📦 [USPS] Validando dirección:', addressData);
+      console.log('📦 [EasyPost] Validando dirección:', addressData);
       
-      // Usar endpoint de USPS para validación
-      const response = await this.makeRequest('/api/usps/validate-address', {
+      // Usar endpoint de EasyPost para validación
+      const response = await this.makeRequest('/api/easypost/validate-address', {
         body: JSON.stringify(addressData),
       });
 
-      console.log('✅ [USPS] Respuesta de validación:', response);
+      console.log('✅ [EasyPost] Respuesta de validación:', response);
 
       // Si hay correcciones, devolver la dirección corregida
       if (response.was_corrected && response.validated_address) {
-        console.log('✅ Dirección corregida por USPS:', response.validated_address);
+        console.log('✅ Dirección corregida por EasyPost:', response.validated_address);
         return {
           ...response,
           corrected: true,
@@ -80,7 +84,7 @@ class ShippoService {
 
       return response;
     } catch (error) {
-      console.error('❌ [USPS] Error validating address:', error);
+      console.error('❌ [EasyPost] Error validating address:', error);
       console.error('   Error details:', error.message);
       console.error('   Address data:', addressData);
       
@@ -171,7 +175,7 @@ class ShippoService {
         async: false // Síncrono para obtener rates inmediatamente
       };
 
-      console.log('📦 [ShippoService] Enviando datos a Shippo para calcular rates:');
+      console.log('📦 [EasyPost Service] Enviando datos a EasyPost para calcular rates:');
       console.log('   📤 Address From (Origen - Tienda):', {
         ciudad: formattedFromAddress.city,
         estado: formattedFromAddress.state,
@@ -188,14 +192,14 @@ class ShippoService {
       console.log('   📦 Parcels:', JSON.stringify(formattedParcels, null, 2));
       console.log('   ✅ Los rates se calculan dinámicamente basándose en estas direcciones específicas');
       console.log('   ✅ Si cambias la dirección de destino, los rates cambiarán automáticamente');
-      console.log('   ✅ Los rates NO están fijos - son calculados en tiempo real por Shippo según la distancia y ubicación');
+      console.log('   ✅ Los rates NO están fijos - son calculados en tiempo real por EasyPost según la distancia y ubicación');
       
-      const response = await this.makeRequest('/api/shippo/shipments', {
+      const response = await this.makeRequest('/api/easypost/shipments', {
         method: 'POST',
         body: JSON.stringify(shipmentData),
       });
 
-      // Shippo devuelve rates en el objeto shipment
+      // EasyPost devuelve rates en el objeto shipment (ya filtrados - 2 más económicos por carrier)
       return response.rates || [];
     } catch (error) {
       console.error('Error getting shipping rates:', error);
@@ -206,8 +210,8 @@ class ShippoService {
   // Crear transaction (comprar etiqueta)
   async createTransaction(rateId) {
     try {
-      const response = await this.makeRequest('/api/shippo/transactions', {
-        body: JSON.stringify({ rate: rateId }),
+      const response = await this.makeRequest('/api/easypost/transactions', {
+        body: JSON.stringify({ rateId: rateId }),
       });
 
       return response;
