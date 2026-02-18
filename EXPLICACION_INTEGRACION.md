@@ -108,3 +108,4 @@
 **Resumen:** Lo que hicimos automatiza la **obtención de datos y generación de CSV**, pero **NO puede comprar etiquetas automáticamente** en Pirate Ship porque no tienen API pública. Para compra automática, usa **Shippo** que ya está integrado.
 
 
+

@@ -200,3 +200,4 @@ curl -X POST https://tu-dominio.com/api/pirateship/webhook/order-created \
 **Nota**: Aunque Pirate Ship no tiene API pública, esta solución te permite automatizar la integración usando servicios de terceros, igual que lo hacen Shopify/WooCommerce.
 
 
+

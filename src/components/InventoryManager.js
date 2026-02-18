@@ -312,6 +312,7 @@ const InventoryManager = ({ open, onClose }) => {
         onClose={() => setInventoryDialog(false)}
         maxWidth="sm"
         fullWidth
+        sx={{ zIndex: 10000001 }}
       >
         <DialogTitle>
           Actualizar Inventario
