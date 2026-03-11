@@ -264,7 +264,9 @@ const Cart = () => {
 
   // Verificar si se puede proceder al checkout
   const canProceedToCheckout = () => {
-    return calculateTotalItems() >= minProducts && acceptShippingPolicy;
+    const hasCombo = items.some(item => item.category === 'boxes');
+    const meetsMinItems = hasCombo || calculateTotalItems() >= minProducts;
+    return meetsMinItems && acceptShippingPolicy;
   };
 
   return (
@@ -737,7 +739,7 @@ const Cart = () => {
                     >
                       {canProceedToCheckout()
                         ? t('cart.checkout')
-                        : calculateTotalItems() < minProducts
+                        : (calculateTotalItems() < minProducts && !items.some(item => item.category === 'boxes'))
                         ? t('cart.minimumProducts', {
                             count: minProducts,
                             plural: minProducts > 1 ? 's' : ''
