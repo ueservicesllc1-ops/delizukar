@@ -39,7 +39,7 @@ import { db, storage } from '../firebase/config';
 import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, setDoc } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
 
-const ProductsManager = ({ open, onClose }) => {
+const ProductsManager = ({ open, onClose, categoryFilter = null }) => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -59,7 +59,7 @@ const ProductsManager = ({ open, onClose }) => {
     weight: '',
     image: '',
     rating: 5,
-    category: 'NY Style Cookies',
+    category: categoryFilter || 'NY Style Cookies',
     isNew: false,
     isBestSeller: false,
     featured: false,
@@ -72,7 +72,9 @@ const ProductsManager = ({ open, onClose }) => {
     'Vainilla',
     'Especiales',
     'Veganas',
-    'Sin Gluten'
+    'Sin Gluten',
+    'boxes',
+    'regalo'
   ];
 
   useEffect(() => {
@@ -95,7 +97,13 @@ const ProductsManager = ({ open, onClose }) => {
           description: data.description_es || data.description || ''
         };
       });
-      setProducts(productsData);
+      
+      // Aplicar filtro de categoría si existe
+      const filteredProducts = categoryFilter 
+        ? productsData.filter(p => p.category === categoryFilter)
+        : productsData;
+
+      setProducts(filteredProducts);
     } catch (err) {
       setError('Error al cargar productos: ' + err.message);
       console.error('Error loading products:', err);

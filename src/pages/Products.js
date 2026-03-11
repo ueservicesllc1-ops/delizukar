@@ -76,6 +76,43 @@ const TEXTS = {
   }
 };
 
+const PRODUCT_TRANSLATIONS = {
+  es: {
+    'Chocole DeLux': {
+      name: 'Chocolate Deluxe',
+      description: 'Una galleta intensa con cuatro tipos de chocolate, textura cremosa y un sabor profundo para los verdaderos amantes del cacao. Esta es la galleta para los verdaderos amantes del cacao. Una poderosa mezcla de cuatro tipos de chocolate en una sola galleta: barra de chocolate artesanal, chips de chocolate oscuro, mini chips semidulces y chips de chocolate con leche. ¿Quién podría resistirse? Es como una sinfonía de texturas y sabores para los verdaderos entusiastas del chocolate. Textura cremosa, sabor profundo y una intensidad que habla por sí sola desde el primer bocado. Esta no es solo una galleta de chocolate... es LA galleta de chocolate.'
+    },
+    'Chocolate Deluxe': {
+      name: 'Chocolate Deluxe',
+      description: 'Una galleta intensa con cuatro tipos de chocolate, textura cremosa y un sabor profundo para los verdaderos amantes del cacao. Esta es la galleta para los verdaderos amantes del cacao. Una poderosa mezcla de cuatro tipos de chocolate en una sola galleta: barra de chocolate artesanal, chips de chocolate oscuro, mini chips semidulces y chips de chocolate con leche. ¿Quién podría resistirse? Es como una sinfonía de texturas y sabores para los verdaderos entusiastas del chocolate. Textura cremosa, sabor profundo y una intensidad que habla por sí sola desde el primer bocado. Esta no es solo una galleta de chocolate... es LA galleta de chocolate.'
+    },
+    'errero Hype': {
+      name: 'Ferrero Hype',
+      description: 'Galleta estilo NY con Ferrero Rocher, chips de chocolate oscuro y avellanas tostadas—intensa, elegante y adictiva. Una galleta estilo Nueva York con un toque europeo. Repleta de trozos de Ferrero Rocher, chips de chocolate oscuro y avellanas tostadas para el crujido perfecto. Intensa, elegante y adictiva: esta galleta nunca pasa desapercibida.'
+    },
+    'Ferrero Hype': {
+      name: 'Ferrero Hype',
+      description: 'Galleta estilo NY con Ferrero Rocher, chips de chocolate oscuro y avellanas tostadas—intensa, elegante y adictiva. Una galleta estilo Nueva York con un toque europeo. Repleta de trozos de Ferrero Rocher, chips de chocolate oscuro y avellanas tostadas para el crujido perfecto. Intensa, elegante y adictiva: esta galleta nunca pasa desapercibida.'
+    },
+    'Gift Message + Premium Card': {
+      name: 'Mensaje de Regalo + Tarjeta Premium',
+      description: 'Añade un mensaje personalizado dentro de tu caja. Perfecto para cualquier ocasión especial.'
+    },
+    'Sweet Box – 4 Cookies': {
+      name: 'Sweet Box – 4 Galletas',
+      description: 'Arma tu caja con 4 galletas estilo NY (200g c/u). Venta mínima de 4 unidades.'
+    },
+    'Sweet Box – 6 Cookies': {
+      name: 'Sweet Box – 6 Galletas',
+      description: 'Arma tu caja con 6 galletas estilo NY (200g c/u). Incluye un 5% de descuento.'
+    },
+    'Deluxe Sweet Box – 12 Cookies': {
+      name: 'Deluxe Sweet Box – 12 Galletas',
+      description: 'Perfecto para compartir o regalar. 12 galletas estilo NY (200g c/u). Incluye un 10% de descuento.'
+    }
+  }
+};
+
 const Products = () => {
   const { language } = useLanguage();
   const { categories, products, addToCart, productsLoading } = useStore();
@@ -242,7 +279,7 @@ const Products = () => {
                         letterSpacing: '0.5px'
                       }}
                     >
-                      {product.name}
+                      {PRODUCT_TRANSLATIONS[language]?.[product.name]?.name || product[`name_${language}`] || product.name}
                     </Typography>
 
                     {/* Precio y Rating */}
@@ -419,7 +456,7 @@ const Products = () => {
                       textTransform: 'uppercase',
                       letterSpacing: '0.5px'
                     }}>
-                      {selected.name}
+                      {PRODUCT_TRANSLATIONS[language]?.[selected.name]?.name || selected[`name_${language}`] || selected.name}
                     </Typography>
                     <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
                       <Rating value={selected.rating} precision={0.1} readOnly size="small" sx={{ color: '#FFD700' }} />
@@ -469,10 +506,12 @@ const Products = () => {
                     </Box>
                     
                     <Typography variant="body2" sx={{ color: '#666', lineHeight: 1.6, mb: 3 }}>
-                      {selected.description || 
+                      {PRODUCT_TRANSLATIONS[language]?.[selected.name]?.description || 
+                       selected[`description_${language}`] || 
+                       selected.description || 
                         (selected.name && selected.name.toLowerCase().includes('ferrero') 
                           ? 'Galleta estilo NY con Ferrero Rocher, chips de chocolate oscuro y avellanas tostadas—intensa, elegante y adictiva.'
-                          : `Deliciosas ${selected.name} con ingredientes premium. Galletas estilo Nueva York perfectamente horneadas para disfrutar o compartir.`
+                          : `Deliciosas ${selected[`name_${language}`] || selected.name} con ingredientes premium. Galletas estilo Nueva York perfectamente horneadas para disfrutar o compartir.`
                         )
                       }
                     </Typography>

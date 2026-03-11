@@ -200,6 +200,12 @@ function App() {
                   <Products />
                 </>
               } />
+              <Route path="/products" element={
+                <>
+                  <Header />
+                  <Products />
+                </>
+              } />
               <Route path="/producto/:id" element={
                 <>
                   <Header />

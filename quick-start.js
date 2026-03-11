@@ -63,7 +63,8 @@ setTimeout(() => {
   const reactProcess = spawn('npm', ['start'], {
     stdio: 'inherit',
     cwd: __dirname,
-    shell: true
+    shell: true,
+    env: { ...process.env, PORT: '3000' }
   });
 
   reactProcess.on('error', (err) => {

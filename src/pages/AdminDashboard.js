@@ -94,6 +94,7 @@ const AdminDashboard = () => {
   const [featuredProductsManagerOpen, setFeaturedProductsManagerOpen] = useState(false);
   const [socialMediaManagerOpen, setSocialMediaManagerOpen] = useState(false);
   const [popupHeroManagerOpen, setPopupHeroManagerOpen] = useState(false);
+  const [sweetBoxesManagerOpen, setSweetBoxesManagerOpen] = useState(false);
   const [paypalBalanceOpen, setPaypalBalanceOpen] = useState(false);
   const [salesReportOpen, setSalesReportOpen] = useState(false);
   const [userManagementOpen, setUserManagementOpen] = useState(false);
@@ -776,13 +777,13 @@ const AdminDashboard = () => {
         >
             <Box sx={{ mt: 12, pt: 6 }}>
             <Grid container spacing={0} sx={{ maxWidth: '1000px', mx: 'auto' }}>
-              {Array.from({ length: 22 }, (_, index) => {
+              {Array.from({ length: 23 }, (_, index) => {
                 const colors = [
                   '#c8626d', '#be8782', '#b5555a', '#c8626d',
                   '#c8626d', '#c8626d', '#c8626d', '#c8626d',
                   '#BC8F8F', '#F5DEB3', '#DDA0DD', '#98FB98',
                   '#F0E68C', '#FFB6C1', '#87CEEB', '#FFA07A',
-                  '#C8626D', '#7C2815', '#EB8B8B', '#8D9A7D', '#C8626D', '#c8626d'
+                  '#C8626D', '#7C2815', '#EB8B8B', '#8D9A7D', '#C8626D', '#c8626d', '#be8782'
                 ];
                 const color = colors[index];
                 
@@ -796,41 +797,42 @@ const AdminDashboard = () => {
                       whileTap={{ scale: 0.95 }}
                     >
                       <Button
-                            onClick={
-                              index === 15 ? () => setFontManagerOpen(true) :
-                              index === 0 ? () => setProductsManagerOpen(true) :
-                              index === 1 ? () => setBannerPhotoManagerOpen(true) :
-                              index === 2 ? () => setBanner2PhotoManagerOpen(true) :
-                              index === 3 ? () => setInventoryManagerOpen(true) :
-                              index === 4 ? () => setPagesManagerOpen(true) :
-                              index === 5 ? () => setTestimonialsManagerOpen(true) :
-                              index === 6 ? () => setFeaturedProductsManagerOpen(true) :
-                              index === 7 ? () => setSocialMediaManagerOpen(true) :
-                              index === 8 ? () => setPopupHeroManagerOpen(true) :
-                              index === 9 ? () => setPaypalBalanceOpen(true) :
-                              index === 10 ? () => setSalesReportOpen(true) :
-                              index === 11 ? () => setUserManagementOpen(true) :
-                              index === 12 ? () => setMinProductsManagerOpen(true) :
-                              index === 13 ? () => setMessagingSystemOpen(true) :
-                              index === 14 ? handleCostAnalysisClick :
-                              index === 16 ? () => setColorPaletteOpen(true) :
-                              index === 17 ? () => {
-                                setOrdersManagerTab('all');
-                                setOrdersManagerOpen(true);
-                              } :
-                              index === 18 ? () => setSubscriptionManagerOpen(true) :
-                              index === 19 ? () => setVoucherManagerOpen(true) :
-                              index === 20 ? () => {
-                                setOrdersManagerTab('labels');
-                                setOrdersManagerOpen(true);
-                              } :
-                              index === 21 ? () => {
-                                setTestCustomerEmail('');
-                                setEmailTestResult(null);
-                                setPaypalEmailTestOpen(true);
-                              } :
-                              undefined
-                            }
+                        onClick={
+                          index === 15 ? () => setFontManagerOpen(true) :
+                          index === 0 ? () => setProductsManagerOpen(true) :
+                          index === 1 ? () => setBannerPhotoManagerOpen(true) :
+                          index === 2 ? () => setBanner2PhotoManagerOpen(true) :
+                          index === 3 ? () => setInventoryManagerOpen(true) :
+                          index === 4 ? () => setPagesManagerOpen(true) :
+                          index === 5 ? () => setTestimonialsManagerOpen(true) :
+                          index === 6 ? () => setFeaturedProductsManagerOpen(true) :
+                          index === 7 ? () => setSocialMediaManagerOpen(true) :
+                          index === 8 ? () => setPopupHeroManagerOpen(true) :
+                          index === 9 ? () => setPaypalBalanceOpen(true) :
+                          index === 10 ? () => setSalesReportOpen(true) :
+                          index === 11 ? () => setUserManagementOpen(true) :
+                          index === 12 ? () => setMinProductsManagerOpen(true) :
+                          index === 13 ? () => setMessagingSystemOpen(true) :
+                          index === 14 ? handleCostAnalysisClick :
+                          index === 16 ? () => setColorPaletteOpen(true) :
+                          index === 17 ? () => {
+                            setOrdersManagerTab('all');
+                            setOrdersManagerOpen(true);
+                          } :
+                          index === 18 ? () => setSubscriptionManagerOpen(true) :
+                          index === 19 ? () => setVoucherManagerOpen(true) :
+                          index === 20 ? () => {
+                            setOrdersManagerTab('labels');
+                            setOrdersManagerOpen(true);
+                          } :
+                          index === 21 ? () => {
+                            setTestCustomerEmail('');
+                            setEmailTestResult(null);
+                            setPaypalEmailTestOpen(true);
+                          } :
+                          index === 22 ? () => setSweetBoxesManagerOpen(true) :
+                          undefined
+                        }
                         sx={{
                           width: '250px',
                           height: '120px',
@@ -845,316 +847,121 @@ const AdminDashboard = () => {
                           transition: 'all 0.3s ease'
                         }}
                       >
-                            {index === 7 ? (
-                              <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1 }}>
-                                <Share sx={{ color: 'white', fontSize: '2rem' }} />
-                                <Typography
-                                  variant="body2"
-                                  sx={{
-                                    color: 'white',
-                                    fontWeight: 600,
-                                    textShadow: '1px 1px 2px rgba(0,0,0,0.5)'
-                                  }}
-                                >
-                                  Redes Sociales
-                                </Typography>
-                              </Box>
-                            ) : index === 8 ? (
-                              <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1 }}>
-                                <LocalOffer sx={{ color: 'white', fontSize: '2rem' }} />
-                                <Typography
-                                  variant="body2"
-                                  sx={{
-                                    color: 'white',
-                                    fontWeight: 600,
-                                    textShadow: '1px 1px 2px rgba(0,0,0,0.5)'
-                                  }}
-                                >
-                                  Popup Hero
-                                </Typography>
-                              </Box>
-                            ) : index === 9 ? (
-                              <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1 }}>
-                                <AttachMoney sx={{ color: 'white', fontSize: '2rem' }} />
-                                <Typography
-                                  variant="body2"
-                                  sx={{
-                                    color: 'white',
-                                    fontWeight: 600,
-                                    textShadow: '1px 1px 2px rgba(0,0,0,0.5)'
-                                  }}
-                                >
-                                  Balance PayPal
-                                </Typography>
-                              </Box>
-                            ) : index === 10 ? (
-                              <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1 }}>
-                                <Assessment sx={{ color: 'white', fontSize: '2rem' }} />
-                                <Typography
-                                  variant="body2"
-                                  sx={{
-                                    color: 'white',
-                                    fontWeight: 600,
-                                    textShadow: '1px 1px 2px rgba(0,0,0,0.5)'
-                                  }}
-                                >
-                                  Reporte de Ventas
-                                </Typography>
-                              </Box>
-                            ) : index === 11 ? (
-                              <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1 }}>
-                                <Group sx={{ color: 'white', fontSize: '2rem' }} />
-                                <Typography
-                                  variant="body2"
-                                  sx={{
-                                    color: 'white',
-                                    fontWeight: 600,
-                                    textShadow: '1px 1px 2px rgba(0,0,0,0.5)'
-                                  }}
-                                >
-                                  Gestión de Usuarios
-                                </Typography>
-                              </Box>
-                            ) : index === 15 ? (
-                              <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1 }}>
-                                <FontDownload sx={{ color: 'white', fontSize: '2rem' }} />
-                                <Typography
-                                  variant="body2"
-                                  sx={{
-                                    color: 'white',
-                                    fontWeight: 600,
-                                    textShadow: '1px 1px 2px rgba(0,0,0,0.5)'
-                                  }}
-                                >
-                                  Fuentes
-                                </Typography>
-                              </Box>
-                            ) : index === 0 ? (
-                              <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1 }}>
-                                <Inventory sx={{ color: 'white', fontSize: '2rem' }} />
-                                <Typography
-                                  variant="body2"
-                                  sx={{
-                                    color: 'white',
-                                    fontWeight: 600,
-                                    textShadow: '1px 1px 2px rgba(0,0,0,0,0.5)'
-                                  }}
-                                >
-                                  Productos
-                                </Typography>
-                              </Box>
-                            ) : index === 1 ? (
-                              <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1 }}>
-                                <PhotoCamera sx={{ color: 'white', fontSize: '2rem' }} />
-                                <Typography
-                                  variant="body2"
-                                  sx={{
-                                    color: 'white',
-                                    fontWeight: 600,
-                                    textShadow: '1px 1px 2px rgba(0,0,0,0.5)'
-                                  }}
-                                >
-                                  Banner
-                                </Typography>
-                              </Box>
-                            ) : index === 2 ? (
-                              <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1 }}>
-                                <PhotoCamera sx={{ color: 'white', fontSize: '2rem' }} />
-                                <Typography
-                                  variant="body2"
-                                  sx={{
-                                    color: 'white',
-                                    fontWeight: 600,
-                                    textShadow: '1px 1px 2px rgba(0,0,0,0.5)'
-                                  }}
-                                >
-                                  Banner 2
-                                </Typography>
-                              </Box>
-                            ) : index === 3 ? (
-                              <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1 }}>
-                                <Inventory sx={{ color: 'white', fontSize: '2rem' }} />
-                                <Typography
-                                  variant="body2"
-                                  sx={{
-                                    color: 'white',
-                                    fontWeight: 600,
-                                    textShadow: '1px 1px 2px rgba(0,0,0,0.5)'
-                                  }}
-                                >
-                                  Inventario
-                                </Typography>
-                              </Box>
-                            ) : index === 4 ? (
-                              <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1 }}>
-                                <Typography
-                                  variant="body2"
-                                  sx={{
-                                    color: 'white',
-                                    fontWeight: 600,
-                                    textShadow: '1px 1px 2px rgba(0,0,0,0.5)'
-                                  }}
-                                >
-                                  Páginas
-                                </Typography>
-                              </Box>
-                            ) : index === 5 ? (
-                              <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1 }}>
-                                <Person sx={{ color: 'white', fontSize: '2rem' }} />
-                                <Typography
-                                  variant="body2"
-                                  sx={{
-                                    color: 'white',
-                                    fontWeight: 600,
-                                    textShadow: '1px 1px 2px rgba(0,0,0,0.5)'
-                                  }}
-                                >
-                                  Testimonios
-                                </Typography>
-                              </Box>
-                            ) : index === 6 ? (
-                              <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1 }}>
-                                <Star sx={{ color: 'white', fontSize: '2rem' }} />
-                                <Typography
-                                  variant="body2"
-                                  sx={{
-                                    color: 'white',
-                                    fontWeight: 600,
-                                    textShadow: '1px 1px 2px rgba(0,0,0,0.5)'
-                                  }}
-                                >
-                                  Productos Destacados
-                                </Typography>
-                              </Box>
-                            ) : index === 12 ? (
-                              <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1 }}>
-                                <ShoppingCart sx={{ color: 'white', fontSize: '2rem' }} />
-                                <Typography
-                                  variant="body2"
-                                  sx={{
-                                    color: 'white',
-                                    fontWeight: 600,
-                                    textShadow: '1px 1px 2px rgba(0,0,0,0.5)'
-                                  }}
-                                >
-                                  Min. Productos
-                                </Typography>
-                              </Box>
-                            ) : index === 13 ? (
-                              <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1 }}>
-                                <Assessment sx={{ color: 'white', fontSize: '2rem' }} />
-                                <Typography
-                                  variant="body2"
-                                  sx={{
-                                    color: 'white',
-                                    fontWeight: 600,
-                                    textShadow: '1px 1px 2px rgba(0,0,0,0.5)'
-                                  }}
-                                >
-                                  Mensajería Push
-                                </Typography>
-                              </Box>
-                            ) : index === 14 ? (
-                              <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1 }}>
-                                <AttachMoney sx={{ color: 'white', fontSize: '2rem' }} />
-                                <Typography
-                                  variant="body2"
-                                  sx={{
-                                    color: 'white',
-                                    fontWeight: 600,
-                                    textShadow: '1px 1px 2px rgba(0,0,0,0.5)'
-                                  }}
-                                >
-                                  Análisis de Costos
-                                </Typography>
-                              </Box>
-                            ) : index === 16 ? (
-                              <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1 }}>
-                                <Palette sx={{ color: 'white', fontSize: '2rem' }} />
-                                <Typography
-                                  variant="body2"
-                                  sx={{
-                                    color: 'white',
-                                    fontWeight: 600,
-                                    textShadow: '1px 1px 2px rgba(0,0,0,0.5)'
-                                  }}
-                                >
-                                  Paleta de Colores
-                                </Typography>
-                              </Box>
-                            ) : index === 17 ? (
-                               <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1 }}>
-                                 <LocalShipping sx={{ color: 'white', fontSize: '2rem' }} />
-                                 <Typography
-                                   variant="body2"
-                                   sx={{
-                                     color: 'white',
-                                     fontWeight: 600,
-                                     textShadow: '1px 1px 2px rgba(0,0,0,0.5)'
-                                   }}
-                                 >
-                                   Pedidos
-                                 </Typography>
-                               </Box>
-                             ) : index === 18 ? (
-                              <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1 }}>
-                                <Email sx={{ color: 'white', fontSize: '2rem' }} />
-                                <Typography
-                                  variant="body2"
-                                  sx={{
-                                    color: 'white',
-                                    fontWeight: 600,
-                                    textShadow: '1px 1px 2px rgba(0,0,0,0.5)'
-                                  }}
-                                >
-                                  Suscriptores
-                                </Typography>
-                              </Box>
-                            ) : index === 19 ? (
-                              <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1 }}>
-                                <LocalOffer sx={{ color: 'white', fontSize: '2rem' }} />
-                                <Typography
-                                  variant="body2"
-                                  sx={{
-                                    color: 'white',
-                                    fontWeight: 600,
-                                    textShadow: '1px 1px 2px rgba(0,0,0,0.5)'
-                                  }}
-                                >
-                                  Crear Voucher
-                                </Typography>
-                              </Box>
-                            ) : index === 20 ? (
-                              <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1 }}>
-                                <Receipt sx={{ color: 'white', fontSize: '2rem' }} />
-                                <Typography
-                                  variant="body2"
-                                  sx={{
-                                    color: 'white',
-                                    fontWeight: 600,
-                                    textShadow: '1px 1px 2px rgba(0,0,0,0.5)'
-                                  }}
-                                >
-                                  Etiquetas Compradas
-                                </Typography>
-                              </Box>
-                            ) : index === 21 ? (
-                              <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1 }}>
-                                <Email sx={{ color: 'white', fontSize: '2rem' }} />
-                                <Typography
-                                  variant="body2"
-                                  sx={{
-                                    color: 'white',
-                                    fontWeight: 600,
-                                    textShadow: '1px 1px 2px rgba(0,0,0,0.5)',
-                                    textAlign: 'center',
-                                    fontSize: '0.85rem'
-                                  }}
-                                >
-                                  Probar Correos PayPal
-                                </Typography>
-                              </Box>
-                            ) : (
+                        {index === 7 ? (
+                          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1 }}>
+                            <Share sx={{ color: 'white', fontSize: '2rem' }} />
+                            <Typography variant="body2" sx={{ color: 'white', fontWeight: 600, textShadow: '1px 1px 2px rgba(0,0,0,0.5)' }}>Redes Sociales</Typography>
+                          </Box>
+                        ) : index === 8 ? (
+                          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1 }}>
+                            <LocalOffer sx={{ color: 'white', fontSize: '2rem' }} />
+                            <Typography variant="body2" sx={{ color: 'white', fontWeight: 600, textShadow: '1px 1px 2px rgba(0,0,0,0.5)' }}>Popup Hero</Typography>
+                          </Box>
+                        ) : index === 9 ? (
+                          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1 }}>
+                            <AttachMoney sx={{ color: 'white', fontSize: '2rem' }} />
+                            <Typography variant="body2" sx={{ color: 'white', fontWeight: 600, textShadow: '1px 1px 2px rgba(0,0,0,0.5)' }}>Balance PayPal</Typography>
+                          </Box>
+                        ) : index === 10 ? (
+                          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1 }}>
+                            <Assessment sx={{ color: 'white', fontSize: '2rem' }} />
+                            <Typography variant="body2" sx={{ color: 'white', fontWeight: 600, textShadow: '1px 1px 2px rgba(0,0,0,0.5)' }}>Reporte de Ventas</Typography>
+                          </Box>
+                        ) : index === 11 ? (
+                          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1 }}>
+                            <Group sx={{ color: 'white', fontSize: '2rem' }} />
+                            <Typography variant="body2" sx={{ color: 'white', fontWeight: 600, textShadow: '1px 1px 2px rgba(0,0,0,0.5)' }}>Gestión de Usuarios</Typography>
+                          </Box>
+                        ) : index === 15 ? (
+                          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1 }}>
+                            <FontDownload sx={{ color: 'white', fontSize: '2rem' }} />
+                            <Typography variant="body2" sx={{ color: 'white', fontWeight: 600, textShadow: '1px 1px 2px rgba(0,0,0,0.5)' }}>Fuentes</Typography>
+                          </Box>
+                        ) : index === 0 ? (
+                          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1 }}>
+                            <Inventory sx={{ color: 'white', fontSize: '2rem' }} />
+                            <Typography variant="body2" sx={{ color: 'white', fontWeight: 600, textShadow: '1px 1px 2px rgba(0,0,0,0.5)' }}>Productos</Typography>
+                          </Box>
+                        ) : index === 1 ? (
+                          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1 }}>
+                            <PhotoCamera sx={{ color: 'white', fontSize: '2rem' }} />
+                            <Typography variant="body2" sx={{ color: 'white', fontWeight: 600, textShadow: '1px 1px 2px rgba(0,0,0,0.5)' }}>Banner</Typography>
+                          </Box>
+                        ) : index === 2 ? (
+                          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1 }}>
+                            <PhotoCamera sx={{ color: 'white', fontSize: '2rem' }} />
+                            <Typography variant="body2" sx={{ color: 'white', fontWeight: 600, textShadow: '1px 1px 2px rgba(0,0,0,0.5)' }}>Banner 2</Typography>
+                          </Box>
+                        ) : index === 3 ? (
+                          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1 }}>
+                            <Inventory sx={{ color: 'white', fontSize: '2rem' }} />
+                            <Typography variant="body2" sx={{ color: 'white', fontWeight: 600, textShadow: '1px 1px 2px rgba(0,0,0,0.5)' }}>Inventario</Typography>
+                          </Box>
+                        ) : index === 4 ? (
+                          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1 }}>
+                            <Typography variant="body2" sx={{ color: 'white', fontWeight: 600, textShadow: '1px 1px 2px rgba(0,0,0,0.5)' }}>Páginas</Typography>
+                          </Box>
+                        ) : index === 5 ? (
+                          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1 }}>
+                            <Person sx={{ color: 'white', fontSize: '2rem' }} />
+                            <Typography variant="body2" sx={{ color: 'white', fontWeight: 600, textShadow: '1px 1px 2px rgba(0,0,0,0.5)' }}>Testimonios</Typography>
+                          </Box>
+                        ) : index === 6 ? (
+                          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1 }}>
+                            <Star sx={{ color: 'white', fontSize: '2rem' }} />
+                            <Typography variant="body2" sx={{ color: 'white', fontWeight: 600, textShadow: '1px 1px 2px rgba(0,0,0,0.5)' }}>Productos Destacados</Typography>
+                          </Box>
+                        ) : index === 12 ? (
+                          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1 }}>
+                            <ShoppingCart sx={{ color: 'white', fontSize: '2rem' }} />
+                            <Typography variant="body2" sx={{ color: 'white', fontWeight: 600, textShadow: '1px 1px 2px rgba(0,0,0,0.5)' }}>Min. Productos</Typography>
+                          </Box>
+                        ) : index === 13 ? (
+                          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1 }}>
+                            <Assessment sx={{ color: 'white', fontSize: '2rem' }} />
+                            <Typography variant="body2" sx={{ color: 'white', fontWeight: 600, textShadow: '1px 1px 2px rgba(0,0,0,0.5)' }}>Mensajería Push</Typography>
+                          </Box>
+                        ) : index === 14 ? (
+                          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1 }}>
+                            <AttachMoney sx={{ color: 'white', fontSize: '2rem' }} />
+                            <Typography variant="body2" sx={{ color: 'white', fontWeight: 600, textShadow: '1px 1px 2px rgba(0,0,0,0.5)' }}>Análisis de Costos</Typography>
+                          </Box>
+                        ) : index === 16 ? (
+                          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1 }}>
+                            <Palette sx={{ color: 'white', fontSize: '2rem' }} />
+                            <Typography variant="body2" sx={{ color: 'white', fontWeight: 600, textShadow: '1px 1px 2px rgba(0,0,0,0.5)' }}>Paleta de Colores</Typography>
+                          </Box>
+                        ) : index === 17 ? (
+                          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1 }}>
+                            <LocalShipping sx={{ color: 'white', fontSize: '2rem' }} />
+                            <Typography variant="body2" sx={{ color: 'white', fontWeight: 600, textShadow: '1px 1px 2px rgba(0,0,0,0.5)' }}>Pedidos</Typography>
+                          </Box>
+                        ) : index === 18 ? (
+                          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1 }}>
+                            <Email sx={{ color: 'white', fontSize: '2rem' }} />
+                            <Typography variant="body2" sx={{ color: 'white', fontWeight: 600, textShadow: '1px 1px 2px rgba(0,0,0,0.5)' }}>Suscriptores</Typography>
+                          </Box>
+                        ) : index === 19 ? (
+                          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1 }}>
+                            <LocalOffer sx={{ color: 'white', fontSize: '2rem' }} />
+                            <Typography variant="body2" sx={{ color: 'white', fontWeight: 600, textShadow: '1px 1px 2px rgba(0,0,0,0.5)' }}>Crear Voucher</Typography>
+                          </Box>
+                        ) : index === 20 ? (
+                          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1 }}>
+                            <Receipt sx={{ color: 'white', fontSize: '2rem' }} />
+                            <Typography variant="body2" sx={{ color: 'white', fontWeight: 600, textShadow: '1px 1px 2px rgba(0,0,0,0.5)' }}>Etiquetas Compradas</Typography>
+                          </Box>
+                        ) : index === 21 ? (
+                          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1 }}>
+                            <Email sx={{ color: 'white', fontSize: '2rem' }} />
+                            <Typography variant="body2" sx={{ color: 'white', fontWeight: 600, textShadow: '1px 1px 2px rgba(0,0,0,0.5)', textAlign: 'center', fontSize: '0.85rem' }}>Probar Correos PayPal</Typography>
+                          </Box>
+                        ) : index === 22 ? (
+                          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1 }}>
+                            <Inventory sx={{ color: 'white', fontSize: '2rem' }} />
+                            <Typography variant="body2" sx={{ color: 'white', fontWeight: 600, textShadow: '1px 1px 2px rgba(0,0,0,0.5)', textAlign: 'center' }}>Sweet Boxes</Typography>
+                          </Box>
+                        ) : (
                           <Typography
                             variant="h6"
                             sx={{
@@ -1216,6 +1023,13 @@ const AdminDashboard = () => {
       <ProductsManager
         open={productsManagerOpen}
         onClose={() => setProductsManagerOpen(false)}
+      />
+
+      {/* Gestor de Sweet Boxes */}
+      <ProductsManager
+        open={sweetBoxesManagerOpen}
+        onClose={() => setSweetBoxesManagerOpen(false)}
+        categoryFilter="boxes"
       />
 
       {/* Gestor de Inventario */}
