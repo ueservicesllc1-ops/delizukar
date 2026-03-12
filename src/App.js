@@ -22,6 +22,7 @@ import Footer from './components/Footer';
 
 // Pages
 import Home from './pages/Home';
+import Maintenance from './pages/Maintenance';
 import Products from './pages/Products';
 import ProductDetail from './pages/ProductDetail';
 import Cart from './pages/Cart';
@@ -149,6 +150,17 @@ const theme = createTheme({
 // });
 
 function App() {
+  const isMaintenanceMode = process.env.REACT_APP_MAINTENANCE_MODE === 'true';
+
+  if (isMaintenanceMode) {
+    return (
+      <ThemeProvider theme={theme}>
+        <CssBaseline />
+        <Maintenance />
+      </ThemeProvider>
+    );
+  }
+
   const RouteWatcher = () => {
     const location = useLocation();
     const { language } = useLanguage();

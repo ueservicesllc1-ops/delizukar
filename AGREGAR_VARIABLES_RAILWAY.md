@@ -32,9 +32,17 @@ Después de agregar las variables:
 - **`USPS_AUTO_PURCHASE_LABELS=true`**: Compra etiquetas automáticamente cuando se crea un pedido
 - **`USPS_AUTO_PURCHASE_LABELS=false`**: No compra automáticamente (solo cuando se llama manualmente)
 
+## 🚧 Modo Mantenimiento (Provisional)
+
+Si quieres mostrar la página de mantenimiento en Railway mientras trabajas localmente:
+- **`REACT_APP_MAINTENANCE_MODE=true`**: Activa la pantalla de mantenimiento (index provisional).
+- **`REACT_APP_MAINTENANCE_MODE=false`**: Muestra la página completa normalmente.
+
+📌 **Nota**: En tu archivo `.env` local, esta variable debe estar en `false` para que puedas seguir desarrollando.
+
 ## 📌 Nota
 
-Si ya tienes las otras variables en Railway, solo necesitas agregar las 6 nuevas variables de USPS.
+Si ya tienes las otras variables en Railway, solo necesitas agregar las variables de USPS y de Mantenimiento.
 
 
 
