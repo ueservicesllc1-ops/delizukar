@@ -70,13 +70,14 @@ const Header = () => {
   }, []);
 
   const labels = {
-    es: { home: 'Inicio', products: 'Productos', about: 'Nosotros', contact: 'Contacto', faq: 'FAQ' },
-    en: { home: 'Home', products: 'Products', about: 'About Us', contact: 'Contact', faq: 'FAQ' }
+    es: { home: 'Inicio', products: 'Productos', sweetbox: 'Sweet Box', about: 'Nosotros', contact: 'Contacto', faq: 'FAQ' },
+    en: { home: 'Home', products: 'Products', sweetbox: 'Sweet Box', about: 'About Us', contact: 'Contact', faq: 'FAQ' }
   };
   const L = labels[language] || labels.es;
   const menuItems = [
     { label: L.home, href: '/' },
     { label: L.products, href: '/productos' },
+    { label: L.sweetbox, href: '/sweet-boxes' },
     { label: L.about, href: '/nosotros' },
     { label: L.contact, href: '/contacto' },
     { label: L.faq, href: '/faq' }
@@ -168,7 +169,10 @@ const Header = () => {
         {menuItems.map((item) => (
           <ListItem key={item.label} disablePadding>
             <Button
-              href={item.href}
+              onClick={() => {
+                navigate(item.href);
+                setMobileOpen(false);
+              }}
               sx={{
                 width: '100%',
                 justifyContent: 'flex-start',
@@ -380,7 +384,7 @@ const Header = () => {
         {menuItems.map((item) => (
           <Button
             key={item.label}
-            href={item.href}
+            onClick={() => navigate(item.href)}
             sx={{
               color: '#eb8b8b',
               textTransform: 'none',
@@ -391,7 +395,9 @@ const Header = () => {
               borderRadius: '999px',
               '&:hover': {
                 backgroundColor: '#c8626d20'
-              }
+              },
+              backgroundColor: location.pathname === item.href ? '#c8626d15' : 'transparent',
+              border: location.pathname === item.href ? '1px solid #c8626d40' : 'none'
             }}
           >
             {item.label}

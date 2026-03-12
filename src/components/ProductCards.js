@@ -57,7 +57,7 @@ const ProductCards = ({ products: propProducts, showAll = false }) => {
                 {/* Imagen del producto */}
                 <Box
                   className="product-image-container"
-                  sx={{ position: 'relative', overflow: 'hidden', pb: 6.25 }}
+                  sx={{ position: 'relative', overflow: 'hidden' }}
                 >
                     <ProductImage
                       src={product.image}
@@ -65,9 +65,9 @@ const ProductCards = ({ products: propProducts, showAll = false }) => {
                       height={280}
                       sx={{
                         transition: 'transform 0.3s ease',
-                        transform: 'translateY(0)',
+                        transform: 'translateY(-20px)',
                         '&:hover': {
-                          transform: 'translateY(0) scale(1.05)'
+                          transform: 'translateY(-20px) scale(1.05)'
                         }
                       }}
                     />

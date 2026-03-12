@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Box, Container, Typography, Grid, Card, CardContent, CardActions, Button, Chip, Rating, IconButton, TextField, InputAdornment, Dialog, DialogContent, Skeleton } from '@mui/material';
 import { Close } from '@mui/icons-material';
@@ -76,44 +77,35 @@ const TEXTS = {
   }
 };
 
-const PRODUCT_TRANSLATIONS = {
+export const PRODUCT_TRANSLATIONS = {
   es: {
-    'Chocole DeLux': {
-      name: 'Chocolate Deluxe',
-      description: 'Una galleta intensa con cuatro tipos de chocolate, textura cremosa y un sabor profundo para los verdaderos amantes del cacao. Esta es la galleta para los verdaderos amantes del cacao. Una poderosa mezcla de cuatro tipos de chocolate en una sola galleta: barra de chocolate artesanal, chips de chocolate oscuro, mini chips semidulces y chips de chocolate con leche. ¿Quién podría resistirse? Es como una sinfonía de texturas y sabores para los verdaderos entusiastas del chocolate. Textura cremosa, sabor profundo y una intensidad que habla por sí sola desde el primer bocado. Esta no es solo una galleta de chocolate... es LA galleta de chocolate.'
-    },
-    'Chocolate Deluxe': {
-      name: 'Chocolate Deluxe',
-      description: 'Una galleta intensa con cuatro tipos de chocolate, textura cremosa y un sabor profundo para los verdaderos amantes del cacao. Esta es la galleta para los verdaderos amantes del cacao. Una poderosa mezcla de cuatro tipos de chocolate en una sola galleta: barra de chocolate artesanal, chips de chocolate oscuro, mini chips semidulces y chips de chocolate con leche. ¿Quién podría resistirse? Es como una sinfonía de texturas y sabores para los verdaderos entusiastas del chocolate. Textura cremosa, sabor profundo y una intensidad que habla por sí sola desde el primer bocado. Esta no es solo una galleta de chocolate... es LA galleta de chocolate.'
-    },
-    'errero Hype': {
-      name: 'Ferrero Hype',
-      description: 'Galleta estilo NY con Ferrero Rocher, chips de chocolate oscuro y avellanas tostadas—intensa, elegante y adictiva. Una galleta estilo Nueva York con un toque europeo. Repleta de trozos de Ferrero Rocher, chips de chocolate oscuro y avellanas tostadas para el crujido perfecto. Intensa, elegante y adictiva: esta galleta nunca pasa desapercibida.'
-    },
-    'Ferrero Hype': {
-      name: 'Ferrero Hype',
-      description: 'Galleta estilo NY con Ferrero Rocher, chips de chocolate oscuro y avellanas tostadas—intensa, elegante y adictiva. Una galleta estilo Nueva York con un toque europeo. Repleta de trozos de Ferrero Rocher, chips de chocolate oscuro y avellanas tostadas para el crujido perfecto. Intensa, elegante y adictiva: esta galleta nunca pasa desapercibida.'
-    },
-    'Gift Message + Premium Card': {
-      name: 'Mensaje de Regalo + Tarjeta Premium',
-      description: 'Añade un mensaje personalizado dentro de tu caja. Perfecto para cualquier ocasión especial.'
-    },
-    'Sweet Box – 4 Cookies': {
-      name: 'Sweet Box – 4 Galletas',
-      description: 'Arma tu caja con 4 galletas estilo NY (200g c/u). Venta mínima de 4 unidades.'
-    },
-    'Sweet Box – 6 Cookies': {
-      name: 'Sweet Box – 6 Galletas',
-      description: 'Arma tu caja con 6 galletas estilo NY (200g c/u). Incluye un 5% de descuento.'
-    },
-    'Deluxe Sweet Box – 12 Cookies': {
-      name: 'Deluxe Sweet Box – 12 Galletas',
-      description: 'Perfecto para compartir o regalar. 12 galletas estilo NY (200g c/u). Incluye un 10% de descuento.'
-    }
+    'Chocole DeLux': { name: 'Chocolate Deluxe' },
+    'Chocolate Deluxe': { name: 'Chocolate Deluxe' },
+    'Ferrero Hype': { name: 'Ferrero Hype' },
+    'PecanBerry Oat': { name: 'Avena y Arándanos' },
+    'Besos Blancos de Avellanas': { name: 'Besos Blancos de Avellanas' },
+    'Almendra de Oro': { name: 'Almendra de Oro' },
+    'Gift Message + Premium Card': { name: 'Mensaje de Regalo + Tarjeta Premium' },
+    'Sweet Box – 4 Cookies': { name: 'Sweet Box – 4 Galletas' },
+    'Sweet Box – 6 Cookies': { name: 'Sweet Box – 6 Galletas' },
+    'Deluxe Sweet Box – 12 Cookies': { name: 'Deluxe Sweet Box – 12 Galletas' }
+  },
+  en: {
+    'Chocole DeLux': { name: 'Chocolate Deluxe' },
+    'Chocolate Deluxe': { name: 'Chocolate Deluxe' },
+    'Ferrero Hype': { name: 'Ferrero Hype' },
+    'PecanBerry Oat': { name: 'PecanBerry Oat' },
+    'Besos Blancos de Avellanas': { name: 'White Hazelnut Kisses' },
+    'Almendra de Oro': { name: 'Golden Almond' },
+    'Gift Message + Premium Card': { name: 'Gift Message + Premium Card' },
+    'Sweet Box – 4 Cookies': { name: 'Sweet Box – 4 Cookies' },
+    'Sweet Box – 6 Cookies': { name: 'Sweet Box – 6 Cookies' },
+    'Deluxe Sweet Box – 12 Cookies': { name: 'Deluxe Sweet Box – 12 Cookies' }
   }
 };
 
 const Products = () => {
+  const navigate = useNavigate();
   const { language } = useLanguage();
   const { categories, products, addToCart, productsLoading } = useStore();
   const [open, setOpen] = useState(false);
@@ -148,12 +140,14 @@ const Products = () => {
         {/* Grid de productos */}
         <Grid container spacing={3} className="products-grid-mobile" sx={{ 
           display: 'grid',
-          gridTemplateColumns: {
-            xs: 'repeat(2, minmax(0, 1fr))',
-            md: 'repeat(3, minmax(0, 1fr))',
-            lg: 'repeat(4, minmax(0, 1fr))'
+          gridTemplateColumns: { 
+            xs: '1fr', 
+            sm: 'repeat(2, 1fr)', 
+            md: 'repeat(3, 1fr)' 
           },
-          gap: { xs: 2, md: 3, lg: 3.5 }
+          gap: 3,
+          maxWidth: '1000px',
+          mx: 'auto'
         }}>
           {productsLoading ? (
             // Skeleton loading mientras cargan los productos
@@ -184,6 +178,10 @@ const Products = () => {
                 <Card
                   className="product-card-mobile"
                   onClick={() => { 
+                    if (product.category === 'boxes') {
+                      navigate(`/armar-caja/${product.id}`);
+                      return;
+                    }
                     console.log('Producto clickeado:', product);
                     setSelected(product); 
                     setOpen(true);
@@ -377,7 +375,11 @@ const Products = () => {
                       }}
                       onClick={(e) => {
                         e.stopPropagation();
-                        addToCart(product);
+                        if (product.category === 'boxes') {
+                          navigate(`/armar-caja/${product.id}`);
+                        } else {
+                          addToCart(product);
+                        }
                       }}
                     >
                       {translatedTexts.addToCart}

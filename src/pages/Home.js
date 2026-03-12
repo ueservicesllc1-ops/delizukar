@@ -9,14 +9,18 @@ import {
   Dialog,
   DialogContent,
   IconButton,
-  Divider
+  Divider,
+  useTheme,
+  useMediaQuery
 } from '@mui/material';
 import { Close, ShoppingBag } from '@mui/icons-material';
 import Rating from '@mui/material/Rating';
 import { useStore } from '../context/StoreContext';
 import { useLanguage } from '../context/LanguageContext';
+import { useNavigate } from 'react-router-dom';
 import PopupHero from '../components/PopupHero';
 import TestimonialsSection from '../components/TestimonialsSection';
+import ProductImage from '../components/ProductImage';
 
 const Home = () => {
   const { featuredProducts, products, productsLoading, addToCart } = useStore();
@@ -24,6 +28,9 @@ const Home = () => {
   const [isBrittanyLoaded, setIsBrittanyLoaded] = useState(false);
   const [popupHeroOpen, setPopupHeroOpen] = useState(false);
   const { language } = useLanguage();
+  const navigate = useNavigate();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   const translations = {
     es: {
@@ -99,7 +106,11 @@ const Home = () => {
   }, [featuredProducts, products, productsLoading]);
 
   const handleOpenDetail = (product) => {
-    setSelectedProduct(product);
+    if (product.category === 'boxes') {
+      navigate(`/armar-caja/${product.id}`);
+    } else {
+      setSelectedProduct(product);
+    }
   };
 
   const handleCloseDetail = () => {
@@ -191,12 +202,13 @@ const Home = () => {
                   height: '100%'
                 }}
               >
-                <CardMedia
-                  component="img"
-                  image={item.image}
-                  alt={item.name}
-                  sx={{ width: '100%', height: { xs: 160, md: 170, lg: 180 }, objectFit: 'cover' }}
-                />
+                <Box sx={{ height: { xs: 160, md: 180 }, overflow: 'hidden' }}>
+                  <img 
+                    src={item.image} 
+                    alt={item.name} 
+                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                  />
+                </Box>
                 <CardContent sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1.5 }}>
                   <Typography variant="h6" sx={{ fontWeight: 700, color: '#c8626d', fontFamily: 'Asap', fontSize: '1rem', textAlign: 'center' }}>
                     {item.name}
@@ -313,14 +325,12 @@ const Home = () => {
           </IconButton>
           {selectedProduct && (
             <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' } }}>
-              <Box sx={{ flexBasis: { md: '50%' }, flexShrink: 0 }}>
-                <Box sx={{ height: '100%', minHeight: { xs: 240, md: 420 }, overflow: 'hidden' }}>
-                  <img
-                    src={selectedProduct.image}
-                    alt={selectedProduct.name}
-                    style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
-                  />
-                </Box>
+              <Box sx={{ flexBasis: { md: '50%' }, flexShrink: 0, height: { xs: 240, md: 420 }, overflow: 'hidden' }}>
+                <img 
+                  src={selectedProduct.image} 
+                  alt={selectedProduct.name} 
+                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                />
               </Box>
               <Box sx={{ flex: 1, p: { xs: 2.5, md: 4 } }}>
                 <Typography sx={{ fontWeight: 700, mb: 1, color: '#333', fontFamily: 'Asap', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
@@ -359,7 +369,11 @@ const Home = () => {
                     }
                   }}
                   onClick={() => {
-                    addToCart(selectedProduct);
+                    if (selectedProduct.category === 'boxes') {
+                      navigate(`/armar-caja/${selectedProduct.id}`);
+                    } else {
+                      addToCart(selectedProduct);
+                    }
                     handleCloseDetail();
                   }}
                 >

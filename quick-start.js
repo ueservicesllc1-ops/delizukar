@@ -12,7 +12,7 @@ console.log('🚀 Inicio Rápido - Stripe API v2\n');
 // Verificar si existe .env
 if (!fs.existsSync('.env')) {
   console.log('📝 Creando archivo .env con configuración de prueba...');
-  
+
   const envContent = `# ==================== STRIPE CONFIGURATION ====================
 # CONFIGURA ESTAS CLAVES CON TUS VALORES REALES
 STRIPE_SECRET_KEY=sk_test_51234567890abcdef...
@@ -58,7 +58,7 @@ serverProcess.on('error', (err) => {
 // Esperar un poco para que el servidor se inicie
 setTimeout(() => {
   console.log('\n🌐 Iniciando aplicación React...');
-  
+
   // Iniciar React
   const reactProcess = spawn('npm', ['start'], {
     stdio: 'inherit',

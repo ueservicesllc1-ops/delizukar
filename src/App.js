@@ -40,6 +40,8 @@ import Shipping from './pages/Shipping';
 import CookieCare from './pages/CookieCare';
 import Nosotros from './pages/Nosotros';
 import Contacto from './pages/Contacto';
+import BoxSelection from './pages/BoxSelection';
+import SweetBoxes from './pages/SweetBoxes';
 
 // Tema personalizado
 const theme = createTheme({
@@ -216,6 +218,18 @@ function App() {
                 <>
                   <Header />
                   <Products />
+                </>
+              } />
+              <Route path="/sweet-boxes" element={
+                <>
+                  <Header />
+                  <SweetBoxes />
+                </>
+              } />
+              <Route path="/armar-caja/:id" element={
+                <>
+                  <Header />
+                  <BoxSelection />
                 </>
               } />
               <Route path="/producto/:id" element={

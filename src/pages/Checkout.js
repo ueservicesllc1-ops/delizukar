@@ -28,6 +28,8 @@ import { collection, addDoc, query, where, getDocs, updateDoc, doc } from 'fireb
 import { onAuthStateChanged } from 'firebase/auth';
 import emailjs from '@emailjs/browser';
 import { useLanguage } from '../context/LanguageContext';
+import GiftMessageModal from '../components/GiftMessageModal';
+import toast from 'react-hot-toast';
 
 // Inicializar EmailJS al cargar el módulo
 const EMAILJS_SERVICE_ID = process.env.REACT_APP_EMAILJS_SERVICE_ID || 'service_7biylnb';
@@ -165,7 +167,7 @@ const Checkout = () => {
 
     return template;
   };
-  const { getCartTotal, getCartItemsCount, clearCart, cart } = useStore();
+  const { getCartTotal, getCartItemsCount, clearCart, cart, addToCart } = useStore();
   const navigate = useNavigate();
   const { createOrderData } = useShipping();
   
@@ -207,6 +209,7 @@ const Checkout = () => {
   const [voucherError, setVoucherError] = useState('');
   const [voucherSuccess, setVoucherSuccess] = useState('');
   const [loadingVoucher, setLoadingVoucher] = useState(false);
+  const [showGiftModal, setShowGiftModal] = useState(false);
 
   const cartTotal = getCartTotal();
   const cartItemsCount = getCartItemsCount();
@@ -232,6 +235,20 @@ const Checkout = () => {
   };
 
   // Funciones para manejar vouchers
+  const handleGiftConfirm = (giftData) => {
+    // Añadir el producto de regalo con los detalles como metadata
+    const giftItem = {
+      ...giftData.product,
+      id: `${giftData.product.id}-${Date.now()}`,
+      giftDetails: giftData.details,
+      description_extra: `Para: ${giftData.details.to} - De: ${giftData.details.from} - Mensaje: ${giftData.details.message}`
+    };
+    
+    addToCart(giftItem);
+    toast.success(language === 'es' ? 'Mensaje de regalo añadido' : 'Gift message added');
+    setShowGiftModal(false);
+  };
+
   const handleApplyVoucher = async () => {
     if (!user) {
       setVoucherError(t('voucher.mustBeLoggedIn'));
@@ -697,7 +714,9 @@ const Checkout = () => {
           name: item.name,
           price: item.price,
           quantity: item.quantity,
-          image: item.image
+          image: item.image,
+          description_extra: item.description_extra || '',
+          giftDetails: item.giftDetails || null
         })),
         total: cartTotal,
         paymentStatus: 'paid',
@@ -761,7 +780,7 @@ const Checkout = () => {
         const shippingCost = parseFloat(orderData.shippingInfo?.cost || 0);
         const subtotal = orderData.total - shippingCost;
         const itemsListText = orderData.cartItems.map(item => 
-          `${item.quantity}x ${item.name} - $${parseFloat(item.price).toFixed(2)} cada uno = $${(parseFloat(item.price) * item.quantity).toFixed(2)}`
+          `${item.quantity}x ${item.name} ${item.description_extra ? `(${item.description_extra})` : ''} - $${parseFloat(item.price).toFixed(2)} cada uno = $${(parseFloat(item.price) * item.quantity).toFixed(2)}`
         ).join('\n');
         
         // Enviar correo al cliente
@@ -1416,7 +1435,34 @@ const Checkout = () => {
                           ${(calculateTotal() + (shippingInfo ? parseFloat(shippingInfo.cost || 0) : 0)).toFixed(2)}
                         </Typography>
                       </Box>
+                      
+                      {!cart.some(item => item.category === 'regalo') && (
+                        <Button
+                          fullWidth
+                          startIcon={<CardGiftcard />}
+                          onClick={() => setShowGiftModal(true)}
+                          sx={{ 
+                            mt: 2, 
+                            bgcolor: alpha('#c8626d', 0.1), 
+                            color: '#c8626d',
+                            borderRadius: '12px',
+                            py: 1,
+                            textTransform: 'none',
+                            fontWeight: 600,
+                            '&:hover': { bgcolor: alpha('#c8626d', 0.2) }
+                          }}
+                        >
+                          {language === 'es' ? 'Añadir Mensaje de Regalo + Tarjeta Premium' : 'Add Gift Message + Premium Card'}
+                        </Button>
+                      )}
                     </Box>
+
+                    <GiftMessageModal 
+                      open={showGiftModal}
+                      onClose={() => setShowGiftModal(false)}
+                      onConfirm={handleGiftConfirm}
+                      onSkip={() => setShowGiftModal(false)}
+                    />
 
                     {/* Información de envío */}
                     {shippingInfo && (
@@ -1827,7 +1873,7 @@ const Checkout = () => {
                               const shippingCost = parseFloat(shippingInfo?.cost || 0);
                               const subtotal = cartTotal - shippingCost;
                               const itemsListText = cart.map(item => 
-                                `${item.quantity}x ${item.name} - $${parseFloat(item.price).toFixed(2)} cada uno = $${(parseFloat(item.price) * item.quantity).toFixed(2)}`
+                                `${item.quantity}x ${item.name} ${item.description_extra ? `(${item.description_extra})` : ''} - $${parseFloat(item.price).toFixed(2)} cada uno = $${(parseFloat(item.price) * item.quantity).toFixed(2)}`
                               ).join('\n');
                               
                               // Enviar correo al cliente
@@ -1978,7 +2024,7 @@ const Checkout = () => {
                                   shipping_cost: shippingInfo ? `$${parseFloat(shippingInfo.cost || 0).toFixed(2)}` : '$0.00',
                                   subtotal: `$${(cartTotal - (shippingInfo ? parseFloat(shippingInfo.cost || 0) : 0)).toFixed(2)}`,
                                   items_count: cart.length,
-                                  items_list: cart.map(item => `${item.quantity}x ${item.name} - $${parseFloat(item.price).toFixed(2)}`).join('\n'),
+                                  items_list: cart.map(item => `${item.quantity}x ${item.name} ${item.description_extra ? `(${item.description_extra})` : ''} - $${parseFloat(item.price).toFixed(2)}`).join('\n'),
                                   payment_method: 'PayPal',
                                   payment_id: paymentDetails.id || paymentDetails.paymentId || 'N/A',
                                   order_date: new Date().toLocaleString('es-ES', { 

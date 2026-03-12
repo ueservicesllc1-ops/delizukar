@@ -3849,7 +3849,10 @@ app.post('/api/create-order', async (req, res) => {
         name: String(item.name || ''),
         price: parseFloat(item.price) || 0,
         quantity: parseInt(item.quantity) || 0,
-        image: String(item.image || '')
+        image: String(item.image || ''),
+        // Incluir campos de regalo y extras
+        giftDetails: item.giftDetails || null,
+        description_extra: item.description_extra || ''
       };
       
       // Validar que el item tiene datos mínimos

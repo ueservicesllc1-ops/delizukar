@@ -63,7 +63,8 @@ import {
   AdminPanelSettings,
   Palette,
   Email,
-  Receipt
+  Receipt,
+  CardGiftcard
 } from '@mui/icons-material';
 import FontManager from '../components/FontManager';
 import BannerPhotoManager from '../components/BannerPhotoManager';
@@ -125,6 +126,9 @@ const AdminDashboard = () => {
   const [testCustomerEmail, setTestCustomerEmail] = useState('');
   const [testingEmail, setTestingEmail] = useState(false);
   const [emailTestResult, setEmailTestResult] = useState(null);
+  const [giftMessagesOpen, setGiftMessagesOpen] = useState(false);
+  const [orders, setOrders] = useState([]);
+  const [loadingOrders, setLoadingOrders] = useState(false);
   const navigate = useNavigate();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
@@ -132,12 +136,40 @@ const AdminDashboard = () => {
   // Estado para errores
   const [error, setError] = useState(null);
 
+  const loadOrders = async () => {
+    setLoadingOrders(true);
+    try {
+      const ordersRef = collection(db, 'orders');
+      const q = query(ordersRef, orderBy('createdAt', 'desc'));
+      const querySnapshot = await getDocs(q);
+      
+      const paidOrders = [];
+      querySnapshot.forEach((docSnap) => {
+        const orderData = docSnap.data();
+        if (orderData.paymentStatus === 'paid') {
+          paidOrders.push({
+            id: docSnap.id,
+            ...orderData
+          });
+        }
+      });
+      
+      setOrders(paidOrders);
+      console.log(`📦 Dashboard: Cargados ${paidOrders.length} pedidos pagados`);
+    } catch (error) {
+      console.error('Error loading orders in dashboard:', error);
+    } finally {
+      setLoadingOrders(false);
+    }
+  };
+
   useEffect(() => {
     // Quitar autenticación - admin funciona sin login
     try {
       setUser({ email: 'admin@delizukar.com' }); // Usuario dummy
       setLoading(false);
       setError(null);
+      loadOrders(); // Cargar pedidos al iniciar
     } catch (error) {
       console.error('Error initializing admin dashboard:', error);
       // Asegurar que siempre haya un usuario por defecto
@@ -343,6 +375,7 @@ const AdminDashboard = () => {
       setLoadingUsers(false);
     }
   };
+
 
   const saveUserToFirestore = async (userData) => {
     try {
@@ -777,13 +810,13 @@ const AdminDashboard = () => {
         >
             <Box sx={{ mt: 12, pt: 6 }}>
             <Grid container spacing={0} sx={{ maxWidth: '1000px', mx: 'auto' }}>
-              {Array.from({ length: 23 }, (_, index) => {
+              {Array.from({ length: 24 }, (_, index) => {
                 const colors = [
                   '#c8626d', '#be8782', '#b5555a', '#c8626d',
                   '#c8626d', '#c8626d', '#c8626d', '#c8626d',
                   '#BC8F8F', '#F5DEB3', '#DDA0DD', '#98FB98',
                   '#F0E68C', '#FFB6C1', '#87CEEB', '#FFA07A',
-                  '#C8626D', '#7C2815', '#EB8B8B', '#8D9A7D', '#C8626D', '#c8626d', '#be8782'
+                  '#C8626D', '#7C2815', '#EB8B8B', '#8D9A7D', '#C8626D', '#c8626d', '#be8782', '#b5555a'
                 ];
                 const color = colors[index];
                 
@@ -831,6 +864,7 @@ const AdminDashboard = () => {
                             setPaypalEmailTestOpen(true);
                           } :
                           index === 22 ? () => setSweetBoxesManagerOpen(true) :
+                          index === 23 ? () => setGiftMessagesOpen(true) :
                           undefined
                         }
                         sx={{
@@ -960,6 +994,11 @@ const AdminDashboard = () => {
                           <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1 }}>
                             <Inventory sx={{ color: 'white', fontSize: '2rem' }} />
                             <Typography variant="body2" sx={{ color: 'white', fontWeight: 600, textShadow: '1px 1px 2px rgba(0,0,0,0.5)', textAlign: 'center' }}>Sweet Boxes</Typography>
+                          </Box>
+                        ) : index === 23 ? (
+                          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1 }}>
+                            <CardGiftcard sx={{ color: 'white', fontSize: '2rem' }} />
+                            <Typography variant="body2" sx={{ color: 'white', fontWeight: 600, textShadow: '1px 1px 2px rgba(0,0,0,0.5)', textAlign: 'center' }}>Mensajes Regalo</Typography>
                           </Box>
                         ) : (
                           <Typography
@@ -2284,8 +2323,108 @@ const AdminDashboard = () => {
             </Button>
           </DialogActions>
         </Dialog>
+        
+        {/* Gestor de Mensajes de Regalo */}
+        <Dialog
+          open={giftMessagesOpen}
+          onClose={() => setGiftMessagesOpen(false)}
+          maxWidth="lg"
+          fullWidth
+        >
+          <DialogTitle sx={{ backgroundColor: '#c8626d', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <CardGiftcard />
+              <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                Mensajes de Regalo + Tarjetas Premium
+              </Typography>
+            </Box>
+            <IconButton onClick={() => setGiftMessagesOpen(false)} sx={{ color: 'white' }}>
+              <Close />
+            </IconButton>
+          </DialogTitle>
+          <DialogContent sx={{ p: 3, backgroundColor: '#fafafa' }}>
+            <GiftMessagesManager orders={orders} />
+          </DialogContent>
+        </Dialog>
     </Box>
   );
 };
+
+// Sub-componente para gestionar los mensajes de regalo
+function GiftMessagesManager({ orders }) {
+  // Filtrar pedidos que tienen mensajes de regalo
+  const ordersWithGifts = orders.filter(order => 
+    order.cartItems?.some(item => 
+      item.id === 'gift-card' || 
+      item.id === 'gift_message_card' || 
+      item.category === 'regalo' ||
+      item.giftDetails
+    ) ||
+    order.giftMessage ||
+    order.giftDetails
+  );
+
+  if (ordersWithGifts.length === 0) {
+    return (
+      <Box sx={{ textAlign: 'center', py: 8 }}>
+        <CardGiftcard sx={{ fontSize: 64, color: '#ccc', mb: 2 }} />
+        <Typography variant="h6" color="textSecondary">
+          No hay mensajes de regalo registrados en los pedidos actuales.
+        </Typography>
+      </Box>
+    );
+  }
+
+  return (
+    <Grid container spacing={3}>
+      {ordersWithGifts.map((order) => {
+        // Encontrar el item del mensaje de regalo
+        const giftItem = order.cartItems?.find(item => item.id === 'gift-card' || item.id === 'gift_message_card' || item.category === 'regalo');
+        const giftData = giftItem?.giftDetails || giftItem?.giftData || order.giftDetails || order.giftData;
+
+        return (
+          <Grid item xs={12} md={6} key={order.id}>
+            <Card sx={{ borderRadius: '12px', borderLeft: '6px solid #c8626d' }}>
+              <CardContent>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
+                  <Typography variant="subtitle2" color="primary" fontWeight="bold">
+                    Pedido #{order.id.slice(-6).toUpperCase()}
+                  </Typography>
+                  <Typography variant="caption" color="textSecondary">
+                    {new Date(order.createdAt?.seconds * 1000).toLocaleDateString()}
+                  </Typography>
+                </Box>
+                
+                <Box sx={{ mb: 2, p: 2, backgroundColor: '#fff5f6', borderRadius: '8px' }}>
+                  <Typography variant="body2" sx={{ mb: 1 }}>
+                    <strong>De:</strong> {giftData?.from || 'N/A'}
+                  </Typography>
+                  <Typography variant="body2" sx={{ mb: 1 }}>
+                    <strong>Para:</strong> {giftData?.to || 'N/A'}
+                  </Typography>
+                  <Divider sx={{ my: 1 }} />
+                  <Typography variant="body1" sx={{ fontStyle: 'italic', color: '#555', mt: 1 }}>
+                    "{giftData?.message || 'Sin mensaje'}"
+                  </Typography>
+                </Box>
+
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <Chip 
+                    label={`Cliente: ${order.customerInfo?.firstName} ${order.customerInfo?.lastName}`} 
+                    size="small" 
+                    variant="outlined"
+                  />
+                  <Typography variant="caption" color="textSecondary">
+                    {order.customerInfo?.email}
+                  </Typography>
+                </Box>
+              </CardContent>
+            </Card>
+          </Grid>
+        );
+      })}
+    </Grid>
+  );
+}
 
 export default AdminDashboard;

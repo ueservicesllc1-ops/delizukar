@@ -426,6 +426,20 @@ const Cart = () => {
                             >
                               {getCategoryDisplayName(item.category)}
                             </Typography>
+                            {item.description_extra && (
+                              <Typography
+                                variant="body2"
+                                sx={{
+                                  color: '#c8626d',
+                                  mb: 1,
+                                  fontSize: '0.75rem',
+                                  fontStyle: 'italic',
+                                  fontWeight: 500
+                                }}
+                              >
+                                {item.description_extra}
+                              </Typography>
+                            )}
                             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                               <Typography
                                 variant="h6"

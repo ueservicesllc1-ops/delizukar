@@ -199,6 +199,9 @@ const Footer = () => {
               <Link href="/productos" sx={{ color: 'white', textDecoration: 'none', fontSize: '0.95rem', '&:hover': { color: '#EB8B8B' } }}>
                 {text.navProducts || 'Productos'}
               </Link>
+              <Link href="/sweet-boxes" sx={{ color: 'white', textDecoration: 'none', fontSize: '0.95rem', '&:hover': { color: '#EB8B8B' } }}>
+                {language === 'es' ? 'Sweet Box' : 'Sweet Box'}
+              </Link>
               <Link href="/contacto" sx={{ color: 'white', textDecoration: 'none', fontSize: '0.95rem', '&:hover': { color: '#EB8B8B' } }}>
                 {text.navContact || 'Contacto'}
               </Link>
