@@ -70,14 +70,14 @@ const Header = () => {
   }, []);
 
   const labels = {
-    es: { home: 'Inicio', products: 'Productos', sweetbox: 'Sweet Box', about: 'Nosotros', contact: 'Contacto', faq: 'FAQ' },
-    en: { home: 'Home', products: 'Products', sweetbox: 'Sweet Box', about: 'About Us', contact: 'Contact', faq: 'FAQ' }
+    es: { home: 'Inicio', products: 'Galletas', sweetbox: 'Box', about: 'Nosotros', contact: 'Contacto', faq: 'FAQ' },
+    en: { home: 'Home', products: 'Cookies', sweetbox: 'Box', about: 'About Us', contact: 'Contact', faq: 'FAQ' }
   };
   const L = labels[language] || labels.es;
   const menuItems = [
     { label: L.home, href: '/' },
-    { label: L.products, href: '/productos' },
     { label: L.sweetbox, href: '/sweet-boxes' },
+    { label: L.products, href: '/productos' },
     { label: L.about, href: '/nosotros' },
     { label: L.contact, href: '/contacto' },
     { label: L.faq, href: '/faq' }

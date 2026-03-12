@@ -122,7 +122,7 @@ export const FeaturedProductsProvider = ({ children }) => {
         ...doc.data()
       }));
       
-      const featured = allProducts.filter(product => productIds.includes(product.id));
+      const featured = productIds.map(id => allProducts.find(p => p.id === id)).filter(Boolean);
       
       console.log('✅ Productos destacados cargados:', featured);
       setFeaturedProducts(featured);

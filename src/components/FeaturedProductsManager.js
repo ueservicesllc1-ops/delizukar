@@ -39,11 +39,13 @@ import {
   StarBorder,
   Refresh,
   SwapHoriz,
-  Add
+  Add,
+  DragIndicator
 } from '@mui/icons-material';
 import { collection, getDocs, doc, setDoc, updateDoc } from 'firebase/firestore';
 import { db } from '../firebase/config';
 import { fontUploader } from '../utils/fontUploader';
+import { Reorder } from 'framer-motion';
 
 const FeaturedProductsManager = ({ open, onClose }) => {
   const [products, setProducts] = useState([]);
@@ -134,10 +136,10 @@ const FeaturedProductsManager = ({ open, onClose }) => {
     setFeaturedProducts(prev => {
       if (prev.includes(productId)) {
         return prev.filter(id => id !== productId);
-      } else if (prev.length < 4) {
+      } else if (prev.length < 15) {
         return [...prev, productId];
       } else {
-        showSnackbar('Solo puedes seleccionar máximo 4 productos', 'warning');
+        showSnackbar('Solo puedes seleccionar máximo 15 productos', 'warning');
         return prev;
       }
     });
@@ -304,8 +306,8 @@ const FeaturedProductsManager = ({ open, onClose }) => {
                 Seleccionar Productos Destacados
               </Typography>
               <Chip 
-                label={`${featuredProducts.length}/4 seleccionados`}
-                color={featuredProducts.length === 4 ? 'success' : 'default'}
+                label={`${featuredProducts.length}/15 seleccionados`}
+                color={featuredProducts.length === 15 ? 'success' : 'default'}
                 size="small"
                 sx={{ fontWeight: 600 }}
               />
@@ -314,7 +316,7 @@ const FeaturedProductsManager = ({ open, onClose }) => {
             <Grid container spacing={1}>
               {products.map((product) => {
                 const isSelected = featuredProducts.includes(product.id);
-                const isMaxReached = featuredProducts.length >= 4 && !isSelected;
+                const isMaxReached = featuredProducts.length >= 15 && !isSelected;
                 
                 return (
                   <Grid item xs={6} sm={3} md={3} key={product.id}>
@@ -379,98 +381,120 @@ const FeaturedProductsManager = ({ open, onClose }) => {
               <Box sx={{ mt: 4 }}>
                 <Typography variant="h6" sx={{ mb: 2, color: '#c8626d', fontWeight: 600 }}>
                   Productos Seleccionados
+                  {featuredProducts.length > 1 && (
+                    <Typography component="span" variant="caption" sx={{ ml: 2, color: '#666', fontWeight: 400 }}>
+                      (Arrastra los elementos para reordenarlos)
+                    </Typography>
+                  )}
                 </Typography>
-                <Grid container spacing={2}>
-                  {getSelectedProducts().map((product) => (
-                    <Grid item xs={12} sm={6} md={3} key={product.id}>
-                      <Card sx={{ 
-                        p: 2, 
-                        backgroundColor: replacingProduct?.id === product.id ? '#fff3cd' : '#f8f9fa', 
-                        border: replacingProduct?.id === product.id ? '2px solid #ffc107' : '1px solid #c8626d',
-                        position: 'relative'
-                      }}>
-                        <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                          <Avatar
-                            src={product.image}
-                            alt={product.name}
-                            sx={{ width: 40, height: 40, mr: 2 }}
-                          />
-                          <Box sx={{ flex: 1 }}>
-                            <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                              {product.name}
-                            </Typography>
-                            <Typography variant="caption" sx={{ color: '#666' }}>
-                              ${product.price}
-                            </Typography>
+                
+                <Reorder.Group 
+                  axis="y" 
+                  values={featuredProducts} 
+                  onReorder={setFeaturedProducts}
+                  style={{ listStyleType: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '12px' }}
+                >
+                  {featuredProducts.map((productId) => {
+                    const product = products.find(p => p.id === productId);
+                    if (!product) return null;
+                    return (
+                      <Reorder.Item key={product.id} value={product.id} style={{ cursor: 'grab' }}>
+                        <Card sx={{ 
+                          p: 1.5, 
+                          backgroundColor: replacingProduct?.id === product.id ? '#fff3cd' : '#f8f9fa', 
+                          border: replacingProduct?.id === product.id ? '2px solid #ffc107' : '1px solid #c8626d',
+                          position: 'relative',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          flexWrap: { xs: 'wrap', sm: 'nowrap' },
+                          gap: 2
+                        }}>
+                          <Box sx={{ display: 'flex', alignItems: 'center', flex: 1, minWidth: '250px' }}>
+                            <DragIndicator sx={{ color: '#aaa', mr: 1, cursor: 'grab' }} />
+                            <Avatar
+                              src={product.image}
+                              alt={product.name}
+                              sx={{ width: 40, height: 40, mr: 2 }}
+                            />
+                            <Box sx={{ flex: 1 }}>
+                              <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                                {product.name}
+                              </Typography>
+                              <Typography variant="caption" sx={{ color: '#666' }}>
+                                ${product.price}
+                              </Typography>
+                            </Box>
                           </Box>
-                        </Box>
-                        
-                        {replacingProduct?.id === product.id ? (
-                          <Box sx={{ mt: 2 }}>
-                            <Typography variant="caption" sx={{ color: '#856404', fontWeight: 600, display: 'block', mb: 1 }}>
-                              Selecciona un producto para reemplazar:
-                            </Typography>
-                            <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
-                              {products
-                                .filter(p => !featuredProducts.includes(p.id))
-                                .slice(0, 3)
-                                .map(availableProduct => (
+                          
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, minWidth: { xs: '100%', sm: 'auto' } }}>
+                            {replacingProduct?.id === product.id ? (
+                              <Box sx={{ flex: 1 }}>
+                                <Typography variant="caption" sx={{ color: '#856404', fontWeight: 600, display: 'block', mb: 1 }}>
+                                  Selecciona un producto para reemplazar:
+                                </Typography>
+                                <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+                                  {products
+                                    .filter(p => !featuredProducts.includes(p.id))
+                                    .slice(0, 3)
+                                    .map(availableProduct => (
+                                      <Button
+                                        key={availableProduct.id}
+                                        size="small"
+                                        variant="outlined"
+                                        startIcon={<SwapHoriz />}
+                                        onClick={() => handleReplaceWithProduct(availableProduct.id)}
+                                        sx={{ 
+                                          fontSize: '0.7rem',
+                                          py: 0.5,
+                                          px: 1,
+                                          minWidth: 'auto'
+                                        }}
+                                      >
+                                        {availableProduct.name.substring(0, 15)}...
+                                      </Button>
+                                    ))}
                                   <Button
-                                    key={availableProduct.id}
                                     size="small"
-                                    variant="outlined"
-                                    startIcon={<SwapHoriz />}
-                                    onClick={() => handleReplaceWithProduct(availableProduct.id)}
+                                    variant="text"
+                                    onClick={cancelReplacement}
                                     sx={{ 
                                       fontSize: '0.7rem',
-                                      py: 0.5,
-                                      px: 1,
+                                      color: '#dc3545',
                                       minWidth: 'auto'
                                     }}
                                   >
-                                    {availableProduct.name.substring(0, 15)}...
+                                    Cancelar
                                   </Button>
-                                ))}
+                                </Box>
+                              </Box>
+                            ) : (
                               <Button
                                 size="small"
-                                variant="text"
-                                onClick={cancelReplacement}
+                                variant="outlined"
+                                startIcon={<SwapHoriz />}
+                                onClick={() => handleReplaceProduct(product)}
                                 sx={{ 
                                   fontSize: '0.7rem',
-                                  color: '#dc3545',
-                                  minWidth: 'auto'
+                                  py: 0.5,
+                                  px: 1,
+                                  borderColor: '#c8626d',
+                                  color: '#c8626d',
+                                  '&:hover': {
+                                    backgroundColor: '#c8626d',
+                                    color: 'white'
+                                  }
                                 }}
                               >
-                                Cancelar
+                                Reemplazar
                               </Button>
-                            </Box>
+                            )}
                           </Box>
-                        ) : (
-                          <Button
-                            size="small"
-                            variant="outlined"
-                            startIcon={<SwapHoriz />}
-                            onClick={() => handleReplaceProduct(product)}
-                            sx={{ 
-                              mt: 1,
-                              fontSize: '0.7rem',
-                              py: 0.5,
-                              px: 1,
-                              borderColor: '#c8626d',
-                              color: '#c8626d',
-                              '&:hover': {
-                                backgroundColor: '#c8626d',
-                                color: 'white'
-                              }
-                            }}
-                          >
-                            Reemplazar
-                          </Button>
-                        )}
-                      </Card>
-                    </Grid>
-                  ))}
-                </Grid>
+                        </Card>
+                      </Reorder.Item>
+                    );
+                  })}
+                </Reorder.Group>
               </Box>
             )}
           </Card>

@@ -22,6 +22,7 @@ import PopupHero from '../components/PopupHero';
 import TestimonialsSection from '../components/TestimonialsSection';
 import ProductImage from '../components/ProductImage';
 import BoxSelectionPopup from '../components/BoxSelectionPopup';
+import FeaturedProducts from '../components/FeaturedProducts';
 
 const Home = () => {
   const { featuredProducts, products, productsLoading, addToCart } = useStore();
@@ -99,17 +100,6 @@ const Home = () => {
     };
   }, []);
 
-  const featuredItems = useMemo(() => {
-    if (productsLoading) return [];
-    const availableFeatured = featuredProducts.length > 0
-      ? featuredProducts
-      : products.filter((product) => product.featured);
-    const additionalItems = products.filter(
-      (product) => !availableFeatured.some((featured) => featured.id === product.id)
-    );
-    return [...availableFeatured, ...additionalItems].slice(0, 4);
-  }, [featuredProducts, products, productsLoading]);
-
   const handleOpenDetail = (product) => {
     if (product.category === 'boxes') {
       setSelectedBoxProduct(product);
@@ -173,94 +163,7 @@ const Home = () => {
           {copy.bannerMessage}
         </Box>
       </Box>
-      <Box sx={{ mt: { xs: 3, md: 4 }, textAlign: 'center', minHeight: '48px' }}>
-        <span
-          style={{
-            fontFamily: 'BrittanySignature',
-            fontSize: '2.4rem',
-            color: '#c8626d',
-            visibility: isBrittanyLoaded ? 'visible' : 'hidden'
-          }}
-        >
-          {copy.featuredTitle}
-        </span>
-      </Box>
-      {!productsLoading && featuredItems.length > 0 && (
-        <Box sx={{ px: { xs: 2, md: 4 }, mt: { xs: 3, md: 5 }, pb: { xs: 4, md: 6 }, display: 'flex', justifyContent: 'center' }}>
-          <Box sx={{ width: '100%', maxWidth: { md: '900px', lg: '1100px' } }}>
-          <Box
-            sx={{
-              display: 'grid',
-              gridTemplateColumns: {
-                xs: 'repeat(2, minmax(0, 1fr))',
-                md: 'repeat(3, minmax(0, 1fr))',
-                lg: 'repeat(4, minmax(0, 1fr))'
-              },
-              gap: { xs: 2, md: 3, lg: 4 }
-            }}
-          >
-            {featuredItems.map((item) => (
-              <Card
-                key={item.id}
-                sx={{
-                  borderRadius: '18px',
-                  boxShadow: '0 12px 30px rgba(0,0,0,0.08)',
-                  height: '100%'
-                }}
-              >
-                <Box sx={{ height: { xs: 160, md: 180 }, overflow: 'hidden' }}>
-                  <img 
-                    src={item.image} 
-                    alt={item.name} 
-                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                  />
-                </Box>
-                <CardContent sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1.5 }}>
-                  <Typography variant="h6" sx={{ fontWeight: 700, color: '#c8626d', fontFamily: 'Asap', fontSize: '1rem', textAlign: 'center' }}>
-                    {item.name}
-                  </Typography>
-                  <Typography variant="body1" sx={{ fontWeight: 600, color: '#4a4a4a' }}>
-                    ${Number(item.price || 0).toFixed(2)}
-                  </Typography>
-                  <Button
-                    variant="contained"
-                    sx={{ backgroundColor: '#c8626d', borderRadius: '20px', px: 3 }}
-                    onClick={() => handleOpenDetail(item)}
-                  >
-                    {copy.viewDetails}
-                  </Button>
-                </CardContent>
-              </Card>
-            ))}
-          </Box>
-          </Box>
-        </Box>
-      )}
-      <Box sx={{ display: 'flex', justifyContent: 'center', mt: { xs: 2, md: 3 } }}>
-        <Button
-          variant="outlined"
-          href="/productos"
-          sx={{
-            borderColor: '#c8626d',
-            color: '#c8626d',
-            borderRadius: '24px',
-            px: { xs: 3, md: 4 },
-            py: { xs: 1, md: 1.2 },
-            fontWeight: 600,
-            textTransform: 'none',
-            '&:hover': {
-              backgroundColor: '#c8626d',
-              color: '#fff',
-              borderColor: '#c8626d'
-            }
-          }}
-        >
-          {language === 'es' && 'Ver todas las galletas'}
-          {language === 'en' && 'View all cookies'}
-          {language === 'fr' && 'Voir tous les biscuits'}
-          {language === 'pt' && 'Ver todos os cookies'}
-        </Button>
-      </Box>
+      <FeaturedProducts onOpenDetail={handleOpenDetail} />
       <Box
         sx={{
           width: '100vw',
