@@ -21,6 +21,7 @@ import { useNavigate } from 'react-router-dom';
 import PopupHero from '../components/PopupHero';
 import TestimonialsSection from '../components/TestimonialsSection';
 import ProductImage from '../components/ProductImage';
+import BoxSelectionPopup from '../components/BoxSelectionPopup';
 
 const Home = () => {
   const { featuredProducts, products, productsLoading, addToCart } = useStore();
@@ -30,6 +31,10 @@ const Home = () => {
   const { language } = useLanguage();
   const navigate = useNavigate();
   const theme = useTheme();
+  
+  const [showBoxPopup, setShowBoxPopup] = useState(false);
+  const [selectedBoxProduct, setSelectedBoxProduct] = useState(null);
+  
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   const translations = {
@@ -107,7 +112,8 @@ const Home = () => {
 
   const handleOpenDetail = (product) => {
     if (product.category === 'boxes') {
-      navigate(`/armar-caja/${product.id}`);
+      setSelectedBoxProduct(product);
+      setShowBoxPopup(true);
     } else {
       setSelectedProduct(product);
     }
@@ -384,6 +390,12 @@ const Home = () => {
           )}
         </DialogContent>
       </Dialog>
+      
+      <BoxSelectionPopup 
+        open={showBoxPopup}
+        onClose={() => setShowBoxPopup(false)}
+        selectedBox={selectedBoxProduct}
+      />
     </Box>
   );
 };

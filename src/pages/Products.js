@@ -7,6 +7,7 @@ import { Search, AddShoppingCart, Favorite, FavoriteBorder, AccountBalanceWallet
 import { useStore } from '../context/StoreContext';
 import ProductImageCarousel from '../components/ProductImageCarousel';
 import ProductImage from '../components/ProductImage';
+import BoxSelectionPopup from '../components/BoxSelectionPopup';
 import AfterpayMessaging from '../components/AfterpayMessaging';
 import { useLanguage } from '../context/LanguageContext';
 
@@ -110,6 +111,8 @@ const Products = () => {
   const { categories, products, addToCart, productsLoading } = useStore();
   const [open, setOpen] = useState(false);
   const [selected, setSelected] = useState(null);
+  const [showBoxPopup, setShowBoxPopup] = useState(false);
+  const [selectedBox, setSelectedBox] = useState(null);
   const translatedTexts = useMemo(
     () => TEXTS[language] || TEXTS.es,
     [language]
@@ -179,7 +182,8 @@ const Products = () => {
                   className="product-card-mobile"
                   onClick={() => { 
                     if (product.category === 'boxes') {
-                      navigate(`/armar-caja/${product.id}`);
+                      setSelectedBox(product);
+                      setShowBoxPopup(true);
                       return;
                     }
                     console.log('Producto clickeado:', product);
@@ -376,7 +380,8 @@ const Products = () => {
                       onClick={(e) => {
                         e.stopPropagation();
                         if (product.category === 'boxes') {
-                          navigate(`/armar-caja/${product.id}`);
+                          setSelectedBox(product);
+                          setShowBoxPopup(true);
                         } else {
                           addToCart(product);
                         }
@@ -540,6 +545,12 @@ const Products = () => {
             )}
           </DialogContent>
         </Dialog>
+
+        <BoxSelectionPopup 
+          open={showBoxPopup}
+          onClose={() => setShowBoxPopup(false)}
+          selectedBox={selectedBox}
+        />
       </Container>
     </Box>
   );
