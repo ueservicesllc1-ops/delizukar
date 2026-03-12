@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { 
@@ -9,22 +9,39 @@ import { ShoppingBag, AutoAwesome } from '@mui/icons-material';
 import { useStore } from '../context/StoreContext';
 import { useLanguage } from '../context/LanguageContext';
 import ProductImage from '../components/ProductImage';
+import GiftMessageModal from '../components/GiftMessageModal';
 import { PRODUCT_TRANSLATIONS } from './Products';
+import { 
+  Dialog, DialogTitle, DialogContent, 
+  IconButton, Stack 
+} from '@mui/material';
+import { Close, Casino, AutoFixHigh, TouchApp } from '@mui/icons-material';
+import toast from 'react-hot-toast';
 
 const TEXTS = {
-  es: {
-    title: 'Nuestras Sweet Boxes',
-    subtitle: 'Elige el tamaño perfecto para compartir o regalar el sabor de Delizukar.',
-    choose: 'Armar mi caja',
-    loading: 'Cargando mejores dulces...',
-    empty: 'No se encontraron cajas disponibles en este momento.'
-  },
   en: {
     title: 'Our Sweet Boxes',
     subtitle: 'Choose the perfect size to share or gift the taste of Delizukar.',
     choose: 'Build my box',
     loading: 'Loading best sweets...',
-    empty: 'No boxes found available at this moment.'
+    empty: 'No boxes found available at this moment.',
+    selectionTitle: 'How do you want to build your box?',
+    surprise: 'Surprise me',
+    surpriseNote: 'We will choose the best mix for you.',
+    chooseMyself: 'Choose myself',
+    added: 'Box added to cart successfully'
+  },
+  es: {
+    title: 'Nuestras Sweet Boxes',
+    subtitle: 'Elige el tamaño perfecto para compartir o regalar el sabor de Delizukar.',
+    choose: 'Armar mi caja',
+    loading: 'Cargando mejores dulces...',
+    empty: 'No se encontraron cajas disponibles en este momento.',
+    selectionTitle: '¿Cómo quieres armar tu caja?',
+    surprise: 'Sorpréndeme',
+    surpriseNote: 'Nosotros elegiremos por ti.',
+    chooseMyself: 'Elegir yo mismo',
+    added: 'Caja agregada al carrito con éxito'
   }
 };
 
@@ -32,7 +49,12 @@ const SweetBoxes = () => {
   const navigate = useNavigate();
   const theme = useTheme();
   const { language } = useLanguage();
-  const { products, productsLoading } = useStore();
+  const { products, productsLoading, addToCart } = useStore();
+  
+  const [showModePopup, setShowModePopup] = useState(false);
+  const [showGiftModal, setShowGiftModal] = useState(false);
+  const [selectedBox, setSelectedBox] = useState(null);
+  const [pendingBox, setPendingBox] = useState(null);
   
   const t = useMemo(() => TEXTS[language] || TEXTS.es, [language]);
 
@@ -40,6 +62,58 @@ const SweetBoxes = () => {
   const boxProducts = useMemo(() => 
     products.filter(p => p.category === 'boxes' && p.active !== false),
   [products]);
+  
+  const handleBoxClick = (product) => {
+    setSelectedBox(product);
+    setShowModePopup(true);
+  };
+
+  const handleManual = () => {
+    setShowModePopup(false);
+    navigate(`/armar-caja/${selectedBox.id}`);
+  };
+
+  const handleSurprise = () => {
+    setShowModePopup(false);
+    
+    // Crear el item de caja sorpresa
+    const surpriseBox = {
+      ...selectedBox,
+      id: `${selectedBox.id}-${Date.now()}`,
+      baseId: selectedBox.id,
+      description_extra: language === 'es' ? 'Selección Sorpresa (Delizukar elige por ti)' : 'Surprise Selection (Delizukar chooses for you)'
+    };
+    
+    setPendingBox(surpriseBox);
+    setShowGiftModal(true);
+  };
+
+  const handleGiftConfirm = (giftData) => {
+    if (pendingBox) {
+      addToCart(pendingBox);
+      
+      const giftItem = {
+        ...giftData.product,
+        id: `${giftData.product.id}-${Date.now()}`,
+        giftDetails: giftData.details,
+        description_extra: `Para: ${giftData.details.to} - De: ${giftData.details.from} - Mensaje: ${giftData.details.message}`
+      };
+      
+      addToCart(giftItem);
+      toast.success(t.added);
+      setShowGiftModal(false);
+      navigate('/carrito');
+    }
+  };
+
+  const handleGiftSkip = () => {
+    if (pendingBox) {
+      addToCart(pendingBox);
+      toast.success(t.added);
+      setShowGiftModal(false);
+      navigate('/carrito');
+    }
+  };
 
   return (
     <Box sx={{ 
@@ -111,14 +185,14 @@ const SweetBoxes = () => {
           ) : boxProducts.length > 0 ? (
             boxProducts.map((product, index) => (
               <Box key={product.id}>
-                <motion.div
+                 <motion.div
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ duration: 0.4, delay: index * 0.05 }}
                   whileHover={{ y: -8 }}
                 >
                   <Card
-                    onClick={() => navigate(`/armar-caja/${product.id}`)}
+                    onClick={() => handleBoxClick(product)}
                     sx={{
                       height: '320px', // Altura fija para que sean pequeñas
                       display: 'flex',
@@ -206,6 +280,95 @@ const SweetBoxes = () => {
           )}
         </Box>
       </Container>
+
+      {/* Popup de Selección de Modo */}
+      <Dialog 
+        open={showModePopup} 
+        onClose={() => setShowModePopup(false)}
+        maxWidth="xs"
+        fullWidth
+        PaperProps={{
+          sx: { borderRadius: '24px', p: 1 }
+        }}
+      >
+        <DialogTitle sx={{ textAlign: 'center', fontWeight: 800, pt: 3 }}>
+          {t.selectionTitle}
+          <IconButton
+            onClick={() => setShowModePopup(false)}
+            sx={{ position: 'absolute', right: 16, top: 16, color: 'grey.500' }}
+          >
+            <Close />
+          </IconButton>
+        </DialogTitle>
+        <DialogContent sx={{ pb: 4 }}>
+          <Stack spacing={2} sx={{ mt: 1 }}>
+            {/* Botón Sorpréndeme */}
+            <Button
+              variant="contained"
+              fullWidth
+              size="large"
+              startIcon={<AutoFixHigh />}
+              onClick={handleSurprise}
+              sx={{
+                py: 2,
+                borderRadius: '20px',
+                backgroundColor: '#c8626d',
+                display: 'flex',
+                flexDirection: 'column',
+                height: 'auto',
+                gap: 0.5,
+                '&:hover': { backgroundColor: '#b25763' }
+              }}
+            >
+              <Typography variant="h6" sx={{ fontWeight: 800, textTransform: 'none' }}>
+                {t.surprise}
+              </Typography>
+              <Typography variant="caption" sx={{ textTransform: 'none', opacity: 0.9, fontWeight: 400 }}>
+                {t.surpriseNote}
+              </Typography>
+            </Button>
+
+            <Box sx={{ display: 'flex', alignItems: 'center', my: 1 }}>
+              <Box sx={{ flex: 1, height: '1px', bgcolor: 'divider' }} />
+              <Typography variant="caption" sx={{ px: 2, color: 'text.secondary', fontWeight: 600 }}>
+                O
+              </Typography>
+              <Box sx={{ flex: 1, height: '1px', bgcolor: 'divider' }} />
+            </Box>
+
+            {/* Botón Elegir Yo Mismo */}
+            <Button
+              variant="outlined"
+              fullWidth
+              size="large"
+              startIcon={<TouchApp />}
+              onClick={handleManual}
+              sx={{
+                py: 2,
+                borderRadius: '20px',
+                borderColor: '#c8626d',
+                color: '#c8626d',
+                fontWeight: 800,
+                textTransform: 'none',
+                '&:hover': {
+                  borderColor: '#b25763',
+                  backgroundColor: alpha('#c8626d', 0.05)
+                }
+              }}
+            >
+              {t.chooseMyself}
+            </Button>
+          </Stack>
+        </DialogContent>
+      </Dialog>
+
+      {/* Modal de Mensaje de Regalo para flujo sorpresa */}
+      <GiftMessageModal 
+        open={showGiftModal}
+        onClose={() => setShowGiftModal(false)}
+        onConfirm={handleGiftConfirm}
+        onSkip={handleGiftSkip}
+      />
     </Box>
   );
 };
