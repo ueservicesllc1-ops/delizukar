@@ -85,6 +85,24 @@ const BoxSelection = () => {
   [products]);
 
   const totalSelected = Object.values(selectedCookies).reduce((a, b) => a + b, 0);
+  
+  // Calcular el precio actual basado en las galletas seleccionadas y el descuento de la caja
+  const currentPrice = useMemo(() => {
+    if (!boxProduct) return 0;
+    
+    // Sumar el precio de todas las galletas seleccionadas
+    const subtotal = Object.entries(selectedCookies).reduce((acc, [cookieId, qty]) => {
+      const cookie = availableCookies.find(c => c.id === cookieId);
+      return acc + (cookie ? (cookie.price * qty) : 0);
+    }, 0);
+
+    // Aplicar el porcentaje de descuento de la caja
+    const discount = boxProduct.discountPercentage || 0;
+    const finalPrice = subtotal * (1 - discount / 100);
+    
+    return parseFloat(finalPrice.toFixed(2));
+  }, [selectedCookies, availableCookies, boxProduct]);
+
   const isComplete = totalSelected === boxCapacity;
 
   useEffect(() => {
@@ -140,6 +158,7 @@ const BoxSelection = () => {
       id: `${boxProduct.id}-${Date.now()}`, // Usamos un ID único para el carrito
       baseId: boxProduct.id, // Guardamos el ID original por si acaso
       selectedCookies: cookiesDetails,
+      price: currentPrice, // Usamos el precio calculado
       // Metadata para mostrar en el carrito
       description_extra: cookiesDetails.map(c => {
         const translatedName = PRODUCT_TRANSLATIONS[language]?.[c.name]?.name || c.name;
@@ -232,12 +251,37 @@ const BoxSelection = () => {
                   {isComplete && <CheckCircle sx={{ verticalAlign: 'middle' }} />}
                 </Box>
               </Box>
-              <LinearProgress 
+                <LinearProgress 
                 variant="determinate" 
                 value={(totalSelected / boxCapacity) * 100} 
                 color={isComplete ? "success" : "primary"}
                 sx={{ height: 12, borderRadius: 6 }}
               />
+              <Box sx={{ mt: 1, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <Typography variant="body2" color="text.secondary">
+                  Selecciona tus galletas favoritas
+                </Typography>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  {boxProduct.discountPercentage > 0 && (
+                    <Typography 
+                      variant="caption" 
+                      sx={{ 
+                        color: '#c8626d', 
+                        fontWeight: 700,
+                        backgroundColor: '#c8626d15',
+                        px: 1,
+                        py: 0.2,
+                        borderRadius: '4px'
+                      }}
+                    >
+                      -{boxProduct.discountPercentage}% Descuento Box
+                    </Typography>
+                  )}
+                  <Typography variant="h6" sx={{ fontWeight: 800, color: '#c8626d' }}>
+                    Total: ${currentPrice}
+                  </Typography>
+                </Box>
+              </Box>
             </Grid>
             <Grid item xs={12} md={4}>
               <Button

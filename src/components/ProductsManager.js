@@ -63,7 +63,8 @@ const ProductsManager = ({ open, onClose, categoryFilter = null }) => {
     isNew: false,
     isBestSeller: false,
     featured: false,
-    active: true
+    active: true,
+    discountPercentage: 0
   });
 
   const categories = [
@@ -206,7 +207,8 @@ const ProductsManager = ({ open, onClose, categoryFilter = null }) => {
       category: '',
       isNew: false,
       isBestSeller: false,
-      featured: false
+      featured: false,
+      discountPercentage: 0
     });
     setEditingProduct(null);
     setShowForm(false);
@@ -261,6 +263,7 @@ const ProductsManager = ({ open, onClose, categoryFilter = null }) => {
         isBestSeller: formData.isBestSeller,
         featured: formData.featured,
         active: formData.active !== false,
+        discountPercentage: formData.category === 'boxes' ? parseFloat(formData.discountPercentage || 0) : 0,
         updatedAt: new Date().toISOString()
       };
 
@@ -331,7 +334,8 @@ const ProductsManager = ({ open, onClose, categoryFilter = null }) => {
       isNew: product.isNew || false,
       isBestSeller: product.isBestSeller || false,
       featured: product.featured || false,
-      active: product.active !== false
+      active: product.active !== false,
+      discountPercentage: product.discountPercentage || 0
     });
     
     // Mostrar imágenes existentes si las hay
@@ -490,17 +494,32 @@ const ProductsManager = ({ open, onClose, categoryFilter = null }) => {
                     </Grid>
                     
                     
-                    <Grid item xs={12} md={6}>
-                      <TextField
-                        fullWidth
-                        label="Precio"
-                        type="number"
-                        value={formData.price}
-                        onChange={(e) => handleInputChange('price', e.target.value)}
-                        required
-                        sx={{ mb: 2 }}
-                      />
-                    </Grid>
+                    {formData.category !== 'boxes' ? (
+                      <Grid item xs={12} md={6}>
+                        <TextField
+                          fullWidth
+                          label="Precio"
+                          type="number"
+                          value={formData.price}
+                          onChange={(e) => handleInputChange('price', e.target.value)}
+                          required
+                          sx={{ mb: 2 }}
+                        />
+                      </Grid>
+                    ) : (
+                      <Grid item xs={12} md={6}>
+                        <TextField
+                          fullWidth
+                          label="Descuento (%)"
+                          type="number"
+                          value={formData.discountPercentage}
+                          onChange={(e) => handleInputChange('discountPercentage', e.target.value)}
+                          required
+                          sx={{ mb: 2 }}
+                          helperText="Se aplicará este % de descuento al total de galletas elegidas"
+                        />
+                      </Grid>
+                    )}
                     
                     <Grid item xs={12} md={6}>
                       <TextField

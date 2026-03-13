@@ -30,8 +30,31 @@ const TEXTS = {
 const BoxSelectionPopup = ({ open, onClose, selectedBox }) => {
   const navigate = useNavigate();
   const { language } = useLanguage();
-  const { addToCart } = useStore();
+  const { products, addToCart } = useStore();
   const t = TEXTS[language] || TEXTS.es;
+
+  // Filtrar solo galletas individuales para calcular precio promedio
+  const availableCookies = React.useMemo(() => 
+    products.filter(p => 
+      p.category !== 'boxes' && 
+      p.category !== 'regalo' && 
+      p.active !== false
+    ), 
+  [products]);
+
+  // Capacidad de la caja
+  const boxCapacity = React.useMemo(() => {
+    if (!selectedBox) return 0;
+    const match = selectedBox.name.match(/(\d+)/);
+    return match ? parseInt(match[0]) : 0;
+  }, [selectedBox]);
+
+  // Precio promedio de las galletas
+  const averageCookiePrice = React.useMemo(() => {
+    if (availableCookies.length === 0) return 0;
+    const total = availableCookies.reduce((acc, p) => acc + (p.price || 0), 0);
+    return total / availableCookies.length;
+  }, [availableCookies]);
 
   const [showGiftModal, setShowGiftModal] = React.useState(false);
   const [pendingBox, setPendingBox] = React.useState(null);
@@ -44,12 +67,20 @@ const BoxSelectionPopup = ({ open, onClose, selectedBox }) => {
   const handleSurprise = () => {
     onClose();
     
+    // Calcular el precio para la caja sorpresa
+    const subtotal = averageCookiePrice * boxCapacity;
+    const discount = selectedBox.discountPercentage || 0;
+    const finalPrice = subtotal * (1 - discount / 100);
+
     // Crear el item de caja sorpresa
     const surpriseBox = {
       ...selectedBox,
       id: `${selectedBox.id}-${Date.now()}`,
       baseId: selectedBox.id,
-      description_extra: language === 'es' ? 'Selección Sorpresa (Delizukar elige por ti)' : 'Surprise Selection (Delizukar chooses for you)'
+      price: parseFloat(finalPrice.toFixed(2)),
+      description_extra: language === 'es' 
+        ? `Selección Sorpresa (${boxCapacity} galletas - Delizukar elige por ti)` 
+        : `Surprise Selection (${boxCapacity} cookies - Delizukar chooses for you)`
     };
     
     setPendingBox(surpriseBox);

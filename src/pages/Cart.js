@@ -440,6 +440,19 @@ const Cart = () => {
                                 {item.description_extra}
                               </Typography>
                             )}
+                            {item.category === 'boxes' && item.discountPercentage > 0 && (
+                              <Typography
+                                variant="caption"
+                                sx={{
+                                  color: '#4caf50',
+                                  display: 'block',
+                                  mb: 1,
+                                  fontWeight: 600
+                                }}
+                              >
+                                Descuento de Box ({item.discountPercentage}%) aplicado
+                              </Typography>
+                            )}
                             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                               <Typography
                                 variant="h6"

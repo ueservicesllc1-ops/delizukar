@@ -143,10 +143,14 @@ const ProductCards = ({ products: propProducts, showAll = false }) => {
                           sx={{
                             fontWeight: 700,
                             color: '#c8626d',
-                            fontSize: '1.3rem'
+                            fontSize: product.category === 'boxes' ? '0.9rem' : '1.3rem'
                           }}
                         >
-                          ${product.price}
+                          {product.category === 'boxes' ? (
+                            `${product.discountPercentage}% OFF - Precio según cookies`
+                          ) : (
+                            `$${product.price}`
+                          )}
                         </Typography>
                         {product.originalPrice && (
                           <Typography
@@ -279,7 +283,11 @@ const ProductCards = ({ products: propProducts, showAll = false }) => {
                     <Box component="span" sx={{ ml: 1, color: '#666' }}>({selected.reviews} {t('cart.reviews', 'reviews')})</Box>
                   </Box>
                   <Box component="h6" sx={{ fontWeight: 700, color: '#c8626d', mb: 2 }}>
-                    ${selected.price}
+                    {selected.category === 'boxes' ? (
+                      `${selected.discountPercentage}% OFF - El precio se calculará según las galletas que elijas`
+                    ) : (
+                      `$${selected.price}`
+                    )}
                   </Box>
                   <Box component="p" sx={{ color: '#666', lineHeight: 1.6, mb: 3 }}>
                     {selected.description || 

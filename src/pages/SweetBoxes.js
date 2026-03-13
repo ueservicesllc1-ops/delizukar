@@ -152,21 +152,24 @@ const SweetBoxes = () => {
                         width="100%"
                         sx={{ objectFit: 'cover' }}
                       />
-                      <Box sx={{ 
-                        position: 'absolute', 
-                        top: 10, 
-                        right: 10, 
-                        bgcolor: 'rgba(255,255,255,0.9)', 
-                        color: '#c8626d', 
-                        px: 1.2, 
-                        py: 0.3, 
-                        borderRadius: '10px',
-                        fontWeight: 800,
-                        fontSize: '0.8rem',
-                        backdropFilter: 'blur(4px)'
-                      }}>
-                        ${product.price}
-                      </Box>
+                      {product.discountPercentage > 0 && (
+                        <Box sx={{ 
+                          position: 'absolute', 
+                          top: 10, 
+                          right: 10, 
+                          bgcolor: '#c8626d', 
+                          color: 'white', 
+                          px: 1.2, 
+                          py: 0.3, 
+                          borderRadius: '10px',
+                          fontWeight: 800,
+                          fontSize: '0.8rem',
+                          backdropFilter: 'blur(4px)',
+                          boxShadow: '0 2px 10px rgba(200, 98, 109, 0.3)'
+                        }}>
+                          -{product.discountPercentage}%
+                        </Box>
+                      )}
                     </Box>
 
                     <CardContent sx={{ p: 2, flexGrow: 1, textAlign: 'center', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
@@ -181,7 +184,31 @@ const SweetBoxes = () => {
                           lineHeight: 1.2
                         }}
                       >
-                        {PRODUCT_TRANSLATIONS[language]?.[product.name]?.name || product[`name_${language}`] || product.name}
+                      {PRODUCT_TRANSLATIONS[language]?.[product.name]?.name || product[`name_${language}`] || product.name}
+                      </Typography>
+                      {product.category === 'boxes' && product.discountPercentage > 0 && (
+                        <Typography
+                          variant="caption"
+                          sx={{
+                            color: '#c8626d',
+                            fontWeight: 600,
+                            display: 'block',
+                            mb: 1
+                          }}
+                        >
+                          ({product.discountPercentage}% de descuento aplicado al total)
+                        </Typography>
+                      )}
+                      <Typography
+                        variant="caption"
+                        sx={{
+                          color: 'text.secondary',
+                          display: 'block',
+                          mb: 1,
+                          fontSize: '0.7rem'
+                        }}
+                      >
+                        Precio final según galletas seleccionadas
                       </Typography>
                       <Button
                         variant="contained"

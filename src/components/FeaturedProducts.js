@@ -139,8 +139,12 @@ const FeaturedProducts = ({ onOpenDetail }) => {
                     >
                       {item.name}
                     </Typography>
-                    <Typography variant="body1" sx={{ fontWeight: 600, color: '#4a4a4a', fontSize: { xs: '0.9rem', md: '1rem' } }}>
-                      ${Number(item.price || 0).toFixed(2)}
+                    <Typography variant="body1" sx={{ fontWeight: 600, color: '#4a4a4a', fontSize: { xs: '0.8rem', md: '0.9rem' }, textAlign: 'center' }}>
+                      {item.category === 'boxes' ? (
+                        `${item.discountPercentage}% OFF - Precio según cookies`
+                      ) : (
+                        `$${Number(item.price || 0).toFixed(2)}`
+                      )}
                     </Typography>
                     <Button
                       variant="contained"
