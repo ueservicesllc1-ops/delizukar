@@ -51,7 +51,7 @@
   },
   "scripts": {
     "start": "craco start",
-    "build": "cross-env GENERATE_SOURCEMAP=false craco build",
+    "build": "cross-env CI=false GENERATE_SOURCEMAP=false craco build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "server": "node server.js",

@@ -1,5 +1,7 @@
 [phases.setup]
 nixPkgs = ["nodejs-18_x"]
+[phases.setup.env]
+CI = "false"
 
 [phases.install]
 cmds = ["npm ci"]
