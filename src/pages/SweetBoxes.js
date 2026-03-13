@@ -18,14 +18,18 @@ const TEXTS = {
     subtitle: 'Choose the perfect size to share or gift the taste of Delizukar.',
     choose: 'Build my box',
     loading: 'Loading best sweets...',
-    empty: 'No boxes found available at this moment.'
+    empty: 'No boxes found available at this moment.',
+    discountInfo: '({percentage}% discount applied to the total)',
+    priceNote: 'Final price based on selected cookies'
   },
   es: {
     title: 'Nuestras Sweet Boxes',
     subtitle: 'Elige el tamaño perfecto para compartir o regalar el sabor de Delizukar.',
     choose: 'Armar mi caja',
     loading: 'Cargando mejores dulces...',
-    empty: 'No se encontraron cajas disponibles en este momento.'
+    empty: 'No se encontraron cajas disponibles en este momento.',
+    discountInfo: '({percentage}% de descuento aplicado al total)',
+    priceNote: 'Precio final según galletas seleccionadas'
   }
 };
 
@@ -196,7 +200,7 @@ const SweetBoxes = () => {
                             mb: 1
                           }}
                         >
-                          ({product.discountPercentage}% de descuento aplicado al total)
+                          {t.discountInfo.replace('{percentage}', product.discountPercentage)}
                         </Typography>
                       )}
                       <Typography
@@ -208,7 +212,7 @@ const SweetBoxes = () => {
                           fontSize: '0.7rem'
                         }}
                       >
-                        Precio final según galletas seleccionadas
+                        {t.priceNote}
                       </Typography>
                       <Button
                         variant="contained"

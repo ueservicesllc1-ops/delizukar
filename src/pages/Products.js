@@ -26,7 +26,10 @@ const TEXTS = {
     reseñas: 'reseñas',
     cerrar: 'Cerrar',
     stockDisponible: 'Stock disponible:',
-    unidades: 'unidades'
+    unidades: 'unidades',
+    offMessage: 'OFF - Precio según galletas',
+    ferreroDescription: 'Galleta estilo NY con Ferrero Rocher, chips de chocolate oscuro y avellanas tostadas—intensa, elegante y adictiva.',
+    defaultDescription: 'Deliciosas {name} con ingredientes premium. Galletas estilo Nueva York perfectamente horneadas para disfrutar o compartir.'
   },
   en: {
     title: 'Our Cookies',
@@ -42,7 +45,10 @@ const TEXTS = {
     reseñas: 'reviews',
     cerrar: 'Close',
     stockDisponible: 'Stock available:',
-    unidades: 'units'
+    unidades: 'units',
+    offMessage: 'OFF - Price based on cookies',
+    ferreroDescription: 'NY-style cookie with Ferrero Rocher, dark chocolate chips, and toasted hazelnuts—intense, elegant, and addictive.',
+    defaultDescription: 'Delicious {name} with premium ingredients. Perfectly baked New York-style cookies to enjoy or share.'
   },
   fr: {
     title: 'Nos biscuits',
@@ -295,7 +301,11 @@ const Products = () => {
                             fontSize: '1.3rem'
                           }}
                         >
-                          ${product.price}
+                          {product.category === 'boxes' ? (
+                            `${product.discountPercentage}% ${translatedTexts.offMessage}`
+                          ) : (
+                            `$${product.price}`
+                          )}
                         </Typography>
                         {product.originalPrice && (
                           <Typography
@@ -470,7 +480,11 @@ const Products = () => {
                       <Typography variant="body2" sx={{ ml: 1, color: '#666' }}>({selected.reviews} {translatedTexts.reseñas})</Typography>
                     </Box>
                     <Typography variant="h6" sx={{ fontWeight: 700, color: '#c8626d', mb: 2 }}>
-                      ${selected.price}
+                      {selected.category === 'boxes' ? (
+                        `${selected.discountPercentage}% ${translatedTexts.offMessage}`
+                      ) : (
+                        `$${selected.price}`
+                      )}
                     </Typography>
                     
                     {/* Afterpay Messaging */}
@@ -517,8 +531,8 @@ const Products = () => {
                        selected[`description_${language}`] || 
                        selected.description || 
                         (selected.name && selected.name.toLowerCase().includes('ferrero') 
-                          ? 'Galleta estilo NY con Ferrero Rocher, chips de chocolate oscuro y avellanas tostadas—intensa, elegante y adictiva.'
-                          : `Deliciosas ${selected[`name_${language}`] || selected.name} con ingredientes premium. Galletas estilo Nueva York perfectamente horneadas para disfrutar o compartir.`
+                          ? translatedTexts.ferreroDescription
+                          : translatedTexts.defaultDescription.replace('{name}', selected[`name_${language}`] || selected.name)
                         )
                       }
                     </Typography>

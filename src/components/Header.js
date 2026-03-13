@@ -70,8 +70,14 @@ const Header = () => {
   }, []);
 
   const labels = {
-    es: { home: 'Inicio', products: 'Galletas', sweetbox: 'Box', about: 'Nosotros', contact: 'Contacto', faq: 'FAQ' },
-    en: { home: 'Home', products: 'Cookies', sweetbox: 'Box', about: 'About Us', contact: 'Contact', faq: 'FAQ' }
+    es: { 
+      home: 'Inicio', products: 'Galletas', sweetbox: 'Box', about: 'Nosotros', contact: 'Contacto', faq: 'FAQ',
+      logout: 'Salir', login: 'Iniciar Sesión', profile: 'Mi Perfil', orders: 'Mis Pedidos', settings: 'Configuración'
+    },
+    en: { 
+      home: 'Home', products: 'Cookies', sweetbox: 'Box', about: 'About Us', contact: 'Contact', faq: 'FAQ',
+      logout: 'Logout', login: 'Sign In', profile: 'My Profile', orders: 'My Orders', settings: 'Settings'
+    }
   };
   const L = labels[language] || labels.es;
   const menuItems = [
@@ -332,7 +338,7 @@ const Header = () => {
                   }
                 }}
               >
-                Salir
+                {L.logout}
               </Button>
               <IconButton onClick={(e) => setAnchorEl(e.currentTarget)} sx={{ color: '#c8626d' }}>
                 <Person sx={{ fontSize: '1.8rem' }} />
@@ -355,7 +361,7 @@ const Header = () => {
                 }
               }}
             >
-              Iniciar Sesión
+              {L.login}
             </Button>
           )}
           {user && (user.email === 'ueservicesllc1@gmail.com' || user.email === 'florvazdi@gmail.com') && (
@@ -448,16 +454,16 @@ const Header = () => {
           transformOrigin={{ horizontal: 'right', vertical: 'top' }}
           anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
         >
-          <MenuItem onClick={() => setAnchorEl(null)}>Mi Perfil</MenuItem>
-          <MenuItem onClick={() => setAnchorEl(null)}>Mis Pedidos</MenuItem>
-          <MenuItem onClick={() => setAnchorEl(null)}>Configuración</MenuItem>
+          <MenuItem onClick={() => setAnchorEl(null)}>{L.profile}</MenuItem>
+          <MenuItem onClick={() => setAnchorEl(null)}>{L.orders}</MenuItem>
+          <MenuItem onClick={() => setAnchorEl(null)}>{L.settings}</MenuItem>
           <MenuItem
             onClick={() => {
               setAnchorEl(null);
               handleLogout();
             }}
           >
-            Salir
+            {L.logout}
           </MenuItem>
         </Menu>
       )}

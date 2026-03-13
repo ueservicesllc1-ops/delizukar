@@ -34,22 +34,26 @@ const FeaturedProducts = ({ onOpenDetail }) => {
     es: {
       featuredTitle: 'Galletas Destacadas',
       viewDetails: 'Ver detalles',
-      viewAll: 'Ver todas las galletas'
+      viewAll: 'Ver todas las galletas',
+      offMessage: 'OFF - Precio según galletas'
     },
     en: {
       featuredTitle: 'Featured Cookies',
       viewDetails: 'View details',
-      viewAll: 'View all cookies'
+      viewAll: 'View all cookies',
+      offMessage: 'OFF - Price based on cookies'
     },
     fr: {
       featuredTitle: 'Biscuits en vedette',
       viewDetails: 'Voir les détails',
-      viewAll: 'Voir tous les biscuits'
+      viewAll: 'Voir tous les biscuits',
+      offMessage: 'OFF - Prix selon les biscuits'
     },
     pt: {
       featuredTitle: 'Cookies em destaque',
-      viewDetails: 'Ver detalles',
-      viewAll: 'Ver todos os cookies'
+      viewDetails: 'Ver detalhes',
+      viewAll: 'Ver todos os cookies',
+      offMessage: 'OFF - Preço de acordo com os cookies'
     }
   };
 
@@ -137,11 +141,11 @@ const FeaturedProducts = ({ onOpenDetail }) => {
                         lineHeight: 1.2
                       }}
                     >
-                      {item.name}
+                      {item[`name_${language}`] || item.name}
                     </Typography>
                     <Typography variant="body1" sx={{ fontWeight: 600, color: '#4a4a4a', fontSize: { xs: '0.8rem', md: '0.9rem' }, textAlign: 'center' }}>
                       {item.category === 'boxes' ? (
-                        `${item.discountPercentage}% OFF - Precio según cookies`
+                        `${item.discountPercentage}% ${copy.offMessage}`
                       ) : (
                         `$${Number(item.price || 0).toFixed(2)}`
                       )}

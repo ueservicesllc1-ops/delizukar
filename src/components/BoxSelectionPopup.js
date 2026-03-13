@@ -16,14 +16,16 @@ const TEXTS = {
     surprise: 'Surprise me',
     surpriseNote: 'We will choose the best mix for you.',
     chooseMyself: 'Choose myself',
-    added: 'Box added to cart successfully'
+    added: 'Box added to cart successfully',
+    or: 'OR'
   },
   es: {
     selectionTitle: '¿Cómo quieres armar tu caja?',
     surprise: 'Sorpréndeme',
     surpriseNote: 'Nosotros elegiremos por ti.',
     chooseMyself: 'Elegir yo mismo',
-    added: 'Caja agregada al carrito con éxito'
+    added: 'Caja agregada al carrito con éxito',
+    or: 'O'
   }
 };
 
@@ -166,7 +168,7 @@ const BoxSelectionPopup = ({ open, onClose, selectedBox }) => {
             <Box sx={{ display: 'flex', alignItems: 'center', my: 1 }}>
               <Box sx={{ flex: 1, height: '1px', bgcolor: 'divider' }} />
               <Typography variant="caption" sx={{ px: 2, color: 'text.secondary', fontWeight: 600 }}>
-                O
+                {t.or}
               </Typography>
               <Box sx={{ flex: 1, height: '1px', bgcolor: 'divider' }} />
             </Box>

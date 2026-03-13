@@ -3,11 +3,41 @@ import { motion } from 'framer-motion';
 import { Box, Grid, Card, CardContent, CardActions, Button, Chip, Rating, IconButton, Dialog, DialogContent, Typography } from '@mui/material';
 import { Close, AddShoppingCart, FavoriteBorder, AccountBalanceWallet, ShoppingBag } from '@mui/icons-material';
 import { useStore } from '../context/StoreContext';
+import { useLanguage } from '../context/LanguageContext';
 import ProductImage from './ProductImage';
  
 
 const ProductCards = ({ products: propProducts, showAll = false }) => {
-  const t = (k, fallback) => (typeof fallback === 'string' ? fallback : (typeof k === 'string' ? k : ''));
+  const { language } = useLanguage();
+  
+  const translations = {
+    es: {
+      new: 'Nuevo',
+      bestSeller: 'Bestseller',
+      addToCart: 'Añadir al carrito',
+      viewDetails: 'Ver detalles',
+      reviews: 'reseñas',
+      offMessage: 'OFF - Precio según galletas',
+      boxPriceInfo: 'El precio se calculará según las galletas que elijas',
+      defaultDescription: 'Deliciosas {name} con ingredientes de primera calidad...',
+      ferreroDescription: 'Galleta estilo NY con Ferrero Rocher...'
+    },
+    en: {
+      new: 'New',
+      bestSeller: 'Best Seller',
+      addToCart: 'Add to Cart',
+      viewDetails: 'View Details',
+      reviews: 'reviews',
+      offMessage: 'OFF - Price based on cookies',
+      boxPriceInfo: 'The price will be calculated based on the cookies you choose',
+      defaultDescription: 'Delicious {name} with premium ingredients...',
+      ferreroDescription: 'NY-style cookie with Ferrero Rocher...'
+    }
+  };
+
+  const text = translations[language] || translations.es;
+  const t = (k, fallback) => text[k.split('.').pop()] || fallback;
+
   const [open, setOpen] = useState(false);
   const [selected, setSelected] = useState(null);
   const { addToCart, products } = useStore();
@@ -131,7 +161,7 @@ const ProductCards = ({ products: propProducts, showAll = false }) => {
                         letterSpacing: '0.5px'
                       }}
                     >
-                      {product.name}
+                      {product[`name_${language}`] || product.name}
                     </Typography>
 
                     {/* Precio y Rating */}
@@ -147,7 +177,7 @@ const ProductCards = ({ products: propProducts, showAll = false }) => {
                           }}
                         >
                           {product.category === 'boxes' ? (
-                            `${product.discountPercentage}% OFF - Precio según cookies`
+                            `${product.discountPercentage}% ${text.offMessage}`
                           ) : (
                             `$${product.price}`
                           )}
@@ -276,7 +306,7 @@ const ProductCards = ({ products: propProducts, showAll = false }) => {
                     textTransform: 'uppercase',
                     letterSpacing: '0.5px'
                   }}>
-                    {selected.name}
+                    {selected[`name_${language}`] || selected.name}
                   </Box>
                   <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
                     <Rating value={selected.rating} precision={0.1} readOnly size="small" sx={{ color: '#FFD700' }} />
@@ -284,13 +314,13 @@ const ProductCards = ({ products: propProducts, showAll = false }) => {
                   </Box>
                   <Box component="h6" sx={{ fontWeight: 700, color: '#c8626d', mb: 2 }}>
                     {selected.category === 'boxes' ? (
-                      `${selected.discountPercentage}% OFF - El precio se calculará según las galletas que elijas`
+                      `${selected.discountPercentage}% OFF - ${text.boxPriceInfo}`
                     ) : (
                       `$${selected.price}`
                     )}
                   </Box>
                   <Box component="p" sx={{ color: '#666', lineHeight: 1.6, mb: 3 }}>
-                    {selected.description || 
+                    {selected[`description_${language}`] || selected.description || 
                       (selected.name && selected.name.toLowerCase().includes('ferrero') 
                         ? t('product.ferreroDescription', 'NY-style cookie with Ferrero Rocher...')
                         : t('product.defaultDescription', 'Delicious {name} with premium ingredients...', { name: selected.name })

@@ -190,10 +190,12 @@ const Home = () => {
             color: '#c8626d'
           }}
         >
-          {language === 'es' && 'Nuestros Clientes Felices'}
-          {language === 'en' && 'Our Happy Clients'}
-          {language === 'fr' && 'Nos clients heureux'}
-          {language === 'pt' && 'Nossos clientes felizes'}
+          {{
+            es: 'Nuestros Clientes Felices',
+            en: 'Our Happy Clients',
+            fr: 'Nos clients heureux',
+            pt: 'Nossos clientes felizes'
+          }[language] || 'Nuestros Clientes Felices'}
         </Typography>
       </Box>
       <Box sx={{ mt: { xs: 4, md: 6 } }}>
@@ -243,7 +245,7 @@ const Home = () => {
               </Box>
               <Box sx={{ flex: 1, p: { xs: 2.5, md: 4 } }}>
                 <Typography sx={{ fontWeight: 700, mb: 1, color: '#333', fontFamily: 'Asap', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                  {selectedProduct.name}
+                  {selectedProduct[`name_${language}`] || selectedProduct.name}
                 </Typography>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
                   {selectedProduct.rating && (
@@ -258,9 +260,9 @@ const Home = () => {
                 <Typography sx={{ fontWeight: 700, color: '#c8626d', mb: 2, fontSize: '1.4rem' }}>
                   ${Number(selectedProduct.price || 0).toFixed(2)}
                 </Typography>
-                {selectedProduct.description && (
+                {(selectedProduct[`description_${language}`] || selectedProduct.description) && (
                   <Typography variant="body2" sx={{ color: '#555', lineHeight: 1.6, mb: 3 }}>
-                    {selectedProduct.description}
+                    {selectedProduct[`description_${language}`] || selectedProduct.description}
                   </Typography>
                 )}
                 <Divider sx={{ mb: 3 }} />

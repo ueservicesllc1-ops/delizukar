@@ -83,7 +83,7 @@ const initialState = {
     {
       id: '5',
       name: 'Sweet Box – 4 Cookies',
-      name_es: 'Sweet Box – 4 Cookies',
+      name_es: 'Sweet Box – 4 Galletas',
       name_en: 'Sweet Box – 4 Cookies',
       price: 52.00,
       image: '/assets/images/caja_generica.png',
@@ -101,7 +101,7 @@ const initialState = {
     {
       id: '6',
       name: 'Sweet Box – 6 Cookies',
-      name_es: 'Sweet Box – 6 Cookies',
+      name_es: 'Sweet Box – 6 Galletas',
       name_en: 'Sweet Box – 6 Cookies',
       price: 74.10,
       image: '/assets/images/caja_generica.png',
@@ -119,7 +119,7 @@ const initialState = {
     {
       id: '7',
       name: 'Deluxe Sweet Box – 12 Cookies',
-      name_es: 'Deluxe Sweet Box – 12 Cookies',
+      name_es: 'Deluxe Sweet Box – 12 Galletas',
       name_en: 'Deluxe Sweet Box – 12 Cookies',
       price: 140.40,
       image: '/assets/images/caja_generica.png',

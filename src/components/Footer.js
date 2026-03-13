@@ -38,14 +38,16 @@ const Footer = () => {
       faq: 'Preguntas Frecuentes', allergy: 'Avisos de Alergias', shipping: 'Política de Envío', cookie: 'Instrucciones de Cuidado de Galletas',
       navTitle: 'Navegación', navHome: 'Inicio', navProducts: 'Productos', navContact: 'Contacto', navAbout: 'Nosotros',
       subscribe: 'Suscríbete a nuestros emails', emailPh: 'Correo electrónico', subscribing: 'Suscribiendo...', subscribeBtn: 'Suscribir',
-      followUs: 'Síguenos en', payments: 'Métodos de pago', copyright: 'Todos los derechos reservados.', madeWith: 'Hecho con amor', developed: 'Desarrollado por Freedom Labs.'
+      followUs: 'Síguenos en', payments: 'Métodos de pago', copyright: 'Todos los derechos reservados.', madeWith: 'Hecho con amor', developed: 'Desarrollado por Freedom Labs.',
+      msgEnterEmail: 'Ingresa tu correo', msgValidEmail: 'Ingresa un correo válido', msgAlreadySubscribed: 'Ya estás suscrito', msgSuccess: 'Suscripción exitosa', msgError: 'Error al suscribirte'
     },
     en: {
       quickLinks: 'Quick Links', terms: 'Terms and Conditions', termsService: 'Terms of Service',
       faq: 'Frequently Asked Questions', allergy: 'Allergy Notices', shipping: 'Shipping Policy', cookie: 'Cookie Care Instructions',
       navTitle: 'Navigation', navHome: 'Home', navProducts: 'Products', navContact: 'Contact', navAbout: 'About Us',
       subscribe: 'Subscribe to our emails', emailPh: 'Email address', subscribing: 'Subscribing...', subscribeBtn: 'Subscribe',
-      followUs: 'Follow us', payments: 'Payment methods', copyright: 'All rights reserved.', madeWith: 'Made with love', developed: 'Developed by Freedom Labs.'
+      followUs: 'Follow us', payments: 'Payment methods', copyright: 'All rights reserved.', madeWith: 'Made with love', developed: 'Developed by Freedom Labs.',
+      msgEnterEmail: 'Please enter your email', msgValidEmail: 'Please enter a valid email', msgAlreadySubscribed: 'Already subscribed', msgSuccess: 'Successful subscription', msgError: 'Error subscribing'
     },
     fr: {
       quickLinks: 'Liens rapides', terms: 'Termes et conditions', termsService: 'Conditions d’utilisation',
@@ -95,12 +97,12 @@ const Footer = () => {
 
   const handleSubscribe = async () => {
     if (!email.trim()) {
-      setSubscriptionMessage('Ingresa tu correo');
+      setSubscriptionMessage(text.msgEnterEmail);
       return;
     }
 
     if (!email.includes('@')) {
-      setSubscriptionMessage('Ingresa un correo válido');
+      setSubscriptionMessage(text.msgValidEmail);
       return;
     }
 
@@ -113,7 +115,7 @@ const Footer = () => {
       const querySnapshot = await getDocs(q);
 
       if (!querySnapshot.empty) {
-        setSubscriptionMessage('Ya estás suscrito');
+        setSubscriptionMessage(text.msgAlreadySubscribed);
         setSubscriptionLoading(false);
         return;
       }
@@ -125,7 +127,7 @@ const Footer = () => {
         source: 'footer'
       });
 
-      setSubscriptionMessage('Suscripción exitosa');
+      setSubscriptionMessage(text.msgSuccess);
       setEmail('');
 
       setTimeout(() => {
@@ -133,7 +135,7 @@ const Footer = () => {
       }, 3000);
     } catch (error) {
       console.error('Error suscribiendo email:', error);
-      setSubscriptionMessage('Error al suscribirte');
+      setSubscriptionMessage(text.msgError);
     } finally {
       setSubscriptionLoading(false);
     }
@@ -200,7 +202,7 @@ const Footer = () => {
                 {text.navProducts || 'Productos'}
               </Link>
               <Link href="/sweet-boxes" sx={{ color: 'white', textDecoration: 'none', fontSize: '0.95rem', '&:hover': { color: '#EB8B8B' } }}>
-                {language === 'es' ? 'Sweet Box' : 'Sweet Box'}
+                Sweet Box
               </Link>
               <Link href="/contacto" sx={{ color: 'white', textDecoration: 'none', fontSize: '0.95rem', '&:hover': { color: '#EB8B8B' } }}>
                 {text.navContact || 'Contacto'}
