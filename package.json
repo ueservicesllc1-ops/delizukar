@@ -51,7 +51,7 @@
   },
   "scripts": {
     "start": "craco start",
-    "build": "GENERATE_SOURCEMAP=false craco build",
+    "build": "cross-env GENERATE_SOURCEMAP=false craco build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "server": "node server.js",
@@ -88,5 +88,8 @@
   "proxy": "http://localhost:5000",
   "overrides": {
     "typescript": "^4.9.5"
+  },
+  "devDependencies": {
+    "cross-env": "^10.1.0"
   }
 }
