@@ -64,7 +64,7 @@ const BannerPhotoManager = ({ open, onClose }) => {
 
   const loadBannerText = async () => {
     try {
-      const docRef = doc(db, 'settings', 'bannerText');
+      const docRef = doc(db, 'settings', 'heroText');
       const docSnap = await getDoc(docRef);
       if (docSnap.exists()) {
         const data = docSnap.data();
@@ -82,7 +82,7 @@ const BannerPhotoManager = ({ open, onClose }) => {
 
   const saveBannerText = async () => {
     try {
-      await setDoc(doc(db, 'settings', 'bannerText'), globalBannerText);
+      await setDoc(doc(db, 'settings', 'heroText'), globalBannerText);
       showSnackbar('Texto del banner guardado', 'success');
     } catch (error) {
       showSnackbar('Error al guardar texto', 'error');

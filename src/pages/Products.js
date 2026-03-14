@@ -7,7 +7,7 @@ import { Search, AddShoppingCart, Favorite, FavoriteBorder, AccountBalanceWallet
 import { useStore } from '../context/StoreContext';
 import { db } from '../firebase/config';
 import { doc, getDoc } from 'firebase/firestore';
-import VideoReviewsCarousel from '../components/VideoReviewsCarousel';
+// import VideoReviewsCarousel from '../components/VideoReviewsCarousel';
 import ComparisonTable from '../components/ComparisonTable';
 import ProductImageCarousel from '../components/ProductImageCarousel';
 import ProductImage from '../components/ProductImage';
@@ -33,7 +33,13 @@ const TEXTS = {
     unidades: 'unidades',
     offMessage: 'OFF - Precio según galletas',
     ferreroDescription: 'Galleta estilo NY con Ferrero Rocher, chips de chocolate oscuro y avellanas tostadas—intensa, elegante y adictiva.',
-    defaultDescription: 'Deliciosas {name} con ingredientes premium. Galletas estilo Nueva York perfectamente horneadas para disfrutar o compartir.'
+    defaultDescription: 'Deliciosas {name} con ingredientes premium. Galletas estilo Nueva York perfectamente horneadas para disfrutar o compartir.',
+    aboutTitle: 'Recién horneadas para ti',
+    aboutContent: 'En Delizukar no hacemos cookies para almacenar. Cada pedido se hornea al momento con ingredientes de primera calidad. Luego las sellamos para que lleguen a tu puerta tan frescas como salieron del horno. Crujientes por fuera. Suaves y fundentes por dentro. Así debe ser una verdadera cookie.',
+    differentTitle: '¿Por qué Delizukar?',
+    differentContent: 'Porque las buenas cookies empiezan con ingredientes reales. Mantequilla de verdad. Huevos frescos. Chocolate premium. Sin conservantes. Sin sabores artificiales. Solo cookies artesanales hechas para disfrutarse recién horneadas.',
+    ingredientsTitle: 'Ingredientes reales',
+    ingredientsContent: 'Harina, mantequilla, huevos, azúcar blanca, azúcar moreno, chocolate, vainilla, polvo para hornear y una pizca de sal. Los ingredientes pueden variar ligeramente según el sabor. Nada más. Sin ingredientes extraños. Solo cookies gruesas, suaves y llenas de sabor. Delizukar no solo somos cookies, somos momentos dulces.'
   },
   en: {
     title: 'Our Cookies',
@@ -52,7 +58,13 @@ const TEXTS = {
     unidades: 'units',
     offMessage: 'OFF - Price based on cookies',
     ferreroDescription: 'NY-style cookie with Ferrero Rocher, dark chocolate chips, and toasted hazelnuts—intense, elegant, and addictive.',
-    defaultDescription: 'Delicious {name} with premium ingredients. Perfectly baked New York-style cookies to enjoy or share.'
+    defaultDescription: 'Delicious {name} with premium ingredients. Perfectly baked New York-style cookies to enjoy or share.',
+    aboutTitle: 'About our cookies',
+    aboutContent: 'At Delizukar, we don\'t bake cookies to sit on a shelf. Every order is baked to order using top-quality ingredients. We then seal them to ensure they arrive at your doorstep as fresh as the moment they left the oven. Crispy on the outside, soft and gooey on the inside. That’s exactly how a real cookie should be.',
+    differentTitle: 'What makes us different',
+    differentContent: 'Because great cookies start with real ingredients. Real butter. Fresh eggs. Premium chocolate. No preservatives. No artificial flavors. Just artisanal cookies crafted to be enjoyed freshly baked.',
+    ingredientsTitle: 'Ingredients',
+    ingredientsContent: 'Flour, butter, eggs, white sugar, brown sugar, chocolate, vanilla, baking powder, and a pinch of salt. Ingredients may vary slightly depending on the flavor. Nothing else. No strange additives. Just thick, soft, and flavor-packed cookies. At Delizukar, we aren\'t just about cookies; we are about creating sweet moments.'
   },
   fr: {
     title: 'Nos biscuits',
@@ -123,14 +135,7 @@ const Products = () => {
   const [selected, setSelected] = useState(null);
   const [showBoxPopup, setShowBoxPopup] = useState(false);
   const [selectedBox, setSelectedBox] = useState(null);
-  const [accordionData, setAccordionData] = useState({
-    aboutTitle: 'Acerca de nuestra cookie',
-    aboutContent: 'Nuestras galletas son horneadas artesanalmente cada día con ingredientes de la más alta calidad. Inspiradas en el estilo de Nueva York, cada bocado ofrece una textura crujiente por fuera y suave por dentro.',
-    differentTitle: 'Lo que nos hace diferentes',
-    differentContent: 'No escatimamos en calidad. Usamos chocolate premium, mantequilla real y técnicas de horneado perfeccionadas durante años para asegurar que cada galleta sea una experiencia inolvidable.',
-    ingredientsTitle: 'Ingredientes',
-    ingredientsContent: 'Harina de trigo enriquecida, mantequilla premium, chips de chocolate belga, azúcar morena, huevos de granja, esencia de vanilla natural y una pizca de sal marina.'
-  });
+  const [accordionData, setAccordionData] = useState(null);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
@@ -301,7 +306,7 @@ const Products = () => {
                       sx={{
                         position: 'absolute',
                         top: 12,
-                        right: isMobile ? 8 : 45,
+                        right: 8,
                         zIndex: 2
                       }}
                     >
@@ -485,12 +490,12 @@ const Products = () => {
                 sx={{ px: 0 }}
               >
                 <Typography sx={{ fontWeight: 600, color: '#7C2815', fontSize: '1.1rem' }}>
-                  {accordionData.aboutTitle}
+                  {accordionData?.[`aboutTitle_${language}`] || accordionData?.aboutTitle || translatedTexts.aboutTitle}
                 </Typography>
               </AccordionSummary>
               <AccordionDetails sx={{ px: 0, pb: 2 }}>
                 <Typography variant="body2" sx={{ color: '#666', lineHeight: 1.8 }}>
-                  {accordionData.aboutContent}
+                  {accordionData?.[`aboutContent_${language}`] || accordionData?.aboutContent || translatedTexts.aboutContent}
                 </Typography>
               </AccordionDetails>
             </Accordion>
@@ -507,12 +512,12 @@ const Products = () => {
                 sx={{ px: 0 }}
               >
                 <Typography sx={{ fontWeight: 600, color: '#7C2815', fontSize: '1.1rem' }}>
-                  {accordionData.differentTitle}
+                  {accordionData?.[`differentTitle_${language}`] || accordionData?.differentTitle || translatedTexts.differentTitle}
                 </Typography>
               </AccordionSummary>
               <AccordionDetails sx={{ px: 0, pb: 2 }}>
                 <Typography variant="body2" sx={{ color: '#666', lineHeight: 1.8 }}>
-                  {accordionData.differentContent}
+                  {accordionData?.[`differentContent_${language}`] || accordionData?.differentContent || translatedTexts.differentContent}
                 </Typography>
               </AccordionDetails>
             </Accordion>
@@ -529,12 +534,12 @@ const Products = () => {
                 sx={{ px: 0 }}
               >
                 <Typography sx={{ fontWeight: 600, color: '#7C2815', fontSize: '1.1rem' }}>
-                  {accordionData.ingredientsTitle}
+                  {accordionData?.[`ingredientsTitle_${language}`] || accordionData?.ingredientsTitle || translatedTexts.ingredientsTitle}
                 </Typography>
               </AccordionSummary>
               <AccordionDetails sx={{ px: 0, pb: 2 }}>
                 <Typography variant="body2" sx={{ color: '#666', lineHeight: 1.8 }}>
-                  {accordionData.ingredientsContent}
+                  {accordionData?.[`ingredientsContent_${language}`] || accordionData?.ingredientsContent || translatedTexts.ingredientsContent}
                 </Typography>
               </AccordionDetails>
             </Accordion>
@@ -702,7 +707,7 @@ const Products = () => {
       </Container>
 
       {/* Video Reviews and Comparison Table */}
-      <VideoReviewsCarousel />
+      {/* <VideoReviewsCarousel /> */}
       <ComparisonTable />
     </Box>
   );

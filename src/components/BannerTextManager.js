@@ -72,7 +72,7 @@ const BannerTextManager = ({ open, onClose }) => {
 
       <DialogContent sx={{ mt: 2 }}>
         <Typography variant="body2" color="text.secondary" gutterBottom>
-          Este texto aparecerá en la barra rosa debajo del banner principal.
+          Este texto aparecerá <strong>únicamente</strong> en la barra rosa debajo del banner principal. Para el texto sobre la foto, usa "Texto Flotante".
         </Typography>
 
         {loading ? (

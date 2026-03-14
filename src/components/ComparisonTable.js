@@ -63,68 +63,22 @@ const ComparisonTable = () => {
   ];
 
   return (
-    <Container maxWidth="lg" sx={{ py: { xs: 6, md: 10 } }}>
-      <Box sx={{ textAlign: 'center', mb: 6 }}>
-        <Typography 
-          variant="h3" 
-          sx={{ 
-            color: '#c8626d', 
-            fontWeight: 800,
-            fontSize: { xs: '2rem', md: '3.5rem' },
-            mb: 1
-          }}
-        >
-          {t.stats}
-        </Typography>
-        <Typography 
-          variant="h6" 
-          sx={{ 
-            color: '#666', 
-            fontWeight: 500,
-            fontSize: { xs: '1rem', md: '1.25rem' },
-            fontStyle: 'italic',
-            mb: 6
-          }}
-        >
-          {t.happy}
-        </Typography>
-
-        <Typography variant="h4" sx={{ 
-          color: '#333', 
-          fontWeight: 700,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          gap: 1.5,
-          flexWrap: 'wrap',
-          fontSize: { xs: '1.5rem', md: '2.5rem' }
-        }}>
-          {t.evil} <span style={{ fontWeight: 400, color: '#666', fontSize: '1.2rem' }}>{t.or}</span> 
-          <Box 
-            component="img" 
-            src="/LOGO.png" 
-            alt="Delizukar" 
-            sx={{ 
-              height: { xs: 60, md: 100 }, 
-              width: 'auto',
-              ml: 1
-            }} 
-          />
-        </Typography>
-      </Box>
+    <Container maxWidth="md" sx={{ py: { xs: 6, md: 10 } }}>
+      {/* Header removido por petición del usuario */}
 
       <TableContainer component={Paper} elevation={0} sx={{ 
         borderRadius: '20px', 
         overflow: 'hidden',
         boxShadow: '0 10px 40px rgba(0,0,0,0.08)',
-        border: '1px solid #eee'
+        border: '1px solid #eee',
+        maxWidth: '800px',
+        mx: 'auto'
       }}>
-        <Table sx={{ minWidth: { xs: 300, md: 650 } }}>
+        <Table sx={{ minWidth: { xs: 280, md: 500 } }}>
           <TableHead>
             <TableRow sx={{ backgroundColor: '#c8626d' }}>
               <TableCell sx={{ color: 'white', fontWeight: 800, py: 3, fontSize: '0.9rem', letterSpacing: '1px' }}>{t.benefits}</TableCell>
               <TableCell align="center" sx={{ color: 'white', fontWeight: 800, py: 3, fontSize: '0.9rem', letterSpacing: '1px' }}>{t.delizukar}</TableCell>
-              <TableCell align="center" sx={{ color: 'white', fontWeight: 800, py: 3, fontSize: '0.9rem', letterSpacing: '1px' }}>{t.evilCorporate}</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -143,9 +97,6 @@ const ComparisonTable = () => {
                 </TableCell>
                 <TableCell align="center">
                   <Check sx={{ color: '#4CAF50', fontSize: { xs: 20, md: 28 } }} />
-                </TableCell>
-                <TableCell align="center">
-                  <Close sx={{ color: '#F44336', fontSize: { xs: 20, md: 28 } }} />
                 </TableCell>
               </TableRow>
             ))}

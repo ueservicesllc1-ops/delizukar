@@ -15,7 +15,7 @@ import { Accordion, AccordionSummary, AccordionDetails } from '@mui/material';
 import { ExpandMore } from '@mui/icons-material';
 import { PRODUCT_TRANSLATIONS } from './Products';
 import BoxSelectionPopup from '../components/BoxSelectionPopup';
-import VideoReviewsCarousel from '../components/VideoReviewsCarousel';
+// import VideoReviewsCarousel from '../components/VideoReviewsCarousel';
 import ComparisonTable from '../components/ComparisonTable';
 
 const TEXTS = {
@@ -354,7 +354,7 @@ const SweetBoxes = () => {
       />
 
       {/* Video Reviews and Comparison Table */}
-      <VideoReviewsCarousel />
+      {/* <VideoReviewsCarousel /> */}
       <ComparisonTable />
     </Box>
   );

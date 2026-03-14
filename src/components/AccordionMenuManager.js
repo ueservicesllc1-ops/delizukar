@@ -18,12 +18,20 @@ import { doc, getDoc, setDoc } from 'firebase/firestore';
 
 const AccordionMenuManager = ({ open, onClose }) => {
   const [data, setData] = useState({
-    aboutTitle: 'Acerca de nuestra cookie',
-    aboutContent: 'Nuestras galletas son horneadas artesanalmente cada día con ingredientes de la más alta calidad. Inspiradas en el estilo de Nueva York, cada bocado ofrece una textura crujiente por fuera y suave por dentro.',
-    differentTitle: 'Lo que nos hace diferentes',
-    differentContent: 'No escatimamos en calidad. Usamos chocolate premium, mantequilla real y técnicas de horneado perfeccionadas durante años para asegurar que cada galleta sea una experiencia inolvidable.',
-    ingredientsTitle: 'Ingredientes',
-    ingredientsContent: 'Harina de trigo enriquecida, mantequilla premium, chips de chocolate belga, azúcar morena, huevos de granja, esencia de vainilla natural y una pizca de sal marina.'
+    aboutTitle: 'Recién horneadas para ti',
+    aboutContent: 'En Delizukar no hacemos cookies para almacenar. Cada pedido se hornea al momento con ingredientes de primera calidad. Luego las sellamos para que lleguen a tu puerta tan frescas como salieron del horno. Crujientes por fuera. Suaves y fundentes por dentro. Así debe ser una verdadera cookie.',
+    aboutTitle_en: 'About our cookies',
+    aboutContent_en: 'At Delizukar, we don\'t bake cookies to sit on a shelf. Every order is baked to order using top-quality ingredients. We then seal them to ensure they arrive at your doorstep as fresh as the moment they left the oven. Crispy on the outside, soft and gooey on the inside. That’s exactly how a real cookie should be.',
+    
+    differentTitle: '¿Por qué Delizukar?',
+    differentContent: 'Porque las buenas cookies empiezan con ingredientes reales. Mantequilla de verdad. Huevos frescos. Chocolate premium. Sin conservantes. Sin sabores artificiales. Solo cookies artesanales hechas para disfrutarse recién horneadas.',
+    differentTitle_en: 'What makes us different',
+    differentContent_en: 'Because great cookies start with real ingredients. Real butter. Fresh eggs. Premium chocolate. No preservatives. No artificial flavors. Just artisanal cookies crafted to be enjoyed freshly baked.',
+    
+    ingredientsTitle: 'Ingredientes reales',
+    ingredientsContent: 'Harina, mantequilla, huevos, azúcar blanca, azúcar moreno, chocolate, vainilla, polvo para hornear y una pizca de sal. Los ingredientes pueden variar ligeramente según el sabor. Nada más. Sin ingredientes extraños. Solo cookies gruesas, suaves y llenas de sabor. Delizukar no solo somos cookies, somos momentos dulces.',
+    ingredientsTitle_en: 'Ingredients',
+    ingredientsContent_en: 'Flour, butter, eggs, white sugar, brown sugar, chocolate, vanilla, baking powder, and a pinch of salt. Ingredients may vary slightly depending on the flavor. Nothing else. No strange additives. Just thick, soft, and flavor-packed cookies. At Delizukar, we aren\'t just about cookies; we are about creating sweet moments.'
   });
   
   const [loading, setLoading] = useState(false);
@@ -45,7 +53,7 @@ const AccordionMenuManager = ({ open, onClose }) => {
       const docSnap = await getDoc(docRef);
       
       if (docSnap.exists()) {
-        setData(docSnap.data());
+        setData(prev => ({ ...prev, ...docSnap.data() }));
       } else {
         // Si no existe, guardar valores por defecto
         await setDoc(docRef, { 
@@ -94,7 +102,7 @@ const AccordionMenuManager = ({ open, onClose }) => {
     <Dialog
       open={open}
       onClose={onClose}
-      maxWidth="md"
+      maxWidth="lg"
       fullWidth
       PaperProps={{
         sx: { borderRadius: '15px' }
@@ -102,7 +110,7 @@ const AccordionMenuManager = ({ open, onClose }) => {
     >
       <DialogTitle sx={{ backgroundColor: '#c8626d', color: 'white' }}>
         <Typography variant="h6" fontWeight={700}>
-          Gestionar Menú Desplegable (Mobile)
+          Gestionar Menú Desplegable Bilingüe (Mobile & Web)
         </Typography>
       </DialogTitle>
 
@@ -112,14 +120,15 @@ const AccordionMenuManager = ({ open, onClose }) => {
             <CircularProgress sx={{ color: '#c8626d' }} />
           </Box>
         ) : (
-          <Grid container spacing={3}>
-            <Grid item xs={12}>
-              <Typography variant="subtitle1" fontWeight={700} color="#c8626d">
-                Opción 1: Acerca de
+          <Grid container spacing={4}>
+            {/* OPCIÓN 1: ACERCA DE */}
+            <Grid item xs={12} md={6}>
+              <Typography variant="subtitle1" fontWeight={700} color="#c8626d" gutterBottom>
+                OPCIÓN 1: ACERCA DE (ESPAÑOL)
               </Typography>
               <TextField
                 fullWidth
-                label="Título"
+                label="Título (ES)"
                 name="aboutTitle"
                 value={data.aboutTitle}
                 onChange={handleChange}
@@ -127,24 +136,49 @@ const AccordionMenuManager = ({ open, onClose }) => {
               />
               <TextField
                 fullWidth
-                label="Contenido"
+                label="Contenido (ES)"
                 name="aboutContent"
                 value={data.aboutContent}
                 onChange={handleChange}
                 multiline
-                rows={3}
+                rows={4}
                 margin="dense"
               />
             </Grid>
-            <Grid item xs={12}><Divider /></Grid>
-            
-            <Grid item xs={12}>
-              <Typography variant="subtitle1" fontWeight={700} color="#c8626d">
-                Opción 2: Diferenciación
+            <Grid item xs={12} md={6}>
+              <Typography variant="subtitle1" fontWeight={700} color="#666" gutterBottom>
+                OPTION 1: ABOUT (ENGLISH)
               </Typography>
               <TextField
                 fullWidth
-                label="Título"
+                label="Title (EN)"
+                name="aboutTitle_en"
+                value={data.aboutTitle_en || ''}
+                onChange={handleChange}
+                margin="dense"
+              />
+              <TextField
+                fullWidth
+                label="Content (EN)"
+                name="aboutContent_en"
+                value={data.aboutContent_en || ''}
+                onChange={handleChange}
+                multiline
+                rows={4}
+                margin="dense"
+              />
+            </Grid>
+            
+            <Grid item xs={12}><Divider /></Grid>
+            
+            {/* OPCIÓN 2: DIFERENCIACIÓN */}
+            <Grid item xs={12} md={6}>
+              <Typography variant="subtitle1" fontWeight={700} color="#c8626d" gutterBottom>
+                OPCIÓN 2: DIFERENCIACIÓN (ESPAÑOL)
+              </Typography>
+              <TextField
+                fullWidth
+                label="Título (ES)"
                 name="differentTitle"
                 value={data.differentTitle}
                 onChange={handleChange}
@@ -152,24 +186,49 @@ const AccordionMenuManager = ({ open, onClose }) => {
               />
               <TextField
                 fullWidth
-                label="Contenido"
+                label="Contenido (ES)"
                 name="differentContent"
                 value={data.differentContent}
                 onChange={handleChange}
                 multiline
-                rows={3}
+                rows={4}
                 margin="dense"
               />
             </Grid>
-            <Grid item xs={12}><Divider /></Grid>
-
-            <Grid item xs={12}>
-              <Typography variant="subtitle1" fontWeight={700} color="#c8626d">
-                Opción 3: Ingredientes
+            <Grid item xs={12} md={6}>
+              <Typography variant="subtitle1" fontWeight={700} color="#666" gutterBottom>
+                OPTION 2: DIFFERENTIATION (ENGLISH)
               </Typography>
               <TextField
                 fullWidth
-                label="Título"
+                label="Title (EN)"
+                name="differentTitle_en"
+                value={data.differentTitle_en || ''}
+                onChange={handleChange}
+                margin="dense"
+              />
+              <TextField
+                fullWidth
+                label="Content (EN)"
+                name="differentContent_en"
+                value={data.differentContent_en || ''}
+                onChange={handleChange}
+                multiline
+                rows={4}
+                margin="dense"
+              />
+            </Grid>
+            
+            <Grid item xs={12}><Divider /></Grid>
+
+            {/* OPCIÓN 3: INGREDIENTES */}
+            <Grid item xs={12} md={6}>
+              <Typography variant="subtitle1" fontWeight={700} color="#c8626d" gutterBottom>
+                OPCIÓN 3: INGREDIENTES (ESPAÑOL)
+              </Typography>
+              <TextField
+                fullWidth
+                label="Título (ES)"
                 name="ingredientsTitle"
                 value={data.ingredientsTitle}
                 onChange={handleChange}
@@ -177,12 +236,35 @@ const AccordionMenuManager = ({ open, onClose }) => {
               />
               <TextField
                 fullWidth
-                label="Contenido"
+                label="Contenido (ES)"
                 name="ingredientsContent"
                 value={data.ingredientsContent}
                 onChange={handleChange}
                 multiline
-                rows={3}
+                rows={4}
+                margin="dense"
+              />
+            </Grid>
+            <Grid item xs={12} md={6}>
+              <Typography variant="subtitle1" fontWeight={700} color="#666" gutterBottom>
+                OPTION 3: INGREDIENTS (ENGLISH)
+              </Typography>
+              <TextField
+                fullWidth
+                label="Title (EN)"
+                name="ingredientsTitle_en"
+                value={data.ingredientsTitle_en || ''}
+                onChange={handleChange}
+                margin="dense"
+              />
+              <TextField
+                fullWidth
+                label="Content (EN)"
+                name="ingredientsContent_en"
+                value={data.ingredientsContent_en || ''}
+                onChange={handleChange}
+                multiline
+                rows={4}
                 margin="dense"
               />
             </Grid>

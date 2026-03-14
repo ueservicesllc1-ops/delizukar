@@ -23,7 +23,7 @@ import TestimonialsSection from '../components/TestimonialsSection';
 import ProductImage from '../components/ProductImage';
 import BoxSelectionPopup from '../components/BoxSelectionPopup';
 import FeaturedProducts from '../components/FeaturedProducts';
-import VideoReviewsCarousel from '../components/VideoReviewsCarousel';
+// import VideoReviewsCarousel from '../components/VideoReviewsCarousel';
 import ComparisonTable from '../components/ComparisonTable';
 import CookieBoxPromo from '../components/CookieBoxPromo';
 import { db } from '../firebase/config';
@@ -43,7 +43,8 @@ const Home = () => {
   const [showPromo, setShowPromo] = useState(false);
   const [bannerUrl, setBannerUrl] = useState(null);
   const [banner2Url, setBanner2Url] = useState(null);
-  const [dynamicBannerText, setDynamicBannerText] = useState(null);
+  const [dynamicBannerText, setDynamicBannerText] = useState(null); // Para la barra rosa
+  const [heroText, setHeroText] = useState(null); // Para el texto flotante
   
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
@@ -142,7 +143,7 @@ const Home = () => {
       }
     });
 
-    // Escuchar cambios en Texto del Banner
+    // Escuchar cambios en Texto de la Barra Rosa (settings/bannerText)
     const settingsRef = doc(db, 'settings', 'bannerText');
     const unsubscribeText = onSnapshot(settingsRef, (snap) => {
       if (snap.exists()) {
@@ -152,10 +153,21 @@ const Home = () => {
       }
     });
 
+    // Escuchar cambios en Texto Flotante (settings/heroText)
+    const heroTextRef = doc(db, 'settings', 'heroText');
+    const unsubscribeHeroText = onSnapshot(heroTextRef, (snap) => {
+      if (snap.exists()) {
+        setHeroText(snap.data());
+      } else {
+        setHeroText(null);
+      }
+    });
+
     return () => {
       unsubscribe1();
       unsubscribe2();
       unsubscribeText();
+      unsubscribeHeroText();
     };
   }, []);
 
@@ -209,7 +221,7 @@ const Home = () => {
         />
         
         {/* Texto Flotante sobre el Banner */}
-        {dynamicBannerText && (
+        {heroText && (
           <Box
             sx={{
               position: 'absolute',
@@ -224,17 +236,17 @@ const Home = () => {
           >
             <Typography
               sx={{
-                fontFamily: dynamicBannerText.fontFamily || 'BrittanySignature',
+                fontFamily: heroText.fontFamily || 'BrittanySignature',
                 fontSize: { 
-                  xs: `${(dynamicBannerText.fontSize || 4.5) * 0.36}rem`, 
-                  md: `${(dynamicBannerText.fontSize || 4.5) * 0.9}rem` 
+                  xs: `${(heroText.fontSize || 4.5) * 0.36}rem`, 
+                  md: `${(heroText.fontSize || 4.5) * 0.9}rem` 
                 },
                 color: '#c8626d',
                 textShadow: '1px 1px 4px rgba(0,0,0,0.2)',
                 lineHeight: 1.2
               }}
             >
-              {dynamicBannerText[language] || dynamicBannerText.es}
+              {heroText[language] || heroText.es}
             </Typography>
           </Box>
         )}
@@ -302,7 +314,7 @@ const Home = () => {
       </Box>
 
       {/* Video Reviews Carousel Section */}
-      <VideoReviewsCarousel />
+      {/* <VideoReviewsCarousel /> */}
 
       {/* Comparison Table Section */}
       <ComparisonTable />

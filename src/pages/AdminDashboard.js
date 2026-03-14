@@ -65,7 +65,8 @@ import {
   Email,
   Receipt,
   CardGiftcard,
-  Movie
+  Movie,
+  AutoAwesome
 } from '@mui/icons-material';
 import FontManager from '../components/FontManager';
 import BannerPhotoManager from '../components/BannerPhotoManager';
@@ -85,6 +86,7 @@ import SubscriptionManager from '../components/SubscriptionManager';
 import AccordionMenuManager from '../components/AccordionMenuManager';
 import ReviewVideosManager from '../components/ReviewVideosManager';
 import BannerTextManager from '../components/BannerTextManager';
+import HeroTextManager from '../components/HeroTextManager';
 
 const AdminDashboard = () => {
   const [fontManagerOpen, setFontManagerOpen] = useState(false);
@@ -103,6 +105,7 @@ const AdminDashboard = () => {
   const [accordionMenuManagerOpen, setAccordionMenuManagerOpen] = useState(false);
   const [reviewVideosManagerOpen, setReviewVideosManagerOpen] = useState(false);
   const [bannerTextManagerOpen, setBannerTextManagerOpen] = useState(false);
+  const [heroTextManagerOpen, setHeroTextManagerOpen] = useState(false);
   const [paypalBalanceOpen, setPaypalBalanceOpen] = useState(false);
   const [salesReportOpen, setSalesReportOpen] = useState(false);
   const [userManagementOpen, setUserManagementOpen] = useState(false);
@@ -817,13 +820,13 @@ const AdminDashboard = () => {
         >
             <Box sx={{ mt: 12, pt: 6 }}>
             <Grid container spacing={0} sx={{ maxWidth: '1000px', mx: 'auto' }}>
-              {Array.from({ length: 27 }, (_, index) => {
+              {Array.from({ length: 28 }, (_, index) => {
                 const colors = [
                   '#c8626d', '#be8782', '#b5555a', '#c8626d',
                   '#c8626d', '#c8626d', '#c8626d', '#c8626d',
                   '#BC8F8F', '#F5DEB3', '#DDA0DD', '#98FB98',
                   '#F0E68C', '#FFB6C1', '#87CEEB', '#FFA07A',
-                  '#C8626D', '#7C2815', '#EB8B8B', '#8D9A7D', '#C8626D', '#c8626d', '#be8782', '#b5555a', '#C8626D', '#7C2815', '#c8626d'
+                  '#C8626D', '#7C2815', '#EB8B8B', '#8D9A7D', '#C8626D', '#c8626d', '#be8782', '#b5555a', '#C8626D', '#7C2815', '#c8626d', '#7C2815'
                 ];
                 const color = colors[index];
                 
@@ -875,6 +878,7 @@ const AdminDashboard = () => {
                           index === 24 ? () => setAccordionMenuManagerOpen(true) :
                           index === 25 ? () => setReviewVideosManagerOpen(true) :
                           index === 26 ? () => setBannerTextManagerOpen(true) :
+                          index === 27 ? () => setHeroTextManagerOpen(true) :
                           undefined
                         }
                         sx={{
@@ -1025,6 +1029,11 @@ const AdminDashboard = () => {
                             <FontDownload sx={{ color: 'white', fontSize: '2rem' }} />
                             <Typography variant="body2" sx={{ color: 'white', fontWeight: 600, textShadow: '1px 1px 2px rgba(0,0,0,0.5)', textAlign: 'center' }}>Texto Banner</Typography>
                           </Box>
+                        ) : index === 27 ? (
+                          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1 }}>
+                            <AutoAwesome sx={{ color: 'white', fontSize: '2rem' }} />
+                            <Typography variant="body2" sx={{ color: 'white', fontWeight: 600, textShadow: '1px 1px 2px rgba(0,0,0,0.5)', textAlign: 'center' }}>Texto Flotante</Typography>
+                          </Box>
                         ) : (
                           <Typography
                             variant="h6"
@@ -1135,6 +1144,12 @@ const AdminDashboard = () => {
       <BannerTextManager
         open={bannerTextManagerOpen}
         onClose={() => setBannerTextManagerOpen(false)}
+      />
+
+      {/* Gestor de Texto Flotante */}
+      <HeroTextManager
+        open={heroTextManagerOpen}
+        onClose={() => setHeroTextManagerOpen(false)}
       />
 
       {/* Gestor de Menú Desplegable */}
