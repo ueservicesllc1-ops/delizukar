@@ -64,7 +64,8 @@ import {
   Palette,
   Email,
   Receipt,
-  CardGiftcard
+  CardGiftcard,
+  Movie
 } from '@mui/icons-material';
 import FontManager from '../components/FontManager';
 import BannerPhotoManager from '../components/BannerPhotoManager';
@@ -81,6 +82,9 @@ import PayPalBalance from '../components/PayPalBalance';
 import OrdersManager from '../components/OrdersManager';
 import VoucherManager from '../components/VoucherManager';
 import SubscriptionManager from '../components/SubscriptionManager';
+import AccordionMenuManager from '../components/AccordionMenuManager';
+import ReviewVideosManager from '../components/ReviewVideosManager';
+import BannerTextManager from '../components/BannerTextManager';
 
 const AdminDashboard = () => {
   const [fontManagerOpen, setFontManagerOpen] = useState(false);
@@ -96,6 +100,9 @@ const AdminDashboard = () => {
   const [socialMediaManagerOpen, setSocialMediaManagerOpen] = useState(false);
   const [popupHeroManagerOpen, setPopupHeroManagerOpen] = useState(false);
   const [sweetBoxesManagerOpen, setSweetBoxesManagerOpen] = useState(false);
+  const [accordionMenuManagerOpen, setAccordionMenuManagerOpen] = useState(false);
+  const [reviewVideosManagerOpen, setReviewVideosManagerOpen] = useState(false);
+  const [bannerTextManagerOpen, setBannerTextManagerOpen] = useState(false);
   const [paypalBalanceOpen, setPaypalBalanceOpen] = useState(false);
   const [salesReportOpen, setSalesReportOpen] = useState(false);
   const [userManagementOpen, setUserManagementOpen] = useState(false);
@@ -810,13 +817,13 @@ const AdminDashboard = () => {
         >
             <Box sx={{ mt: 12, pt: 6 }}>
             <Grid container spacing={0} sx={{ maxWidth: '1000px', mx: 'auto' }}>
-              {Array.from({ length: 24 }, (_, index) => {
+              {Array.from({ length: 27 }, (_, index) => {
                 const colors = [
                   '#c8626d', '#be8782', '#b5555a', '#c8626d',
                   '#c8626d', '#c8626d', '#c8626d', '#c8626d',
                   '#BC8F8F', '#F5DEB3', '#DDA0DD', '#98FB98',
                   '#F0E68C', '#FFB6C1', '#87CEEB', '#FFA07A',
-                  '#C8626D', '#7C2815', '#EB8B8B', '#8D9A7D', '#C8626D', '#c8626d', '#be8782', '#b5555a'
+                  '#C8626D', '#7C2815', '#EB8B8B', '#8D9A7D', '#C8626D', '#c8626d', '#be8782', '#b5555a', '#C8626D', '#7C2815', '#c8626d'
                 ];
                 const color = colors[index];
                 
@@ -865,6 +872,9 @@ const AdminDashboard = () => {
                           } :
                           index === 22 ? () => setSweetBoxesManagerOpen(true) :
                           index === 23 ? () => setGiftMessagesOpen(true) :
+                          index === 24 ? () => setAccordionMenuManagerOpen(true) :
+                          index === 25 ? () => setReviewVideosManagerOpen(true) :
+                          index === 26 ? () => setBannerTextManagerOpen(true) :
                           undefined
                         }
                         sx={{
@@ -1000,6 +1010,21 @@ const AdminDashboard = () => {
                             <CardGiftcard sx={{ color: 'white', fontSize: '2rem' }} />
                             <Typography variant="body2" sx={{ color: 'white', fontWeight: 600, textShadow: '1px 1px 2px rgba(0,0,0,0.5)', textAlign: 'center' }}>Mensajes Regalo</Typography>
                           </Box>
+                        ) : index === 24 ? (
+                          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1 }}>
+                            <MoreVert sx={{ color: 'white', fontSize: '2rem' }} />
+                            <Typography variant="body2" sx={{ color: 'white', fontWeight: 600, textShadow: '1px 1px 2px rgba(0,0,0,0.5)', textAlign: 'center' }}>Menú Desplegable</Typography>
+                          </Box>
+                        ) : index === 25 ? (
+                          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1 }}>
+                            <Movie sx={{ color: 'white', fontSize: '2rem' }} />
+                            <Typography variant="body2" sx={{ color: 'white', fontWeight: 600, textShadow: '1px 1px 2px rgba(0,0,0,0.5)', textAlign: 'center' }}>Videos Reviews</Typography>
+                          </Box>
+                        ) : index === 26 ? (
+                          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1 }}>
+                            <FontDownload sx={{ color: 'white', fontSize: '2rem' }} />
+                            <Typography variant="body2" sx={{ color: 'white', fontWeight: 600, textShadow: '1px 1px 2px rgba(0,0,0,0.5)', textAlign: 'center' }}>Texto Banner</Typography>
+                          </Box>
                         ) : (
                           <Typography
                             variant="h6"
@@ -1098,6 +1123,24 @@ const AdminDashboard = () => {
       <PopupHeroManager
         open={popupHeroManagerOpen}
         onClose={() => setPopupHeroManagerOpen(false)}
+      />
+
+       {/* Gestor de Video Reviews */}
+      <ReviewVideosManager
+        open={reviewVideosManagerOpen}
+        onClose={() => setReviewVideosManagerOpen(false)}
+      />
+
+      {/* Gestor de Texto del Banner */}
+      <BannerTextManager
+        open={bannerTextManagerOpen}
+        onClose={() => setBannerTextManagerOpen(false)}
+      />
+
+      {/* Gestor de Menú Desplegable */}
+      <AccordionMenuManager
+        open={accordionMenuManagerOpen}
+        onClose={() => setAccordionMenuManagerOpen(false)}
       />
 
       <PayPalBalance

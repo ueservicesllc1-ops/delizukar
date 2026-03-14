@@ -12,7 +12,8 @@ import {
   CardContent,
   Button,
   useTheme,
-  useMediaQuery
+  useMediaQuery,
+  Chip
 } from '@mui/material';
 import { useStore } from '../context/StoreContext';
 import { useLanguage } from '../context/LanguageContext';
@@ -115,12 +116,43 @@ const FeaturedProducts = ({ onOpenDetail }) => {
                     backgroundColor: '#fff'
                   }}
                 >
-                  <Box sx={{ height: { xs: 160, md: 180 }, overflow: 'hidden' }}>
+                  <Box sx={{ height: { xs: 160, md: 180 }, overflow: 'hidden', position: 'relative' }}>
                     <img 
                       src={item.image} 
                       alt={item.name} 
                       style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                     />
+                    <Box
+                      component={motion.div}
+                      animate={{ 
+                        scale: [1, 1.1, 1],
+                      }}
+                      transition={{ 
+                        duration: 1.5,
+                        repeat: Infinity,
+                        ease: "easeInOut"
+                      }}
+                      sx={{
+                        position: 'absolute',
+                        top: 10,
+                        right: 10,
+                        zIndex: 2
+                      }}
+                    >
+                      <Chip
+                        label="200g Gourmet"
+                        size="small"
+                        sx={{
+                          backgroundColor: '#c8626d',
+                          color: 'white',
+                          fontWeight: 800,
+                          fontSize: '0.65rem',
+                          height: 20,
+                          boxShadow: '0 4px 10px rgba(0,0,0,0.2)',
+                          border: '1px solid white'
+                        }}
+                      />
+                    </Box>
                   </Box>
                   <CardContent sx={{ 
                     display: 'flex', 

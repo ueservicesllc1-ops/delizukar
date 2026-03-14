@@ -1,10 +1,14 @@
 import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Box, Container, Typography, Grid, Card, CardContent, CardActions, Button, Chip, Rating, IconButton, TextField, InputAdornment, Dialog, DialogContent, Skeleton } from '@mui/material';
-import { Close } from '@mui/icons-material';
+import { Box, Container, Typography, Grid, Card, CardContent, CardActions, Button, Chip, Rating, IconButton, TextField, InputAdornment, Dialog, DialogContent, Skeleton, Accordion, AccordionSummary, AccordionDetails, useMediaQuery, useTheme } from '@mui/material';
+import { Close, ExpandMore } from '@mui/icons-material';
 import { Search, AddShoppingCart, Favorite, FavoriteBorder, AccountBalanceWallet, ShoppingBag } from '@mui/icons-material';
 import { useStore } from '../context/StoreContext';
+import { db } from '../firebase/config';
+import { doc, getDoc } from 'firebase/firestore';
+import VideoReviewsCarousel from '../components/VideoReviewsCarousel';
+import ComparisonTable from '../components/ComparisonTable';
 import ProductImageCarousel from '../components/ProductImageCarousel';
 import ProductImage from '../components/ProductImage';
 import BoxSelectionPopup from '../components/BoxSelectionPopup';
@@ -79,7 +83,7 @@ const TEXTS = {
     enStock: 'Em estoque',
     reseñas: 'avaliações',
     cerrar: 'Fechar',
-    stockDisponible: 'Estoque disponível:',
+    stockDisponible: 'Estoque disponible:',
     unidades: 'unidades'
   }
 };
@@ -119,6 +123,31 @@ const Products = () => {
   const [selected, setSelected] = useState(null);
   const [showBoxPopup, setShowBoxPopup] = useState(false);
   const [selectedBox, setSelectedBox] = useState(null);
+  const [accordionData, setAccordionData] = useState({
+    aboutTitle: 'Acerca de nuestra cookie',
+    aboutContent: 'Nuestras galletas son horneadas artesanalmente cada día con ingredientes de la más alta calidad. Inspiradas en el estilo de Nueva York, cada bocado ofrece una textura crujiente por fuera y suave por dentro.',
+    differentTitle: 'Lo que nos hace diferentes',
+    differentContent: 'No escatimamos en calidad. Usamos chocolate premium, mantequilla real y técnicas de horneado perfeccionadas durante años para asegurar que cada galleta sea una experiencia inolvidable.',
+    ingredientsTitle: 'Ingredientes',
+    ingredientsContent: 'Harina de trigo enriquecida, mantequilla premium, chips de chocolate belga, azúcar morena, huevos de granja, esencia de vanilla natural y una pizca de sal marina.'
+  });
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+
+  React.useEffect(() => {
+    const fetchAccordionData = async () => {
+      try {
+        const docRef = doc(db, 'settings', 'accordionMenu');
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+          setAccordionData(docSnap.data());
+        }
+      } catch (err) {
+        console.error('Error fetching accordion data:', err);
+      }
+    };
+    fetchAccordionData();
+  }, []);
   const translatedTexts = useMemo(
     () => TEXTS[language] || TEXTS.es,
     [language]
@@ -255,6 +284,40 @@ const Products = () => {
                           }}
                         />
                       )}
+                    </Box>
+
+                    {/* Gourmet Badge */}
+                    <Box
+                      component={motion.div}
+                      animate={{ 
+                        scale: [1, 1.1, 1],
+                        rotate: [0, 5, -5, 0]
+                      }}
+                      transition={{ 
+                        duration: 2,
+                        repeat: Infinity,
+                        ease: "easeInOut"
+                      }}
+                      sx={{
+                        position: 'absolute',
+                        top: 12,
+                        right: isMobile ? 8 : 45,
+                        zIndex: 2
+                      }}
+                    >
+                      <Chip
+                        label="200g Gourmet"
+                        size="small"
+                        sx={{
+                          backgroundColor: '#c8626d',
+                          color: 'white',
+                          fontWeight: 800,
+                          fontSize: '0.7rem',
+                          height: 24,
+                          boxShadow: '0 4px 12px rgba(200, 98, 109, 0.3)',
+                          border: '1.5px solid white'
+                        }}
+                      />
                     </Box>
 
                     {/* Botón de favoritos */}
@@ -406,6 +469,77 @@ const Products = () => {
             ))
           )}
         </Grid>
+
+        {/* Acordeón Informativo - Todas las versiones */}
+        {accordionData && (
+          <Box sx={{ mt: 6, mb: 4, px: 2 }}>
+            <Accordion elevation={0} sx={{ 
+              backgroundColor: 'transparent',
+              '&:before': { display: 'none' },
+              borderBottom: '1px solid #eee',
+              borderRadius: '0 !important',
+              '&.Mui-expanded': { margin: 0 }
+            }}>
+              <AccordionSummary 
+                expandIcon={<ExpandMore sx={{ color: '#7C2815' }} />}
+                sx={{ px: 0 }}
+              >
+                <Typography sx={{ fontWeight: 600, color: '#7C2815', fontSize: '1.1rem' }}>
+                  {accordionData.aboutTitle}
+                </Typography>
+              </AccordionSummary>
+              <AccordionDetails sx={{ px: 0, pb: 2 }}>
+                <Typography variant="body2" sx={{ color: '#666', lineHeight: 1.8 }}>
+                  {accordionData.aboutContent}
+                </Typography>
+              </AccordionDetails>
+            </Accordion>
+
+            <Accordion elevation={0} sx={{ 
+              backgroundColor: 'transparent',
+              '&:before': { display: 'none' },
+              borderBottom: '1px solid #eee',
+              borderRadius: '0 !important',
+              '&.Mui-expanded': { margin: 0 }
+            }}>
+              <AccordionSummary 
+                expandIcon={<ExpandMore sx={{ color: '#7C2815' }} />}
+                sx={{ px: 0 }}
+              >
+                <Typography sx={{ fontWeight: 600, color: '#7C2815', fontSize: '1.1rem' }}>
+                  {accordionData.differentTitle}
+                </Typography>
+              </AccordionSummary>
+              <AccordionDetails sx={{ px: 0, pb: 2 }}>
+                <Typography variant="body2" sx={{ color: '#666', lineHeight: 1.8 }}>
+                  {accordionData.differentContent}
+                </Typography>
+              </AccordionDetails>
+            </Accordion>
+
+            <Accordion elevation={0} sx={{ 
+              backgroundColor: 'transparent',
+              '&:before': { display: 'none' },
+              borderBottom: '1px solid #eee',
+              borderRadius: '0 !important',
+              '&.Mui-expanded': { margin: 0 }
+            }}>
+              <AccordionSummary 
+                expandIcon={<ExpandMore sx={{ color: '#7C2815' }} />}
+                sx={{ px: 0 }}
+              >
+                <Typography sx={{ fontWeight: 600, color: '#7C2815', fontSize: '1.1rem' }}>
+                  {accordionData.ingredientsTitle}
+                </Typography>
+              </AccordionSummary>
+              <AccordionDetails sx={{ px: 0, pb: 2 }}>
+                <Typography variant="body2" sx={{ color: '#666', lineHeight: 1.8 }}>
+                  {accordionData.ingredientsContent}
+                </Typography>
+              </AccordionDetails>
+            </Accordion>
+          </Box>
+        )}
 
         {/* Popup de producto */}
         <Dialog
@@ -566,6 +700,10 @@ const Products = () => {
           selectedBox={selectedBox}
         />
       </Container>
+
+      {/* Video Reviews and Comparison Table */}
+      <VideoReviewsCarousel />
+      <ComparisonTable />
     </Box>
   );
 };

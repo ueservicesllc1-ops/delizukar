@@ -18,6 +18,7 @@ import { FeaturedProductsProvider } from './context/FeaturedProductsContext';
 // Components
 import Header from './components/Header';
 import Footer from './components/Footer';
+import GourmetBadge from './components/GourmetBadge';
 // import AutoTranslateButton from './components/AutoTranslateButton';
 
 // Pages
@@ -322,6 +323,7 @@ function App() {
             </Box>
             
             <Footer />
+            <GourmetBadge />
             
             {/* Traducción del DOM desactivada */}
             

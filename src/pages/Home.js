@@ -23,6 +23,11 @@ import TestimonialsSection from '../components/TestimonialsSection';
 import ProductImage from '../components/ProductImage';
 import BoxSelectionPopup from '../components/BoxSelectionPopup';
 import FeaturedProducts from '../components/FeaturedProducts';
+import VideoReviewsCarousel from '../components/VideoReviewsCarousel';
+import ComparisonTable from '../components/ComparisonTable';
+import CookieBoxPromo from '../components/CookieBoxPromo';
+import { db } from '../firebase/config';
+import { collection, query, where, orderBy, limit, doc, onSnapshot } from 'firebase/firestore';
 
 const Home = () => {
   const { featuredProducts, products, productsLoading, addToCart } = useStore();
@@ -35,6 +40,10 @@ const Home = () => {
   
   const [showBoxPopup, setShowBoxPopup] = useState(false);
   const [selectedBoxProduct, setSelectedBoxProduct] = useState(null);
+  const [showPromo, setShowPromo] = useState(false);
+  const [bannerUrl, setBannerUrl] = useState(null);
+  const [banner2Url, setBanner2Url] = useState(null);
+  const [dynamicBannerText, setDynamicBannerText] = useState(null);
   
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
@@ -100,6 +109,56 @@ const Home = () => {
     };
   }, []);
 
+  useEffect(() => {
+    // Escuchar cambios en Banner 1
+    const bannerPhotosRef = collection(db, 'bannerPhotos');
+    const q1 = query(bannerPhotosRef, where('isActive', '==', true), orderBy('order', 'asc'), limit(1));
+    
+    const unsubscribe1 = onSnapshot(q1, (snap) => {
+      if (!snap.empty) {
+        setBannerUrl(snap.docs[0].data().imageUrl);
+      } else {
+        // Fallback: si no hay activas, buscar cualquiera
+        const qFallback = query(bannerPhotosRef, limit(1));
+        const unsubscribeFallback = onSnapshot(qFallback, (snapFallback) => {
+          if (!snapFallback.empty) {
+            setBannerUrl(snapFallback.docs[0].data().imageUrl);
+          } else {
+            setBannerUrl('none');
+          }
+        });
+        return () => unsubscribeFallback();
+      }
+    });
+
+    // Escuchar cambios en Banner 2
+    const banner2PhotosRef = collection(db, 'banner2Photos');
+    const q2 = query(banner2PhotosRef, where('isActive', '==', true), orderBy('order', 'asc'), limit(1));
+    const unsubscribe2 = onSnapshot(q2, (snap) => {
+      if (!snap.empty) {
+        setBanner2Url(snap.docs[0].data().imageUrl);
+      } else {
+        setBanner2Url('none');
+      }
+    });
+
+    // Escuchar cambios en Texto del Banner
+    const settingsRef = doc(db, 'settings', 'bannerText');
+    const unsubscribeText = onSnapshot(settingsRef, (snap) => {
+      if (snap.exists()) {
+        setDynamicBannerText(snap.data());
+      } else {
+        setDynamicBannerText(null);
+      }
+    });
+
+    return () => {
+      unsubscribe1();
+      unsubscribe2();
+      unsubscribeText();
+    };
+  }, []);
+
   const handleOpenDetail = (product) => {
     if (product.category === 'boxes') {
       setSelectedBoxProduct(product);
@@ -121,8 +180,12 @@ const Home = () => {
     return () => clearTimeout(timer);
   }, []);
 
-  const handleClosePopupHero = () => {
+   const handleClosePopupHero = () => {
     setPopupHeroOpen(false);
+    // Trigger promo after hero closes
+    setTimeout(() => {
+      setShowPromo(true);
+    }, 800);
   };
 
   return (
@@ -136,12 +199,46 @@ const Home = () => {
       marginTop: { xs: '16px', md: '72px', lg: '96px' }
     }}>
       <PopupHero open={popupHeroOpen} onClose={handleClosePopupHero} />
-      <Box
-        component="img"
-        src="/banner.jpg"
-        alt="Banner principal"
-        sx={{ width: '100%', display: 'block' }}
-      />
+      <CookieBoxPromo open={showPromo} onClose={() => setShowPromo(false)} />
+      <Box sx={{ position: 'relative', width: '100%' }}>
+        <Box
+          component="img"
+          src="/banersin.jpg"
+          alt="Banner Delizukar"
+          sx={{ width: '100%', display: 'block' }}
+        />
+        
+        {/* Texto Flotante sobre el Banner */}
+        {dynamicBannerText && (
+          <Box
+            sx={{
+              position: 'absolute',
+              top: '20%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)',
+              width: '80%',
+              textAlign: 'center',
+              pointerEvents: 'none',
+              zIndex: 10
+            }}
+          >
+            <Typography
+              sx={{
+                fontFamily: dynamicBannerText.fontFamily || 'BrittanySignature',
+                fontSize: { 
+                  xs: `${(dynamicBannerText.fontSize || 4.5) * 0.36}rem`, 
+                  md: `${(dynamicBannerText.fontSize || 4.5) * 0.9}rem` 
+                },
+                color: '#c8626d',
+                textShadow: '1px 1px 4px rgba(0,0,0,0.2)',
+                lineHeight: 1.2
+              }}
+            >
+              {dynamicBannerText[language] || dynamicBannerText.es}
+            </Typography>
+          </Box>
+        )}
+      </Box>
       <Box
         sx={{
           backgroundColor: '#c8626d',
@@ -160,28 +257,30 @@ const Home = () => {
             whiteSpace: 'nowrap'
           }}
         >
-          {copy.bannerMessage}
+          {dynamicBannerText ? (dynamicBannerText[language] || dynamicBannerText.es) : copy.bannerMessage}
         </Box>
       </Box>
       <FeaturedProducts onOpenDetail={handleOpenDetail} />
-      <Box
-        sx={{
-          width: '100vw',
-          position: 'relative',
-          left: '50%',
-          right: '50%',
-          marginLeft: '-50vw',
-          marginRight: '-50vw',
-          mt: { xs: 4, md: 6 }
-        }}
-      >
+      {banner2Url && banner2Url !== 'none' && (
         <Box
-          component="img"
-          src="/banner2.jpg"
-          alt="Banner secundario"
-          sx={{ width: '100%', display: 'block' }}
-        />
-       </Box>
+          sx={{
+            width: '100vw',
+            position: 'relative',
+            left: '50%',
+            right: '50%',
+            marginLeft: '-50vw',
+            marginRight: '-50vw',
+            mt: { xs: 4, md: 6 }
+          }}
+        >
+          <Box
+            component="img"
+            src={banner2Url}
+            alt="Banner secundario"
+            sx={{ width: '100%', display: 'block' }}
+          />
+        </Box>
+      )}
       <Box sx={{ mt: { xs: 4, md: 6 }, textAlign: 'center' }}>
         <Typography
           sx={{
@@ -201,6 +300,12 @@ const Home = () => {
       <Box sx={{ mt: { xs: 4, md: 6 } }}>
         <TestimonialsSection />
       </Box>
+
+      {/* Video Reviews Carousel Section */}
+      <VideoReviewsCarousel />
+
+      {/* Comparison Table Section */}
+      <ComparisonTable />
 
       <Dialog
         open={Boolean(selectedProduct)}

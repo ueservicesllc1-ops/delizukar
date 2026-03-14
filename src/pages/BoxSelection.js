@@ -4,19 +4,23 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Box, Container, Typography, Grid, Card, CardContent, 
   Button, IconButton, Badge, Divider, LinearProgress,
-  Paper, useTheme, alpha, Tooltip, Zoom
+  Paper, useTheme, alpha, Tooltip, Zoom, Accordion, AccordionSummary, AccordionDetails
 } from '@mui/material';
 import { 
   Add, Remove, ShoppingCart, ArrowBack, 
-  Info, CheckCircle, HelpOutline, AutoAwesome
+  Info, CheckCircle, HelpOutline, AutoAwesome, ExpandMore
 } from '@mui/icons-material';
+import { db } from '../firebase/config';
+import { doc, getDoc } from 'firebase/firestore';
 import { useStore } from '../context/StoreContext';
 import { useLanguage } from '../context/LanguageContext';
 import toast from 'react-hot-toast';
 import GiftMessageModal from '../components/GiftMessageModal';
-import { PRODUCT_TRANSLATIONS } from './Products';
 import ProductImage from '../components/ProductImage';
+import VideoReviewsCarousel from '../components/VideoReviewsCarousel';
+import ComparisonTable from '../components/ComparisonTable';
 import { FavoriteBorder } from '@mui/icons-material';
+import { PRODUCT_TRANSLATIONS } from './Products';
 
 const TEXTS = {
   es: {
@@ -60,6 +64,29 @@ const BoxSelection = () => {
   const [loading, setLoading] = useState(true);
   const [showGiftModal, setShowGiftModal] = useState(false);
   const [pendingBox, setPendingBox] = useState(null);
+  const [accordionData, setAccordionData] = useState({
+    aboutTitle: 'Acerca de nuestra cookie',
+    aboutContent: 'Nuestras galletas son horneadas artesanalmente cada día con ingredientes de la más alta calidad. Inspiradas en el estilo de Nueva York, cada bocado ofrece una textura crujiente por fuera y suave por dentro.',
+    differentTitle: 'Lo que nos hace diferentes',
+    differentContent: 'No escatimamos en calidad. Usamos chocolate premium, mantequilla real y técnicas de horneado perfeccionadas durante años para asegurar que cada galleta sea una experiencia inolvidable.',
+    ingredientsTitle: 'Ingredientes',
+    ingredientsContent: 'Harina de trigo enriquecida, mantequilla premium, chips de chocolate belga, azúcar morena, huevos de granja, esencia de vanilla natural y una pizca de sal marina.'
+  });
+
+  useEffect(() => {
+    const fetchAccordionData = async () => {
+      try {
+        const docRef = doc(db, 'settings', 'accordionMenu');
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+          setAccordionData(docSnap.data());
+        }
+      } catch (err) {
+        console.error('Error fetching accordion data:', err);
+      }
+    };
+    fetchAccordionData();
+  }, []);
 
   const translatedTexts = useMemo(() => TEXTS[language] || TEXTS.es, [language]);
 
@@ -427,6 +454,77 @@ const BoxSelection = () => {
             </Box>
           ))}
         </Grid>
+
+        {/* Acordeón Informativo - Todas las versiones */}
+        {accordionData && (
+          <Box sx={{ mt: 8, mb: 4, maxWidth: '800px', mx: 'auto', px: 2 }}>
+            <Accordion elevation={0} sx={{ 
+              backgroundColor: 'transparent',
+              '&:before': { display: 'none' },
+              borderBottom: '1px solid #eee',
+              borderRadius: '0 !important',
+              '&.Mui-expanded': { margin: 0 }
+            }}>
+              <AccordionSummary 
+                expandIcon={<ExpandMore sx={{ color: '#7C2815' }} />}
+                sx={{ px: 0 }}
+              >
+                <Typography sx={{ fontWeight: 600, color: '#7C2815', fontSize: '1.2rem' }}>
+                  {accordionData.aboutTitle}
+                </Typography>
+              </AccordionSummary>
+              <AccordionDetails sx={{ px: 0, pb: 4 }}>
+                <Typography variant="body1" sx={{ color: '#666', lineHeight: 1.8 }}>
+                  {accordionData.aboutContent}
+                </Typography>
+              </AccordionDetails>
+            </Accordion>
+
+            <Accordion elevation={0} sx={{ 
+              backgroundColor: 'transparent',
+              '&:before': { display: 'none' },
+              borderBottom: '1px solid #eee',
+              borderRadius: '0 !important',
+              '&.Mui-expanded': { margin: 0 }
+            }}>
+              <AccordionSummary 
+                expandIcon={<ExpandMore sx={{ color: '#7C2815' }} />}
+                sx={{ px: 0 }}
+              >
+                <Typography sx={{ fontWeight: 600, color: '#7C2815', fontSize: '1.2rem' }}>
+                  {accordionData.differentTitle}
+                </Typography>
+              </AccordionSummary>
+              <AccordionDetails sx={{ px: 0, pb: 4 }}>
+                <Typography variant="body1" sx={{ color: '#666', lineHeight: 1.8 }}>
+                  {accordionData.differentContent}
+                </Typography>
+              </AccordionDetails>
+            </Accordion>
+
+            <Accordion elevation={0} sx={{ 
+              backgroundColor: 'transparent',
+              '&:before': { display: 'none' },
+              borderBottom: '1px solid #eee',
+              borderRadius: '0 !important',
+              '&.Mui-expanded': { margin: 0 }
+            }}>
+              <AccordionSummary 
+                expandIcon={<ExpandMore sx={{ color: '#7C2815' }} />}
+                sx={{ px: 0 }}
+              >
+                <Typography sx={{ fontWeight: 600, color: '#7C2815', fontSize: '1.2rem' }}>
+                  {accordionData.ingredientsTitle}
+                </Typography>
+              </AccordionSummary>
+              <AccordionDetails sx={{ px: 0, pb: 4 }}>
+                <Typography variant="body1" sx={{ color: '#666', lineHeight: 1.8 }}>
+                  {accordionData.ingredientsContent}
+                </Typography>
+              </AccordionDetails>
+            </Accordion>
+          </Box>
+        )}
       </Container>
 
       {/* Quick Summary Mobile (Bottom Bar) */}
@@ -457,6 +555,10 @@ const BoxSelection = () => {
         onConfirm={handleGiftConfirm}
         onSkip={handleGiftSkip}
       />
+      
+      {/* Video Reviews and Comparison Table */}
+      <VideoReviewsCarousel />
+      <ComparisonTable />
     </Box>
   );
 };

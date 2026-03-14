@@ -31,7 +31,7 @@ import {
 } from '@mui/icons-material';
 import { storage, db } from '../firebase/config';
 import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
-import { collection, addDoc, getDocs, deleteDoc, doc, updateDoc } from 'firebase/firestore';
+import { collection, addDoc, getDocs, deleteDoc, doc, updateDoc, getDoc, setDoc } from 'firebase/firestore';
 
 const BannerPhotoManager = ({ open, onClose }) => {
   const [bannerPhotos, setBannerPhotos] = useState([]);
@@ -45,6 +45,12 @@ const BannerPhotoManager = ({ open, onClose }) => {
     order: 1
   });
   const [editingPhoto, setEditingPhoto] = useState(null);
+  const [globalBannerText, setGlobalBannerText] = useState({ 
+    es: '', 
+    en: '', 
+    fontSize: 4.5, 
+    fontFamily: 'BrittanySignature' 
+  });
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
   const progressIntervalRef = useRef(null);
 
@@ -52,8 +58,36 @@ const BannerPhotoManager = ({ open, onClose }) => {
   useEffect(() => {
     if (open) {
       loadBannerPhotos();
+      loadBannerText();
     }
   }, [open]);
+
+  const loadBannerText = async () => {
+    try {
+      const docRef = doc(db, 'settings', 'bannerText');
+      const docSnap = await getDoc(docRef);
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        setGlobalBannerText({
+          es: data.es || '',
+          en: data.en || '',
+          fontSize: data.fontSize || 4.5,
+          fontFamily: data.fontFamily || 'BrittanySignature'
+        });
+      }
+    } catch (error) {
+      console.error('Error cargando texto:', error);
+    }
+  };
+
+  const saveBannerText = async () => {
+    try {
+      await setDoc(doc(db, 'settings', 'bannerText'), globalBannerText);
+      showSnackbar('Texto del banner guardado', 'success');
+    } catch (error) {
+      showSnackbar('Error al guardar texto', 'error');
+    }
+  };
 
   // Limpiar timer cuando se desmonte el componente o cambie el archivo seleccionado
   useEffect(() => {
@@ -291,7 +325,7 @@ const BannerPhotoManager = ({ open, onClose }) => {
               <Box sx={{ mb: 3 }}>
                 <Grid container spacing={2}>
                   <Grid item xs={12} md={6}>
-                    <Box sx={{ mb: 2 }}>
+                    <Box sx={{ mb: 2, position: 'relative' }}>
                       <img
                         src={URL.createObjectURL(selectedFile)}
                         alt="Preview"
@@ -303,6 +337,35 @@ const BannerPhotoManager = ({ open, onClose }) => {
                           border: '2px dashed #ddd'
                         }}
                       />
+                      {/* Preview Overlay */}
+                      <Box
+                        sx={{
+                          position: 'absolute',
+                          top: '20%',
+                          left: '50%',
+                          transform: 'translate(-50%, -50%)',
+                          width: '100%',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          pointerEvents: 'none',
+                          px: 2,
+                          zIndex: 10
+                        }}
+                      >
+                        <Typography
+                          sx={{
+                            fontFamily: globalBannerText.fontFamily || 'BrittanySignature',
+                            fontSize: `${(globalBannerText.fontSize || 4.5) * 0.475}rem`, // Proporcional con reducción del 5%
+                            color: '#c8626d',
+                            textShadow: '1px 1px 4px rgba(0,0,0,0.2)',
+                            textAlign: 'center',
+                            lineHeight: 1.2
+                          }}
+                        >
+                          {globalBannerText.es}
+                        </Typography>
+                      </Box>
                     </Box>
                   </Grid>
                   <Grid item xs={12} md={6}>
@@ -368,6 +431,73 @@ const BannerPhotoManager = ({ open, onClose }) => {
             )}
           </Box>
 
+          {/* Banner Text Manager Section */}
+          <Box sx={{ borderTop: '1px solid #eee', pt: 3, mb: 4 }}>
+            <Typography variant="h6" sx={{ mb: 2, color: '#eb8b8b' }}>
+              Texto que saldrá encima del Banner
+            </Typography>
+            <Grid container spacing={2} alignItems="center">
+              <Grid item xs={12} md={3}>
+                <TextField
+                  fullWidth
+                  label="Texto en Español"
+                  value={globalBannerText.es}
+                  onChange={(e) => setGlobalBannerText({ ...globalBannerText, es: e.target.value })}
+                  placeholder="Ej: Bakded with love in NY"
+                />
+              </Grid>
+              <Grid item xs={12} md={3}>
+                <TextField
+                  fullWidth
+                  label="Texto en Inglés"
+                  value={globalBannerText.en}
+                  onChange={(e) => setGlobalBannerText({ ...globalBannerText, en: e.target.value })}
+                />
+              </Grid>
+              <Grid item xs={12} md={2}>
+                <TextField
+                  fullWidth
+                  label="Tamaño Fuente"
+                  type="number"
+                  inputProps={{ step: 0.1 }}
+                  value={globalBannerText.fontSize}
+                  onChange={(e) => setGlobalBannerText({ ...globalBannerText, fontSize: parseFloat(e.target.value) })}
+                />
+              </Grid>
+              <Grid item xs={12} md={2}>
+                <TextField
+                  fullWidth
+                  select
+                  label="Fuente"
+                  value={globalBannerText.fontFamily}
+                  onChange={(e) => setGlobalBannerText({ ...globalBannerText, fontFamily: e.target.value })}
+                  SelectProps={{ native: true }}
+                >
+                  <option value="BrittanySignature">Brittany Signature</option>
+                  <option value="Playfair Display">Playfair Display</option>
+                  <option value="Inter">Inter</option>
+                  <option value="Asap">Asap</option>
+                  <option value="Roboto">Roboto</option>
+                </TextField>
+              </Grid>
+              <Grid item xs={12} md={2}>
+                <Button
+                  fullWidth
+                  variant="contained"
+                  onClick={saveBannerText}
+                  sx={{ 
+                    height: '56px',
+                    backgroundColor: '#c8626d',
+                    '&:hover': { backgroundColor: '#b5555a' }
+                  }}
+                >
+                  Guardar
+                </Button>
+              </Grid>
+            </Grid>
+          </Box>
+
+          {/* Banner Photos List Section */}
           <Box sx={{ borderTop: '1px solid #eee', pt: 3 }}>
             <Typography variant="h6" sx={{ mb: 2, color: '#eb8b8b' }}>
               Fotos del Banner ({bannerPhotos.length})
@@ -396,6 +526,7 @@ const BannerPhotoManager = ({ open, onClose }) => {
                         sx={{
                           borderRadius: '15px',
                           overflow: 'hidden',
+                          position: 'relative',
                           '&:hover': {
                             boxShadow: '0 8px 25px rgba(0,0,0,0.15)'
                           }
@@ -408,6 +539,35 @@ const BannerPhotoManager = ({ open, onClose }) => {
                           alt={photo.title}
                           sx={{ objectFit: 'cover' }}
                         />
+                        {/* Overlay Preview on List */}
+                        <Box
+                          sx={{
+                            position: 'absolute',
+                            top: '20%',
+                            left: '50%',
+                            transform: 'translate(-50%, -50%)',
+                            width: '100%',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            pointerEvents: 'none',
+                            px: 2,
+                            zIndex: 10
+                          }}
+                        >
+                          <Typography
+                            sx={{
+                              fontFamily: globalBannerText.fontFamily || 'BrittanySignature',
+                              fontSize: `${(globalBannerText.fontSize || 4.5) * 0.475}rem`,
+                              color: '#c8626d',
+                              textShadow: '1px 1px 4px rgba(0,0,0,0.2)',
+                              textAlign: 'center',
+                              lineHeight: 1.2
+                            }}
+                          >
+                            {globalBannerText.es}
+                          </Typography>
+                        </Box>
                         <CardContent sx={{ p: 2 }}>
                           <Typography variant="h6" sx={{ mb: 1, fontWeight: 600 }}>
                             {photo.title}
