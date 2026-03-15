@@ -54,14 +54,16 @@ const Home = () => {
       featuredTitle: 'Galletas Destacadas',
       viewDetails: 'Ver detalles',
       addToCart: 'Agregar al carrito',
-      noFeatured: 'Aún no hay suficientes galletas destacadas para mostrar.'
+      noFeatured: 'Aún no hay suficientes galletas destacadas para mostrar.',
+      cookieWeightChip: 'Entre 180g y 200g de puro antojo en cada galleta'
     },
     en: {
       bannerMessage: 'DeliZuKar: your heart’s Wi-Fi (always connects you to happiness).',
       featuredTitle: 'Featured Cookies',
       viewDetails: 'View details',
       addToCart: 'Add to cart',
-      noFeatured: 'Not enough featured cookies to display yet.'
+      noFeatured: 'Not enough featured cookies to display yet.',
+      cookieWeightChip: 'Between 180g and 200g of pure craving in every cookie'
     }
   };
 
@@ -189,9 +191,9 @@ const Home = () => {
               backgroundColor: '#c8626d',
               color: 'white',
               fontWeight: 800,
-              fontSize: { xs: '0.4rem', sm: '0.65rem', md: '0.52rem', lg: '0.85rem' },
-              px: { xs: 1.0, sm: 1.8, md: 1.4, lg: 2.1 },
-              py: { xs: 0.7, sm: 0.9, md: 0.6, lg: 0.85 },
+              fontSize: { xs: '0.4rem', sm: '0.65rem', md: '0.52rem', lg: '0.7rem' },
+              px: { xs: 1.0, sm: 1.8, md: 1.4, lg: 1.6 },
+              py: { xs: 0.7, sm: 0.9, md: 0.6, lg: 0.7 },
               borderRadius: '999px',
               border: '1px solid white',
               boxShadow: '0 6px 20px rgba(200, 98, 109, 0.4)',
@@ -205,7 +207,7 @@ const Home = () => {
               whiteSpace: { xs: 'normal', md: 'nowrap' }
             }}
           >
-            Entre 180g y 200g de puro antojo en cada galleta
+            {copy.cookieWeightChip}
           </Box>
         </Box>
         

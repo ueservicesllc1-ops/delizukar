@@ -72,11 +72,13 @@ const Header = () => {
   const labels = {
     es: { 
       home: 'Inicio', products: 'Galletas', sweetbox: 'Cajas', about: 'Nosotros', contact: 'Contacto', faq: 'FAQ',
-      logout: 'Salir', login: 'Iniciar Sesión', profile: 'Mi Perfil', orders: 'Mis Pedidos', settings: 'Configuración'
+      logout: 'Salir', login: 'Iniciar Sesión', profile: 'Mi Perfil', orders: 'Mis Pedidos', settings: 'Configuración',
+      cookieWeightChip: 'Entre 180g y 200g de puro antojo en cada galleta'
     },
     en: { 
       home: 'Home', products: 'Cookies', sweetbox: 'Boxes', about: 'About Us', contact: 'Contact', faq: 'FAQ',
-      logout: 'Logout', login: 'Sign In', profile: 'My Profile', orders: 'My Orders', settings: 'Settings'
+      logout: 'Logout', login: 'Sign In', profile: 'My Profile', orders: 'My Orders', settings: 'Settings',
+      cookieWeightChip: 'Between 180g and 200g of pure craving in every cookie'
     }
   };
   const L = labels[language] || labels.es;
@@ -266,8 +268,8 @@ const Header = () => {
           transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
           sx={{ 
             position: 'absolute', 
-            left: '42px', 
-            top: '70px', 
+            left: '60px', 
+            top: '50px', 
             zIndex: 100,
             display: { xs: 'flex', md: 'none' } 
           }}
@@ -277,9 +279,9 @@ const Header = () => {
               backgroundColor: '#c8626d',
               color: 'white',
               fontWeight: 800,
-              fontSize: '0.34rem',
-              px: 0.8,
-              py: 0.5,
+              fontSize: { xs: '0.42rem', sm: '0.65rem' },
+              px: { xs: 1.2, sm: 2 },
+              py: { xs: 0.8, sm: 1.2 },
               borderRadius: '20px',
               border: '0.5px solid white',
               boxShadow: '0 4px 10px rgba(200, 98, 109, 0.2)',
@@ -289,11 +291,11 @@ const Header = () => {
               justifyContent: 'center',
               textAlign: 'center',
               lineHeight: 1.1,
-              maxWidth: '55px',
+              maxWidth: { xs: '65px', sm: '100px' },
               whiteSpace: 'normal'
             }}
           >
-            Entre 180g y 200g de puro antojo en cada galleta
+            {L.cookieWeightChip}
           </Box>
         </Box>
 
