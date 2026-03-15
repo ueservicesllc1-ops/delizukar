@@ -22,7 +22,7 @@ const TEXTS = {
   en: {
     title: 'Our Sweet Boxes',
     subtitle: 'Choose the perfect size to share or gift the taste of Delizukar.',
-    choose: 'Build my box',
+    choose: 'View details',
     loading: 'Loading best sweets...',
     empty: 'No boxes found available at this moment.',
     discountInfo: '({percentage}% discount applied to the total)',
@@ -31,7 +31,7 @@ const TEXTS = {
   es: {
     title: 'Nuestras Sweet Boxes',
     subtitle: 'Elige el tamaño perfecto para compartir o regalar el sabor de Delizukar.',
-    choose: 'Armar mi caja',
+    choose: 'Ver detalles',
     loading: 'Cargando mejores dulces...',
     empty: 'No se encontraron cajas disponibles en este momento.',
     discountInfo: '({percentage}% de descuento aplicado al total)',
@@ -162,7 +162,7 @@ const SweetBoxes = () => {
                   <Card
                     onClick={() => handleBoxClick(product)}
                     sx={{
-                      height: '320px', // Altura fija para que sean pequeñas
+                      height: '360px', // Reducción a 360px para diseño más compacto
                       display: 'flex',
                       flexDirection: 'column',
                       borderRadius: '16px',
@@ -177,7 +177,7 @@ const SweetBoxes = () => {
                       }
                     }}
                   >
-                    <Box sx={{ position: 'relative', height: 160, overflow: 'hidden' }}>
+                    <Box sx={{ position: 'relative', height: 180, overflow: 'hidden' }}>
                       <ProductImage
                         src={product.image}
                         alt={product.name}
@@ -218,6 +218,18 @@ const SweetBoxes = () => {
                         }}
                       >
                       {PRODUCT_TRANSLATIONS[language]?.[product.name]?.name || product[`name_${language}`] || product.name}
+                      </Typography>
+                      <Typography
+                        variant="body2"
+                        sx={{
+                          color: 'text.secondary',
+                          fontSize: '0.75rem',
+                          mb: 1.5,
+                          lineHeight: 1.4,
+                          minHeight: '3em' // Asegura altura constante
+                        }}
+                      >
+                        {PRODUCT_TRANSLATIONS[language]?.[product.name]?.description || product[`description_${language}`] || product.description}
                       </Typography>
                       {product.category === 'boxes' && product.discountPercentage > 0 && (
                         <Typography

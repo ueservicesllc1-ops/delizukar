@@ -360,69 +360,78 @@ const Cart = () => {
                         }
                       }}
                     >
-                      <CardContent sx={{ p: 3 }}>
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 3, width: '100%' }}>
+                      <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
+                        <Box sx={{ 
+                          display: 'flex', 
+                          flexDirection: { xs: 'column', sm: 'row' }, 
+                          alignItems: { xs: 'center', sm: 'center' }, 
+                          gap: { xs: 2, sm: 3 }, 
+                          width: '100%' 
+                        }}>
                           {/* Imagen del producto */}
-                          <Box sx={{ flex: '0 0 80px' }}>
+                          <Box sx={{ flex: '0 0 auto' }}>
                             <Box sx={{ position: 'relative' }}>
                               <Box
                                 component="img"
                                 src={item.image}
                                 alt={item.name}
-                                sx={{
-                                  width: 80,
-                                  height: 80,
-                                  objectFit: 'cover',
-                                  borderRadius: '15px'
-                                }}
+                                  sx={{
+                                    width: { xs: 60, sm: 80 },
+                                    height: { xs: 60, sm: 80 },
+                                    objectFit: 'cover',
+                                    borderRadius: '12px'
+                                  }}
                               />
                               {item.isBestSeller && (
                                 <Box
                                   sx={{
                                     position: 'absolute',
-                                    top: 8,
-                                    left: 8,
+                                    top: -4,
+                                    left: -4,
                                     backgroundColor: '#FF6B35',
                                     color: 'white',
-                                    px: 1,
-                                    py: 0.5,
-                                    borderRadius: '8px',
-                                    fontSize: '0.7rem',
-                                    fontWeight: 600
+                                    px: 0.8,
+                                    py: 0.2,
+                                    borderRadius: '6px',
+                                    fontSize: '0.55rem',
+                                    fontWeight: 700,
+                                    zIndex: 2,
+                                    boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+                                    whiteSpace: 'nowrap'
                                   }}
                                 >
-                                  Best Seller
+                                  BEST SELLER
                                 </Box>
                               )}
                             </Box>
                           </Box>
 
                           {/* Información del producto */}
-                          <Box sx={{ flex: 1, minWidth: 0 }}>
+                          <Box sx={{ flex: 1, minWidth: 0, textAlign: { xs: 'center', sm: 'left' }, width: { xs: '100%', sm: 'auto' } }}>
                             <Typography
                               variant="h6"
-                              sx={{
-                                fontWeight: 600,
-                                color: '#333',
-                                mb: 0.5,
-                                fontFamily: '"Asap", sans-serif',
-                                textTransform: 'uppercase',
-                                letterSpacing: '0.5px',
-                                fontSize: '0.9rem'
-                              }}
+                                sx={{
+                                  fontWeight: 600,
+                                  color: '#333',
+                                  mb: 0.2,
+                                  fontFamily: '"Asap", sans-serif',
+                                  textTransform: 'uppercase',
+                                  letterSpacing: '0.5px',
+                                  fontSize: { xs: '0.85rem', sm: '0.9rem' }
+                                }}
                             >
                               {item.name}
                             </Typography>
                             <Typography
                               variant="body2"
-                              sx={{
-                                color: '#666',
-                                mb: 1,
-                                fontFamily: '"Asap", sans-serif',
-                                textTransform: 'uppercase',
-                                fontSize: '0.65rem',
-                                letterSpacing: '0.3px'
-                              }}
+                                sx={{
+                                  color: '#666',
+                                  mb: 0.5,
+                                  fontFamily: '"Asap", sans-serif',
+                                  textTransform: 'uppercase',
+                                  fontSize: { xs: '0.6rem', sm: '0.65rem' },
+                                  letterSpacing: '0.3px'
+                                }}
                             >
                               {getCategoryDisplayName(item.category)}
                             </Typography>
@@ -453,7 +462,7 @@ const Cart = () => {
                                 Descuento de Box ({item.discountPercentage}%) aplicado
                               </Typography>
                             )}
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, justifyContent: { xs: 'center', sm: 'flex-start' } }}>
                               <Typography
                                 variant="h6"
                                 sx={{
@@ -478,8 +487,19 @@ const Cart = () => {
                             </Box>
                           </Box>
 
-                          {/* Controles de cantidad y eliminar - Layout vertical */}
-                          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1, ml: 'auto' }}>
+                          {/* Controles de cantidad y eliminar - Layout adaptativo */}
+                          <Box sx={{ 
+                            display: 'flex', 
+                            flexDirection: { xs: 'row', sm: 'column' }, 
+                            alignItems: 'center', 
+                            justifyContent: { xs: 'space-between', sm: 'center' },
+                            gap: { xs: 1, sm: 1 }, 
+                            width: { xs: '100%', sm: 'auto' },
+                            ml: { xs: 0, sm: 'auto' },
+                            mt: { xs: 1, sm: 0 },
+                            pt: { xs: 1.5, sm: 0 },
+                            borderTop: { xs: '1px solid rgba(0,0,0,0.05)', sm: 'none' }
+                          }}>
                             {/* Controles de cantidad arriba */}
                             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                               <IconButton

@@ -18,6 +18,7 @@ import {
 import { useStore } from '../context/StoreContext';
 import { useLanguage } from '../context/LanguageContext';
 import { useFeaturedProducts } from '../context/FeaturedProductsContext';
+import { PRODUCT_TRANSLATIONS } from '../pages/Products';
 
 const FeaturedProducts = ({ onOpenDetail }) => {
   const { featuredProducts: defaultFeaturedProducts, productsLoading, addToCart } = useStore();
@@ -36,7 +37,7 @@ const FeaturedProducts = ({ onOpenDetail }) => {
       featuredTitle: 'Galletas Destacadas',
       viewDetails: 'Ver detalles',
       viewAll: 'Ver todas las galletas',
-      offMessage: 'OFF - Precio según galletas'
+      offMessage: 'de descuento aplicado al total'
     },
     en: {
       featuredTitle: 'Featured Cookies',
@@ -110,7 +111,7 @@ const FeaturedProducts = ({ onOpenDetail }) => {
                   sx={{
                     borderRadius: '18px',
                     boxShadow: '0 12px 30px rgba(0,0,0,0.08)',
-                    height: '100%',
+                    height: '360px',
                     display: 'flex',
                     flexDirection: 'column',
                     backgroundColor: '#fff'
@@ -122,37 +123,7 @@ const FeaturedProducts = ({ onOpenDetail }) => {
                       alt={item.name} 
                       style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                     />
-                    <Box
-                      component={motion.div}
-                      animate={{ 
-                        scale: [1, 1.1, 1],
-                      }}
-                      transition={{ 
-                        duration: 1.5,
-                        repeat: Infinity,
-                        ease: "easeInOut"
-                      }}
-                      sx={{
-                        position: 'absolute',
-                        top: 10,
-                        right: 10,
-                        zIndex: 2
-                      }}
-                    >
-                      <Chip
-                        label="200g Gourmet"
-                        size="small"
-                        sx={{
-                          backgroundColor: '#c8626d',
-                          color: 'white',
-                          fontWeight: 800,
-                          fontSize: '0.65rem',
-                          height: 20,
-                          boxShadow: '0 4px 10px rgba(0,0,0,0.2)',
-                          border: '1px solid white'
-                        }}
-                      />
-                    </Box>
+
                   </Box>
                   <CardContent sx={{ 
                     display: 'flex', 
@@ -173,8 +144,23 @@ const FeaturedProducts = ({ onOpenDetail }) => {
                         lineHeight: 1.2
                       }}
                     >
-                      {item[`name_${language}`] || item.name}
+                      {PRODUCT_TRANSLATIONS[language]?.[item.name]?.name || item[`name_${language}`] || item.name}
                     </Typography>
+                    
+                    {item.category === 'boxes' && (
+                       <Typography 
+                         variant="body2" 
+                         sx={{ 
+                           color: 'text.secondary', 
+                           fontSize: '0.75rem', 
+                           textAlign: 'center',
+                           lineHeight: 1.3
+                         }}
+                       >
+                         {PRODUCT_TRANSLATIONS[language]?.[item.name]?.description || item[`description_${language}`] || item.description}
+                       </Typography>
+                    )}
+
                     <Typography variant="body1" sx={{ fontWeight: 600, color: '#4a4a4a', fontSize: { xs: '0.8rem', md: '0.9rem' }, textAlign: 'center' }}>
                       {item.category === 'boxes' ? (
                         `${item.discountPercentage}% ${copy.offMessage}`
@@ -182,6 +168,9 @@ const FeaturedProducts = ({ onOpenDetail }) => {
                         `$${Number(item.price || 0).toFixed(2)}`
                       )}
                     </Typography>
+
+                    <Box sx={{ flexGrow: 1 }} />
+
                     <Button
                       variant="contained"
                       sx={{ 

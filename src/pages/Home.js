@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import { motion } from 'framer-motion';
 import {
   Box,
   Card,
@@ -11,7 +12,8 @@ import {
   IconButton,
   Divider,
   useTheme,
-  useMediaQuery
+  useMediaQuery,
+  Chip
 } from '@mui/material';
 import { Close, ShoppingBag } from '@mui/icons-material';
 import Rating from '@mui/material/Rating';
@@ -219,6 +221,45 @@ const Home = () => {
           alt="Banner Delizukar"
           sx={{ width: '100%', display: 'block' }}
         />
+        
+        {/* Chip de peso fijo solicitado con micro-animación */}
+        <Box
+          component={motion.div}
+          animate={{ 
+            y: [0, -8, 0],
+          }}
+          transition={{ 
+            duration: 3,
+            repeat: Infinity,
+            ease: "easeInOut"
+          }}
+          sx={{
+            position: 'absolute',
+            left: { xs: '5%', md: '8%' },
+            top: { xs: '35%', md: '25%' }, 
+            zIndex: 15
+          }}
+        >
+          <Chip
+            label="Entre 180g y 200g de puro antojo en cada galletas"
+            sx={{
+              backgroundColor: '#c8626d',
+              color: 'white',
+              fontWeight: 800,
+              fontSize: { xs: '0.5rem', md: '0.85rem' }, // Reducido de 1.2rem
+              height: 'auto',
+              px: { xs: 1.2, md: 2 }, // Reducido
+              py: { xs: 0.6, md: 0.8 }, // Reducido
+              borderRadius: '999px',
+              border: '1px solid white', // Borde más fino
+              boxShadow: '0 6px 20px rgba(200, 98, 109, 0.4)',
+              '& .MuiChip-label': {
+                whiteSpace: 'normal',
+                textAlign: 'center'
+              }
+            }}
+          />
+        </Box>
         
         {/* Texto Flotante sobre el Banner */}
         {heroText && (

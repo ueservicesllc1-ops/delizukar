@@ -359,7 +359,7 @@ const BoxSelection = () => {
                   sx={{ 
                     width: '100%',
                     maxWidth: '100%',
-                    height: '320px',
+                    height: '360px',
                     display: 'flex',
                     flexDirection: 'column',
                     borderRadius: '8px',
@@ -376,7 +376,7 @@ const BoxSelection = () => {
                     <ProductImage
                       src={cookie.image}
                       alt={cookie.name}
-                      height={180}
+                      height={200}
                       sx={{
                         transition: 'transform 0.3s ease',
                         transform: 'translateY(0px)',
@@ -405,7 +405,7 @@ const BoxSelection = () => {
                     )}
                   </Box>
 
-                  <CardContent sx={{ flexGrow: 0, p: 1.5, transform: 'translateY(-10px)', textAlign: 'center' }}>
+                  <CardContent sx={{ flexGrow: 1, p: 1.5, textAlign: 'center' }}>
                     <Typography 
                       variant="h6"
                       sx={{
@@ -413,22 +413,22 @@ const BoxSelection = () => {
                         mb: 0.5,
                         color: '#333',
                         fontSize: '1rem',
-                        transform: 'translateY(5px)',
                         fontFamily: '"Asap", sans-serif',
                         textTransform: 'uppercase',
                         letterSpacing: '0.5px',
+                        lineHeight: 1.2,
                         display: '-webkit-box',
                         WebkitLineClamp: 2,
                         WebkitBoxOrient: 'vertical',
                         overflow: 'hidden',
-                        height: '40px'
+                        height: '60px'
                       }}
                     >
                       {PRODUCT_TRANSLATIONS[language]?.[cookie.name]?.name || cookie[`name_${language}`] || cookie.name}
                     </Typography>
                   </CardContent>
 
-                  <Box sx={{ p: 1, pt: 0, mt: 'auto', transform: 'translateY(-10px)', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 2 }}>
+                  <Box sx={{ p: 1, pt: 0, mt: 'auto', pb: 2, display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 2 }}>
                     <IconButton 
                       size="small" 
                       onClick={() => handleRemove(cookie.id)}
@@ -475,12 +475,12 @@ const BoxSelection = () => {
                 sx={{ px: 0 }}
               >
                 <Typography sx={{ fontWeight: 600, color: '#7C2815', fontSize: '1.2rem' }}>
-                  {accordionData?.[`aboutTitle_${language}`] || accordionData?.aboutTitle || translatedTexts.aboutTitle}
+                  {language === 'es' ? (translatedTexts.aboutTitle || accordionData?.aboutTitle) : (accordionData?.aboutTitle_en || translatedTexts.aboutTitle || accordionData?.aboutTitle)}
                 </Typography>
               </AccordionSummary>
               <AccordionDetails sx={{ px: 0, pb: 4 }}>
                 <Typography variant="body1" sx={{ color: '#666', lineHeight: 1.8 }}>
-                  {accordionData?.[`aboutContent_${language}`] || accordionData?.aboutContent || translatedTexts.aboutContent}
+                  {language === 'es' ? (translatedTexts.aboutContent || accordionData?.aboutContent) : (accordionData?.aboutContent_en || translatedTexts.aboutContent || accordionData?.aboutContent)}
                 </Typography>
               </AccordionDetails>
             </Accordion>
@@ -497,12 +497,12 @@ const BoxSelection = () => {
                 sx={{ px: 0 }}
               >
                 <Typography sx={{ fontWeight: 600, color: '#7C2815', fontSize: '1.2rem' }}>
-                  {accordionData?.[`differentTitle_${language}`] || accordionData?.differentTitle || translatedTexts.differentTitle}
+                  {language === 'es' ? (translatedTexts.differentTitle || accordionData?.differentTitle) : (accordionData?.differentTitle_en || translatedTexts.differentTitle || accordionData?.differentTitle)}
                 </Typography>
               </AccordionSummary>
               <AccordionDetails sx={{ px: 0, pb: 4 }}>
                 <Typography variant="body1" sx={{ color: '#666', lineHeight: 1.8 }}>
-                  {accordionData?.[`differentContent_${language}`] || accordionData?.differentContent || translatedTexts.differentContent}
+                  {language === 'es' ? (translatedTexts.differentContent || accordionData?.differentContent) : (accordionData?.differentContent_en || translatedTexts.differentContent || accordionData?.differentContent)}
                 </Typography>
               </AccordionDetails>
             </Accordion>
@@ -519,12 +519,12 @@ const BoxSelection = () => {
                 sx={{ px: 0 }}
               >
                 <Typography sx={{ fontWeight: 600, color: '#7C2815', fontSize: '1.2rem' }}>
-                  {accordionData?.[`ingredientsTitle_${language}`] || accordionData?.ingredientsTitle || translatedTexts.ingredientsTitle}
+                  {language === 'es' ? (translatedTexts.ingredientsTitle || accordionData?.ingredientsTitle) : (accordionData?.ingredientsTitle_en || translatedTexts.ingredientsTitle || accordionData?.ingredientsTitle)}
                 </Typography>
               </AccordionSummary>
               <AccordionDetails sx={{ px: 0, pb: 4 }}>
                 <Typography variant="body1" sx={{ color: '#666', lineHeight: 1.8 }}>
-                  {accordionData?.[`ingredientsContent_${language}`] || accordionData?.ingredientsContent || translatedTexts.ingredientsContent}
+                  {language === 'es' ? (translatedTexts.ingredientsContent || accordionData?.ingredientsContent) : (accordionData?.ingredientsContent_en || translatedTexts.ingredientsContent || accordionData?.ingredientsContent)}
                 </Typography>
               </AccordionDetails>
             </Accordion>

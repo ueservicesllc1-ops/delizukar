@@ -71,11 +71,11 @@ const Header = () => {
 
   const labels = {
     es: { 
-      home: 'Inicio', products: 'Galletas', sweetbox: 'Box', about: 'Nosotros', contact: 'Contacto', faq: 'FAQ',
+      home: 'Inicio', products: 'Galletas', sweetbox: 'Cajas', about: 'Nosotros', contact: 'Contacto', faq: 'FAQ',
       logout: 'Salir', login: 'Iniciar Sesión', profile: 'Mi Perfil', orders: 'Mis Pedidos', settings: 'Configuración'
     },
     en: { 
-      home: 'Home', products: 'Cookies', sweetbox: 'Box', about: 'About Us', contact: 'Contact', faq: 'FAQ',
+      home: 'Home', products: 'Cookies', sweetbox: 'Boxes', about: 'About Us', contact: 'Contact', faq: 'FAQ',
       logout: 'Logout', login: 'Sign In', profile: 'My Profile', orders: 'My Orders', settings: 'Settings'
     }
   };
@@ -291,14 +291,14 @@ const Header = () => {
                 flexDirection: 'column',
                 alignItems: 'stretch',
                 gap: { md: 1.5, lg: 2 },
-                px: { md: 4, lg: 6 },
-                py: { md: 1.1, lg: 1.5 },
+                px: { md: 2, lg: 6 },
+                py: { md: 1, lg: 1.5 },
                 minHeight: 'auto'
               }}
             >
       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: { md: 1.5, lg: 2 }, flex: 1 }}>
-          <IconButton sx={{ color: '#be8782', ml: { md: 4, lg: 6 } }}>
+          <IconButton sx={{ color: '#be8782', ml: { md: 1, lg: 6 } }}>
             <Search />
           </IconButton>
         </Box>
@@ -309,10 +309,27 @@ const Header = () => {
           whileTap={{ scale: 0.95 }}
           style={{ display: 'flex', justifyContent: 'center', flex: 1 }}
         >
-          <Box component="img" src="/LOGO.png" alt="Delizukar Logo" sx={{ height: { md: 140, lg: 160 }, width: 'auto' }} />
+          <Box 
+            component="img" 
+            src="/LOGO.png" 
+            alt="Delizukar Logo" 
+            sx={{ 
+              height: { md: 100, lg: 130 }, 
+              width: 'auto', 
+              maxWidth: '100%', 
+              objectFit: 'contain' 
+            }} 
+          />
         </motion.a>
 
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: { md: 1.2, lg: 1.6 }, justifyContent: 'flex-end', flex: 1, minWidth: { md: '220px', lg: '260px' } }}>
+        <Box sx={{ 
+          display: 'flex', 
+          alignItems: 'center', 
+          gap: { md: 1.2, lg: 1.6 }, 
+          justifyContent: 'flex-end', 
+          flex: 1, 
+          minWidth: { md: '200px', lg: '260px' } 
+        }}>
           <LanguageSelect />
           {user ? (
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>

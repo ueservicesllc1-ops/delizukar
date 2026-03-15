@@ -5,6 +5,7 @@ import { Close, AddShoppingCart, FavoriteBorder, AccountBalanceWallet, ShoppingB
 import { useStore } from '../context/StoreContext';
 import { useLanguage } from '../context/LanguageContext';
 import ProductImage from './ProductImage';
+import { PRODUCT_TRANSLATIONS } from '../pages/Products';
  
 
 const ProductCards = ({ products: propProducts, showAll = false }) => {
@@ -92,7 +93,7 @@ const ProductCards = ({ products: propProducts, showAll = false }) => {
                     <ProductImage
                       src={product.image}
                       alt={product.name}
-                      height={280}
+                      height={200}
                       sx={{
                         transition: 'transform 0.3s ease',
                         transform: 'translateY(-20px)',
@@ -112,7 +113,7 @@ const ProductCards = ({ products: propProducts, showAll = false }) => {
                           backgroundColor: '#4CAF50',
                           color: 'white',
                           fontWeight: 600,
-                          fontSize: '0.75rem'
+                          fontSize: '0.7rem'
                         }}
                       />
                     )}
@@ -124,7 +125,7 @@ const ProductCards = ({ products: propProducts, showAll = false }) => {
                           backgroundColor: '#FF6B35',
                           color: 'white',
                           fontWeight: 600,
-                          fontSize: '0.75rem'
+                          fontSize: '0.7rem'
                         }}
                       />
                     )}
@@ -146,23 +147,39 @@ const ProductCards = ({ products: propProducts, showAll = false }) => {
                   </IconButton>
                 </Box>
 
-                <CardContent className="product-card-content-mobile" sx={{ flexGrow: 0, p: 1.5, pt: 2.5, pb: 1.5 }}>
+                <CardContent className="product-card-content-mobile" sx={{ flexGrow: 1, p: 1.5, pt: 2.5, pb: 1.5 }}>
                     <Typography
                       variant="h6"
                       className="product-title-mobile"
                       sx={{
                         fontWeight: 600,
                         mt: 1.5,
-                        mb: 1,
-                        color: '#333',
+                        mb: 0.5,
+                        color: '#c8626d',
                         fontSize: '1rem',
                         fontFamily: '"Asap", sans-serif',
                         textTransform: 'uppercase',
                         letterSpacing: '0.5px'
                       }}
                     >
-                      {product[`name_${language}`] || product.name}
+                      {PRODUCT_TRANSLATIONS[language]?.[product.name]?.name || product[`name_${language}`] || product.name}
                     </Typography>
+
+                    {product.category === 'boxes' && (
+                      <Typography
+                        variant="body2"
+                        sx={{
+                          color: '#c8626d',
+                          fontSize: '0.75rem',
+                          mb: 1,
+                          lineHeight: 1.3,
+                          fontWeight: 500,
+                          textAlign: 'center'
+                        }}
+                      >
+                        {PRODUCT_TRANSLATIONS[language]?.[product.name]?.description || product[`description_${language}`] || product.description}
+                      </Typography>
+                    )}
 
                     {/* Precio y Rating */}
                     <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 0.5, mt: 1, transform: 'translateY(-10px)' }}>
@@ -239,7 +256,7 @@ const ProductCards = ({ products: propProducts, showAll = false }) => {
                         addToCart(product);
                       }}
                   >
-                    {t('product.addToCart', 'Add to Cart')}
+                    {text.viewDetails}
                   </Button>
                 </CardActions>
               </Card>

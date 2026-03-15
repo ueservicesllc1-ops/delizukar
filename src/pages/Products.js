@@ -31,7 +31,7 @@ const TEXTS = {
     cerrar: 'Cerrar',
     stockDisponible: 'Stock disponible:',
     unidades: 'unidades',
-    offMessage: 'OFF - Precio según galletas',
+    offMessage: 'de descuento aplicado al total',
     ferreroDescription: 'Galleta estilo NY con Ferrero Rocher, chips de chocolate oscuro y avellanas tostadas—intensa, elegante y adictiva.',
     defaultDescription: 'Deliciosas {name} con ingredientes premium. Galletas estilo Nueva York perfectamente horneadas para disfrutar o compartir.',
     aboutTitle: 'Recién horneadas para ti',
@@ -109,9 +109,18 @@ export const PRODUCT_TRANSLATIONS = {
     'Besos Blancos de Avellanas': { name: 'Besos Blancos de Avellanas' },
     'Almendra de Oro': { name: 'Almendra de Oro' },
     'Gift Message + Premium Card': { name: 'Mensaje de Regalo + Tarjeta Premium' },
-    'Sweet Box – 4 Cookies': { name: 'Sweet Box – 4 Galletas' },
-    'Sweet Box – 6 Cookies': { name: 'Sweet Box – 6 Galletas' },
-    'Deluxe Sweet Box – 12 Cookies': { name: 'Deluxe Sweet Box – 12 Galletas' }
+    '"A little luxury Box" 4 Cookies  Perfect for enjoying or gifting a sweet moment.': { 
+      name: '"Caja Un Pequeño Lujo" 4 Galletas', 
+      description: 'Caja perfecta para disfrutar o regalar un momento dulce.' 
+    },
+    '"Sweet Moments Box" 6 New York-style cookies to share and enjoy a special moment.': { 
+      name: '"Caja Momentos Dulces" 6 Galletas', 
+      description: '6 galletas estilo Nueva York para compartir y disfrutar de un momento especial.' 
+    },
+    '"Celebration Box" 12 New York-style cookies perfect for celebrating, sharing, or surprising someone.': { 
+      name: '"Caja de Celebración" 12 Galletas', 
+      description: '12 galletas estilo Nueva York perfectas para celebrar, compartir o sorprender a alguien.' 
+    }
   },
   en: {
     'Chocole DeLux': { name: 'Chocolate Deluxe' },
@@ -121,9 +130,18 @@ export const PRODUCT_TRANSLATIONS = {
     'Besos Blancos de Avellanas': { name: 'White Hazelnut Kisses' },
     'Almendra de Oro': { name: 'Golden Almond' },
     'Gift Message + Premium Card': { name: 'Gift Message + Premium Card' },
-    'Sweet Box – 4 Cookies': { name: 'Sweet Box – 4 Cookies' },
-    'Sweet Box – 6 Cookies': { name: 'Sweet Box – 6 Cookies' },
-    'Deluxe Sweet Box – 12 Cookies': { name: 'Deluxe Sweet Box – 12 Cookies' }
+    '"A little luxury Box" 4 Cookies  Perfect for enjoying or gifting a sweet moment.': { 
+      name: '"A little luxury Box" 4 Cookies', 
+      description: 'Perfect for enjoying or gifting a sweet moment.' 
+    },
+    '"Sweet Moments Box" 6 New York-style cookies to share and enjoy a special moment.': { 
+      name: '"Sweet Moments Box" 6 New York-style cookies', 
+      description: 'to share and enjoy a special moment.' 
+    },
+    '"Celebration Box" 12 New York-style cookies perfect for celebrating, sharing, or surprising someone.': { 
+      name: '"Celebration Box"', 
+      description: '12 New York-style cookies perfect for celebrating, sharing, or surprising someone.' 
+    }
   }
 };
 
@@ -234,7 +252,7 @@ const Products = () => {
                   sx={{
                     width: '100%',
                     maxWidth: '100%',
-                    height: '320px',
+                    height: '360px',
                     display: 'flex',
                     flexDirection: 'column',
                     borderRadius: '8px',
@@ -291,39 +309,7 @@ const Products = () => {
                       )}
                     </Box>
 
-                    {/* Gourmet Badge */}
-                    <Box
-                      component={motion.div}
-                      animate={{ 
-                        scale: [1, 1.1, 1],
-                        rotate: [0, 5, -5, 0]
-                      }}
-                      transition={{ 
-                        duration: 2,
-                        repeat: Infinity,
-                        ease: "easeInOut"
-                      }}
-                      sx={{
-                        position: 'absolute',
-                        top: 12,
-                        right: 8,
-                        zIndex: 2
-                      }}
-                    >
-                      <Chip
-                        label="200g Gourmet"
-                        size="small"
-                        sx={{
-                          backgroundColor: '#c8626d',
-                          color: 'white',
-                          fontWeight: 800,
-                          fontSize: '0.7rem',
-                          height: 24,
-                          boxShadow: '0 4px 12px rgba(200, 98, 109, 0.3)',
-                          border: '1.5px solid white'
-                        }}
-                      />
-                    </Box>
+
 
                     {/* Botón de favoritos */}
                     <IconButton
@@ -341,7 +327,7 @@ const Products = () => {
                     </IconButton>
                   </Box>
 
-                  <CardContent sx={{ flexGrow: 0, p: 1.5, transform: 'translateY(-10px)' }}>
+                  <CardContent sx={{ flexGrow: 0, p: 1.5 }}>
                     <Typography
                       variant="h6"
                       sx={{
@@ -349,7 +335,6 @@ const Products = () => {
                         mb: 0.5,
                         color: '#333',
                         fontSize: '1rem',
-                        transform: 'translateY(5px)',
                         fontFamily: '"Asap", sans-serif',
                         textTransform: 'uppercase',
                         letterSpacing: '0.5px'
@@ -357,6 +342,21 @@ const Products = () => {
                     >
                       {PRODUCT_TRANSLATIONS[language]?.[product.name]?.name || product[`name_${language}`] || product.name}
                     </Typography>
+                    {product.category === 'boxes' && (
+                      <Typography
+                        variant="body2"
+                        sx={{
+                          color: 'text.secondary',
+                          fontSize: '0.75rem',
+                          mb: 1,
+                          lineHeight: 1.3,
+                          mt: 1,
+                          textAlign: 'center'
+                        }}
+                      >
+                        {PRODUCT_TRANSLATIONS[language]?.[product.name]?.description || product[`description_${language}`] || product.description}
+                      </Typography>
+                    )}
 
                     {/* Precio y Rating */}
                     <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 0.5, mt: 1, transform: 'translateY(-10px)' }}>
