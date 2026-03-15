@@ -259,6 +259,44 @@ const Header = () => {
           <MenuIcon />
         </IconButton>
 
+        {/* Chip de peso en el header */}
+        <Box
+          component={motion.div}
+          animate={{ y: [0, -3, 0] }}
+          transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+          sx={{ 
+            position: 'absolute', 
+            left: '42px', 
+            top: '70px', 
+            zIndex: 100,
+            display: { xs: 'flex', md: 'none' } 
+          }}
+        >
+          <Box
+            sx={{
+              backgroundColor: '#c8626d',
+              color: 'white',
+              fontWeight: 800,
+              fontSize: '0.34rem',
+              px: 0.8,
+              py: 0.5,
+              borderRadius: '20px',
+              border: '0.5px solid white',
+              boxShadow: '0 4px 10px rgba(200, 98, 109, 0.2)',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              textAlign: 'center',
+              lineHeight: 1.1,
+              maxWidth: '55px',
+              whiteSpace: 'normal'
+            }}
+          >
+            Entre 180g y 200g de puro antojo en cada galleta
+          </Box>
+        </Box>
+
         <motion.a href="/" whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} style={{ display: 'flex', justifyContent: 'center', width: '100%', marginTop: '6px' }}>
           <Box component="img" src="/LOGO.png" alt="Delizukar Logo" sx={{ height: 95, width: 'auto' }} />
         </motion.a>
@@ -280,6 +318,7 @@ const Header = () => {
           <LanguageSelect sx={{ px: 1.5, py: 0.4, fontSize: '0.75rem' }} />
         </Box>
       </Box>
+
     </Toolbar>
   );
 
