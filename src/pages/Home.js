@@ -245,9 +245,9 @@ const Home = () => {
               backgroundColor: '#c8626d',
               color: 'white',
               fontWeight: 800,
-              fontSize: { xs: '0.45rem', sm: '0.65rem', md: '0.75rem', lg: '1.05rem', xl: '1.2rem' },
-              px: { xs: 1.2, sm: 1.8, md: 2, lg: 2.8, xl: 3 },
-              py: { xs: 0.8, sm: 0.9, md: 0.9, lg: 1.1, xl: 1.2 },
+              fontSize: { xs: '0.4rem', sm: '0.65rem', md: '0.52rem', lg: '0.85rem', xl: '0.85rem' },
+              px: { xs: 1.0, sm: 1.8, md: 1.4, lg: 2.1, xl: 2.1 },
+              py: { xs: 0.7, sm: 0.9, md: 0.6, lg: 0.85, xl: 0.85 },
               borderRadius: '999px',
               border: '1px solid white',
               boxShadow: '0 6px 20px rgba(200, 98, 109, 0.4)',
@@ -261,10 +261,7 @@ const Home = () => {
               whiteSpace: { xs: 'normal', md: 'nowrap' }
             }}
           >
-            <Box component="span">Entre 180g y 200g</Box>
-            <Box component="span" sx={{ ml: { md: 1 }, fontSize: { xs: '0.35rem', md: 'inherit' } }}>
-              de puro antojo
-            </Box>
+            Entre 180g y 200g de puro antojo en cada galleta
           </Box>
         </Box>
         
