@@ -235,30 +235,37 @@ const Home = () => {
           }}
           sx={{
             position: 'absolute',
-            left: { xs: '2%', md: '5%' },
-            top: { xs: '22%', md: '15%' }, 
+            left: { xs: '2%', md: '5%', lg: '8%' },
+            top: { xs: '5%', md: '18%', lg: '25%' }, 
             zIndex: 15
           }}
         >
-          <Chip
-            label="Entre 180g y 200g de puro antojo en cada galleta"
+          <Box
             sx={{
               backgroundColor: '#c8626d',
               color: 'white',
               fontWeight: 800,
-              fontSize: { xs: '0.45rem', md: '0.7rem' }, 
-              height: 'auto',
-              px: { xs: 1, md: 1.5 }, 
-              py: { xs: 0.4, md: 0.6 }, 
+              fontSize: { xs: '0.45rem', sm: '0.65rem', md: '0.75rem', lg: '1.05rem', xl: '1.2rem' },
+              px: { xs: 1.2, sm: 1.8, md: 2, lg: 2.8, xl: 3 },
+              py: { xs: 0.8, sm: 0.9, md: 0.9, lg: 1.1, xl: 1.2 },
               borderRadius: '999px',
-              border: '1px solid white', // Borde más fino
+              border: '1px solid white',
               boxShadow: '0 6px 20px rgba(200, 98, 109, 0.4)',
-              '& .MuiChip-label': {
-                whiteSpace: 'normal',
-                textAlign: 'center'
-              }
+              display: 'flex',
+              flexDirection: { xs: 'column', md: 'row' },
+              alignItems: 'center',
+              justifyContent: 'center',
+              textAlign: 'center',
+              lineHeight: 1.2,
+              maxWidth: { xs: '75px', md: 'none' },
+              whiteSpace: { xs: 'normal', md: 'nowrap' }
             }}
-          />
+          >
+            <Box component="span">Entre 180g y 200g</Box>
+            <Box component="span" sx={{ ml: { md: 1 }, fontSize: { xs: '0.35rem', md: 'inherit' } }}>
+              de puro antojo
+            </Box>
+          </Box>
         </Box>
         
         {/* Texto Flotante sobre el Banner */}
