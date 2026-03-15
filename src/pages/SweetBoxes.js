@@ -26,7 +26,13 @@ const TEXTS = {
     loading: 'Loading best sweets...',
     empty: 'No boxes found available at this moment.',
     discountInfo: '({percentage}% discount applied to the total)',
-    priceNote: 'Final price based on selected cookies'
+    priceNote: 'Final price based on selected cookies',
+    aboutTitle: 'About our cookies',
+    aboutContent: 'At Delizukar, we don\'t bake cookies to sit on a shelf. Every order is baked to order using top-quality ingredients. We then seal them to ensure they arrive at your doorstep as fresh as the moment they left the oven. Crispy on the outside, soft and gooey on the inside. That’s exactly how a real cookie should be.',
+    differentTitle: 'What makes us different',
+    differentContent: 'Because great cookies start with real ingredients. Real butter. Fresh eggs. Premium chocolate. No preservatives. No artificial flavors. Just artisanal cookies crafted to be enjoyed freshly baked.',
+    ingredientsTitle: 'Ingredients',
+    ingredientsContent: 'Flour, butter, eggs, white sugar, brown sugar, chocolate, vanilla, baking powder, and a pinch of salt. Ingredients may vary slightly depending on the flavor. Nothing else. No strange additives. Just thick, soft, and flavor-packed cookies. At Delizukar, we aren\'t just about cookies; we are about creating sweet moments.'
   },
   es: {
     title: 'Nuestras Sweet Boxes',
@@ -35,7 +41,13 @@ const TEXTS = {
     loading: 'Cargando mejores dulces...',
     empty: 'No se encontraron cajas disponibles en este momento.',
     discountInfo: '({percentage}% de descuento aplicado al total)',
-    priceNote: 'Precio final según galletas seleccionadas'
+    priceNote: 'Precio final según galletas seleccionadas',
+    aboutTitle: 'Recién horneadas para ti',
+    aboutContent: 'En Delizukar no hacemos cookies para almacenar. Cada pedido se hornea al momento con ingredientes de primera calidad. Luego las sellamos para que lleguen a tu puerta tan frescas como salieron del horno. Crujientes por fuera. Suaves y fundentes por dentro. Así debe ser una verdadera cookie.',
+    differentTitle: '¿Por qué Delizukar?',
+    differentContent: 'Porque las buenas cookies empiezan con ingredientes reales. Mantequilla de verdad. Huevos frescos. Chocolate premium. Sin conservantes. Sin sabores artificiales. Solo cookies artesanales hechas para disfrutarse recién horneadas.',
+    ingredientsTitle: 'Ingredientes reales',
+    ingredientsContent: 'Harina, mantequilla, huevos, azúcar blanca, azúcar moreno, chocolate, vainilla, polvo para hornear y una pizca de sal. Los ingredientes pueden variar ligeramente según el sabor. Nada más. Sin ingredientes extraños. Solo cookies gruesas, suaves y llenas de sabor. Delizukar no solo somos cookies, somos momentos dulces.'
   }
 };
 
@@ -302,12 +314,12 @@ const SweetBoxes = () => {
                 sx={{ px: 0 }}
               >
                 <Typography sx={{ fontWeight: 600, color: '#7C2815', fontSize: '1.2rem' }}>
-                  {accordionData.aboutTitle}
+                  {language === 'es' ? (t.aboutTitle || accordionData?.aboutTitle) : (accordionData?.aboutTitle_en || t.aboutTitle || accordionData?.aboutTitle)}
                 </Typography>
               </AccordionSummary>
               <AccordionDetails sx={{ px: 0, pb: 4 }}>
                 <Typography variant="body1" sx={{ color: '#666', lineHeight: 1.8 }}>
-                  {accordionData.aboutContent}
+                  {language === 'es' ? (t.aboutContent || accordionData?.aboutContent) : (accordionData?.aboutContent_en || t.aboutContent || accordionData?.aboutContent)}
                 </Typography>
               </AccordionDetails>
             </Accordion>
@@ -324,12 +336,12 @@ const SweetBoxes = () => {
                 sx={{ px: 0 }}
               >
                 <Typography sx={{ fontWeight: 600, color: '#7C2815', fontSize: '1.2rem' }}>
-                  {accordionData.differentTitle}
+                  {language === 'es' ? (t.differentTitle || accordionData?.differentTitle) : (accordionData?.differentTitle_en || t.differentTitle || accordionData?.differentTitle)}
                 </Typography>
               </AccordionSummary>
               <AccordionDetails sx={{ px: 0, pb: 4 }}>
                 <Typography variant="body1" sx={{ color: '#666', lineHeight: 1.8 }}>
-                  {accordionData.differentContent}
+                  {language === 'es' ? (t.differentContent || accordionData?.differentContent) : (accordionData?.differentContent_en || t.differentContent || accordionData?.differentContent)}
                 </Typography>
               </AccordionDetails>
             </Accordion>
@@ -346,12 +358,12 @@ const SweetBoxes = () => {
                 sx={{ px: 0 }}
               >
                 <Typography sx={{ fontWeight: 600, color: '#7C2815', fontSize: '1.2rem' }}>
-                  {accordionData.ingredientsTitle}
+                  {language === 'es' ? (t.ingredientsTitle || accordionData?.ingredientsTitle) : (accordionData?.ingredientsTitle_en || t.ingredientsTitle || accordionData?.ingredientsTitle)}
                 </Typography>
               </AccordionSummary>
               <AccordionDetails sx={{ px: 0, pb: 4 }}>
                 <Typography variant="body1" sx={{ color: '#666', lineHeight: 1.8 }}>
-                  {accordionData.ingredientsContent}
+                  {language === 'es' ? (t.ingredientsContent || accordionData?.ingredientsContent) : (accordionData?.ingredientsContent_en || t.ingredientsContent || accordionData?.ingredientsContent)}
                 </Typography>
               </AccordionDetails>
             </Accordion>
