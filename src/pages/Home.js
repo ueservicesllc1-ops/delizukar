@@ -235,21 +235,21 @@ const Home = () => {
           }}
           sx={{
             position: 'absolute',
-            left: { xs: '5%', md: '8%' },
-            top: { xs: '35%', md: '25%' }, 
+            left: { xs: '2%', md: '5%' },
+            top: { xs: '22%', md: '15%' }, 
             zIndex: 15
           }}
         >
           <Chip
-            label="Entre 180g y 200g de puro antojo en cada galletas"
+            label="Entre 180g y 200g de puro antojo en cada galleta"
             sx={{
               backgroundColor: '#c8626d',
               color: 'white',
               fontWeight: 800,
-              fontSize: { xs: '0.5rem', md: '0.85rem' }, // Reducido de 1.2rem
+              fontSize: { xs: '0.45rem', md: '0.7rem' }, 
               height: 'auto',
-              px: { xs: 1.2, md: 2 }, // Reducido
-              py: { xs: 0.6, md: 0.8 }, // Reducido
+              px: { xs: 1, md: 1.5 }, 
+              py: { xs: 0.4, md: 0.6 }, 
               borderRadius: '999px',
               border: '1px solid white', // Borde más fino
               boxShadow: '0 6px 20px rgba(200, 98, 109, 0.4)',
