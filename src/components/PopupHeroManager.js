@@ -66,21 +66,34 @@ const PopupHeroManager = ({ open, onClose }) => {
   const [snackbarSeverity, setSnackbarSeverity] = useState('success');
   const [uploadingImage, setUploadingImage] = useState(false);
   const [imagePreview, setImagePreview] = useState('');
+  const [editLanguage, setEditLanguage] = useState('es'); // 'es' o 'en'
 
   // Estados del formulario
   const [formData, setFormData] = useState({
     title: '¡Ofertas Especiales!',
+    title_es: '¡Ofertas Especiales!',
+    title_en: 'Special Offers!',
     welcomeTitle: '¡Bienvenido a DeliZuKar!',
+    welcomeTitle_es: '¡Bienvenido a DeliZuKar!',
+    welcomeTitle_en: 'Welcome to DeliZuKar!',
     showWelcomeTitle: true,
     description: '',
+    description_es: '',
+    description_en: '',
     image: 'https://images.unsplash.com/photo-1558961363-fa8fdf82db35?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80',
     originalPrice: '15.99',
     discountPrice: '12.99',
     discountPercent: '19',
     discountText: '¡APROVECHA ESTA OFERTA!',
+    discountText_es: '¡APROVECHA ESTA OFERTA!',
+    discountText_en: 'TAKE ADVANTAGE OF THIS OFFER!',
     discountConditions: 'A usuarios registrados en su primera compra',
+    discountConditions_es: 'A usuarios registrados en su primera compra',
+    discountConditions_en: 'For registered users on their first purchase',
     discountCode: 'BIENVENIDO20',
     buttonText: '¡Aceptar la Oferta!',
+    buttonText_es: '¡Aceptar la Oferta!',
+    buttonText_en: 'Accept Offer!',
     actionUrl: '/productos',
     isActive: true
   });
@@ -146,21 +159,30 @@ const PopupHeroManager = ({ open, onClose }) => {
             duration: config.duration || 8
           });
           
-          // Actualizar TODOS los campos del formulario con datos de Firebase
           setFormData(prev => ({
             ...prev,
             title: config.title || prev.title,
+            title_es: config.title_es || config.title || prev.title_es,
+            title_en: config.title_en || prev.title_en,
             welcomeTitle: config.welcomeTitle || prev.welcomeTitle,
+            welcomeTitle_es: config.welcomeTitle_es || config.welcomeTitle || prev.welcomeTitle_es,
+            welcomeTitle_en: config.welcomeTitle_en || prev.welcomeTitle_en,
             showWelcomeTitle: config.showWelcomeTitle === true,
             description: config.description || prev.description,
+            description_es: config.description_es || config.description || prev.description_es,
+            description_en: config.description_en || prev.description_en,
             image: config.image || prev.image,
-            originalPrice: config.originalPrice || prev.originalPrice,
-            discountPrice: config.discountPrice || prev.discountPrice,
             discountPercent: config.discountPercent || prev.discountPercent,
             discountText: config.discountText || prev.discountText,
+            discountText_es: config.discountText_es || config.discountText || prev.discountText_es,
+            discountText_en: config.discountText_en || prev.discountText_en,
             discountConditions: config.discountConditions || prev.discountConditions,
+            discountConditions_es: config.discountConditions_es || config.discountConditions || prev.discountConditions_es,
+            discountConditions_en: config.discountConditions_en || prev.discountConditions_en,
             discountCode: config.discountCode || prev.discountCode,
             buttonText: config.buttonText || prev.buttonText,
+            buttonText_es: config.buttonText_es || config.buttonText || prev.buttonText_es,
+            buttonText_en: config.buttonText_en || prev.buttonText_en,
             actionUrl: config.actionUrl || prev.actionUrl,
             isActive: config.isActive !== false
           }));
@@ -189,10 +211,20 @@ const PopupHeroManager = ({ open, onClose }) => {
   };
 
   const handleInputChange = (field, value) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: value
-    }));
+    setFormData(prev => {
+      const newState = { ...prev, [field]: value };
+      
+      // Sincronizar campo base con campo _es si estamos editando en español
+      // o viceversa para asegurar que el PopupHero tenga siempre valores
+      if (editLanguage === 'es' && !field.endsWith('_en')) {
+        const baseField = field.endsWith('_es') ? field.replace('_es', '') : field;
+        const esField = baseField + '_es';
+        newState[baseField] = value;
+        newState[esField] = value;
+      }
+      
+      return newState;
+    });
   };
 
   const handleImageUpload = async (event) => {
@@ -254,15 +286,28 @@ const PopupHeroManager = ({ open, onClose }) => {
     setEditingOffer(offer.id);
     setFormData({
       title: offer.title || '',
+      title_es: offer.title_es || offer.title || '',
+      title_en: offer.title_en || '',
+      welcomeTitle: offer.welcomeTitle || '',
+      welcomeTitle_es: offer.welcomeTitle_es || offer.welcomeTitle || '',
+      welcomeTitle_en: offer.welcomeTitle_en || '',
       description: offer.description || '',
+      description_es: offer.description_es || offer.description || '',
+      description_en: offer.description_en || '',
       image: offer.image || '',
       originalPrice: offer.originalPrice || '',
       discountPrice: offer.discountPrice || '',
       discountPercent: offer.discountPercent || '',
       discountText: offer.discountText || '¡APROVECHA ESTA OFERTA!',
+      discountText_es: offer.discountText_es || offer.discountText || '¡APROVECHA ESTA OFERTA!',
+      discountText_en: offer.discountText_en || 'TAKE ADVANTAGE OF THIS OFFER!',
       discountConditions: offer.discountConditions || 'A usuarios registrados en su primera compra',
+      discountConditions_es: offer.discountConditions_es || offer.discountConditions || 'A usuarios registrados en su primera compra',
+      discountConditions_en: offer.discountConditions_en || 'For registered users on their first purchase',
       discountCode: offer.discountCode || 'BIENVENIDO20',
       buttonText: offer.buttonText || '',
+      buttonText_es: offer.buttonText_es || offer.buttonText || '',
+      buttonText_en: offer.buttonText_en || '',
       actionUrl: offer.actionUrl || '',
       isActive: offer.isActive !== false
     });
@@ -273,15 +318,28 @@ const PopupHeroManager = ({ open, onClose }) => {
     setEditingOffer(null);
     setFormData({
       title: '¡Ofertas Especiales!',
+      title_es: '¡Ofertas Especiales!',
+      title_en: 'Special Offers!',
+      welcomeTitle: '¡Bienvenido a DeliZuKar!',
+      welcomeTitle_es: '¡Bienvenido a DeliZuKar!',
+      welcomeTitle_en: 'Welcome to DeliZuKar!',
       description: '',
+      description_es: '',
+      description_en: '',
       image: 'https://images.unsplash.com/photo-1558961363-fa8fdf82db35?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80',
       originalPrice: '15.99',
       discountPrice: '12.99',
       discountPercent: '19',
       discountText: '¡APROVECHA ESTA OFERTA!',
+      discountText_es: '¡APROVECHA ESTA OFERTA!',
+      discountText_en: 'TAKE ADVANTAGE OF THIS OFFER!',
       discountConditions: 'A usuarios registrados en su primera compra',
+      discountConditions_es: 'A usuarios registrados en su primera compra',
+      discountConditions_en: 'For registered users on their first purchase',
       discountCode: 'BIENVENIDO20',
       buttonText: '¡Aceptar la Oferta!',
+      buttonText_es: '¡Aceptar la Oferta!',
+      buttonText_en: 'Accept Offer!',
       actionUrl: '/productos',
       isActive: true
     });
@@ -372,9 +430,8 @@ const PopupHeroManager = ({ open, onClose }) => {
       
       const configRef = doc(db, 'popupOffers', 'mainOffer');
       const dataToSave = {
+        ...formData,
         duration: popupConfig.duration,
-        showWelcomeTitle: formData.showWelcomeTitle,
-        welcomeTitle: formData.welcomeTitle,
         updatedAt: new Date().toISOString()
       };
       
@@ -484,16 +541,21 @@ const PopupHeroManager = ({ open, onClose }) => {
                       Configuración General
                     </Typography>
                     
+                    <Tabs 
+                      value={editLanguage} 
+                      onChange={(e, v) => setEditLanguage(v)}
+                      sx={{ mb: 2, borderBottom: 1, borderColor: 'divider' }}
+                    >
+                      <Tab label="Español" value="es" />
+                      <Tab label="Inglés" value="en" />
+                    </Tabs>
+
                     <TextField
                       fullWidth
-                      label="Título de Bienvenida"
-                      value={formData.welcomeTitle}
+                      label={`Título de Bienvenida (${editLanguage.toUpperCase()})`}
+                      value={editLanguage === 'es' ? formData.welcomeTitle_es : formData.welcomeTitle_en}
                       onChange={(e) => {
-                        handleInputChange('welcomeTitle', e.target.value);
-                        // Guardar automáticamente cuando se cambia el título
-                        setTimeout(() => {
-                          handleSaveConfig();
-                        }, 500);
+                        handleInputChange(editLanguage === 'es' ? 'welcomeTitle_es' : 'welcomeTitle_en', e.target.value);
                       }}
                       placeholder="Ej: ¡Bienvenido a DeliZuKar!"
                       sx={{ mb: 2 }}
@@ -518,29 +580,29 @@ const PopupHeroManager = ({ open, onClose }) => {
                     
                     <TextField
                       fullWidth
-                      label="Título Principal"
-                      value={formData.title}
-                      onChange={(e) => handleInputChange('title', e.target.value)}
+                      label={`Título Principal (${editLanguage.toUpperCase()})`}
+                      value={editLanguage === 'es' ? formData.title_es : formData.title_en}
+                      onChange={(e) => handleInputChange(editLanguage === 'es' ? 'title_es' : 'title_en', e.target.value)}
                       placeholder="Ej: ¡Ofertas Especiales!"
                       sx={{ mb: 2 }}
                     />
                     
                     <TextField
                       fullWidth
-                      label="Descripción"
+                      label={`Descripción (${editLanguage.toUpperCase()})`}
                       multiline
                       rows={3}
-                      value={formData.description}
-                      onChange={(e) => handleInputChange('description', e.target.value)}
+                      value={editLanguage === 'es' ? formData.description_es : formData.description_en}
+                      onChange={(e) => handleInputChange(editLanguage === 'es' ? 'description_es' : 'description_en', e.target.value)}
                       placeholder="Descripción de la oferta..."
                       sx={{ mb: 2 }}
                     />
                     
                     <TextField
                       fullWidth
-                      label="Texto del Botón"
-                      value={formData.buttonText}
-                      onChange={(e) => handleInputChange('buttonText', e.target.value)}
+                      label={`Texto del Botón (${editLanguage.toUpperCase()})`}
+                      value={editLanguage === 'es' ? formData.buttonText_es : formData.buttonText_en}
+                      onChange={(e) => handleInputChange(editLanguage === 'es' ? 'buttonText_es' : 'buttonText_en', e.target.value)}
                       placeholder="Ej: ¡Aceptar la Oferta!"
                       sx={{ mb: 2 }}
                     />
@@ -717,18 +779,18 @@ const PopupHeroManager = ({ open, onClose }) => {
                       <Grid item xs={12}>
                         <TextField
                           fullWidth
-                          label="Texto del Descuento"
-                          value={formData.discountText}
-                          onChange={(e) => handleInputChange('discountText', e.target.value)}
+                          label={`Texto del Descuento (${editLanguage.toUpperCase()})`}
+                          value={editLanguage === 'es' ? formData.discountText_es : formData.discountText_en}
+                          onChange={(e) => handleInputChange(editLanguage === 'es' ? 'discountText_es' : 'discountText_en', e.target.value)}
                           placeholder="¡APROVECHA ESTA OFERTA!"
                         />
                       </Grid>
                       <Grid item xs={12}>
                         <TextField
                           fullWidth
-                          label="Condiciones del Descuento"
-                          value={formData.discountConditions}
-                          onChange={(e) => handleInputChange('discountConditions', e.target.value)}
+                          label={`Condiciones del Descuento (${editLanguage.toUpperCase()})`}
+                          value={editLanguage === 'es' ? formData.discountConditions_es : formData.discountConditions_en}
+                          onChange={(e) => handleInputChange(editLanguage === 'es' ? 'discountConditions_es' : 'discountConditions_en', e.target.value)}
                           placeholder="A usuarios registrados en su primera compra"
                         />
                       </Grid>

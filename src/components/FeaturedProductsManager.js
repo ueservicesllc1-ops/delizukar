@@ -57,6 +57,7 @@ const FeaturedProductsManager = ({ open, onClose }) => {
   // Configuración del título
   const [titleConfig, setTitleConfig] = useState({
     text: '',
+    text_en: '',
     font: 'Playfair Display'
   });
   
@@ -93,6 +94,7 @@ const FeaturedProductsManager = ({ open, onClose }) => {
         const config = configData.data();
         setTitleConfig({
           text: config.titleText || '',
+          text_en: config.titleText_en || '',
           font: config.titleFont || 'Playfair Display'
         });
         setFeaturedProducts(config.selectedProducts || []);
@@ -171,6 +173,7 @@ const FeaturedProductsManager = ({ open, onClose }) => {
       const configDoc = doc(db, 'appConfig', 'featuredProducts');
       await setDoc(configDoc, {
         titleText: titleConfig.text,
+        titleText_en: titleConfig.text_en,
         titleFont: titleConfig.font,
         selectedProducts: featuredProducts,
         updatedAt: new Date()
@@ -247,17 +250,27 @@ const FeaturedProductsManager = ({ open, onClose }) => {
             </Typography>
             
             <Grid container spacing={2}>
-              <Grid item xs={12} md={6}>
+              <Grid item xs={12} md={4}>
                 <TextField
                   fullWidth
-                  label="Texto del título"
+                  label="Título (ES)"
                   value={titleConfig.text}
                   onChange={(e) => setTitleConfig(prev => ({ ...prev, text: e.target.value }))}
-                  placeholder=""
+                  placeholder="Ej: Galletas Destacadas"
                 />
               </Grid>
               
-              <Grid item xs={12} md={6}>
+              <Grid item xs={12} md={4}>
+                <TextField
+                  fullWidth
+                  label="Title (EN)"
+                  value={titleConfig.text_en}
+                  onChange={(e) => setTitleConfig(prev => ({ ...prev, text_en: e.target.value }))}
+                  placeholder="Ej: Featured Cookies"
+                />
+              </Grid>
+              
+              <Grid item xs={12} md={4}>
                 <FormControl fullWidth>
                   <InputLabel>Fuente del título</InputLabel>
                   <Select

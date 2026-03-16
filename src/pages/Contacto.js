@@ -5,7 +5,45 @@ import { collection, addDoc, serverTimestamp, doc, getDoc, collection as fsColle
 import { useLanguage } from '../context/LanguageContext';
 import { translateBatch } from '../services/translateService';
 
+const TEXTS = {
+  es: {
+    nombre: 'Nombre',
+    email: 'Email',
+    mensaje: 'Mensaje',
+    enviar: 'Enviar Mensaje',
+    enviando: 'Enviando...',
+    exito: 'Tu mensaje ha sido enviado. Te responderemos pronto.',
+  },
+  en: {
+    nombre: 'Name',
+    email: 'Email',
+    mensaje: 'Message',
+    enviar: 'Send Message',
+    enviando: 'Sending...',
+    exito: 'Your message has been sent. We will get back to you soon.',
+  },
+  fr: {
+    nombre: 'Nom',
+    email: 'Email',
+    mensaje: 'Message',
+    enviar: 'Envoyer le message',
+    enviando: 'Envoi...',
+    exito: 'Votre message a été envoyé. Nous vous répondrons bientôt.',
+  },
+  pt: {
+    nombre: 'Nome',
+    email: 'Email',
+    mensaje: 'Mensagem',
+    enviar: 'Enviar mensagem',
+    enviando: 'Enviando...',
+    exito: 'Sua mensaje foi enviada. Entraremos em contato em breve.',
+  }
+};
+
 const Contacto = () => {
+  const { language } = useLanguage();
+  const t = TEXTS[language] || TEXTS.es;
+
   const [pageData, setPageData] = useState({
     title: 'Contáctanos',
     content: 'Nos encantaría saber de ti. Envíanos un mensaje y te responderemos pronto.',
@@ -14,7 +52,6 @@ const Contacto = () => {
   });
   const [fontsReady, setFontsReady] = useState(false);
   const [rawData, setRawData] = useState(null);
-  const { language } = useLanguage();
   const [form, setForm] = useState({ nombre: '', email: '', mensaje: '' });
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
@@ -211,7 +248,7 @@ const Contacto = () => {
 
         {sent && (
           <Alert severity="success" sx={{ mb: 3 }}>
-            Tu mensaje ha sido enviado. Te responderemos pronto.
+            {t.exito}
           </Alert>
         )}
 
@@ -220,7 +257,7 @@ const Contacto = () => {
             <Grid item xs={12} md={6}>
               <TextField
                 fullWidth
-                label={language === 'en' ? 'Name' : language === 'fr' ? 'Nom' : language === 'pt' ? 'Nome' : 'Nombre'}
+                label={t.nombre}
                 name="nombre"
                 value={form.nombre}
                 onChange={handleChange}
@@ -230,7 +267,7 @@ const Contacto = () => {
             <Grid item xs={12} md={6}>
               <TextField
                 fullWidth
-                label="Email"
+                label={t.email}
                 type="email"
                 name="email"
                 value={form.email}
@@ -242,7 +279,7 @@ const Contacto = () => {
           
           <Box sx={{ mt: 2, width: '100%' }}>
             <TextField
-              label={language === 'en' ? 'Message' : language === 'fr' ? 'Message' : language === 'pt' ? 'Mensagem' : 'Mensaje'}
+              label={t.mensaje}
               name="mensaje"
               value={form.mensaje}
               onChange={handleChange}
@@ -281,9 +318,7 @@ const Contacto = () => {
                 '&:hover': { backgroundColor: '#b5555a' }
               }}
             >
-              {sending
-                ? language === 'en' ? 'Sending...' : language === 'fr' ? 'Envoi...' : language === 'pt' ? 'Enviando...' : 'Enviando...'
-                : language === 'en' ? 'Send Message' : language === 'fr' ? 'Envoyer le message' : language === 'pt' ? 'Enviar mensagem' : 'Enviar Mensaje'}
+              {sending ? t.enviando : t.enviar}
             </Button>
           </Box>
         </Box>

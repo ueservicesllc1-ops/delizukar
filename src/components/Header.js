@@ -365,25 +365,49 @@ const Header = () => {
 
         <Box sx={{ 
           display: 'flex', 
-          alignItems: 'center', 
-          gap: { md: 1.2, lg: 1.6 }, 
-          justifyContent: 'flex-end', 
+          flexDirection: 'column',
+          alignItems: 'flex-end',
+          gap: 0.5,
+          justifyContent: 'center', 
           flex: 1, 
-          minWidth: { md: '200px', lg: '260px' } 
+          minWidth: { md: '220px', lg: '300px' } 
         }}>
-          <LanguageSelect />
-          {user ? (
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              <Avatar src={user.photoURL} alt={user.displayName} sx={{ width: 36, height: 36 }} />
-              <Typography
-                variant="body2"
-                sx={{ fontWeight: 600, color: '#c8626d', maxWidth: { md: '120px', lg: '160px' }, textOverflow: 'ellipsis', whiteSpace: 'nowrap', overflow: 'hidden' }}
-              >
-                {user.displayName}
-              </Typography>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: { md: 1.2, lg: 1.6 } }}>
+            {user ? (
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <Avatar src={user.photoURL} alt={user.displayName} sx={{ width: 36, height: 36 }} />
+                <Typography
+                  variant="body2"
+                  sx={{ fontWeight: 600, color: '#c8626d', maxWidth: { md: '120px', lg: '160px' }, textOverflow: 'ellipsis', whiteSpace: 'nowrap', overflow: 'hidden' }}
+                >
+                  {user.displayName}
+                </Typography>
+                <Button
+                  variant="outlined"
+                  onClick={handleLogout}
+                  sx={{
+                    borderColor: '#c8626d',
+                    color: '#c8626d',
+                    textTransform: 'none',
+                    fontWeight: 600,
+                    '&:hover': {
+                      backgroundColor: '#c8626d',
+                      color: 'white',
+                      borderColor: '#c8626d'
+                    }
+                  }}
+                >
+                  {L.logout}
+                </Button>
+                <IconButton onClick={(e) => setAnchorEl(e.currentTarget)} sx={{ color: '#c8626d' }}>
+                  <Person sx={{ fontSize: '1.8rem' }} />
+                </IconButton>
+              </Box>
+            ) : (
               <Button
                 variant="outlined"
-                onClick={handleLogout}
+                startIcon={<Login />}
+                onClick={handleGoogleAuth}
                 sx={{
                   borderColor: '#c8626d',
                   color: '#c8626d',
@@ -396,42 +420,21 @@ const Header = () => {
                   }
                 }}
               >
-                {L.logout}
+                {L.login}
               </Button>
-              <IconButton onClick={(e) => setAnchorEl(e.currentTarget)} sx={{ color: '#c8626d' }}>
-                <Person sx={{ fontSize: '1.8rem' }} />
+            )}
+            {user && (user.email === 'ueservicesllc1@gmail.com' || user.email === 'florvazdi@gmail.com') && (
+              <IconButton component="a" href="/admin" sx={{ color: '#c8626d' }}>
+                <Security sx={{ fontSize: '1.8rem' }} />
               </IconButton>
-            </Box>
-          ) : (
-            <Button
-              variant="outlined"
-              startIcon={<Login />}
-              onClick={handleGoogleAuth}
-              sx={{
-                borderColor: '#c8626d',
-                color: '#c8626d',
-                textTransform: 'none',
-                fontWeight: 600,
-                '&:hover': {
-                  backgroundColor: '#c8626d',
-                  color: 'white',
-                  borderColor: '#c8626d'
-                }
-              }}
-            >
-              {L.login}
-            </Button>
-          )}
-          {user && (user.email === 'ueservicesllc1@gmail.com' || user.email === 'florvazdi@gmail.com') && (
-            <IconButton component="a" href="/admin" sx={{ color: '#c8626d' }}>
-              <Security sx={{ fontSize: '1.8rem' }} />
+            )}
+            <IconButton onClick={handleCartClick} sx={{ color: '#be8782' }}>
+              <Badge badgeContent={getCartItemsCount()} color="error">
+                <ShoppingBag />
+              </Badge>
             </IconButton>
-          )}
-          <IconButton onClick={handleCartClick} sx={{ color: '#be8782' }}>
-            <Badge badgeContent={getCartItemsCount()} color="error">
-              <ShoppingBag />
-            </Badge>
-          </IconButton>
+          </Box>
+          <LanguageSelect sx={{ px: 1.5, py: 0.4, fontSize: '0.8rem' }} />
         </Box>
       </Box>
 

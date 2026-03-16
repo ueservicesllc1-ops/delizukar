@@ -169,6 +169,14 @@ const PagesManager = ({ open, onClose }) => {
       imageUrl: ''
     },
     {
+      id: 'sweet-boxes',
+      title: 'Sweet Boxes',
+      content: 'Elige el tamaño perfecto para compartir o regalar el sabor de DeliZuKar.',
+      route: '/sweet-boxes',
+      titleFont: 'BrittanySignature',
+      contentFont: 'Roboto'
+    },
+    {
       id: 'contacto',
       title: 'Contáctanos',
       content: 'Nos encantaría saber de ti. Envíanos un mensaje y te responderemos.',
@@ -180,7 +188,9 @@ const PagesManager = ({ open, onClose }) => {
 
   const [editingPage, setEditingPage] = useState(null);
   const [editTitle, setEditTitle] = useState('');
+  const [editTitleEn, setEditTitleEn] = useState('');
   const [editContent, setEditContent] = useState('');
+  const [editContentEn, setEditContentEn] = useState('');
   const [editTitleFont, setEditTitleFont] = useState('');
   const [editContentFont, setEditContentFont] = useState('');
   const [editImageUrl, setEditImageUrl] = useState('');
@@ -210,10 +220,12 @@ const PagesManager = ({ open, onClose }) => {
 
   const handleEdit = (page) => {
     setEditingPage(page);
-    setEditTitle(page.title);
-    setEditContent(page.content);
-    setEditTitleFont(page.titleFont);
-    setEditContentFont(page.contentFont);
+    setEditTitle(page.title || '');
+    setEditTitleEn(page.title_en || '');
+    setEditContent(page.content || '');
+    setEditContentEn(page.content_en || '');
+    setEditTitleFont(page.titleFont || '');
+    setEditContentFont(page.contentFont || '');
     setEditImageUrl(page.imageUrl || '');
   };
 
@@ -222,19 +234,21 @@ const PagesManager = ({ open, onClose }) => {
       try {
         const updatedPages = pages.map(page => 
           page.id === editingPage.id 
-            ? { ...page, title: editTitle, content: editContent, titleFont: editTitleFont, contentFont: editContentFont, imageUrl: editImageUrl }
+            ? { ...page, title: editTitle, title_en: editTitleEn, content: editContent, content_en: editContentEn, titleFont: editTitleFont, contentFont: editContentFont, imageUrl: editImageUrl }
             : page
         );
         
         setPages(updatedPages);
         
-        // Guardar solo español en Firestore
+        // Guardar ambos idiomas en Firestore
         const pageRef = doc(db, 'pages', editingPage.id);
         await setDoc(pageRef, {
           title_es: editTitle,
+          title_en: editTitleEn,
           content_es: editContent,
-          title: editTitle, // compatibilidad
-          content: editContent, // compatibilidad
+          content_en: editContentEn,
+          title: editTitle, // para compatibilidad con código antiguo
+          content: editContent, // para compatibilidad con código antiguo
           titleFont: editTitleFont,
           contentFont: editContentFont,
           imageUrl: editImageUrl || '',
@@ -244,7 +258,9 @@ const PagesManager = ({ open, onClose }) => {
         
         setEditingPage(null);
         setEditTitle('');
+        setEditTitleEn('');
         setEditContent('');
+        setEditContentEn('');
         setEditTitleFont('');
         setEditContentFont('');
         setEditImageUrl('');
@@ -258,7 +274,9 @@ const PagesManager = ({ open, onClose }) => {
   const handleCancel = () => {
     setEditingPage(null);
     setEditTitle('');
+    setEditTitleEn('');
     setEditContent('');
+    setEditContentEn('');
     setEditTitleFont('');
     setEditContentFont('');
     setEditImageUrl('');
@@ -415,13 +433,26 @@ const PagesManager = ({ open, onClose }) => {
                 </IconButton>
               </Box>
 
-              <TextField
-                fullWidth
-                label="Título"
-                value={editTitle}
-                onChange={(e) => setEditTitle(e.target.value)}
-                sx={{ mb: 3 }}
-              />
+              <Grid container spacing={2}>
+                <Grid item xs={12} md={6}>
+                  <TextField
+                    fullWidth
+                    label="Título (Español)"
+                    value={editTitle}
+                    onChange={(e) => setEditTitle(e.target.value)}
+                    sx={{ mb: 3 }}
+                  />
+                </Grid>
+                <Grid item xs={12} md={6}>
+                  <TextField
+                    fullWidth
+                    label="Title (English)"
+                    value={editTitleEn}
+                    onChange={(e) => setEditTitleEn(e.target.value)}
+                    sx={{ mb: 3 }}
+                  />
+                </Grid>
+              </Grid>
 
               <FormControl fullWidth sx={{ mb: 3 }}>
                 <InputLabel>Fuente del Título</InputLabel>
@@ -440,13 +471,25 @@ const PagesManager = ({ open, onClose }) => {
 
               <Box sx={{ mb: 3 }}>
                 <Typography variant="subtitle2" sx={{ mb: 1, color: '#666', fontWeight: 600 }}>
-                  Contenido
+                  Contenido (Español)
                 </Typography>
                 <RichTextEditor
                   value={editContent}
                   onChange={setEditContent}
-                  placeholder="Escribe el contenido de la página aquí..."
-                  minHeight={200}
+                  placeholder="Escribe el contenido en español aquí..."
+                  minHeight={150}
+                />
+              </Box>
+
+              <Box sx={{ mb: 3 }}>
+                <Typography variant="subtitle2" sx={{ mb: 1, color: '#666', fontWeight: 600 }}>
+                  Content (English)
+                </Typography>
+                <RichTextEditor
+                  value={editContentEn}
+                  onChange={setEditContentEn}
+                  placeholder="Escribe el contenido en inglés aquí..."
+                  minHeight={150}
                 />
               </Box>
 

@@ -62,7 +62,7 @@ const FeaturedProducts = ({ onOpenDetail }) => {
   const copy = translations[language] || translations.es;
 
   // Use the title from config if available, otherwise use translation
-  const titleText = config?.titleText || copy.featuredTitle;
+  const titleText = (language === 'es' ? config?.titleText : (config?.titleText_en || config?.titleText)) || copy.featuredTitle;
   const titleFont = config?.titleFont || 'BrittanySignature';
 
   if (productsLoading) return null;
@@ -105,7 +105,7 @@ const FeaturedProducts = ({ onOpenDetail }) => {
               '--swiper-pagination-color': '#c8626d',
             }}
           >
-            {displayProducts.map((item) => (
+            {displayProducts.filter(item => item.category !== 'boxes').map((item) => (
               <SwiperSlide key={item.id} style={{ height: 'auto' }}>
                 <Card
                   sx={{

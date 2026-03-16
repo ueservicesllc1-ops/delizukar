@@ -228,7 +228,7 @@ const Products = () => {
               </Box>
             ))
           ) : (
-            products.map((product, index) => (
+            products.filter(p => p.category !== 'boxes').map((product, index) => (
             <Box key={product.id}>
               <motion.div
                 initial={{ opacity: 0, y: 50 }}
@@ -490,7 +490,7 @@ const Products = () => {
                 sx={{ px: 0 }}
               >
                 <Typography sx={{ fontWeight: 600, color: '#7C2815', fontSize: '1.1rem' }}>
-                  {accordionData?.[`aboutTitle_${language}`] || accordionData?.aboutTitle || translatedTexts.aboutTitle}
+                  {language === 'es' ? 'Recién horneadas para ti' : (accordionData?.[`aboutTitle_${language}`] || accordionData?.aboutTitle || translatedTexts.aboutTitle)}
                 </Typography>
               </AccordionSummary>
               <AccordionDetails sx={{ px: 0, pb: 2 }}>

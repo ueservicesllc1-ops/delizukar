@@ -25,6 +25,7 @@ export const FeaturedProductsProvider = ({ children }) => {
         
         const newConfig = {
           titleText: data.titleText || '',
+          titleText_en: data.titleText_en || '',
           titleFont: data.titleFont || 'Playfair Display',
           selectedProducts: data.selectedProducts || []
         };

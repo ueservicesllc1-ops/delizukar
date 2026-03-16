@@ -2,9 +2,35 @@ import React, { useEffect, useState } from 'react';
 import { Box, Typography, Paper, IconButton } from '@mui/material';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Close } from '@mui/icons-material';
+import { useLanguage } from '../context/LanguageContext';
+
+const TEXTS = {
+  es: {
+    title: '¡Arma tu caja de galletas estilo NY! 🍪',
+    subtitle: 'Mínimo 4 Galletas',
+    shipping: 'Envíos a todo el país 🇺🇸'
+  },
+  en: {
+    title: 'Build Your NY-Style Cookie Box 🍪',
+    subtitle: 'Minimum 4 Cookies',
+    shipping: 'Ships Nationwide 🇺🇸'
+  },
+  fr: {
+    title: 'Créez votre boîte de biscuits style NY ! 🍪',
+    subtitle: 'Minimum 4 biscuits',
+    shipping: 'Livraison dans tout le pays 🇺🇸'
+  },
+  pt: {
+    title: 'Monte sua caixa de biscoitos estilo NY! 🍪',
+    subtitle: 'Mínimo 4 biscoitos',
+    shipping: 'Envio para todo o país 🇺🇸'
+  }
+};
 
 const CookieBoxPromo = ({ open, onClose }) => {
   const [visible, setVisible] = useState(false);
+  const { language } = useLanguage();
+  const t = TEXTS[language] || TEXTS.es;
 
   useEffect(() => {
     if (open) {
@@ -95,7 +121,7 @@ const CookieBoxPromo = ({ open, onClose }) => {
                   textShadow: '0 2px 4px rgba(0,0,0,0.1)'
                 }}
               >
-                Build Your NY-Style Cookie Box 🍪
+                {t.title}
               </Typography>
               
               <Box sx={{ 
@@ -115,7 +141,7 @@ const CookieBoxPromo = ({ open, onClose }) => {
                   opacity: 0.95
                 }}
               >
-                Minimum 4 Cookies
+                {t.subtitle}
               </Typography>
               
               <Typography
@@ -129,7 +155,7 @@ const CookieBoxPromo = ({ open, onClose }) => {
                   gap: 1
                 }}
               >
-                Ships Nationwide 🇺🇸
+                {t.shipping}
               </Typography>
 
               <Box

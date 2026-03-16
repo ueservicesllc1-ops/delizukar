@@ -30,7 +30,8 @@ const STATIC_TEXTS = {
     defaultTitle: '¡Ofertas Especiales!',
     defaultButton: 'Ver productos',
     defaultDiscountText: '¡APROVECHA ESTA OFERTA!',
-    defaultDiscountConditions: 'A usuarios registrados en su primera compra'
+    defaultDiscountConditions: 'A usuarios registrados en su primera compra',
+    imageAlt: 'Deliciosas Galletas'
   },
   en: {
     seg: 'sec',
@@ -39,7 +40,8 @@ const STATIC_TEXTS = {
     defaultTitle: 'Special Offers!',
     defaultButton: 'View products',
     defaultDiscountText: 'TAKE ADVANTAGE OF THIS OFFER!',
-    defaultDiscountConditions: 'For registered users on their first purchase'
+    defaultDiscountConditions: 'For registered users on their first purchase',
+    imageAlt: 'Delicious Cookies'
   },
   fr: {
     seg: 'sec',
@@ -48,7 +50,8 @@ const STATIC_TEXTS = {
     defaultTitle: 'Offres spéciales !',
     defaultButton: 'Voir les produits',
     defaultDiscountText: 'PROFITEZ DE CETTE OFFRE !',
-    defaultDiscountConditions: 'Pour les utilisateurs inscrits lors de leur premier achat'
+    defaultDiscountConditions: 'Pour les utilisateurs inscrits lors de leur premier achat',
+    imageAlt: 'Délicieux biscuits'
   },
   pt: {
     seg: 'seg',
@@ -113,10 +116,9 @@ const PopupHero = ({ open, onClose }) => {
   );
 
   const fallbackLanguages = useMemo(() => {
-    const order = [language];
+    const order = [language, 'base'];
     if (language !== 'en') order.push('en');
     if (language !== 'es') order.push('es');
-    order.push('base');
     return order;
   }, [language]);
 
@@ -1225,7 +1227,7 @@ const PopupHero = ({ open, onClose }) => {
                     {/* Imagen que se mueve detrás de la máscara */}
                     <motion.img
                       src={currentOfferData.image || "https://images.unsplash.com/photo-1558961363-fa8fdf82db35?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80"}
-                      alt="Deliciosas Galletas"
+                      alt={translatedTexts.imageAlt}
                       style={{
                         width: '100%',
                         height: '100%',

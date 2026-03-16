@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { 
@@ -57,8 +57,17 @@ const SweetBoxes = () => {
   const { language } = useLanguage();
   const { products, productsLoading } = useStore();
   
+  const t = useMemo(() => TEXTS[language] || TEXTS.es, [language]);
+
   const [showModePopup, setShowModePopup] = useState(false);
   const [selectedBox, setSelectedBox] = useState(null);
+  const [pageData, setPageData] = useState({
+    title: t.title,
+    subtitle: t.subtitle,
+    titleFont: 'BrittanySignature',
+    contentFont: 'inherit'
+  });
+  const [rawData, setRawData] = useState(null);
   const [accordionData, setAccordionData] = useState({
     aboutTitle: 'Acerca de nuestra cookie',
     aboutContent: 'Nuestras galletas son horneadas artesanalmente cada día con ingredientes de la más alta calidad. Inspiradas en el estilo de Nueva York, cada bocado ofrece una textura crujiente por fuera y suave por dentro.',
@@ -68,7 +77,7 @@ const SweetBoxes = () => {
     ingredientsContent: 'Harina de trigo enriquecida, mantequilla premium, chips de chocolate belga, azúcar morena, huevos de granja, esencia de vanilla natural y una pizca de sal marina.'
   });
 
-  React.useEffect(() => {
+  useEffect(() => {
     const fetchAccordionData = async () => {
       try {
         const docRef = doc(db, 'settings', 'accordionMenu');
@@ -81,10 +90,91 @@ const SweetBoxes = () => {
       }
     };
     fetchAccordionData();
-  }, []);
-  
-  const t = useMemo(() => TEXTS[language] || TEXTS.es, [language]);
 
+    const fetchPageData = async () => {
+      try {
+        const docRef = doc(db, 'pages', 'sweet-boxes');
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          setPageData(prev => ({
+            ...prev,
+            title: language === 'es' ? (data.title_es || data.title || t.title) : (data.title_en || t.title),
+            subtitle: language === 'es' ? (data.content_es || data.content || t.subtitle) : (data.content_en || t.subtitle),
+            titleFont: data.titleFont || prev.titleFont,
+            contentFont: data.contentFont || prev.contentFont
+          }));
+          setRawData(data);
+        }
+      } catch (err) {
+        console.error('Error fetching page data:', err);
+      }
+    };
+    fetchPageData();
+  }, [language, t.title, t.subtitle]);
+
+  // Efecto para traducción automática si falta información
+  useEffect(() => {
+    const localizeContent = async () => {
+      if (!rawData) return;
+      const lang = language || 'es';
+      
+      // Si ya tenemos los datos en el idioma correcto, no hacemos nada
+      const localizedTitle = lang === 'es' ? (rawData.title_es || rawData.title) : rawData.title_en;
+      const localizedContent = lang === 'es' ? (rawData.content_es || rawData.content) : rawData.content_en;
+
+      if (localizedTitle && localizedContent) {
+        setPageData(prev => ({
+          ...prev,
+          title: localizedTitle,
+          subtitle: localizedContent
+        }));
+        return;
+      }
+
+      // Si falta traducción, intentamos auto-traducir
+      try {
+        const { translateBatch } = await import('../services/translateService');
+        const sourceTitle = rawData.title_es || rawData.title || t.title;
+        const sourceSubtitle = rawData.content_es || rawData.content || t.subtitle;
+
+        const [translatedTitle, translatedSubtitle] = await translateBatch(
+          [sourceTitle, sourceSubtitle],
+          lang,
+          'es'
+        );
+
+        const resultTitle = translatedTitle || sourceTitle;
+        const resultSubtitle = translatedSubtitle || sourceSubtitle;
+
+        setPageData(prev => ({
+          ...prev,
+          title: resultTitle,
+          subtitle: resultSubtitle
+        }));
+
+        // Persistir la traducción automáticamente para futuras visitas
+        const updates = {};
+        if (lang === 'en') {
+          if (!rawData.title_en) updates.title_en = resultTitle;
+          if (!rawData.content_en) updates.content_en = resultSubtitle;
+        } else if (lang === 'es') {
+          if (!rawData.title_es) updates.title_es = resultTitle;
+          if (!rawData.content_es) updates.content_es = resultSubtitle;
+        }
+
+        if (Object.keys(updates).length > 0) {
+          const { setDoc } = await import('firebase/firestore');
+          await setDoc(doc(db, 'pages', 'sweet-boxes'), updates, { merge: true });
+          setRawData(prev => ({ ...prev, ...updates }));
+        }
+      } catch (error) {
+        console.error('Error auto-translating Sweet Boxes page:', error);
+      }
+    };
+
+    localizeContent();
+  }, [language, rawData, t.title, t.subtitle]);
   // Filtrar solo productos de la categoría 'boxes'
   const boxProducts = useMemo(() => 
     products.filter(p => p.category === 'boxes' && p.active !== false),
@@ -112,13 +202,13 @@ const SweetBoxes = () => {
           >
             <Typography
               sx={{
-                fontFamily: 'BrittanySignature',
+                fontFamily: pageData?.titleFont || 'BrittanySignature',
                 fontSize: { xs: '3rem', md: '5rem' },
                 color: '#c8626d',
                 mb: 1
               }}
             >
-              Sweet Boxes
+              {pageData?.title}
             </Typography>
             <Typography 
               variant="h6" 
@@ -127,10 +217,11 @@ const SweetBoxes = () => {
                 maxWidth: '600px', 
                 mx: 'auto',
                 fontWeight: 400,
-                lineHeight: 1.6
+                lineHeight: 1.6,
+                fontFamily: pageData?.contentFont || 'inherit'
               }}
             >
-              {t.subtitle}
+              {pageData?.subtitle}
             </Typography>
             <Box sx={{ mt: 3, display: 'flex', justifyContent: 'center' }}>
               <Box sx={{ height: '2px', width: '80px', bgcolor: '#c8626d', borderRadius: '2px' }} />
@@ -314,7 +405,7 @@ const SweetBoxes = () => {
                 sx={{ px: 0 }}
               >
                 <Typography sx={{ fontWeight: 600, color: '#7C2815', fontSize: '1.2rem' }}>
-                  {language === 'es' ? (t.aboutTitle || accordionData?.aboutTitle) : (accordionData?.aboutTitle_en || t.aboutTitle || accordionData?.aboutTitle)}
+                  {language === 'es' ? 'Recién horneadas para ti' : (accordionData?.aboutTitle_en || t.aboutTitle || accordionData?.aboutTitle)}
                 </Typography>
               </AccordionSummary>
               <AccordionDetails sx={{ px: 0, pb: 4 }}>
