@@ -105,7 +105,7 @@ const FeaturedProducts = ({ onOpenDetail }) => {
               '--swiper-pagination-color': '#c8626d',
             }}
           >
-            {displayProducts.filter(item => item.category !== 'boxes').map((item) => (
+            {displayProducts.map((item) => (
               <SwiperSlide key={item.id} style={{ height: 'auto' }}>
                 <Card
                   sx={{
