@@ -13,6 +13,8 @@ import { auth, db } from '../firebase/config';
 import { onAuthStateChanged } from 'firebase/auth';
 import { doc, getDoc, updateDoc, collection, query, where, getDocs } from 'firebase/firestore';
 
+import { PRODUCT_TRANSLATIONS } from './Products';
+
 const CART_TRANSLATIONS = {
   en: {
     'cart.continueShopping': 'Continue Shopping',
@@ -43,7 +45,8 @@ const CART_TRANSLATIONS = {
     'voucher.alreadyUsed': 'You have already used this coupon.',
     'voucher.applied': 'Coupon applied: {percentage}% off',
     'voucher.discount': 'Discount',
-    'voucher.discountLabel': '{code}: {percentage}% off'
+    'voucher.discountLabel': '{code}: {percentage}% off',
+    'cart.boxDiscountApplied': 'Box Discount ({percentage}%) applied'
   },
   es: {
     'cart.continueShopping': 'Seguir comprando',
@@ -74,7 +77,8 @@ const CART_TRANSLATIONS = {
     'voucher.alreadyUsed': 'Ya has usado este cupón.',
     'voucher.applied': 'Cupón aplicado: {percentage}% de descuento',
     'voucher.discount': 'Descuento',
-    'voucher.discountLabel': '{code}: {percentage}% de descuento'
+    'voucher.discountLabel': '{code}: {percentage}% de descuento',
+    'cart.boxDiscountApplied': 'Descuento de Box ({percentage}%) aplicado'
   }
 };
 
@@ -112,12 +116,25 @@ const Cart = () => {
 
   // Función para mapear categorías
   const getCategoryDisplayName = (category) => {
-    const categoryMap = {
-      'Clásicas NY': 'NY Style Cookies',
-      'clasicas': 'NY Style Cookies',
-      'Clásicas': 'NY Style Cookies'
-    };
-    return categoryMap[category] || category;
+    if (language === 'es') {
+      const categoryMap = {
+        'Clásicas NY': 'Galletas Estilo NY',
+        'clasicas': 'Galletas Estilo NY',
+        'Clásicas': 'Galletas Estilo NY',
+        'boxes': 'CAJAS',
+        'regalo': 'REGALO'
+      };
+      return categoryMap[category] || category.toUpperCase();
+    } else {
+      const categoryMap = {
+        'Clásicas NY': 'NY Style Cookies',
+        'clasicas': 'NY Style Cookies',
+        'Clásicas': 'NY Style Cookies',
+        'boxes': 'BOXES',
+        'regalo': 'GIFT'
+      };
+      return categoryMap[category] || category.toUpperCase();
+    }
   };
   const navigate = useNavigate();
   const { minProducts } = useMinProducts();
@@ -439,8 +456,25 @@ const Cart = () => {
                                   fontSize: { xs: '0.85rem', sm: '0.9rem' }
                                 }}
                             >
-                              {item.name}
+                               {PRODUCT_TRANSLATIONS[language]?.[item.name]?.name || 
+                                item[`name_${language}`] || 
+                                item.name}
                             </Typography>
+                            {(PRODUCT_TRANSLATIONS[language]?.[item.name]?.description || item[`description_${language}`] || item.description) && (
+                              <Typography
+                                variant="body2"
+                                sx={{
+                                  color: '#666',
+                                  mb: 0.5,
+                                  fontSize: '0.75rem',
+                                  lineHeight: 1.4
+                                }}
+                              >
+                                {PRODUCT_TRANSLATIONS[language]?.[item.name]?.description || 
+                                 item[`description_${language}`] || 
+                                 item.description}
+                              </Typography>
+                            )}
                             <Typography
                               variant="body2"
                                 sx={{
@@ -478,7 +512,7 @@ const Cart = () => {
                                   fontWeight: 600
                                 }}
                               >
-                                Descuento de Box ({item.discountPercentage}%) aplicado
+                                 {t('cart.boxDiscountApplied', { percentage: item.discountPercentage })}
                               </Typography>
                             )}
                             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, justifyContent: { xs: 'center', sm: 'flex-start' } }}>

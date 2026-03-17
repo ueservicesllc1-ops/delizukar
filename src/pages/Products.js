@@ -117,9 +117,25 @@ export const PRODUCT_TRANSLATIONS = {
       name: '"Caja Momentos Dulces" 6 Galletas', 
       description: '6 galletas estilo Nueva York para compartir y disfrutar de un momento especial.' 
     },
+    '"Sweet Moments Box" 6 New York-style cookies to share and enjoy a special moment.': {
+      name: '"Caja Momentos Dulces" 6 Galletas',
+      description: '6 galletas estilo Nueva York para compartir y disfrutar de un momento especial.'
+    },
+    '"A little luxury Box" 4 New York-style cookies perfect to enjoy or gift a sweet moment.': {
+      name: '"Caja Un Pequeño Lujo" 4 Galletas',
+      description: 'Caja perfecta para disfrutar o regalar un momento dulce.'
+    },
     '"Celebration Box" 12 Cookies': { 
       name: '"Caja de Celebración" 12 Galletas', 
       description: '12 galletas estilo Nueva York perfectas para celebrar, compartir o sorprender a alguien.' 
+    },
+    '"SWEET MOMENTS BOX" 6 NEW YORK-STYLE COOKIES TO SHARE AND ENJOY A SPECIAL MOMENT.': {
+      name: '"Caja Momentos Dulces" 6 Galletas',
+      description: '6 galletas estilo Nueva York para compartir y disfrutar de un momento especial.'
+    },
+    '"A LITTLE LUXURY BOX" 4 NEW YORK-STYLE COOKIES PERFECT TO ENJOY OR GIFT A SWEET MOMENT.': {
+      name: '"Caja Un Pequeño Lujo" 4 Galletas',
+      description: 'Caja perfecta para disfrutar o regalar un momento dulce.'
     }
   },
   en: {
@@ -138,9 +154,25 @@ export const PRODUCT_TRANSLATIONS = {
       name: '"Sweet Moments Box" 6 Cookies', 
       description: '6 New York-style cookies to share and enjoy a special moment.' 
     },
+    '"Sweet Moments Box" 6 New York-style cookies to share and enjoy a special moment.': {
+      name: '"Sweet Moments Box" 6 Cookies',
+      description: '6 New York-style cookies to share and enjoy a special moment.'
+    },
+    '"A little luxury Box" 4 New York-style cookies perfect to enjoy or gift a sweet moment.': {
+      name: '"A little luxury Box" 4 Cookies',
+      description: 'Perfect for enjoying or gifting a sweet moment.'
+    },
     '"Celebration Box" 12 Cookies': { 
       name: '"Celebration Box" 12 Cookies', 
       description: '12 New York-style cookies perfect for celebrating, sharing, or surprising someone.' 
+    },
+    '"SWEET MOMENTS BOX" 6 NEW YORK-STYLE COOKIES TO SHARE AND ENJOY A SPECIAL MOMENT.': {
+      name: '"Sweet Moments Box" 6 Cookies',
+      description: '6 New York-style cookies to share and enjoy a special moment.'
+    },
+    '"A LITTLE LUXURY BOX" 4 NEW YORK-STYLE COOKIES PERFECT TO ENJOY OR GIFT A SWEET MOMENT.': {
+      name: '"A little luxury Box" 4 Cookies',
+      description: 'Perfect for enjoying or gifting a sweet moment.'
     }
   }
 };
