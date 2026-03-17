@@ -16,6 +16,44 @@ import {
 import { LocationOn, CheckCircle, Warning, Edit } from '@mui/icons-material';
 import shippoService from '../services/shippoService';
 import useIphone16 from '../hooks/useIphone16';
+import { useLanguage } from '../context/LanguageContext';
+
+const ADDRESS_CORRECTION_TRANSLATIONS = {
+  es: {
+    title: 'Validación de Dirección',
+    validating: 'Validando dirección...',
+    needsCorrection: 'La dirección necesita corrección',
+    validAddress: 'Dirección Válida',
+    enteredAddress: 'Dirección Ingresada:',
+    correctedAddress: 'Dirección Corregida:',
+    residential: 'Residencial',
+    commercial: 'Comercial',
+    suggestions: 'Sugerencias:',
+    suggestionAvailable: 'Sugerencia disponible',
+    useOriginal: 'Usar Original',
+    useCorrected: 'Usar Corregida',
+    continue: 'Continuar',
+    errorValidation: 'Error al validar la dirección',
+    cannotValidate: 'La dirección no pudo ser validada'
+  },
+  en: {
+    title: 'Address Validation',
+    validating: 'Validating address...',
+    needsCorrection: 'Address needs correction',
+    validAddress: 'Valid Address',
+    enteredAddress: 'Entered Address:',
+    correctedAddress: 'Corrected Address:',
+    residential: 'Residential',
+    commercial: 'Commercial',
+    suggestions: 'Suggestions:',
+    suggestionAvailable: 'Suggestion available',
+    useOriginal: 'Use Original',
+    useCorrected: 'Use Corrected',
+    continue: 'Continue',
+    errorValidation: 'Error validating address',
+    cannotValidate: 'Address could not be validated'
+  }
+};
 
 const AddressCorrection = ({ 
   open, 
@@ -23,6 +61,9 @@ const AddressCorrection = ({
   originalAddress, 
   onAddressCorrected 
 }) => {
+  const { language } = useLanguage();
+  const translations = ADDRESS_CORRECTION_TRANSLATIONS[language] || ADDRESS_CORRECTION_TRANSLATIONS.es;
+  const t = (key) => translations[key] || key;
   const [loading, setLoading] = useState(false);
   const [correctionResult, setCorrectionResult] = useState(null);
   const [error, setError] = useState(null);
@@ -62,7 +103,7 @@ const AddressCorrection = ({
         setCorrectionResult({
           success: false,
           address: correctedAddress,
-          messages: result.validation_messages || ['Dirección no pudo ser validada']
+          messages: result.validation_messages || [t('cannotValidate')]
         });
       }
     } catch (err) {
@@ -71,7 +112,7 @@ const AddressCorrection = ({
       console.error('   Original error:', err.originalError);
       
       // Mostrar mensaje de error más descriptivo
-      const errorMessage = err.message || 'Error al validar la dirección';
+      const errorMessage = err.message || t('errorValidation');
       setError(errorMessage);
       
       // También mostrar en la consola para debugging
@@ -102,9 +143,9 @@ const AddressCorrection = ({
   };
 
   const getStatusText = () => {
-    if (loading) return 'Validando dirección...';
-    if (correctionResult?.needsCorrection) return 'Dirección necesita corrección';
-    return 'Valid Address';
+    if (loading) return t('validating');
+    if (correctionResult?.needsCorrection) return t('needsCorrection');
+    return t('validAddress');
   };
 
   const getStatusColor = () => {
@@ -167,7 +208,7 @@ const AddressCorrection = ({
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           <LocationOn />
           <Typography variant="h6" sx={{ fontWeight: 600 }}>
-            Address Validation
+            {t('title')}
           </Typography>
         </Box>
       </DialogTitle>
@@ -195,7 +236,7 @@ const AddressCorrection = ({
             <Card sx={{ mb: 2, border: '1px solid #e0e0e0' }}>
               <CardContent>
                 <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1 }}>
-                  Entered Address:
+                  {t('enteredAddress')}
                 </Typography>
                 <Typography variant="body2" sx={{ color: '#666' }}>
                   {originalAddress.name}<br />
@@ -213,7 +254,7 @@ const AddressCorrection = ({
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
                     <CheckCircle color="success" />
                     <Typography variant="subtitle1" sx={{ fontWeight: 600, color: '#4CAF50' }}>
-                      Dirección Corregida:
+                      {t('correctedAddress')}
                     </Typography>
                   </Box>
                   <Typography variant="body2" sx={{ color: '#666' }}>
@@ -226,7 +267,7 @@ const AddressCorrection = ({
                   {/* Información adicional */}
                   <Box sx={{ mt: 2 }}>
                     <Chip 
-                      label={correctionResult.isResidential ? 'Residencial' : 'Comercial'} 
+                      label={correctionResult.isResidential ? t('residential') : t('commercial')} 
                       size="small" 
                       color={correctionResult.isResidential ? 'primary' : 'secondary'}
                     />
@@ -239,11 +280,11 @@ const AddressCorrection = ({
             {correctionResult.suggestions && correctionResult.suggestions.length > 0 && (
               <Box sx={{ mb: 2 }}>
                 <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1 }}>
-                  Sugerencias:
+                  {t('suggestions')}
                 </Typography>
                 {correctionResult.suggestions.map((suggestion, index) => (
                   <Alert key={index} severity="info" sx={{ mb: 1 }}>
-                    {typeof suggestion === 'string' ? suggestion : suggestion.text || suggestion.message || 'Sugerencia disponible'}
+                    {typeof suggestion === 'string' ? suggestion : suggestion.text || suggestion.message || t('suggestionAvailable')}
                   </Alert>
                 ))}
               </Box>
@@ -265,7 +306,7 @@ const AddressCorrection = ({
                   }
                 }}
               >
-                Use Original
+                {t('useOriginal')}
               </Button>
               
               {correctionResult.needsCorrection && (
@@ -280,7 +321,7 @@ const AddressCorrection = ({
                     }
                   }}
                 >
-                  Usar Corregida
+                  {t('useCorrected')}
                 </Button>
               )}
               
@@ -295,7 +336,7 @@ const AddressCorrection = ({
                     }
                   }}
                 >
-                  Continue
+                  {t('continue')}
                 </Button>
               )}
             </Box>

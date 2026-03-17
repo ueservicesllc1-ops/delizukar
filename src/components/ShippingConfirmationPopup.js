@@ -21,6 +21,44 @@ import {
   CreditCard,
   Payment
 } from '@mui/icons-material';
+import { useLanguage } from '../context/LanguageContext';
+
+const SHIPPING_CONFIRMATION_TRANSLATIONS = {
+  es: {
+    title: 'Envío Configurado',
+    shippingDetails: 'Detalles de Envío',
+    shippedOn: 'Tu pedido será enviado el',
+    transitTime: 'Tiempo de tránsito estimado',
+    days: 'días',
+    estimatedDelivery: 'Entrega estimada',
+    tracking: 'Seguimiento',
+    carrier: 'Transportista',
+    paymentInfo: 'Información de Pago',
+    cancel: 'Cancelar',
+    accept: 'Estoy de Acuerdo',
+    paymentMessage: 'Por favor, complete el pago en la página de checkout principal.',
+    from: 'del',
+    to: 'al',
+    eta: 'Tiempo estimado de llegada (ETA):'
+  },
+  en: {
+    title: 'Shipping Configured',
+    shippingDetails: 'Shipping Details',
+    shippedOn: 'Your order will be shipped on',
+    transitTime: 'Estimated transit time',
+    days: 'days',
+    estimatedDelivery: 'Estimated delivery',
+    tracking: 'Tracking',
+    carrier: 'Carrier',
+    paymentInfo: 'Payment Information',
+    cancel: 'Cancel',
+    accept: 'I Agree',
+    paymentMessage: 'Please complete the payment on the main checkout page.',
+    from: 'from',
+    to: 'to',
+    eta: 'Estimated Time of Arrival (ETA):'
+  }
+};
  
 
 const ShippingConfirmationPopup = ({ 
@@ -34,7 +72,9 @@ const ShippingConfirmationPopup = ({
   onPaymentSuccess,
   onPaymentError
 }) => {
-  const t = (k, fallback) => (typeof fallback === 'string' ? fallback : (typeof k === 'string' ? k : ''));
+  const { language } = useLanguage();
+  const translations = SHIPPING_CONFIRMATION_TRANSLATIONS[language] || SHIPPING_CONFIRMATION_TRANSLATIONS.es;
+  const t = (key, fallback) => translations[key] || fallback;
   const [showPayment, setShowPayment] = useState(false);
   const [paymentError, setPaymentError] = useState(null);
 
@@ -213,7 +253,7 @@ const ShippingConfirmationPopup = ({
         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', mb: 2 }}>
           <CheckCircle sx={{ color: '#4CAF50', fontSize: '2rem', mr: 1 }} />
           <Typography variant="h5" sx={{ fontWeight: 700, color: '#333' }}>
-            {t('shippingConfirmation.title', 'Envío Configurado')}
+            {t('title', 'Envío Configurado')}
           </Typography>
         </Box>
       </DialogTitle>
@@ -227,14 +267,14 @@ const ShippingConfirmationPopup = ({
                 <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
                   <LocalShipping sx={{ color: '#c8626d', mr: 1, fontSize: '1.2rem' }} />
                   <Typography variant="h6" sx={{ fontWeight: 600, color: '#333' }}>
-                    {t('shippingConfirmation.shippingDetails', 'Detalles de Envío')}
+                    {t('shippingDetails', 'Detalles de Envío')}
                   </Typography>
                 </Box>
 
                 <Box sx={{ display: 'flex', alignItems: 'center', mb: 1.5 }}>
                   <Schedule sx={{ color: '#666', mr: 1, fontSize: '1rem' }} />
                   <Typography variant="body1" sx={{ color: '#666' }}>
-                    {t('shippingConfirmation.shippedOn', 'Tu pedido será enviado el')} {deliveryInfo.shippingDate.toLocaleDateString('es-ES', { 
+                    {t('shippedOn', 'Tu pedido será enviado el')} {deliveryInfo.shippingDate.toLocaleDateString(language === 'en' ? 'en-US' : 'es-ES', { 
                       weekday: 'long', 
                       day: 'numeric', 
                       month: 'long' 
@@ -245,29 +285,29 @@ const ShippingConfirmationPopup = ({
                 <Box sx={{ display: 'flex', alignItems: 'center', mb: 1.5 }}>
                   <LocalShipping sx={{ color: '#666', mr: 1, fontSize: '1rem' }} />
                   <Typography variant="body1" sx={{ color: '#666' }}>
-                    {t('shippingConfirmation.transitTime', 'Tiempo de tránsito estimado')}: {
+                    {t('transitTime', 'Tiempo de tránsito estimado')}: {
                       deliveryInfo.minTransitDays === deliveryInfo.maxTransitDays
                         ? `${deliveryInfo.minTransitDays}`
                         : `${deliveryInfo.minTransitDays} - ${deliveryInfo.maxTransitDays}`
-                    } {t('shippingConfirmation.days', 'días')}
+                    } {t('days', 'días')}
                   </Typography>
                 </Box>
 
                 <Box sx={{ display: 'flex', alignItems: 'center', mb: 1.5 }}>
                   <DeliveryDining sx={{ color: '#c8626d', mr: 1, fontSize: '1rem' }} />
                   <Typography variant="body1" sx={{ color: '#c8626d', fontWeight: 600 }}>
-                    {t('shippingConfirmation.estimatedDelivery', 'Entrega estimada')}: {
+                    {t('estimatedDelivery', 'Entrega estimada')}: {
                       deliveryInfo.minTransitDays === deliveryInfo.maxTransitDays 
-                        ? deliveryInfo.minDeliveryDate.toLocaleDateString('es-ES', { 
+                        ? deliveryInfo.minDeliveryDate.toLocaleDateString(language === 'en' ? 'en-US' : 'es-ES', { 
                             weekday: 'long', 
                             day: 'numeric', 
                             month: 'long' 
                           })
-                        : `del ${deliveryInfo.minDeliveryDate.toLocaleDateString('es-ES', { 
+                        : `${translations.from} ${deliveryInfo.minDeliveryDate.toLocaleDateString(language === 'en' ? 'en-US' : 'es-ES', { 
                             weekday: 'long', 
                             day: 'numeric', 
                             month: 'long' 
-                          })} al ${deliveryInfo.maxDeliveryDate.toLocaleDateString('es-ES', { 
+                          })} ${translations.to} ${deliveryInfo.maxDeliveryDate.toLocaleDateString(language === 'en' ? 'en-US' : 'es-ES', { 
                             weekday: 'long', 
                             day: 'numeric', 
                             month: 'long' 
@@ -284,25 +324,36 @@ const ShippingConfirmationPopup = ({
                 <Box sx={{ display: 'flex', alignItems: 'center', mb: 1.5 }}>
                   <TrackChanges sx={{ color: '#666', mr: 1, fontSize: '1rem' }} />
                   <Typography variant="body2" sx={{ color: '#666' }}>
-                    {t('shippingConfirmation.tracking', 'Seguimiento')}: {shippingInfo.trackingNumber || 'PENDING'}
+                    {t('tracking', 'Seguimiento')}: {shippingInfo.trackingNumber || 'PENDING'}
                   </Typography>
                 </Box>
 
                 <Box sx={{ display: 'flex', alignItems: 'center', mb: 1.5 }}>
                   <LocalShipping sx={{ color: '#666', mr: 1, fontSize: '1rem' }} />
                   <Typography variant="body2" sx={{ color: '#666' }}>
-                    {t('shippingConfirmation.carrier', 'Transportista')}: {shippingInfo.carrier} - {shippingInfo.serviceLevel}
+                    {t('carrier', 'Transportista')}: {shippingInfo.carrier} - {shippingInfo.serviceLevel}
                   </Typography>
                 </Box>
 
-                {shippingInfo.eta && (
-                  <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                    <Schedule sx={{ color: '#666', mr: 1, fontSize: '1rem' }} />
-                    <Typography variant="body2" sx={{ color: '#666' }}>
-                      ETA: {shippingInfo.eta}
-                    </Typography>
-                  </Box>
-                )}
+                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                  <Schedule sx={{ color: '#666', mr: 1, fontSize: '1rem' }} />
+                  <Typography variant="body2" sx={{ color: '#666' }}>
+                    {t('eta', 'ETA')}: {
+                      deliveryInfo.minTransitDays === deliveryInfo.maxTransitDays 
+                        ? deliveryInfo.minDeliveryDate.toLocaleDateString(language === 'en' ? 'en-US' : 'es-ES', { 
+                            day: 'numeric', 
+                            month: 'long' 
+                          })
+                        : `${t('from')} ${deliveryInfo.minDeliveryDate.toLocaleDateString(language === 'en' ? 'en-US' : 'es-ES', { 
+                            day: 'numeric', 
+                            month: 'long' 
+                          })} ${t('to')} ${deliveryInfo.maxDeliveryDate.toLocaleDateString(language === 'en' ? 'en-US' : 'es-ES', { 
+                            day: 'numeric', 
+                            month: 'long' 
+                          })}`
+                    }
+                  </Typography>
+                </Box>
               </Box>
             </CardContent>
           </Card>
@@ -312,7 +363,7 @@ const ShippingConfirmationPopup = ({
               <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
                 <CreditCard sx={{ color: '#c8626d', mr: 1, fontSize: '1.2rem' }} />
                 <Typography variant="h6" sx={{ fontWeight: 600, color: '#333' }}>
-                  {t('shippingConfirmation.paymentInfo', 'Información de Pago')}
+                  {t('paymentInfo', 'Información de Pago')}
                 </Typography>
               </Box>
 
@@ -323,7 +374,7 @@ const ShippingConfirmationPopup = ({
               )}
 
               <Alert severity="info" sx={{ mb: 2 }}>
-                Por favor, complete el pago en la página de checkout principal.
+                {t('paymentMessage', 'Por favor, complete el pago en la página de checkout principal.')}
               </Alert>
             </CardContent>
           </Card>
@@ -341,7 +392,7 @@ const ShippingConfirmationPopup = ({
               mr: 2
             }}
           >
-            {t('shippingConfirmation.cancel', 'Cancelar')}
+            {t('cancel', 'Cancelar')}
           </Button>
           <Button
             onClick={handleAccept}
@@ -359,7 +410,7 @@ const ShippingConfirmationPopup = ({
               }
             }}
           >
-            {t('shippingConfirmation.accept', 'Estoy de Acuerdo')}
+            {t('accept', 'Estoy de Acuerdo')}
           </Button>
         </DialogActions>
       )}

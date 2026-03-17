@@ -8,6 +8,52 @@ import {
   Button,
 } from '@mui/material';
 import { toast } from 'react-hot-toast';
+import { useLanguage } from '../context/LanguageContext';
+
+const PAYPAL_SIMPLE_TRANSLATIONS = {
+  es: {
+    'paypal.notAvailable': 'PayPal no está disponible. Por favor verifica tu conexión a internet e intenta de nuevo.',
+    'paypal.possibleCauses': 'Posibles causas:',
+    'paypal.cause1': 'Client ID no válido o no está activo en PayPal',
+    'paypal.cause2': 'Problema de conexión a internet',
+    'paypal.cause3': 'Bloqueador de anuncios o extensión del navegador',
+    'paypal.cause4': 'Firewall o proxy bloqueando PayPal',
+    'paypal.cause5': 'Variables REACT_APP_* no configuradas antes del build',
+    'paypal.refresh': 'Actualizar Página',
+    'paypal.debugInfo': 'Información de Debug',
+    'paypal.loading': 'Cargando PayPal...',
+    'paypal.success': '¡Pago completado con éxito!',
+    'paypal.failed': 'El procesamiento del pago falló. Por favor, inténtalo de nuevo.',
+    'paypal.cancelled': 'El pago fue cancelado.',
+    'paypal.noConfig': 'PayPal Client ID no configurado',
+    'paypal.configHint': 'Por favor configura REACT_APP_PAYPAL_CLIENT_ID en las variables de entorno de Railway',
+    'paypal.currentValue': 'Valor actual:',
+    'paypal.configNote': 'Nota: Las variables REACT_APP_* deben estar configuradas ANTES de hacer build en Railway',
+    'paypal.payWith': 'Pagar con PayPal',
+    'paypal.disclaimer': 'Pago seguro procesado por PayPal - Acepta las principales tarjetas de crédito/débito'
+  },
+  en: {
+    'paypal.notAvailable': 'PayPal is not available. Please check your internet connection and try again.',
+    'paypal.possibleCauses': 'Possible causes:',
+    'paypal.cause1': 'Invalid or inactive PayPal Client ID',
+    'paypal.cause2': 'Internet connection problem',
+    'paypal.cause3': 'Ad blocker or browser extension interference',
+    'paypal.cause4': 'Firewall or proxy blocking PayPal',
+    'paypal.cause5': 'REACT_APP_* variables not configured before build',
+    'paypal.refresh': 'Refresh Page',
+    'paypal.debugInfo': 'Debug Info',
+    'paypal.loading': 'Loading PayPal...',
+    'paypal.success': 'Payment completed successfully!',
+    'paypal.failed': 'Payment processing failed. Please try again.',
+    'paypal.cancelled': 'Payment was cancelled.',
+    'paypal.noConfig': 'PayPal Client ID not configured',
+    'paypal.configHint': 'Please configure REACT_APP_PAYPAL_CLIENT_ID in Railway environment variables',
+    'paypal.currentValue': 'Current value:',
+    'paypal.configNote': 'Note: REACT_APP_* variables must be configured BEFORE building on Railway',
+    'paypal.payWith': 'Pay with PayPal',
+    'paypal.disclaimer': 'Secure payment powered by PayPal - Accepts all major credit/debit cards'
+  }
+};
 
 // Internal component to handle PayPal state
 const PayPalButtonContainer = ({ 
@@ -17,7 +63,8 @@ const PayPalButtonContainer = ({
   onSuccess,
   onError,
   shippingAddress,
-  shippingInfo
+  shippingInfo,
+  t
 }) => {
   const [{ isResolved, isRejected, isPending, options, error }] = usePayPalScriptReducer();
 
@@ -60,18 +107,18 @@ const PayPalButtonContainer = ({
     return (
       <Box sx={{ textAlign: 'center', py: 4 }}>
         <Alert severity="error" sx={{ mb: 2 }}>
-          PayPal no está disponible. Por favor verifica tu conexión a internet e intenta de nuevo.
+          {t('paypal.notAvailable')}
         </Alert>
         <Alert severity="info" sx={{ mb: 2, textAlign: 'left' }}>
           <Typography variant="body2" sx={{ mb: 1 }}>
-            <strong>Posibles causas:</strong>
+            <strong>{t('paypal.possibleCauses')}</strong>
           </Typography>
           <Typography variant="body2" component="ul" sx={{ pl: 2, mb: 0 }}>
-            <li>Client ID no válido o no está activo en PayPal</li>
-            <li>Problema de conexión a internet</li>
-            <li>Bloqueador de anuncios o extensión del navegador</li>
-            <li>Firewall o proxy bloqueando PayPal</li>
-            <li>Variables REACT_APP_* no configuradas antes del build</li>
+            <li>{t('paypal.cause1')}</li>
+            <li>{t('paypal.cause2')}</li>
+            <li>{t('paypal.cause3')}</li>
+            <li>{t('paypal.cause4')}</li>
+            <li>{t('paypal.cause5')}</li>
           </Typography>
         </Alert>
         <Button 
@@ -79,7 +126,7 @@ const PayPalButtonContainer = ({
           onClick={() => window.location.reload()}
           sx={{ backgroundColor: '#c8626d', mr: 2 }}
         >
-          Refresh Page
+          {t('paypal.refresh')}
         </Button>
         <Button 
           variant="outlined" 
@@ -90,7 +137,7 @@ const PayPalButtonContainer = ({
           }}
           sx={{ borderColor: '#c8626d', color: '#c8626d' }}
         >
-          Debug Info
+          {t('paypal.debugInfo')}
         </Button>
       </Box>
     );
@@ -102,7 +149,7 @@ const PayPalButtonContainer = ({
       <Box display="flex" flexDirection="column" alignItems="center" py={4}>
         <CircularProgress />
         <Typography variant="body2" sx={{ mt: 2 }}>
-          Loading PayPal...
+          {t('paypal.loading')}
         </Typography>
       </Box>
     );
@@ -152,7 +199,7 @@ const PayPalButtonContainer = ({
       console.log('✅ [PayPal] Pago capturado exitosamente:', details);
       
       // Mostrar mensaje de éxito inmediatamente
-      toast.success('Payment completed successfully!');
+      toast.success(t('paypal.success'));
       
       // Llamar onSuccess directamente como funcionaba antes
       if (onSuccess) {
@@ -176,7 +223,7 @@ const PayPalButtonContainer = ({
     } catch (error) {
       console.error('❌ [PayPal] Error capturando pago:', error);
       console.error('❌ [PayPal] Stack:', error.stack);
-      toast.error('Payment processing failed. Please try again.');
+      toast.error(t('paypal.failed'));
       if (onError) {
         onError(error);
       }
@@ -194,12 +241,12 @@ const PayPalButtonContainer = ({
       onError(error);
     }
     
-    toast.error(`Payment failed: ${error?.message || 'Unknown error'}. Please try again.`);
+    toast.error(`${t('paypal.failed')}: ${error?.message || 'Unknown error'}`);
   };
 
   const handleCancel = (data) => {
     console.log('PayPal Simple - Payment cancelled:', data);
-    toast.error('Payment was cancelled.');
+    toast.error(t('paypal.cancelled'));
   };
 
   console.log('🎯🎯 [PayPal] Renderizando PayPalButtons, onSuccess es:', typeof onSuccess);
@@ -237,6 +284,11 @@ const PayPalSimple = ({
   shippingAddress = null,
   shippingInfo = null
 }) => {
+  const { language } = useLanguage();
+  const t = (key) => {
+    const dict = PAYPAL_SIMPLE_TRANSLATIONS[language] || PAYPAL_SIMPLE_TRANSLATIONS.es;
+    return dict[key] || key;
+  };
   // DEBUG: Log todas las variables de entorno al inicio
   console.log('🔍 [PayPal] DEBUG - Variables de entorno:', {
     'REACT_APP_PAYPAL_CLIENT_ID': process.env.REACT_APP_PAYPAL_CLIENT_ID ? 'SET' : 'NOT SET',
@@ -257,16 +309,16 @@ const PayPalSimple = ({
     return (
       <Box sx={{ textAlign: 'center', py: 4 }}>
         <Alert severity="error" sx={{ mb: 2 }}>
-          PayPal Client ID no configurado
+          {t('paypal.noConfig')}
         </Alert>
         <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-          Por favor configura REACT_APP_PAYPAL_CLIENT_ID en Railway environment variables
+          {t('paypal.configHint')}
         </Typography>
         <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.75rem' }}>
-          Current value: {clientId || 'NOT SET'}
+          {t('paypal.currentValue')} {clientId || 'NOT SET'}
         </Typography>
         <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.75rem', mt: 1 }}>
-          Nota: Las variables REACT_APP_* deben estar configuradas ANTES de hacer build en Railway
+          {t('paypal.configNote')}
         </Typography>
       </Box>
     );
@@ -374,10 +426,10 @@ const PayPalSimple = ({
     >
       <Box sx={{ p: 3, textAlign: 'center' }}>
         <Typography variant="h6" sx={{ mb: 2 }}>
-          Pay with PayPal
+          {t('paypal.payWith')}
         </Typography>
         <Typography variant="body2" sx={{ mb: 3, color: 'text.secondary' }}>
-          Secure payment powered by PayPal - Accepts all major credit/debit cards
+          {t('paypal.disclaimer')}
         </Typography>
         
         <PayPalButtonContainer
@@ -388,6 +440,7 @@ const PayPalSimple = ({
           onError={onError}
           shippingAddress={shippingAddress}
           shippingInfo={shippingInfo}
+          t={t}
         />
       </Box>
     </PayPalScriptProvider>

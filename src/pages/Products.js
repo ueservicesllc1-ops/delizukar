@@ -342,9 +342,9 @@ const Products = () => {
                     >
                       {product.category === 'boxes' 
                         ? (PRODUCT_TRANSLATIONS[language]?.[product.name]?.name || product[`name_${language}`] || product.name)
-                        : (product.name_en || product.name)}
+                        : (product[`name_${language}`] || product.name_en || product.name)}
                     </Typography>
-                    {product.category === 'boxes' && (
+                    {(product.category === 'boxes' || product.category === 'regalo') && (
                       <Typography
                         variant="body2"
                         sx={{
@@ -353,10 +353,14 @@ const Products = () => {
                           mb: 1,
                           lineHeight: 1.3,
                           mt: 1,
-                          textAlign: 'center'
+                          textAlign: 'center',
+                          display: '-webkit-box',
+                          WebkitLineClamp: 2,
+                          WebkitBoxOrient: 'vertical',
+                          overflow: 'hidden'
                         }}
                       >
-                        {PRODUCT_TRANSLATIONS[language]?.[product.name]?.description || product[`description_${language}`] || product.description}
+                        {PRODUCT_TRANSLATIONS[language]?.[product.name]?.description || product[`description_${language}`] || product.description_en || product.description}
                       </Typography>
                     )}
 
@@ -616,7 +620,7 @@ const Products = () => {
                     }}>
                       {selected.category === 'boxes'
                         ? (PRODUCT_TRANSLATIONS[language]?.[selected.name]?.name || selected[`name_${language}`] || selected.name)
-                        : (selected.name_en || selected.name)}
+                        : (selected[`name_${language}`] || selected.name_en || selected.name)}
                     </Typography>
                     <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
                       <Rating value={selected.rating} precision={0.1} readOnly size="small" sx={{ color: '#FFD700' }} />
@@ -672,6 +676,7 @@ const Products = () => {
                     <Typography variant="body2" sx={{ color: '#666', lineHeight: 1.6, mb: 3 }}>
                       {PRODUCT_TRANSLATIONS[language]?.[selected.name]?.description || 
                        selected[`description_${language}`] || 
+                       selected.description_en ||
                        selected.description || 
                         (selected.name && selected.name.toLowerCase().includes('ferrero') 
                           ? translatedTexts.ferreroDescription

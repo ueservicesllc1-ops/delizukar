@@ -15,6 +15,40 @@ import PayPalCheckout from './PayPalCheckout';
 import PayPalCardPayment from './PayPalCardPayment';
 import PayPalSimple from './PayPalSimple';
 import { toast } from 'react-hot-toast';
+import { useLanguage } from '../context/LanguageContext';
+
+const PAYPAL_TRANSLATIONS = {
+  es: {
+    'paypal.summary': 'Resumen de pago',
+    'paypal.subtotal': 'Subtotal:',
+    'paypal.shipping': 'Envío:',
+    'paypal.free': 'Gratis',
+    'paypal.total': 'Total:',
+    'paypal.method': 'Método de Pago',
+    'paypal.disclaimer': 'Pago seguro procesado por PayPal - Acepta las principales tarjetas de crédito/débito',
+    'paypal.processing': 'Procesando tu pago...',
+    'paypal.shippingAddress': 'Dirección de Envío',
+    'paypal.emptyCart': 'Tu carrito está vacío',
+    'paypal.success_message': '¡Pago completado con éxito!',
+    'paypal.error_message': 'El pago falló. Por favor, inténtelo de nuevo.',
+    'paypal.cancel_message': 'El pago fue cancelado.'
+  },
+  en: {
+    'paypal.summary': 'Payment Summary',
+    'paypal.subtotal': 'Subtotal:',
+    'paypal.shipping': 'Shipping:',
+    'paypal.free': 'Free',
+    'paypal.total': 'Total:',
+    'paypal.method': 'Payment Method',
+    'paypal.disclaimer': 'Secure payment powered by PayPal - Accepts all major credit/debit cards',
+    'paypal.processing': 'Processing your payment...',
+    'paypal.shippingAddress': 'Shipping Address',
+    'paypal.emptyCart': 'Your cart is empty',
+    'paypal.success_message': 'Payment completed successfully!',
+    'paypal.error_message': 'Payment failed. Please try again.',
+    'paypal.cancel_message': 'Payment was cancelled.'
+  }
+};
 
 const PayPalPaymentForm = ({ 
   cartItems = [], 
@@ -23,6 +57,12 @@ const PayPalPaymentForm = ({
   shippingAddress = null,
   shippingInfo = null
 }) => {
+  const { language } = useLanguage();
+  const t = (key) => {
+    const dict = PAYPAL_TRANSLATIONS[language] || PAYPAL_TRANSLATIONS.es;
+    return dict[key] || key;
+  };
+
   const [orderData, setOrderData] = useState({
     subtotal: 0,
     shipping: 0,
@@ -78,7 +118,7 @@ const PayPalPaymentForm = ({
       onPaymentSuccess(paymentDetails);
     }
     
-    toast.success('Payment completed successfully!');
+    toast.success(t('paypal.success_message') || 'Payment completed successfully!');
   };
 
   const handlePaymentError = (error) => {
@@ -88,12 +128,12 @@ const PayPalPaymentForm = ({
       onPaymentError(error);
     }
     
-    toast.error('Payment failed. Please try again.');
+    toast.error(t('paypal.error_message') || 'Payment failed. Please try again.');
   };
 
   const handlePaymentCancel = (data) => {
     console.log('Payment cancelled:', data);
-    toast.error('Payment was cancelled.');
+    toast.error(t('paypal.cancel_message') || 'Payment was cancelled.');
   };
 
   if (cartItems.length === 0) {
@@ -101,7 +141,7 @@ const PayPalPaymentForm = ({
       <Card>
         <CardContent>
           <Typography variant="h6" color="text.secondary">
-            Your cart is empty
+            {t('paypal.emptyCart')}
           </Typography>
         </CardContent>
       </Card>
@@ -113,22 +153,22 @@ const PayPalPaymentForm = ({
       <Card>
         <CardContent>
           <Typography variant="h5" gutterBottom>
-            Payment Summary
+            {t('paypal.summary')}
           </Typography>
           
           <Grid container spacing={2}>
             <Grid item xs={12}>
               <Box display="flex" justifyContent="space-between">
-                <Typography>Subtotal:</Typography>
+                <Typography>{t('paypal.subtotal')}</Typography>
                 <Typography>${orderData.subtotal}</Typography>
               </Box>
             </Grid>
             
             <Grid item xs={12}>
               <Box display="flex" justifyContent="space-between">
-                <Typography>Shipping:</Typography>
+                <Typography>{t('paypal.shipping')}</Typography>
                 <Typography>
-                  {orderData.shipping === '0.00' ? 'Free' : `$${orderData.shipping}`}
+                  {orderData.shipping === '0.00' ? t('paypal.free') : `$${orderData.shipping}`}
                 </Typography>
               </Box>
             </Grid>
@@ -140,7 +180,7 @@ const PayPalPaymentForm = ({
             <Grid item xs={12}>
               <Box display="flex" justifyContent="space-between">
                 <Typography variant="h6" fontWeight="bold">
-                  Total:
+                  {t('paypal.total')}
                 </Typography>
                 <Typography variant="h6" fontWeight="bold">
                   ${orderData.total}
@@ -151,18 +191,18 @@ const PayPalPaymentForm = ({
           
           <Box mt={3}>
             <Typography variant="h6" gutterBottom>
-              Payment Method
+              {t('paypal.method')}
             </Typography>
             
             <Alert severity="info" sx={{ mb: 2 }}>
-              Secure payment powered by PayPal - Accepts all major credit/debit cards
+              {t('paypal.disclaimer')}
             </Alert>
             
             {isProcessing ? (
               <Box display="flex" flexDirection="column" alignItems="center" py={4}>
                 <CircularProgress />
                 <Typography variant="body2" sx={{ mt: 2 }}>
-                  Processing your payment...
+                  {t('paypal.processing')}
                 </Typography>
               </Box>
             ) : (
@@ -191,7 +231,7 @@ const PayPalPaymentForm = ({
           {shippingAddress && (
             <Box mt={3}>
               <Typography variant="h6" gutterBottom>
-                Shipping Address
+                {t('paypal.shippingAddress')}
               </Typography>
               <Typography variant="body2" color="text.secondary">
                 {shippingAddress.street}, {shippingAddress.city}, {shippingAddress.state} {shippingAddress.zipCode}

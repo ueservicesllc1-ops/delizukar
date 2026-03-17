@@ -131,11 +131,20 @@ export function startAutoTranslate(targetLang = 'en', sourceLang = 'es') {
   if (typeof document === 'undefined') return;
   autoLang = targetLang; autoSource = sourceLang;
   if (mutationObserver) { try { mutationObserver.disconnect(); } catch {} }
-  mutationObserver = new MutationObserver(() => {
+  mutationObserver = new MutationObserver((mutations) => {
+    // Solo re-traducir si hay cambios reales en el contenido de texto o nuevos elementos
+    const hasRelevantChanges = mutations.some(m => m.type === 'childList' || m.type === 'characterData');
+    if (!hasRelevantChanges) return;
+
     clearTimeout(startAutoTranslate._t);
-    startAutoTranslate._t = setTimeout(() => translateAndApply(document.body, autoLang, autoSource), 150);
+    startAutoTranslate._t = setTimeout(() => translateAndApply(document.body, autoLang, autoSource), 500); // Aumentado a 500ms
   });
-  mutationObserver.observe(document.body, { childList: true, subtree: true, attributes: true });
+  mutationObserver.observe(document.body, { 
+    childList: true, 
+    subtree: true, 
+    characterData: true,
+    attributes: false // Desactivado para evitar bucles con animaciones
+  });
   translateAndApply(document.body, targetLang, sourceLang);
 }
 

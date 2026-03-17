@@ -12,9 +12,10 @@ import {
   Divider,
   Alert,
   Select,
-  MenuItem
+  MenuItem,
+  alpha
 } from '@mui/material';
-import { CreditCard, LocalShipping, Security, ArrowBack, LocalOffer } from '@mui/icons-material';
+import { CreditCard, LocalShipping, Security, ArrowBack, LocalOffer, CardGiftcard } from '@mui/icons-material';
 import { useStore } from '../context/StoreContext';
 import { useNavigate } from 'react-router-dom';
 import ShippingCalculator from '../components/ShippingCalculator';
@@ -92,7 +93,29 @@ const CHECKOUT_TRANSLATIONS = {
     'voucher.alreadyUsed': 'Ya has usado este cupón.',
     'voucher.applied': '¡Cupón aplicado! {percentage}% de descuento',
     'voucher.appliedLabel': '{code} - {percentage}% DTO',
-    'voucher.discount': 'Descuento'
+    'voucher.discount': 'Descuento',
+    'voucher.remove': 'Quitar',
+    'checkout.calcDelivery': '📦 Calculando fecha de entrega...',
+    'checkout.shippedOn': '📦 Tu pedido será enviado el {date}',
+    'checkout.transit': '🚚 Tránsito estimado: {days} días',
+    'checkout.estDelivery': '📅 Entrega estimada: {date}',
+    'checkout.tracking': 'Seguimiento:',
+    'checkout.carrier': 'Transportista:',
+    'checkout.eta': 'Tiempo estimado de llegada (ETA):',
+    'checkout.ssl': 'Pago seguro con encriptación SSL',
+    'checkout.shippingConfigured': '✓ Envío Configurado',
+    'checkout.from': 'del',
+    'checkout.to': 'al',
+    'paypal.summary': 'Resumen de pago',
+    'paypal.subtotal': 'Subtotal:',
+    'paypal.shipping': 'Envío:',
+    'paypal.free': 'Gratis',
+    'paypal.total': 'Total:',
+    'paypal.method': 'Método de Pago',
+    'paypal.disclaimer': 'Pago seguro procesado por PayPal - Acepta las principales tarjetas de crédito/débito',
+    'paypal.processing': 'Procesando tu pago...',
+    'paypal.shippingAddress': 'Dirección de Envío',
+    'paypal.emptyCart': 'Tu carrito está vacío'
   },
   en: {
     'checkout.backToCart': 'Back to cart',
@@ -129,7 +152,29 @@ const CHECKOUT_TRANSLATIONS = {
     'voucher.alreadyUsed': 'You have already used this voucher.',
     'voucher.applied': 'Coupon applied! {percentage}% discount',
     'voucher.appliedLabel': '{code} - {percentage}% OFF',
-    'voucher.discount': 'Discount'
+    'voucher.discount': 'Discount',
+    'voucher.remove': 'Remove',
+    'checkout.calcDelivery': '📦 Calculating delivery date...',
+    'checkout.shippedOn': '📦 Your order will be shipped on {date}',
+    'checkout.transit': '🚚 Estimated transit: {days} days',
+    'checkout.estDelivery': '📅 Estimated delivery: {date}',
+    'checkout.tracking': 'Tracking:',
+    'checkout.carrier': 'Carrier:',
+    'checkout.eta': 'Estimated Time of Arrival (ETA):',
+    'checkout.ssl': 'Secure payment with SSL encryption',
+    'checkout.shippingConfigured': '✓ Shipping Configured',
+    'checkout.from': 'from',
+    'checkout.to': 'to',
+    'paypal.summary': 'Payment Summary',
+    'paypal.subtotal': 'Subtotal:',
+    'paypal.shipping': 'Shipping:',
+    'paypal.free': 'Free',
+    'paypal.total': 'Total:',
+    'paypal.method': 'Payment Method',
+    'paypal.disclaimer': 'Secure payment powered by PayPal - Accepts all major credit/debit cards',
+    'paypal.processing': 'Processing your payment...',
+    'paypal.shippingAddress': 'Shipping Address',
+    'paypal.emptyCart': 'Your cart is empty'
   }
 };
 
@@ -450,9 +495,9 @@ const Checkout = () => {
       console.log('🔍 [Checkout] No hay transitDays en shippingInfo, usando valores por defecto (2-3)');
     }
     
-    // Calcular fecha de entrega usando el promedio de días
-    const avgTransitDays = Math.ceil((minTransitDays + maxTransitDays) / 2);
-    const deliveryDate = new Date(shippingDate.getTime() + (avgTransitDays * 24 * 60 * 60 * 1000));
+    // Calcular fechas de entrega: fecha de envío + rango de días
+    const minDeliveryDate = new Date(shippingDate.getTime() + (minTransitDays * 24 * 60 * 60 * 1000));
+    const maxDeliveryDate = new Date(shippingDate.getTime() + (maxTransitDays * 24 * 60 * 60 * 1000));
     
     // Formatear transitDays para mostrar
     const formattedTransitDays = minTransitDays === maxTransitDays 
@@ -466,7 +511,9 @@ const Checkout = () => {
     
     return {
       shippingDate,
-      deliveryDate,
+      deliveryDate: minDeliveryDate, // Usamos minDeliveryDate como base
+      minDeliveryDate,
+      maxDeliveryDate,
       transitDays: formattedTransitDays,
       daysToMonday,
       minTransitDays,
@@ -1344,7 +1391,7 @@ const Checkout = () => {
                                     fontSize: '0.75rem'
                                   }}
                                 >
-                                  Remove
+                                  {t('voucher.remove')}
                                 </Button>
                               </Box>
                             </Box>
@@ -1468,7 +1515,7 @@ const Checkout = () => {
                     {shippingInfo && (
                       <Box sx={{ mb: 2, p: 1.5, backgroundColor: '#f8f9fa', borderRadius: '8px' }}>
                         <Typography variant="body1" sx={{ mb: 0.5, color: '#c8626d', fontWeight: 600, fontSize: '0.9rem' }}>
-                          ✓ Envío Configurado
+                          {t('checkout.shippingConfigured')}
                         </Typography>
                         
                         {/* Información de fecha de entrega */}
@@ -1480,7 +1527,7 @@ const Checkout = () => {
                             return (
                               <Box sx={{ mt: 1 }}>
                                 <Typography variant="body2" sx={{ color: '#666', fontSize: '0.85rem' }}>
-                                  📦 Calculating delivery date...
+                                  {t('checkout.calcDelivery')}
                                 </Typography>
                               </Box>
                             );
@@ -1489,40 +1536,39 @@ const Checkout = () => {
                           return (
                             <Box sx={{ mt: 1 }}>
                               <Typography variant="body2" sx={{ color: '#666', fontSize: '0.85rem', mb: 0.5 }}>
-                                📦 Your order will be shipped on {deliveryInfo.shippingDate.toLocaleDateString('en-US', { 
+                                {t('checkout.shippedOn', { date: deliveryInfo.shippingDate.toLocaleDateString(language === 'es' ? 'es-ES' : 'en-US', { 
                                   weekday: 'long', 
                                   day: 'numeric', 
                                   month: 'long' 
-                                })}
+                                }) })}
                               </Typography>
                               <Typography variant="body2" sx={{ color: '#666', fontSize: '0.85rem', mb: 0.5 }}>
-                                🚚 Estimated transit: {
-                                  deliveryInfo.minTransitDays === deliveryInfo.maxTransitDays
+                                {t('checkout.transit', { days: deliveryInfo.minTransitDays === deliveryInfo.maxTransitDays
                                     ? `${deliveryInfo.minTransitDays}`
-                                    : `${deliveryInfo.minTransitDays} - ${deliveryInfo.maxTransitDays}`
-                                } days
+                                    : `${deliveryInfo.minTransitDays} - ${deliveryInfo.maxTransitDays}` })}
                               </Typography>
                               <Typography variant="body2" sx={{ color: '#c8626d', fontWeight: 600, fontSize: '0.85rem' }}>
-                                📅 Estimated delivery: {deliveryInfo.deliveryDate.toLocaleDateString('en-US', { 
+                                {t('checkout.estDelivery', { date: deliveryInfo.deliveryDate.toLocaleDateString(language === 'es' ? 'es-ES' : 'en-US', { 
                                   weekday: 'long', 
                                   day: 'numeric', 
                                   month: 'long' 
-                                })}
+                                }) })}
                               </Typography>
                             </Box>
                           );
                         })()}
                         <Typography variant="body2" sx={{ color: '#666', fontSize: '0.8rem' }}>
-                          Tracking: {shippingInfo.trackingNumber}
+                          {t('checkout.tracking')} {shippingInfo.trackingNumber || 'PENDING'}
                         </Typography>
                         <Typography variant="body2" sx={{ color: '#666', fontSize: '0.8rem' }}>
-                          Carrier: {shippingInfo.carrier} - {shippingInfo.serviceLevel}
+                          {t('checkout.carrier')} {shippingInfo.carrier} - {shippingInfo.serviceLevel}
                         </Typography>
-                        {shippingInfo.eta && (
-                          <Typography variant="body2" sx={{ color: '#666', fontSize: '0.8rem' }}>
-                            ETA: {shippingInfo.eta}
-                          </Typography>
-                        )}
+                        <Typography variant="body2" sx={{ color: '#666', fontSize: '0.8rem' }}>
+                          {t('checkout.eta')}{' '}
+                          {deliveryInfo.minTransitDays === deliveryInfo.maxTransitDays
+                            ? deliveryInfo.minDeliveryDate.toLocaleDateString(language === 'es' ? 'es-ES' : 'en-US', { day: 'numeric', month: 'long' })
+                            : `${t('checkout.from')} ${deliveryInfo.minDeliveryDate.toLocaleDateString(language === 'es' ? 'es-ES' : 'en-US', { day: 'numeric', month: 'long' })} ${t('checkout.to')} ${deliveryInfo.maxDeliveryDate.toLocaleDateString(language === 'es' ? 'es-ES' : 'en-US', { day: 'numeric', month: 'long' })}`}
+                        </Typography>
                       </Box>
                     )}
 
@@ -1538,7 +1584,7 @@ const Checkout = () => {
                     <Box sx={{ display: 'flex', alignItems: 'center', mb: 1.5 }}>
                       <Security sx={{ color: '#C8626D', mr: 1, fontSize: '1rem' }} />
                       <Typography variant="body2" sx={{ color: '#666', fontSize: '0.8rem' }}>
-                        Secure payment with SSL encryption
+                        {t('checkout.ssl')}
                       </Typography>
                     </Box>
                   </CardContent>

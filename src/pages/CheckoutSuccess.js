@@ -12,9 +12,73 @@ import {
   CircularProgress
 } from '@mui/material';
 import { CheckCircle, ShoppingBag, Home } from '@mui/icons-material';
+import { useLanguage } from '../context/LanguageContext';
+
+const CHECKOUT_SUCCESS_TRANSLATIONS = {
+  es: {
+    loading: 'Cargando detalles del pago...',
+    error: 'Error al cargar los detalles del pago',
+    backToHome: 'Volver al Inicio',
+    noDetails: 'No se pudieron cargar los detalles del pago. Por favor, contacta con soporte.',
+    successTitle: '¡Pago Exitoso!',
+    successMessage: '¡Gracias por tu compra! Tu pago ha sido procesado correctamente.',
+    emailSent: '📧 Correo de confirmación enviado',
+    paymentSummary: '📋 Resumen de Pago',
+    subtotal: 'Subtotal:',
+    shipping: 'Envío:',
+    totalPaid: 'Total Pagado:',
+    shippingConfigured: '✓ Envío Configurado',
+    shippedOn: '📦 Tu pedido será enviado el {date}',
+    transitEstimated: '🚚 Tránsito estimado: {days} días',
+    deliveryEstimated: '📅 Entrega estimada: {date}',
+    tracking: 'Seguimiento:',
+    carrier: 'Transportista:',
+    continueShopping: 'Continuar Comprando',
+    goToHome: 'Ir al Inicio',
+    calcDelivery: '📦 Calculando fecha de entrega...',
+    from: 'del',
+    to: 'al',
+    eta: 'Tiempo estimado de llegada (ETA):'
+  },
+  en: {
+    loading: 'Loading payment details...',
+    error: 'Error loading payment details',
+    backToHome: 'Back to Home',
+    noDetails: 'Could not load payment details. Please contact support.',
+    successTitle: 'Payment Successful!',
+    successMessage: 'Thank you for your purchase! Your payment has been processed successfully.',
+    emailSent: '📧 Confirmation email sent',
+    paymentSummary: '📋 Payment Summary',
+    subtotal: 'Subtotal:',
+    shipping: 'Shipping:',
+    totalPaid: 'Total Paid:',
+    shippingConfigured: '✓ Shipping Configured',
+    shippedOn: '📦 Your order will be shipped on {date}',
+    transitEstimated: '🚚 Estimated transit: {days} days',
+    deliveryEstimated: '📅 Estimated delivery: {date}',
+    tracking: 'Tracking:',
+    carrier: 'Carrier:',
+    continueShopping: 'Continue Shopping',
+    goToHome: 'Go to Home',
+    calcDelivery: '📦 Calculating delivery date...',
+    from: 'from',
+    to: 'to',
+    eta: 'Estimated Time of Arrival (ETA):'
+  }
+};
 
 const CheckoutSuccess = () => {
   const navigate = useNavigate();
+  const { language } = useLanguage();
+  const translations = CHECKOUT_SUCCESS_TRANSLATIONS[language] || CHECKOUT_SUCCESS_TRANSLATIONS.es;
+  const t = (key, vars = {}) => {
+    let text = translations[key] || key;
+    Object.entries(vars).forEach(([k, v]) => {
+      text = text.replace(`{${k}}`, v);
+    });
+    return text;
+  };
+
   const [loading, setLoading] = useState(true);
   const [orderDetails, setOrderDetails] = useState(null);
   const [shippingInfo, setShippingInfo] = useState(null);
@@ -178,6 +242,9 @@ const CheckoutSuccess = () => {
         minHeight: '50vh' 
       }}>
         <CircularProgress size={60} sx={{ color: '#c8626d' }} />
+        <Typography variant="body1" sx={{ mt: 2, color: '#666' }}>
+          {translations.loading}
+        </Typography>
       </Box>
     );
   }
@@ -196,7 +263,7 @@ const CheckoutSuccess = () => {
             '&:hover': { backgroundColor: '#6B3410' }
           }}
         >
-          Volver al Inicio
+          {translations.backToHome}
         </Button>
       </Container>
     );
@@ -206,7 +273,7 @@ const CheckoutSuccess = () => {
     return (
       <Container maxWidth="sm" sx={{ py: 8, textAlign: 'center' }}>
         <Alert severity="warning" sx={{ mb: 3 }}>
-          No se pudieron cargar los detalles del pago. Por favor, contacta con soporte.
+          {translations.noDetails}
         </Alert>
         <Button
           variant="contained"
@@ -216,7 +283,7 @@ const CheckoutSuccess = () => {
             '&:hover': { backgroundColor: '#6B3410' }
           }}
         >
-          Volver al Inicio
+          {translations.backToHome}
         </Button>
       </Container>
     );
@@ -251,7 +318,7 @@ const CheckoutSuccess = () => {
               color: '#c8626d', 
               mb: 1 
             }}>
-              Payment Successful!
+              {translations.successTitle}
             </Typography>
 
             <Typography variant="body2" sx={{ 
@@ -260,7 +327,7 @@ const CheckoutSuccess = () => {
               lineHeight: 1.4,
               fontSize: '0.9rem'
             }}>
-              Thank you for your purchase! Your payment has been processed successfully.
+              {translations.successMessage}
             </Typography>
 
             <Box sx={{ 
@@ -271,7 +338,7 @@ const CheckoutSuccess = () => {
               border: '1px solid #4CAF50'
             }}>
               <Typography variant="body2" sx={{ fontWeight: 600, color: '#2E7D32', mb: 0.5, fontSize: '0.9rem' }}>
-                📧 Confirmation email sent
+                {translations.emailSent}
               </Typography>
             </Box>
 
@@ -283,12 +350,12 @@ const CheckoutSuccess = () => {
                 mb: 2 
               }}>
                 <Typography variant="body2" sx={{ fontWeight: 600, mb: 1, fontSize: '0.9rem', color: '#c8626d' }}>
-                  📋 Payment Summary
+                  {translations.paymentSummary}
                 </Typography>
                 
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
                   <Typography variant="body2" sx={{ fontSize: '0.8rem', color: '#666' }}>
-                    Subtotal:
+                    {translations.subtotal}
                   </Typography>
                   <Typography variant="body2" sx={{ fontSize: '0.8rem', color: '#666' }}>
                     ${(orderDetails.subtotal || (orderDetails.amount - (orderDetails.shipping || 0))).toFixed(2)} {orderDetails.currency?.toUpperCase()}
@@ -297,7 +364,7 @@ const CheckoutSuccess = () => {
                 
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
                   <Typography variant="body2" sx={{ fontSize: '0.8rem', color: '#666' }}>
-                    Envío:
+                    {translations.shipping}
                   </Typography>
                   <Typography variant="body2" sx={{ fontSize: '0.8rem', color: '#666' }}>
                     ${(orderDetails.shipping || 0).toFixed(2)} {orderDetails.currency?.toUpperCase()}
@@ -307,7 +374,7 @@ const CheckoutSuccess = () => {
                 <Box sx={{ borderTop: '1px solid #ddd', pt: 0.5, mt: 0.5 }}>
                   <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
                     <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '0.9rem' }}>
-                      Total Paid:
+                      {translations.totalPaid}
                     </Typography>
                     <Typography variant="h6" sx={{ fontWeight: 700, color: '#c8626d', fontSize: '1rem' }}>
                       ${orderDetails.amount.toFixed(2)} {orderDetails.currency?.toUpperCase()}
@@ -327,18 +394,18 @@ const CheckoutSuccess = () => {
                 border: '1px solid #4caf50'
               }}>
                 <Typography variant="h6" sx={{ fontWeight: 600, color: '#2e7d32', mb: 1.5, fontSize: '1rem' }}>
-                  ✓ Shipping Configured
+                  {translations.shippingConfigured}
                 </Typography>
                 
                 {shippingInfo.shippingDate && (
                   <Box sx={{ mb: 1 }}>
                     <Typography variant="body2" sx={{ fontWeight: 600, color: '#388e3c', fontSize: '0.9rem' }}>
-                      📦 Su pedido se enviará el {shippingInfo.shippingDate.toLocaleDateString('es-ES', { 
+                      {t('shippedOn', { date: shippingInfo.shippingDate.toLocaleDateString(language === 'en' ? 'en-US' : 'es-ES', { 
                         weekday: 'long', 
                         year: 'numeric', 
                         month: 'long', 
                         day: 'numeric' 
-                      })}
+                      }) })}
                     </Typography>
                   </Box>
                 )}
@@ -346,7 +413,7 @@ const CheckoutSuccess = () => {
                 {shippingInfo.transitDays && (
                   <Box sx={{ mb: 1 }}>
                     <Typography variant="body2" sx={{ color: '#2e7d32', fontSize: '0.85rem' }}>
-                      🚚 Tránsito estimado: {
+                      {t('transitEstimated', { days: 
                         shippingInfo.minTransitDays !== undefined && shippingInfo.maxTransitDays !== undefined
                           ? (shippingInfo.minTransitDays === shippingInfo.maxTransitDays
                               ? shippingInfo.minTransitDays
@@ -362,7 +429,7 @@ const CheckoutSuccess = () => {
                               }
                               return transitValue;
                             })()
-                      } días
+                      })}
                     </Typography>
                   </Box>
                 )}
@@ -370,32 +437,36 @@ const CheckoutSuccess = () => {
                 {shippingInfo.deliveryDate && (
                   <Box sx={{ mb: 1 }}>
                     <Typography variant="body2" sx={{ color: '#2e7d32', fontSize: '0.85rem' }}>
-                      📅 Entrega estimada: {shippingInfo.deliveryDate.toLocaleDateString('es-ES', { 
+                      {t('deliveryEstimated', { date: shippingInfo.deliveryDate.toLocaleDateString(language === 'en' ? 'en-US' : 'es-ES', { 
                         weekday: 'long', 
                         year: 'numeric', 
                         month: 'long', 
                         day: 'numeric' 
-                      })}
+                      }) })}
                     </Typography>
                   </Box>
                 )}
                 
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 1.5 }}>
                   <Typography variant="body2" sx={{ color: '#666', fontSize: '0.8rem' }}>
-                    Tracking: {shippingInfo.trackingNumber || 'PENDING'}
+                    {translations.tracking} {shippingInfo.trackingNumber || 'PENDING'}
                   </Typography>
                   <Typography variant="body2" sx={{ color: '#666', fontSize: '0.8rem' }}>
-                    Carrier: {shippingInfo.carrier} - {shippingInfo.serviceLevel}
+                    {translations.carrier} {shippingInfo.carrier} - {shippingInfo.serviceLevel}
                   </Typography>
                 </Box>
                 
-                {shippingInfo.eta && (
-                  <Box sx={{ mt: 1 }}>
-                    <Typography variant="body2" sx={{ color: '#666', fontSize: '0.75rem', fontStyle: 'italic' }}>
-                      ETA: {shippingInfo.eta}
-                    </Typography>
-                  </Box>
-                )}
+                <Box sx={{ mt: 1 }}>
+                  <Typography variant="body2" sx={{ color: '#666', fontSize: '0.75rem', fontStyle: 'italic' }}>
+                    {translations.eta || 'ETA:'} {
+                      shippingInfo.minTransitDays !== undefined && shippingInfo.maxTransitDays !== undefined
+                        ? (shippingInfo.minTransitDays === shippingInfo.maxTransitDays
+                            ? shippingInfo.deliveryDate.toLocaleDateString(language === 'en' ? 'en-US' : 'es-ES', { day: 'numeric', month: 'long' })
+                            : `${translations.from} ${new Date(shippingInfo.shippingDate.getTime() + (shippingInfo.minTransitDays * 24 * 60 * 60 * 1000)).toLocaleDateString(language === 'en' ? 'en-US' : 'es-ES', { day: 'numeric', month: 'long' })} ${translations.to} ${new Date(shippingInfo.shippingDate.getTime() + (shippingInfo.maxTransitDays * 24 * 60 * 60 * 1000)).toLocaleDateString(language === 'en' ? 'en-US' : 'es-ES', { day: 'numeric', month: 'long' })}`)
+                        : shippingInfo.eta
+                    }
+                  </Typography>
+                </Box>
               </Box>
             )}
 
@@ -418,7 +489,7 @@ const CheckoutSuccess = () => {
                   minWidth: '120px'
                 }}
               >
-                Continue Shopping
+                {translations.continueShopping}
               </Button>
 
               <Button
@@ -443,7 +514,7 @@ const CheckoutSuccess = () => {
                   }
                 }}
               >
-                Go to Home
+                {translations.goToHome}
               </Button>
             </Box>
           </CardContent>

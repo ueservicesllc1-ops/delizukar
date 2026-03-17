@@ -137,9 +137,9 @@ const initialState = {
     {
       id: '8',
       name: 'Gift Message + Premium Card',
-      name_es: 'Mensaje de Regalo + Tarjeta Premium',
-      name_en: 'Gift Message + Premium Card',
-      price: 9.00,
+      name_es: 'Convierte tu pedido en un regalo especial',
+      name_en: 'Turn your order into a special gift',
+      price: 7.00,
       image: '/assets/images/caja_generica.png',
       rating: 5.0,
       reviews: 0,
@@ -148,9 +148,9 @@ const initialState = {
       featured: false,
       active: true,
       category: 'regalo',
-      description: 'Añade un mensaje personalizado dentro de tu caja. Perfecto para cualquier ocasión especial.',
-      description_es: 'Añade un mensaje personalizado dentro de tu caja. Perfecto para cualquier ocasión especial.',
-      description_en: 'Add a personalized message inside your box. Perfect for any special occasion.'
+      description: 'Haz que tu pedido sea aún más especial con nuestra presentación de regalo DeliZukar y una tarjeta personalizada. Perfecto para cumpleaños, sorpresas o darte un gusto.',
+      description_es: 'Haz que tu pedido sea aún más especial con nuestra presentación de regalo DeliZukar y una tarjeta personalizada. Perfecto para cumpleaños, sorpresas o darte un gusto.',
+      description_en: 'Make your order even more special with our DeliZukar gift presentation and a personalized card. Perfect for birthdays, surprises, or treating yourself.'
     }
   ],
   cart: JSON.parse(localStorage.getItem('delizukar-cart')) || [],

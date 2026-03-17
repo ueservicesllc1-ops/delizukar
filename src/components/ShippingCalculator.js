@@ -15,8 +15,43 @@ import {
   Grid
 } from '@mui/material';
 import { LocalShipping, CheckCircle, Close } from '@mui/icons-material';
- 
+import { useLanguage } from '../context/LanguageContext';
 import useIphone16 from '../hooks/useIphone16';
+
+const SHIPPING_TRANSLATIONS = {
+  es: {
+    title: 'Opciones de Envío',
+    calculating: 'Calculando opciones de envío...',
+    selectOption: 'Selecciona una opción de envío:',
+    found: 'Se encontraron {count} opciones de envío',
+    cancel: 'Cancelar',
+    confirm: 'Confirmar Envío',
+    noOptions: 'No hay opciones de envío disponibles',
+    checkAddress: 'Por favor, verifica tu dirección o intenta de nuevo más tarde.',
+    tryAgain: 'Intentar de nuevo',
+    retry: 'Reintentar',
+    error: 'No se pudieron obtener las tarifas de envío. Por favor, verifica la configuración de EasyPost.',
+    standard: 'Estándar',
+    from: 'del',
+    to: 'al'
+  },
+  en: {
+    title: 'Shipping Options',
+    calculating: 'Calculating shipping options...',
+    selectOption: 'Select a shipping option:',
+    found: 'Found {count} shipping options',
+    cancel: 'Cancel',
+    confirm: 'Confirm Shipping',
+    noOptions: 'No shipping options available',
+    checkAddress: 'Please check your address or try again later.',
+    tryAgain: 'Try Again',
+    retry: 'Retry',
+    error: 'Could not get shipping rates. Please check EasyPost configuration.',
+    standard: 'Standard',
+    from: 'from',
+    to: 'to'
+  }
+};
 
 const ShippingCalculator = ({ 
   open, 
@@ -24,7 +59,11 @@ const ShippingCalculator = ({
   orderData, 
   onShippingSelected 
 }) => {
-  const t = (k, fallback) => (typeof fallback === 'string' ? fallback : (typeof k === 'string' ? k : ''));
+  const { language } = useLanguage();
+  const translations = SHIPPING_TRANSLATIONS[language] || SHIPPING_TRANSLATIONS.es;
+  
+  const t = (key, fallback) => translations[key] || fallback;
+  
   const [loading, setLoading] = useState(false);
   const [rates, setRates] = useState([]);
   const [selectedRate, setSelectedRate] = useState(null);
@@ -136,7 +175,7 @@ const ShippingCalculator = ({
       // Formatear rates de EasyPost al formato esperado por el componente
       const formattedRates = easyPostRates.map((rate) => {
         // Formatear nombre del servicio para mejor visualización
-        let displayName = rate.service || rate.servicelevel?.name || 'Standard Shipping';
+        let displayName = rate.service || rate.servicelevel?.name || translations.standard;
         
         // Mejorar nombres de servicios comunes
         if (displayName.includes('GroundAdvantage')) {
@@ -180,7 +219,7 @@ const ShippingCalculator = ({
       setRates(finalRates);
     } catch (err) {
       console.error('Error calculating rates:', err);
-      setError('No se pudieron obtener las tarifas de envío. Por favor, verifica la configuración de EasyPost.');
+      setError(translations.error);
     } finally {
       setLoading(false);
     }
@@ -420,7 +459,8 @@ const ShippingCalculator = ({
     
     // Formatear fechas
     const formatDate = (date) => {
-      return date.toLocaleDateString('es-ES', {
+      const locale = language === 'en' ? 'en-US' : 'es-ES';
+      return date.toLocaleDateString(locale, {
         day: 'numeric',
         month: 'long'
       });
@@ -432,7 +472,7 @@ const ShippingCalculator = ({
     }
     
     // Mostrar rango de fechas
-    return `del ${formatDate(minDeliveryDate)} al ${formatDate(maxDeliveryDate)}`;
+    return `${translations.from} ${formatDate(minDeliveryDate)} ${translations.to} ${formatDate(maxDeliveryDate)}`;
   };
 
   const getCarrierColor = (carrier) => {
@@ -512,7 +552,7 @@ const ShippingCalculator = ({
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           <LocalShipping />
           <Typography variant="h6" sx={{ fontWeight: 600 }}>
-            {t('shippingOptions.title', 'Shipping Options')}
+            {t('title', 'Shipping Options')}
           </Typography>
         </Box>
         <Button
@@ -530,7 +570,7 @@ const ShippingCalculator = ({
             sx={{ mb: 2 }}
             action={
               <Button color="inherit" size="small" onClick={calculateRates}>
-                Reintentar
+                {translations.retry}
               </Button>
             }
           >
@@ -542,7 +582,7 @@ const ShippingCalculator = ({
           <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', py: 4 }}>
             <CircularProgress sx={{ color: '#c8626d', mb: 2 }} />
             <Typography variant="body1" color="text.secondary">
-              {t('shippingOptions.calculating', 'Calculando opciones de envío...')}
+              {t('calculating', 'Calculating shipping options...')}
             </Typography>
           </Box>
         )}
@@ -550,17 +590,17 @@ const ShippingCalculator = ({
         {!loading && rates.length === 0 && (
           <Box sx={{ textAlign: 'center', py: 4 }}>
             <Typography variant="h6" sx={{ mb: 2, color: 'text.secondary' }}>
-              No shipping options available
+              {translations.noOptions}
             </Typography>
             <Typography variant="body2" sx={{ color: 'text.secondary', mb: 3 }}>
-              Please check your address or try again later.
+              {translations.checkAddress}
             </Typography>
             <Button 
               variant="contained" 
               onClick={calculateRates}
               sx={{ backgroundColor: '#c8626d' }}
             >
-              Try Again
+              {translations.tryAgain}
             </Button>
           </Box>
         )}
@@ -568,10 +608,10 @@ const ShippingCalculator = ({
         {rates.length > 0 && (
           <>
             <Typography variant="h6" sx={{ mb: 3, fontWeight: 600, textAlign: 'center' }}>
-              {t('shippingOptions.selectOption', 'Select a shipping option:')}
+              {t('selectOption', 'Select a shipping option:')}
             </Typography>
             <Typography variant="body2" sx={{ mb: 2, textAlign: 'center', color: 'text.secondary' }}>
-              Found {rates.length} shipping options
+              {t('found', 'Found {count} shipping options').replace('{count}', rates.length)}
             </Typography>
 
             <Grid container spacing={{ xs: 1, sm: 2 }} justifyContent="center">
@@ -703,7 +743,7 @@ const ShippingCalculator = ({
                   }
                 }}
               >
-                {t('shippingOptions.cancel', 'Cancel')}
+                {t('cancel', 'Cancel')}
               </Button>
               
               <Button
@@ -717,7 +757,7 @@ const ShippingCalculator = ({
                   }
                 }}
               >
-                {t('shippingOptions.confirm', 'Confirm Shipping')}
+                {t('confirm', 'Confirm Shipping')}
               </Button>
             </Box>
           </>

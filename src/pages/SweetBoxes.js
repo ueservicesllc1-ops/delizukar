@@ -21,7 +21,7 @@ import ComparisonTable from '../components/ComparisonTable';
 const TEXTS = {
   en: {
     title: 'Our Sweet Boxes',
-    subtitle: 'Choose the perfect size to share or gift the taste of Delizukar.',
+    subtitle: 'Choose the perfect size to share or gift the taste of DeliZuKar.',
     choose: 'View details',
     loading: 'Loading best sweets...',
     empty: 'No boxes found available at this moment.',
@@ -36,7 +36,7 @@ const TEXTS = {
   },
   es: {
     title: 'Nuestras Sweet Boxes',
-    subtitle: 'Elige el tamaño perfecto para compartir o regalar el sabor de Delizukar.',
+    subtitle: 'Elige el tamaño perfecto para compartir o regalar el sabor de DeliZuKar.',
     choose: 'Ver detalles',
     loading: 'Cargando mejores dulces...',
     empty: 'No se encontraron cajas disponibles en este momento.',

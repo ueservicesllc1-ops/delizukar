@@ -33,13 +33,12 @@ const GiftMessageModal = ({ open, onClose, onConfirm, onSkip }) => {
   const t = {
     es: {
       title: '¿Es un regalo?',
-      subtitle: 'Añade un Mensaje de Regalo + Tarjeta Premium por solo $9.00',
+      subtitle: 'Añade un Mensaje de Regalo + Tarjeta Premium por solo $7.00',
       description: 'Haz que tu detalle sea aún más especial con una de nuestras tarjetas exclusivas y un mensaje personalizado.',
       addGift: 'Sí, añadir regalo',
       noGift: 'No, gracias',
       step2Title: 'Personaliza tu tarjeta',
-      chooseCard: '1. Elige tu diseño',
-      fillDetails: '2. Completa los detalles',
+      fillDetails: 'Completa los detalles',
       to: 'Para:',
       from: 'De:',
       message: 'Mensaje (máx. 250 caracteres):',
@@ -51,13 +50,12 @@ const GiftMessageModal = ({ open, onClose, onConfirm, onSkip }) => {
     },
     en: {
       title: 'Is this a gift?',
-      subtitle: 'Add a Gift Message + Premium Card for only $9.00',
+      subtitle: 'Add a Gift Message + Premium Card for only $7.00',
       description: 'Make your gift even more special with one of our exclusive cards and a personalized message.',
       addGift: 'Yes, add gift',
       noGift: 'No, thanks',
       step2Title: 'Customize your card',
-      chooseCard: '1. Choose your design',
-      fillDetails: '2. Fill in the details',
+      fillDetails: 'Complete the details',
       to: 'To:',
       from: 'From:',
       message: 'Message (max. 250 chars):',
@@ -69,13 +67,12 @@ const GiftMessageModal = ({ open, onClose, onConfirm, onSkip }) => {
     }
   }[language] || {
     title: '¿Es un regalo?',
-    subtitle: 'Añade un Mensaje de Regalo + Tarjeta Premium por solo $9.00',
+    subtitle: 'Añade un Mensaje de Regalo + Tarjeta Premium por solo $7.00',
     description: 'Haz que tu detalle sea aún más especial con una de nuestras tarjetas exclusivas y un mensaje personalizado.',
     addGift: 'Sí, añadir regalo',
     noGift: 'No, gracias',
     step2Title: 'Personaliza tu tarjeta',
-    chooseCard: '1. Elige tu diseño',
-    fillDetails: '2. Completa los detalles',
+    fillDetails: 'Completa los detalles',
     to: 'Para:',
     from: 'De:',
     message: 'Mensaje (máx. 250 caracteres):',
@@ -185,78 +182,8 @@ const GiftMessageModal = ({ open, onClose, onConfirm, onSkip }) => {
                 </Typography>
                 
                 <Grid container spacing={4}>
-                  {/* Card Selection */}
-                  <Grid item xs={12} md={5}>
-                    <Typography variant="subtitle1" sx={{ fontWeight: 700, mb: 2 }}>
-                      {t.chooseCard}
-                    </Typography>
-                    <Box sx={{ 
-                      display: 'grid', 
-                      gridTemplateColumns: 'repeat(2, 1fr)', 
-                      gap: 2,
-                      maxHeight: 400,
-                      overflowY: 'auto',
-                      pr: 1
-                    }}>
-                      {giftProducts.length > 0 ? giftProducts.map(card => (
-                        <Card 
-                          key={card.id}
-                          onClick={() => setSelectedCardId(card.id)}
-                          sx={{ 
-                            cursor: 'pointer',
-                            borderRadius: '12px',
-                            border: `2px solid ${selectedCardId === card.id || (!selectedCardId && card.id === giftProducts[0].id) ? '#c8626d' : 'transparent'}`,
-                            position: 'relative',
-                            transition: 'all 0.2s ease',
-                            '&:hover': { transform: 'scale(1.02)' },
-                            height: '140px', // Fixed height for consistency
-                            display: 'flex',
-                            flexDirection: 'column'
-                          }}
-                        >
-                          <Box sx={{ height: 100, overflow: 'hidden' }}>
-                            <img 
-                              src={card.image} 
-                              alt={card.name} 
-                              style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
-                            />
-                          </Box>
-                          <CardContent sx={{ p: 1, textAlign: 'center', flexGrow: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                            <Typography variant="caption" sx={{ fontWeight: 600, fontSize: '0.65rem', lineHeight: 1.1 }} noWrap>
-                              {card[`name_${language}`] || card.name}
-                            </Typography>
-                          </CardContent>
-                          {(selectedCardId === card.id || (!selectedCardId && card.id === giftProducts[0].id)) && (
-                            <CheckCircle sx={{ position: 'absolute', top: 4, right: 4, color: '#c8626d', fontSize: 20, bgcolor: 'white', borderRadius: '50%' }} />
-                          )}
-                        </Card>
-                      )) : (
-                        // Fallback if no products found in database with category regalo
-                        [1, 2, 3, 4].map(i => (
-                          <Card 
-                            key={i}
-                            onClick={() => setSelectedCardId(i)}
-                            sx={{ 
-                              cursor: 'pointer',
-                              borderRadius: '12px',
-                              border: `2px solid ${selectedCardId === i ? '#c8626d' : 'transparent'}`,
-                              bgcolor: i === 1 ? '#fff5f5' : i === 2 ? '#f5fff5' : i === 3 ? '#f5f5ff' : '#fff9f5',
-                              height: '140px',
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center'
-                            }}
-                          >
-                            <Typography variant="caption">Card Design {i}</Typography>
-                            {selectedCardId === i && <CheckCircle sx={{ position: 'absolute', top: 4, right: 4, color: '#c8626d', fontSize: 20 }} />}
-                          </Card>
-                        ))
-                      )}
-                    </Box>
-                  </Grid>
-
                   {/* Form Details */}
-                  <Grid item xs={12} md={7}>
+                  <Grid item xs={12}>
                     <Typography variant="subtitle1" sx={{ fontWeight: 700, mb: 2 }}>
                       {t.fillDetails}
                     </Typography>

@@ -1,7 +1,15 @@
 import React, { useState } from 'react';
 import { Box, Skeleton } from '@mui/material';
+import { useLanguage } from '../context/LanguageContext';
+
+const TEXTS = {
+  es: { noImage: 'Imagen no disponible' },
+  en: { noImage: 'Image not available' }
+};
 
 const ProductImage = ({ src, alt, height = 350, sx = {} }) => {
+  const { language } = useLanguage();
+  const texts = TEXTS[language] || TEXTS.es;
   const [imageLoaded, setImageLoaded] = useState(false);
   const [imageError, setImageError] = useState(false);
 
@@ -63,7 +71,7 @@ const ProductImage = ({ src, alt, height = 350, sx = {} }) => {
             fontSize: '0.875rem'
           }}
         >
-          Imagen no disponible
+          {texts.noImage}
         </Box>
       )}
     </Box>
