@@ -102,22 +102,22 @@ const TEXTS = {
 
 export const PRODUCT_TRANSLATIONS = {
   es: {
-    'Chocole DeLux': { name: 'Chocolate Deluxe' },
+    'Chocole DeLux': { name: 'Chocole DeLux' },
     'Chocolate Deluxe': { name: 'Chocolate Deluxe' },
     'Ferrero Hype': { name: 'Ferrero Hype' },
-    'PecanBerry Oat': { name: 'Avena y Arándanos' },
-    'Besos Blancos de Avellanas': { name: 'Besos Blancos de Avellanas' },
-    'Almendra de Oro': { name: 'Almendra de Oro' },
-    'Gift Message + Premium Card': { name: 'Mensaje de Regalo + Tarjeta Premium' },
-    '"A little luxury Box" 4 Cookies  Perfect for enjoying or gifting a sweet moment.': { 
+    'PecanBerry Oat': { name: 'PecanBerry Oat' },
+    'White Hazelnut Kisses': { name: 'White Hazelnut Kisses' },
+    'Golden Almond': { name: 'Golden Almond' },
+    'Gift Message + Premium Card': { name: 'Gift Message + Premium Card' },
+    '"A little luxury Box" 4 Cookies': { 
       name: '"Caja Un Pequeño Lujo" 4 Galletas', 
       description: 'Caja perfecta para disfrutar o regalar un momento dulce.' 
     },
-    '"Sweet Moments Box" 6 New York-style cookies to share and enjoy a special moment.': { 
+    '"Sweet Moments Box" 6 Cookies': { 
       name: '"Caja Momentos Dulces" 6 Galletas', 
       description: '6 galletas estilo Nueva York para compartir y disfrutar de un momento especial.' 
     },
-    '"Celebration Box" 12 New York-style cookies perfect for celebrating, sharing, or surprising someone.': { 
+    '"Celebration Box" 12 Cookies': { 
       name: '"Caja de Celebración" 12 Galletas', 
       description: '12 galletas estilo Nueva York perfectas para celebrar, compartir o sorprender a alguien.' 
     }
@@ -127,19 +127,19 @@ export const PRODUCT_TRANSLATIONS = {
     'Chocolate Deluxe': { name: 'Chocolate Deluxe' },
     'Ferrero Hype': { name: 'Ferrero Hype' },
     'PecanBerry Oat': { name: 'PecanBerry Oat' },
-    'Besos Blancos de Avellanas': { name: 'White Hazelnut Kisses' },
-    'Almendra de Oro': { name: 'Golden Almond' },
+    'White Hazelnut Kisses': { name: 'White Hazelnut Kisses' },
+    'Golden Almond': { name: 'Golden Almond' },
     'Gift Message + Premium Card': { name: 'Gift Message + Premium Card' },
-    '"A little luxury Box" 4 Cookies  Perfect for enjoying or gifting a sweet moment.': { 
+    '"A little luxury Box" 4 Cookies': { 
       name: '"A little luxury Box" 4 Cookies', 
       description: 'Perfect for enjoying or gifting a sweet moment.' 
     },
-    '"Sweet Moments Box" 6 New York-style cookies to share and enjoy a special moment.': { 
-      name: '"Sweet Moments Box" 6 New York-style cookies', 
-      description: 'to share and enjoy a special moment.' 
+    '"Sweet Moments Box" 6 Cookies': { 
+      name: '"Sweet Moments Box" 6 Cookies', 
+      description: '6 New York-style cookies to share and enjoy a special moment.' 
     },
-    '"Celebration Box" 12 New York-style cookies perfect for celebrating, sharing, or surprising someone.': { 
-      name: '"Celebration Box"', 
+    '"Celebration Box" 12 Cookies': { 
+      name: '"Celebration Box" 12 Cookies', 
       description: '12 New York-style cookies perfect for celebrating, sharing, or surprising someone.' 
     }
   }
@@ -340,7 +340,9 @@ const Products = () => {
                         letterSpacing: '0.5px'
                       }}
                     >
-                      {PRODUCT_TRANSLATIONS[language]?.[product.name]?.name || product[`name_${language}`] || product.name}
+                      {product.category === 'boxes' 
+                        ? (PRODUCT_TRANSLATIONS[language]?.[product.name]?.name || product[`name_${language}`] || product.name)
+                        : (product.name_en || product.name)}
                     </Typography>
                     {product.category === 'boxes' && (
                       <Typography
@@ -490,12 +492,12 @@ const Products = () => {
                 sx={{ px: 0 }}
               >
                 <Typography sx={{ fontWeight: 600, color: '#7C2815', fontSize: '1.1rem' }}>
-                  {language === 'es' ? 'Recién horneadas para ti' : (accordionData?.[`aboutTitle_${language}`] || accordionData?.aboutTitle || translatedTexts.aboutTitle)}
+                  {language === 'es' ? (accordionData?.aboutTitle || translatedTexts.aboutTitle) : (accordionData?.[`aboutTitle_${language}`] || accordionData?.aboutTitle || translatedTexts.aboutTitle)}
                 </Typography>
               </AccordionSummary>
               <AccordionDetails sx={{ px: 0, pb: 2 }}>
                 <Typography variant="body2" sx={{ color: '#666', lineHeight: 1.8 }}>
-                  {accordionData?.[`aboutContent_${language}`] || accordionData?.aboutContent || translatedTexts.aboutContent}
+                  {language === 'es' ? (accordionData?.aboutContent || translatedTexts.aboutContent) : (accordionData?.[`aboutContent_${language}`] || accordionData?.aboutContent || translatedTexts.aboutContent)}
                 </Typography>
               </AccordionDetails>
             </Accordion>
@@ -512,12 +514,12 @@ const Products = () => {
                 sx={{ px: 0 }}
               >
                 <Typography sx={{ fontWeight: 600, color: '#7C2815', fontSize: '1.1rem' }}>
-                  {accordionData?.[`differentTitle_${language}`] || accordionData?.differentTitle || translatedTexts.differentTitle}
+                  {language === 'es' ? (accordionData?.differentTitle || translatedTexts.differentTitle) : (accordionData?.[`differentTitle_${language}`] || accordionData?.differentTitle || translatedTexts.differentTitle)}
                 </Typography>
               </AccordionSummary>
               <AccordionDetails sx={{ px: 0, pb: 2 }}>
                 <Typography variant="body2" sx={{ color: '#666', lineHeight: 1.8 }}>
-                  {accordionData?.[`differentContent_${language}`] || accordionData?.differentContent || translatedTexts.differentContent}
+                  {language === 'es' ? (accordionData?.differentContent || translatedTexts.differentContent) : (accordionData?.[`differentContent_${language}`] || accordionData?.differentContent || translatedTexts.differentContent)}
                 </Typography>
               </AccordionDetails>
             </Accordion>
@@ -534,12 +536,12 @@ const Products = () => {
                 sx={{ px: 0 }}
               >
                 <Typography sx={{ fontWeight: 600, color: '#7C2815', fontSize: '1.1rem' }}>
-                  {accordionData?.[`ingredientsTitle_${language}`] || accordionData?.ingredientsTitle || translatedTexts.ingredientsTitle}
+                  {language === 'es' ? (accordionData?.ingredientsTitle || translatedTexts.ingredientsTitle) : (accordionData?.[`ingredientsTitle_${language}`] || accordionData?.ingredientsTitle || translatedTexts.ingredientsTitle)}
                 </Typography>
               </AccordionSummary>
               <AccordionDetails sx={{ px: 0, pb: 2 }}>
                 <Typography variant="body2" sx={{ color: '#666', lineHeight: 1.8 }}>
-                  {accordionData?.[`ingredientsContent_${language}`] || accordionData?.ingredientsContent || translatedTexts.ingredientsContent}
+                  {language === 'es' ? (accordionData?.ingredientsContent || translatedTexts.ingredientsContent) : (accordionData?.[`ingredientsContent_${language}`] || accordionData?.ingredientsContent || translatedTexts.ingredientsContent)}
                 </Typography>
               </AccordionDetails>
             </Accordion>
@@ -612,7 +614,9 @@ const Products = () => {
                       textTransform: 'uppercase',
                       letterSpacing: '0.5px'
                     }}>
-                      {PRODUCT_TRANSLATIONS[language]?.[selected.name]?.name || selected[`name_${language}`] || selected.name}
+                      {selected.category === 'boxes'
+                        ? (PRODUCT_TRANSLATIONS[language]?.[selected.name]?.name || selected[`name_${language}`] || selected.name)
+                        : (selected.name_en || selected.name)}
                     </Typography>
                     <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
                       <Rating value={selected.rating} precision={0.1} readOnly size="small" sx={{ color: '#FFD700' }} />

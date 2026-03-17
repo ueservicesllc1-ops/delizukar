@@ -265,9 +265,9 @@ const SweetBoxes = () => {
                   <Card
                     onClick={() => handleBoxClick(product)}
                     sx={{
-                      height: '360px', // Reducción a 360px para diseño más compacto
-                      display: 'flex',
-                      flexDirection: 'column',
+                      minHeight: '400px',
+                      height: 'auto',
+                      pb: 2,
                       borderRadius: '16px',
                       overflow: 'hidden',
                       cursor: 'pointer',
@@ -280,13 +280,13 @@ const SweetBoxes = () => {
                       }
                     }}
                   >
-                    <Box sx={{ position: 'relative', height: 180, overflow: 'hidden' }}>
+                    <Box sx={{ position: 'relative', height: 'auto', pt: 2, px: 2, overflow: 'hidden', display: 'flex', justifyContent: 'center' }}>
                       <ProductImage
                         src={product.image}
                         alt={product.name}
-                        height="100%"
-                        width="100%"
-                        sx={{ objectFit: 'cover' }}
+                        height="140px"
+                        width="auto"
+                        sx={{ objectFit: 'contain', maxWidth: '100%' }}
                       />
                       {product.discountPercentage > 0 && (
                         <Box sx={{ 
@@ -301,14 +301,15 @@ const SweetBoxes = () => {
                           fontWeight: 800,
                           fontSize: '0.8rem',
                           backdropFilter: 'blur(4px)',
-                          boxShadow: '0 2px 10px rgba(200, 98, 109, 0.3)'
+                          boxShadow: '0 2px 10px rgba(200, 98, 109, 0.3)',
+                          zIndex: 2
                         }}>
                           -{product.discountPercentage}%
                         </Box>
                       )}
                     </Box>
 
-                    <CardContent sx={{ p: 2, flexGrow: 1, textAlign: 'center', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                    <CardContent sx={{ p: 2, pt: 3, flexGrow: 1, textAlign: 'center', display: 'flex', flexDirection: 'column', justifyContent: 'flex-start' }}>
                       <Typography
                         variant="subtitle1"
                         sx={{
@@ -317,10 +318,16 @@ const SweetBoxes = () => {
                           color: '#333',
                           fontFamily: '"Asap", sans-serif',
                           fontSize: '0.9rem',
-                          lineHeight: 1.2
+                          lineHeight: 1.2,
+                          minHeight: '2.4em',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center'
                         }}
                       >
-                      {PRODUCT_TRANSLATIONS[language]?.[product.name]?.name || product[`name_${language}`] || product.name}
+                      {product.category === 'boxes'
+                        ? (PRODUCT_TRANSLATIONS[language]?.[product.name]?.name || product[`name_${language}`] || product.name)
+                        : (product.name_en || product.name)}
                       </Typography>
                       <Typography
                         variant="body2"
@@ -329,7 +336,7 @@ const SweetBoxes = () => {
                           fontSize: '0.75rem',
                           mb: 1.5,
                           lineHeight: 1.4,
-                          minHeight: '3em' // Asegura altura constante
+                          minHeight: '4.2em' // Asegura altura constante para 3 líneas
                         }}
                       >
                         {PRODUCT_TRANSLATIONS[language]?.[product.name]?.description || product[`description_${language}`] || product.description}
@@ -405,12 +412,12 @@ const SweetBoxes = () => {
                 sx={{ px: 0 }}
               >
                 <Typography sx={{ fontWeight: 600, color: '#7C2815', fontSize: '1.2rem' }}>
-                  {language === 'es' ? 'Recién horneadas para ti' : (accordionData?.aboutTitle_en || t.aboutTitle || accordionData?.aboutTitle)}
+                  {language === 'es' ? (accordionData?.aboutTitle || t.aboutTitle) : (accordionData?.aboutTitle_en || t.aboutTitle || accordionData?.aboutTitle)}
                 </Typography>
               </AccordionSummary>
               <AccordionDetails sx={{ px: 0, pb: 4 }}>
                 <Typography variant="body1" sx={{ color: '#666', lineHeight: 1.8 }}>
-                  {language === 'es' ? (t.aboutContent || accordionData?.aboutContent) : (accordionData?.aboutContent_en || t.aboutContent || accordionData?.aboutContent)}
+                  {language === 'es' ? (accordionData?.aboutContent || t.aboutContent) : (accordionData?.aboutContent_en || t.aboutContent || accordionData?.aboutContent)}
                 </Typography>
               </AccordionDetails>
             </Accordion>
@@ -427,12 +434,12 @@ const SweetBoxes = () => {
                 sx={{ px: 0 }}
               >
                 <Typography sx={{ fontWeight: 600, color: '#7C2815', fontSize: '1.2rem' }}>
-                  {language === 'es' ? (t.differentTitle || accordionData?.differentTitle) : (accordionData?.differentTitle_en || t.differentTitle || accordionData?.differentTitle)}
+                  {language === 'es' ? (accordionData?.differentTitle || t.differentTitle) : (accordionData?.differentTitle_en || t.differentTitle || accordionData?.differentTitle)}
                 </Typography>
               </AccordionSummary>
               <AccordionDetails sx={{ px: 0, pb: 4 }}>
                 <Typography variant="body1" sx={{ color: '#666', lineHeight: 1.8 }}>
-                  {language === 'es' ? (t.differentContent || accordionData?.differentContent) : (accordionData?.differentContent_en || t.differentContent || accordionData?.differentContent)}
+                  {language === 'es' ? (accordionData?.differentContent || t.differentContent) : (accordionData?.differentContent_en || t.differentContent || accordionData?.differentContent)}
                 </Typography>
               </AccordionDetails>
             </Accordion>
@@ -449,12 +456,12 @@ const SweetBoxes = () => {
                 sx={{ px: 0 }}
               >
                 <Typography sx={{ fontWeight: 600, color: '#7C2815', fontSize: '1.2rem' }}>
-                  {language === 'es' ? (t.ingredientsTitle || accordionData?.ingredientsTitle) : (accordionData?.ingredientsTitle_en || t.ingredientsTitle || accordionData?.ingredientsTitle)}
+                  {language === 'es' ? (accordionData?.ingredientsTitle || t.ingredientsTitle) : (accordionData?.ingredientsTitle_en || t.ingredientsTitle || accordionData?.ingredientsTitle)}
                 </Typography>
               </AccordionSummary>
               <AccordionDetails sx={{ px: 0, pb: 4 }}>
                 <Typography variant="body1" sx={{ color: '#666', lineHeight: 1.8 }}>
-                  {language === 'es' ? (t.ingredientsContent || accordionData?.ingredientsContent) : (accordionData?.ingredientsContent_en || t.ingredientsContent || accordionData?.ingredientsContent)}
+                  {language === 'es' ? (accordionData?.ingredientsContent || t.ingredientsContent) : (accordionData?.ingredientsContent_en || t.ingredientsContent || accordionData?.ingredientsContent)}
                 </Typography>
               </AccordionDetails>
             </Accordion>

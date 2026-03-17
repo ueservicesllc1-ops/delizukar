@@ -424,7 +424,7 @@ const BoxSelection = () => {
                         height: '60px'
                       }}
                     >
-                      {PRODUCT_TRANSLATIONS[language]?.[cookie.name]?.name || cookie[`name_${language}`] || cookie.name}
+                      {cookie.name_en || cookie.name}
                     </Typography>
                   </CardContent>
 
@@ -475,12 +475,12 @@ const BoxSelection = () => {
                 sx={{ px: 0 }}
               >
                 <Typography sx={{ fontWeight: 600, color: '#7C2815', fontSize: '1.2rem' }}>
-                  {language === 'es' ? (translatedTexts.aboutTitle || accordionData?.aboutTitle) : (accordionData?.aboutTitle_en || translatedTexts.aboutTitle || accordionData?.aboutTitle)}
+                  {language === 'es' ? (accordionData?.aboutTitle || translatedTexts.aboutTitle) : (accordionData?.aboutTitle_en || translatedTexts.aboutTitle || accordionData?.aboutTitle)}
                 </Typography>
               </AccordionSummary>
               <AccordionDetails sx={{ px: 0, pb: 4 }}>
                 <Typography variant="body1" sx={{ color: '#666', lineHeight: 1.8 }}>
-                  {language === 'es' ? (translatedTexts.aboutContent || accordionData?.aboutContent) : (accordionData?.aboutContent_en || translatedTexts.aboutContent || accordionData?.aboutContent)}
+                  {language === 'es' ? (accordionData?.aboutContent || translatedTexts.aboutContent) : (accordionData?.aboutContent_en || translatedTexts.aboutContent || accordionData?.aboutContent)}
                 </Typography>
               </AccordionDetails>
             </Accordion>
@@ -497,12 +497,12 @@ const BoxSelection = () => {
                 sx={{ px: 0 }}
               >
                 <Typography sx={{ fontWeight: 600, color: '#7C2815', fontSize: '1.2rem' }}>
-                  {language === 'es' ? (translatedTexts.differentTitle || accordionData?.differentTitle) : (accordionData?.differentTitle_en || translatedTexts.differentTitle || accordionData?.differentTitle)}
+                  {language === 'es' ? (accordionData?.differentTitle || translatedTexts.differentTitle) : (accordionData?.differentTitle_en || translatedTexts.differentTitle || accordionData?.differentTitle)}
                 </Typography>
               </AccordionSummary>
               <AccordionDetails sx={{ px: 0, pb: 4 }}>
                 <Typography variant="body1" sx={{ color: '#666', lineHeight: 1.8 }}>
-                  {language === 'es' ? (translatedTexts.differentContent || accordionData?.differentContent) : (accordionData?.differentContent_en || translatedTexts.differentContent || accordionData?.differentContent)}
+                  {language === 'es' ? (accordionData?.differentContent || translatedTexts.differentContent) : (accordionData?.differentContent_en || translatedTexts.differentContent || accordionData?.differentContent)}
                 </Typography>
               </AccordionDetails>
             </Accordion>
@@ -519,12 +519,12 @@ const BoxSelection = () => {
                 sx={{ px: 0 }}
               >
                 <Typography sx={{ fontWeight: 600, color: '#7C2815', fontSize: '1.2rem' }}>
-                  {language === 'es' ? (translatedTexts.ingredientsTitle || accordionData?.ingredientsTitle) : (accordionData?.ingredientsTitle_en || translatedTexts.ingredientsTitle || accordionData?.ingredientsTitle)}
+                  {language === 'es' ? (accordionData?.ingredientsTitle || translatedTexts.ingredientsTitle) : (accordionData?.ingredientsTitle_en || translatedTexts.ingredientsTitle || accordionData?.ingredientsTitle)}
                 </Typography>
               </AccordionSummary>
               <AccordionDetails sx={{ px: 0, pb: 4 }}>
                 <Typography variant="body1" sx={{ color: '#666', lineHeight: 1.8 }}>
-                  {language === 'es' ? (translatedTexts.ingredientsContent || accordionData?.ingredientsContent) : (accordionData?.ingredientsContent_en || translatedTexts.ingredientsContent || accordionData?.ingredientsContent)}
+                  {language === 'es' ? (accordionData?.ingredientsContent || translatedTexts.ingredientsContent) : (accordionData?.ingredientsContent_en || translatedTexts.ingredientsContent || accordionData?.ingredientsContent)}
                 </Typography>
               </AccordionDetails>
             </Accordion>
