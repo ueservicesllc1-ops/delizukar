@@ -175,6 +175,16 @@ const Cart = () => {
     return items.reduce((total, item) => total + item.quantity, 0);
   };
 
+  const calculateIndividualCookiesCount = () => {
+    return items.reduce((total, item) => {
+      // Excluimos cajas y artículos de regalo para contar solo galletas individuales
+      if (item.category !== 'boxes' && item.category !== 'regalo') {
+        return total + item.quantity;
+      }
+      return total;
+    }, 0);
+  };
+
   const calculateTotal = () => {
     const subtotal = calculateSubtotal();
     if (appliedVoucher) {
@@ -264,9 +274,18 @@ const Cart = () => {
 
   // Verificar si se puede proceder al checkout
   const canProceedToCheckout = () => {
-    const hasCombo = items.some(item => item.category === 'boxes');
-    const meetsMinItems = hasCombo || calculateTotalItems() >= minProducts;
-    return meetsMinItems && acceptShippingPolicy;
+    const individualCount = calculateIndividualCookiesCount();
+    const hasBox = items.some(item => item.category === 'boxes');
+
+    // Regla según solicitud del usuario:
+    // 1. Si hay galletas individuales, debe haber al menos 4 (minProducts),
+    //    incluso si también hay cajas en el pedido.
+    if (individualCount > 0) {
+      return individualCount >= minProducts && acceptShippingPolicy;
+    }
+    
+    // 2. Si no hay galletas individuales, se permite la compra si hay al menos una caja.
+    return hasBox && acceptShippingPolicy;
   };
 
   return (
@@ -786,7 +805,7 @@ const Cart = () => {
                     >
                       {canProceedToCheckout()
                         ? t('cart.checkout')
-                        : (calculateTotalItems() < minProducts && !items.some(item => item.category === 'boxes'))
+                        : (calculateIndividualCookiesCount() > 0 && calculateIndividualCookiesCount() < minProducts)
                         ? t('cart.minimumProducts', {
                             count: minProducts,
                             plural: minProducts > 1 ? 's' : ''
