@@ -102,13 +102,82 @@ const TEXTS = {
 
 export const PRODUCT_TRANSLATIONS = {
   es: {
-    'Chocole DeLux': { name: 'Chocole DeLux' },
-    'Chocolate Deluxe': { name: 'Chocolate Deluxe' },
-    'Ferrero Hype': { name: 'Ferrero Hype' },
-    'PecanBerry Oat': { name: 'PecanBerry Oat' },
-    'White Hazelnut Kisses': { name: 'White Hazelnut Kisses' },
-    'Golden Almond': { name: 'Golden Almond' },
-    'Gift Message + Premium Card': { name: 'Gift Message + Premium Card' },
+    'Chocolate Chip Clásica': {
+      name: 'Chocolate Chip Clásica',
+      description: 'Nuestra galleta de chocolate chip clásica, horneada con trozos de chocolate premium y el sabor de hogar.'
+    },
+    'Vainilla Premium': {
+      name: 'Vainilla Premium',
+      description: 'Galleta de vainilla con un toque especial de canela y una textura suave que se deshace en tu boca.'
+    },
+    'Oatmeal Raisin': {
+      name: 'Avena y Pasas',
+      description: 'La combinación perfecta de avena natural y pasas dulces, crujiente por fuera y tierna por dentro.'
+    },
+    'Chocole DeLux': { 
+      name: 'Chocole DeLux',
+      description: 'Nuestra versión premium de la clásica cookie de chocolate, con ingredientes seleccionados para una experiencia superior.'
+    },
+    'Chocolate Deluxe': { 
+      name: 'Chocolate Deluxe',
+      description: 'Una galleta intensa con cuatro tipos de chocolate, textura cremosa y un sabor profundo para los verdaderos amantes del cacao.'
+    },
+    'Ferrero Hype': { 
+      name: 'Ferrero Hype',
+      description: 'Galleta estilo NY con bombón Ferrero Rocher, chips de chocolate oscuro y avellanas tostadas—intensa, elegante y adictiva.'
+    },
+    'PecanBerry Oat': { 
+      name: 'PecanBerry Oat',
+      description: 'La combinación perfecta de bienestar y sabor. Deliciosa galleta de avena con trozos de pacanas crujientes y arándanos deshidratados.'
+    },
+    'White Hazelnut Kisses': { 
+      name: 'White Hazelnut Kisses',
+      description: 'Delicadas por fuera y seductoras por dentro. Nuestros Besos Blancos de Avellanas combinan una masa suave de vainilla blanca con trocitos de avellana tostada, un corazón cremoso de chocolate blanco con avellanas y una fina capa de crujiente cobertura tipo “Ferrero blanco”. Un mordisco… y el amor es inevitable.'
+    },
+    'Lotus Biscoff Spice': {
+      name: 'Lotus Biscoff Spice',
+      description: 'Una explosión de especias cálidas y cremosa Lotus, con trozos de Biscoff, chocolate blanco y un toque crujiente que cautiva en cualquier estación. Nuestra galleta más audaz y especiada. En su corazón se encuentra un centro cremoso de Lotus, envuelto en una masa suave salpicada de trozos de galleta Biscoff, chocolate blanco fundente y una mezcla secreta de especias cálidas que despiertan los sentidos. Es como una galleta de invierno... hecha para cualquier época del año. Un deleite intenso, cremoso y crujiente para los amantes de lo extraordinario.'
+    },
+    'Lotus Cream': {
+      name: 'Lotus Cream',
+      description: 'Una explosión de especias cálidas y cremosa Lotus, con trozos de Biscoff, chocolate blanco y un toque crujiente que cautiva en cualquier estación. Nuestra galleta más audaz y especiada. En su corazón se encuentra un centro cremoso de Lotus, envuelto en una masa suave salpicada de trozos de galleta Biscoff, chocolate blanco fundente y una mezcla secreta de especias cálidas que despiertan los sentidos. Es como una galleta de invierno... hecha para cualquier época del año. Un deleite intenso, cremoso y crujiente para los amantes de lo extraordinario.'
+    },
+    'LOTUS CREAM': {
+      name: 'Lotus Cream',
+      description: 'Una explosión de especias cálidas y cremosa Lotus, con trozos de Biscoff, chocolate blanco y un toque crujiente que cautiva en cualquier estación. Nuestra galleta más audaz y especiada. En su corazón se encuentra un centro cremoso de Lotus, envuelto en una masa suave salpicada de trozos de galleta Biscoff, chocolate blanco fundente y una mezcla secreta de especias cálidas que despiertan los sentidos. Es como una galleta de invierno... hecha para cualquier época del año. Un deleite intenso, cremoso y crujiente para los amantes de lo extraordinario.'
+    },
+    'Dubai Luxe Pistachio': {
+      name: 'Dubai Luxe Pistacho',
+      description: 'Intensa, exótica y elegante: chocolate profundo, crema de pistacho y un toque dorado que sabe a lujo. Una joya inspirada en los sabores del desierto, con un cautivador matiz verde. Sobre una base de rico chocolate, cremosas chispas de chocolate, crema de pistacho, el crujiente dorado del kataifi y delicadas láminas de oro comestible. Una galleta intensa, exótica y elegante, como un paseo por Dubái en cada bocado.'
+    },
+    'GREEN DUBAI GOLD': {
+      name: 'Green Dubai Gold',
+      description: 'Intensa, exótica y elegante: chocolate profundo, crema de pistacho y un toque dorado que sabe a lujo. Una joya inspirada en los sabores del desierto, con un cautivador matiz verde. Sobre una base de rico chocolate, cremosas chispas de chocolate, crema de pistacho, el crujiente dorado del kataifi y delicadas láminas de oro comestible. Una galleta intensa, exótica y elegante, como un paseo por Dubái en cada bocado.'
+    },
+    'Green Dubai Gold': {
+      name: 'Green Dubai Gold',
+      description: 'Intensa, exótica y elegante: chocolate profundo, crema de pistacho y un toque dorado que sabe a lujo. Una joya inspirada en los sabores del desierto, con un cautivador matiz verde. Sobre una base de rico chocolate, cremosas chispas de chocolate, crema de pistacho, el crujiente dorado del kataifi y delicadas láminas de oro comestible. Una galleta intensa, exótica y elegante, como un paseo por Dubái en cada bocado.'
+    },
+    'RED VERVET KISS': {
+      name: 'Red Velvet Kiss',
+      description: 'Una galleta inspirada en el clásico red velvet, suave y sedosa, elaborada con cocoa amarga, cargada de chispas de chocolate premium y un corazón fundente de crema de vainilla. El equilibrio perfecto entre elegancia y dulzura.'
+    },
+    'Red Velvet Kiss': {
+      name: 'Red Velvet Kiss',
+      description: 'Una galleta inspirada en el clásico red velvet, suave y sedosa, elaborada con cocoa amarga, cargada de chispas de chocolate premium y un corazón fundente de crema de vainilla. El equilibrio perfecto entre elegancia y dulzura.'
+    },
+    'RED VELVET KISS': {
+      name: 'Red Velvet Kiss',
+      description: 'Una galleta inspirada en el clásico red velvet, suave y sedosa, elaborada con cocoa amarga, cargada de chispas de chocolate premium y un corazón fundente de crema de vainilla. El equilibrio perfecto entre elegancia y dulzura.'
+    },
+    'Golden Almond': { 
+      name: 'Golden Almond',
+      description: 'Elegancia en cada mordisco. Galleta de vainilla con almendras fileteadas tostadas y un toque de caramelo salado que resalta su sabor artesanal.'
+    },
+    'Gift Message + Premium Card': { 
+      name: 'Gift Message + Premium Card',
+      description: 'Haz que tu pedido sea aún más especial con nuestra presentación de regalo DeliZukar y una tarjeta personalizada.'
+    },
     '"A little luxury Box" 4 Cookies': { 
       name: '"Caja Un Pequeño Lujo" 4 Galletas', 
       description: 'Caja perfecta para disfrutar o regalar un momento dulce.' 
@@ -139,13 +208,66 @@ export const PRODUCT_TRANSLATIONS = {
     }
   },
   en: {
-    'Chocole DeLux': { name: 'Chocolate Deluxe' },
-    'Chocolate Deluxe': { name: 'Chocolate Deluxe' },
-    'Ferrero Hype': { name: 'Ferrero Hype' },
-    'PecanBerry Oat': { name: 'PecanBerry Oat' },
-    'White Hazelnut Kisses': { name: 'White Hazelnut Kisses' },
-    'Golden Almond': { name: 'Golden Almond' },
-    'Gift Message + Premium Card': { name: 'Gift Message + Premium Card' },
+    'Chocolate Chip Clásica': {
+      name: 'Classic Chocolate Chip',
+      description: 'Our classic chocolate chip cookie, baked with premium chocolate chips and the taste of home.'
+    },
+    'Vainilla Premium': {
+      name: 'Premium Vanilla',
+      description: 'Vanilla cookie with a special touch of cinnamon and a soft texture that melts in your mouth.'
+    },
+    'Oatmeal Raisin': {
+      name: 'Oatmeal Raisin',
+      description: 'The perfect combination of natural oats and sweet raisins, crispy on the outside and tender on the inside.'
+    },
+    'Chocole DeLux': { 
+      name: 'Chocole DeLux',
+      description: 'Our premium version of the classic chocolate cookie, with selected ingredients for a superior experience.'
+    },
+    'Chocolate Deluxe': { 
+      name: 'Chocolate Deluxe',
+      description: 'An intense cookie with four types of chocolate, creamy texture, and deep flavor for true cocoa lovers.'
+    },
+    'Ferrero Hype': { 
+      name: 'Ferrero Hype',
+      description: 'NY-style cookie with Ferrero Rocher, dark chocolate chips, and toasted hazelnuts—intense, elegant, and addictive.'
+    },
+    'PecanBerry Oat': { 
+      name: 'PecanBerry Oat',
+      description: 'The perfect blend of wellness and flavor. Delicious oatmeal cookie with crunchy pecans and dried cranberries.'
+    },
+    'White Hazelnut Kisses': { 
+      name: 'White Hazelnut Kisses',
+      description: 'Delicate outside, seductive inside. Our White Hazelnut Kisses combine a soft white vanilla dough with toasted hazelnut pieces, a creamy white chocolate and hazelnut core, and a thin layer of crunchy "white Ferrero" style coating. One bite... and love is inevitable.'
+    },
+    'Lotus Biscoff Spice': {
+      name: 'Lotus Biscoff Spice',
+      description: 'A burst of warm spices and creamy Lotus, with Biscoff pieces, white chocolate, and a crunchy touch that captivates in every season. Our boldest and spiciest cookie. At its heart lies a creamy Lotus center, wrapped in a soft dough studded with Biscoff cookie pieces, melting white chocolate, and a secret blend of warm spices that awaken the senses. It’s like a winter cookie… made for any season. An intense, creamy, and crunchy delight for lovers of the extraordinary.'
+    },
+    'Dubai Luxe Pistachio': {
+      name: 'Dubai Luxe Pistachio',
+      description: 'Intense, exotic, and elegant: deep chocolate, pistachio cream, and a golden touch that tastes like luxury. A jewel inspired by the flavors of the desert, with a captivating hint of green. On a base of rich chocolate, creamy chocolate chips, pistachio cream, the golden crunch of kataifi, and delicate sheets of edible gold. An intense, exotic, and elegant cookie—like a stroll through Dubai, but in every bite.'
+    },
+    'LOTUS CREAM': {
+      name: 'Lotus Cream',
+      description: 'A burst of warm spices and creamy Lotus, with Biscoff pieces, white chocolate, and a crunchy touch that captivates in every season. Our boldest and spiciest cookie. At its heart lies a creamy Lotus center, wrapped in a soft dough studded with Biscoff cookie pieces, melting white chocolate, and a secret blend of warm spices that awaken the senses. It’s like a winter cookie… made for any season. An intense, creamy, and crunchy delight for lovers of the extraordinary.'
+    },
+    'GREEN DUBAI GOLD': {
+      name: 'Green Dubai Gold',
+      description: 'Intense, exotic, and elegant: deep chocolate, pistachio cream, and a golden touch that tastes like luxury. A jewel inspired by the flavors of the desert, with a captivating hint of green. On a base of rich chocolate, creamy chocolate chips, pistachio cream, the golden crunch of kataifi, and delicate sheets of edible gold. An intense, exotic, and elegant cookie—like a stroll through Dubai, but in every bite.'
+    },
+    'RED VERVET KISS': {
+      name: 'Red Velvet Kiss',
+      description: 'A cookie inspired by the classic red velvet, soft and silky, made with bitter cocoa, loaded with premium chocolate chips and a melting vanilla cream heart. The perfect balance between elegance and sweetness.'
+    },
+    'Golden Almond': { 
+      name: 'Golden Almond',
+      description: 'Elegance in every bite. Vanilla cookie with toasted sliced almonds and a touch of salted caramel.'
+    },
+    'Gift Message + Premium Card': { 
+      name: 'Gift Message + Premium Card',
+      description: 'Make your order even more special with our DeliZukar gift presentation and a personalized card.'
+    },
     '"A little luxury Box" 4 Cookies': { 
       name: '"A little luxury Box" 4 Cookies', 
       description: 'Perfect for enjoying or gifting a sweet moment.' 
@@ -372,29 +494,43 @@ const Products = () => {
                         letterSpacing: '0.5px'
                       }}
                     >
-                      {product.category === 'boxes' 
-                        ? (PRODUCT_TRANSLATIONS[language]?.[product.name]?.name || product[`name_${language}`] || product.name)
-                        : (product[`name_${language}`] || product.name_en || product.name)}
+                      {(() => {
+                        const name = product.name || '';
+                        const translation = PRODUCT_TRANSLATIONS[language]?.[name.trim()] || 
+                                           PRODUCT_TRANSLATIONS[language]?.[name.trim().toUpperCase()] ||
+                                           PRODUCT_TRANSLATIONS[language]?.[name];
+                        return translation?.name || product[`name_${language}`] || product.name_en || product.name;
+                      })()}
                     </Typography>
-                    {(product.category === 'boxes' || product.category === 'regalo') && (
-                      <Typography
-                        variant="body2"
-                        sx={{
-                          color: 'text.secondary',
-                          fontSize: '0.75rem',
-                          mb: 1,
-                          lineHeight: 1.3,
-                          mt: 1,
-                          textAlign: 'center',
-                          display: '-webkit-box',
-                          WebkitLineClamp: 2,
-                          WebkitBoxOrient: 'vertical',
-                          overflow: 'hidden'
-                        }}
-                      >
-                        {PRODUCT_TRANSLATIONS[language]?.[product.name]?.description || product[`description_${language}`] || product.description_en || product.description}
-                      </Typography>
-                    )}
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        color: 'text.secondary',
+                        fontSize: '0.75rem',
+                        mb: 1,
+                        lineHeight: 1.3,
+                        mt: 1,
+                        textAlign: 'center',
+                        display: '-webkit-box',
+                        WebkitLineClamp: 2,
+                        WebkitBoxOrient: 'vertical',
+                        overflow: 'hidden'
+                      }}
+                    >
+                      {(() => {
+                        const name = product.name || '';
+                        const translation = PRODUCT_TRANSLATIONS[language]?.[name.trim()] || 
+                                           PRODUCT_TRANSLATIONS[language]?.[name.trim().toUpperCase()] ||
+                                           PRODUCT_TRANSLATIONS[language]?.[name];
+                        return translation?.description || 
+                               product[`description_${language}`] || 
+                               product.description_en || 
+                               product.description ||
+                               (name.toLowerCase().includes('ferrero') 
+                                  ? translatedTexts.ferreroDescription
+                                  : translatedTexts.defaultDescription.replace('{name}', product[`name_${language}`] || product.name));
+                      })()}
+                    </Typography>
 
                     {/* Precio y Rating */}
                     <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 0.5, mt: 1, transform: 'translateY(-10px)' }}>
@@ -650,9 +786,13 @@ const Products = () => {
                       textTransform: 'uppercase',
                       letterSpacing: '0.5px'
                     }}>
-                      {selected.category === 'boxes'
-                        ? (PRODUCT_TRANSLATIONS[language]?.[selected.name]?.name || selected[`name_${language}`] || selected.name)
-                        : (selected[`name_${language}`] || selected.name_en || selected.name)}
+                      {(() => {
+                        const name = selected.name || '';
+                        const translation = PRODUCT_TRANSLATIONS[language]?.[name.trim()] || 
+                                           PRODUCT_TRANSLATIONS[language]?.[name.trim().toUpperCase()] ||
+                                           PRODUCT_TRANSLATIONS[language]?.[name];
+                        return translation?.name || selected[`name_${language}`] || selected.name_en || selected.name;
+                      })()}
                     </Typography>
                     <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
                       <Rating value={selected.rating} precision={0.1} readOnly size="small" sx={{ color: '#FFD700' }} />
@@ -706,15 +846,20 @@ const Products = () => {
                     </Box>
                     
                     <Typography variant="body2" sx={{ color: '#666', lineHeight: 1.6, mb: 3 }}>
-                      {PRODUCT_TRANSLATIONS[language]?.[selected.name]?.description || 
-                       selected[`description_${language}`] || 
-                       selected.description_en ||
-                       selected.description || 
-                        (selected.name && selected.name.toLowerCase().includes('ferrero') 
-                          ? translatedTexts.ferreroDescription
-                          : translatedTexts.defaultDescription.replace('{name}', selected[`name_${language}`] || selected.name)
-                        )
-                      }
+                      {(() => {
+                        const name = selected.name || '';
+                        const translation = PRODUCT_TRANSLATIONS[language]?.[name.trim()] || 
+                                           PRODUCT_TRANSLATIONS[language]?.[name.trim().toUpperCase()] ||
+                                           PRODUCT_TRANSLATIONS[language]?.[name];
+                        return translation?.description || 
+                               selected[`description_${language}`] || 
+                               selected.description_en ||
+                               selected.description || 
+                                (name.toLowerCase().includes('ferrero') 
+                                  ? translatedTexts.ferreroDescription
+                                  : translatedTexts.defaultDescription.replace('{name}', selected[`name_${language}`] || selected.name)
+                                );
+                      })()}
                     </Typography>
                     <Button
                       variant="contained"
