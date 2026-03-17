@@ -397,18 +397,22 @@ const CheckoutSuccess = () => {
                   {translations.shippingConfigured}
                 </Typography>
                 
-                {shippingInfo.shippingDate && (
-                  <Box sx={{ mb: 1 }}>
-                    <Typography variant="body2" sx={{ fontWeight: 600, color: '#388e3c', fontSize: '0.9rem' }}>
-                      {t('shippedOn', { date: shippingInfo.shippingDate.toLocaleDateString(language === 'en' ? 'en-US' : 'es-ES', { 
-                        weekday: 'long', 
-                        year: 'numeric', 
-                        month: 'long', 
-                        day: 'numeric' 
-                      }) })}
-                    </Typography>
-                  </Box>
-                )}
+                {(() => {
+                  const sDate = shippingInfo.shippingDate ? new Date(shippingInfo.shippingDate) : null;
+                  if (!sDate || isNaN(sDate.getTime())) return null;
+                  return (
+                    <Box sx={{ mb: 1 }}>
+                      <Typography variant="body2" sx={{ fontWeight: 600, color: '#388e3c', fontSize: '0.9rem' }}>
+                        {t('shippedOn', { date: sDate.toLocaleDateString(language === 'en' ? 'en-US' : 'es-ES', { 
+                          weekday: 'long', 
+                          year: 'numeric', 
+                          month: 'long', 
+                          day: 'numeric' 
+                        }) })}
+                      </Typography>
+                    </Box>
+                  );
+                })()}
                 
                 {shippingInfo.transitDays && (
                   <Box sx={{ mb: 1 }}>
@@ -434,18 +438,22 @@ const CheckoutSuccess = () => {
                   </Box>
                 )}
                 
-                {shippingInfo.deliveryDate && (
-                  <Box sx={{ mb: 1 }}>
-                    <Typography variant="body2" sx={{ color: '#2e7d32', fontSize: '0.85rem' }}>
-                      {t('deliveryEstimated', { date: shippingInfo.deliveryDate.toLocaleDateString(language === 'en' ? 'en-US' : 'es-ES', { 
-                        weekday: 'long', 
-                        year: 'numeric', 
-                        month: 'long', 
-                        day: 'numeric' 
-                      }) })}
-                    </Typography>
-                  </Box>
-                )}
+                {(() => {
+                  const dDate = shippingInfo.deliveryDate ? new Date(shippingInfo.deliveryDate) : null;
+                  if (!dDate || isNaN(dDate.getTime())) return null;
+                  return (
+                    <Box sx={{ mb: 1 }}>
+                      <Typography variant="body2" sx={{ color: '#2e7d32', fontSize: '0.85rem' }}>
+                        {t('deliveryEstimated', { date: dDate.toLocaleDateString(language === 'en' ? 'en-US' : 'es-ES', { 
+                          weekday: 'long', 
+                          year: 'numeric', 
+                          month: 'long', 
+                          day: 'numeric' 
+                        }) })}
+                      </Typography>
+                    </Box>
+                  );
+                })()}
                 
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 1.5 }}>
                   <Typography variant="body2" sx={{ color: '#666', fontSize: '0.8rem' }}>
@@ -459,11 +467,25 @@ const CheckoutSuccess = () => {
                 <Box sx={{ mt: 1 }}>
                   <Typography variant="body2" sx={{ color: '#666', fontSize: '0.75rem', fontStyle: 'italic' }}>
                     {translations.eta || 'ETA:'} {
-                      shippingInfo.minTransitDays !== undefined && shippingInfo.maxTransitDays !== undefined
-                        ? (shippingInfo.minTransitDays === shippingInfo.maxTransitDays
-                            ? shippingInfo.deliveryDate.toLocaleDateString(language === 'en' ? 'en-US' : 'es-ES', { day: 'numeric', month: 'long' })
-                            : `${translations.from} ${new Date(shippingInfo.shippingDate.getTime() + (shippingInfo.minTransitDays * 24 * 60 * 60 * 1000)).toLocaleDateString(language === 'en' ? 'en-US' : 'es-ES', { day: 'numeric', month: 'long' })} ${translations.to} ${new Date(shippingInfo.shippingDate.getTime() + (shippingInfo.maxTransitDays * 24 * 60 * 60 * 1000)).toLocaleDateString(language === 'en' ? 'en-US' : 'es-ES', { day: 'numeric', month: 'long' })}`)
-                        : shippingInfo.eta
+                      (() => {
+                        if (shippingInfo.minTransitDays !== undefined && shippingInfo.maxTransitDays !== undefined) {
+                          const sDate = shippingInfo.shippingDate ? new Date(shippingInfo.shippingDate) : null;
+                          const dDate = shippingInfo.deliveryDate ? new Date(shippingInfo.deliveryDate) : null;
+                          
+                          if (shippingInfo.minTransitDays === shippingInfo.maxTransitDays) {
+                            return dDate && !isNaN(dDate.getTime()) 
+                              ? dDate.toLocaleDateString(language === 'en' ? 'en-US' : 'es-ES', { day: 'numeric', month: 'long' })
+                              : shippingInfo.eta || 'N/A';
+                          }
+                          
+                          if (sDate && !isNaN(sDate.getTime())) {
+                            const minDate = new Date(sDate.getTime() + (shippingInfo.minTransitDays * 24 * 60 * 60 * 1000));
+                            const maxDate = new Date(sDate.getTime() + (shippingInfo.maxTransitDays * 24 * 60 * 60 * 1000));
+                            return `${translations.from} ${minDate.toLocaleDateString(language === 'en' ? 'en-US' : 'es-ES', { day: 'numeric', month: 'long' })} ${translations.to} ${maxDate.toLocaleDateString(language === 'en' ? 'en-US' : 'es-ES', { day: 'numeric', month: 'long' })}`;
+                          }
+                        }
+                        return shippingInfo.eta || 'N/A';
+                      })()
                     }
                   </Typography>
                 </Box>

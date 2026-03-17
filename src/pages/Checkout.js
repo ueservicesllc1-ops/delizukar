@@ -1534,41 +1534,43 @@ const Checkout = () => {
                           }
                           
                           return (
-                            <Box sx={{ mt: 1 }}>
-                              <Typography variant="body2" sx={{ color: '#666', fontSize: '0.85rem', mb: 0.5 }}>
-                                {t('checkout.shippedOn', { date: deliveryInfo.shippingDate.toLocaleDateString(language === 'es' ? 'es-ES' : 'en-US', { 
-                                  weekday: 'long', 
-                                  day: 'numeric', 
-                                  month: 'long' 
-                                }) })}
+                            <>
+                              <Box sx={{ mt: 1 }}>
+                                <Typography variant="body2" sx={{ color: '#666', fontSize: '0.85rem', mb: 0.5 }}>
+                                  {t('checkout.shippedOn', { date: deliveryInfo.shippingDate.toLocaleDateString(language === 'es' ? 'es-ES' : 'en-US', { 
+                                    weekday: 'long', 
+                                    day: 'numeric', 
+                                    month: 'long' 
+                                  }) })}
+                                </Typography>
+                                <Typography variant="body2" sx={{ color: '#666', fontSize: '0.85rem', mb: 0.5 }}>
+                                  {t('checkout.transit', { days: deliveryInfo.minTransitDays === deliveryInfo.maxTransitDays
+                                      ? `${deliveryInfo.minTransitDays}`
+                                      : `${deliveryInfo.minTransitDays} - ${deliveryInfo.maxTransitDays}` })}
+                                </Typography>
+                                <Typography variant="body2" sx={{ color: '#c8626d', fontWeight: 600, fontSize: '0.85rem' }}>
+                                  {t('checkout.estDelivery', { date: deliveryInfo.deliveryDate.toLocaleDateString(language === 'es' ? 'es-ES' : 'en-US', { 
+                                    weekday: 'long', 
+                                    day: 'numeric', 
+                                    month: 'long' 
+                                  }) })}
+                                </Typography>
+                              </Box>
+                              <Typography variant="body2" sx={{ color: '#666', fontSize: '0.8rem' }}>
+                                {t('checkout.tracking')} {shippingInfo.trackingNumber || 'PENDING'}
                               </Typography>
-                              <Typography variant="body2" sx={{ color: '#666', fontSize: '0.85rem', mb: 0.5 }}>
-                                {t('checkout.transit', { days: deliveryInfo.minTransitDays === deliveryInfo.maxTransitDays
-                                    ? `${deliveryInfo.minTransitDays}`
-                                    : `${deliveryInfo.minTransitDays} - ${deliveryInfo.maxTransitDays}` })}
+                              <Typography variant="body2" sx={{ color: '#666', fontSize: '0.8rem' }}>
+                                {t('checkout.carrier')} {shippingInfo.carrier} - {shippingInfo.serviceLevel}
                               </Typography>
-                              <Typography variant="body2" sx={{ color: '#c8626d', fontWeight: 600, fontSize: '0.85rem' }}>
-                                {t('checkout.estDelivery', { date: deliveryInfo.deliveryDate.toLocaleDateString(language === 'es' ? 'es-ES' : 'en-US', { 
-                                  weekday: 'long', 
-                                  day: 'numeric', 
-                                  month: 'long' 
-                                }) })}
+                              <Typography variant="body2" sx={{ color: '#666', fontSize: '0.8rem' }}>
+                                {t('checkout.eta')}{' '}
+                                {deliveryInfo.minTransitDays === deliveryInfo.maxTransitDays
+                                  ? deliveryInfo.minDeliveryDate.toLocaleDateString(language === 'es' ? 'es-ES' : 'en-US', { day: 'numeric', month: 'long' })
+                                  : `${t('checkout.from')} ${deliveryInfo.minDeliveryDate.toLocaleDateString(language === 'es' ? 'es-ES' : 'en-US', { day: 'numeric', month: 'long' })} ${t('checkout.to')} ${deliveryInfo.maxDeliveryDate.toLocaleDateString(language === 'es' ? 'es-ES' : 'en-US', { day: 'numeric', month: 'long' })}`}
                               </Typography>
-                            </Box>
+                            </>
                           );
                         })()}
-                        <Typography variant="body2" sx={{ color: '#666', fontSize: '0.8rem' }}>
-                          {t('checkout.tracking')} {shippingInfo.trackingNumber || 'PENDING'}
-                        </Typography>
-                        <Typography variant="body2" sx={{ color: '#666', fontSize: '0.8rem' }}>
-                          {t('checkout.carrier')} {shippingInfo.carrier} - {shippingInfo.serviceLevel}
-                        </Typography>
-                        <Typography variant="body2" sx={{ color: '#666', fontSize: '0.8rem' }}>
-                          {t('checkout.eta')}{' '}
-                          {deliveryInfo.minTransitDays === deliveryInfo.maxTransitDays
-                            ? deliveryInfo.minDeliveryDate.toLocaleDateString(language === 'es' ? 'es-ES' : 'en-US', { day: 'numeric', month: 'long' })
-                            : `${t('checkout.from')} ${deliveryInfo.minDeliveryDate.toLocaleDateString(language === 'es' ? 'es-ES' : 'en-US', { day: 'numeric', month: 'long' })} ${t('checkout.to')} ${deliveryInfo.maxDeliveryDate.toLocaleDateString(language === 'es' ? 'es-ES' : 'en-US', { day: 'numeric', month: 'long' })}`}
-                        </Typography>
                       </Box>
                     )}
 
