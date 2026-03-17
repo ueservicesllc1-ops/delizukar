@@ -34,7 +34,7 @@ const GiftMessageModal = ({ open, onClose, onConfirm, onSkip }) => {
     es: {
       title: '¿Es un regalo?',
       subtitle: 'Añade un Mensaje de Regalo + Tarjeta Premium por solo $7.00',
-      description: 'Haz que tu detalle sea aún más especial con una de nuestras tarjetas exclusivas y un mensaje personalizado.',
+      description: 'Haz que tu pedido sea aún más especial con nuestra presentación de regalo DeliZukar y una tarjeta personalizada.',
       addGift: 'Sí, añadir regalo',
       noGift: 'No, gracias',
       step2Title: 'Personaliza tu tarjeta',
@@ -68,7 +68,7 @@ const GiftMessageModal = ({ open, onClose, onConfirm, onSkip }) => {
   }[language] || {
     title: '¿Es un regalo?',
     subtitle: 'Añade un Mensaje de Regalo + Tarjeta Premium por solo $7.00',
-    description: 'Haz que tu detalle sea aún más especial con una de nuestras tarjetas exclusivas y un mensaje personalizado.',
+    description: 'Haz que tu pedido sea aún más especial con nuestra presentación de regalo DeliZukar y una tarjeta personalizada.',
     addGift: 'Sí, añadir regalo',
     noGift: 'No, gracias',
     step2Title: 'Personaliza tu tarjeta',
