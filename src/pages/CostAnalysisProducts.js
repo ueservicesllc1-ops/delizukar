@@ -28,7 +28,8 @@ import {
   Step,
   StepLabel,
   Tabs,
-  Tab
+  Tab,
+  Snackbar
 } from '@mui/material';
 import {
   Add,
@@ -61,7 +62,8 @@ const CostAnalysisProducts = ({ selectedProduct, onProductSelect }) => {
     laborCost: 0,
     profitMargin: 30,
     image: '',
-    category: 'galletas'
+    category: 'galletas',
+    yield: 1
   });
   const [laborCosts, setLaborCosts] = useState({
     laborHours: 0,
@@ -83,11 +85,30 @@ const CostAnalysisProducts = ({ selectedProduct, onProductSelect }) => {
   });
   const [calculatedCost, setCalculatedCost] = useState(0);
   const [selectedIngredientData, setSelectedIngredientData] = useState(null);
+  const [editingIngredientItem, setEditingIngredientItem] = useState(null);
+  const [editIngredientDialogOpen, setEditIngredientDialogOpen] = useState(false);
+  const [editIngredientQuantity, setEditIngredientQuantity] = useState(0);
+  const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
 
   useEffect(() => {
     loadData();
   }, []);
 
+  useEffect(() => {
+    if (selectedProduct) {
+      console.log('🔄 Producto seleccionado:', selectedProduct.name);
+    }
+  }, [selectedProduct]);
+
+  const handleCloseSnackbar = (event, reason) => {
+    if (reason === 'clickaway') return;
+    setSnackbar({ ...snackbar, open: false });
+  };
+
+  const showNotification = (message, severity = 'success') => {
+    setSnackbar({ open: true, message, severity });
+  };
+     
   useEffect(() => {
     if (selectedProduct) {
       console.log('🔄 Producto seleccionado:', selectedProduct.name);
@@ -100,13 +121,15 @@ const CostAnalysisProducts = ({ selectedProduct, onProductSelect }) => {
         console.log('✅ Producto completo encontrado:', fullProduct);
         console.log('Ingredientes del producto completo:', fullProduct.ingredients);
         
-        // Inicializar el estado de edición
+        // Inicializar el estado de edición y sincronizar el rendimiento
         setEditingProduct({ ...fullProduct });
+        setNewProduct(prev => ({ ...prev, yield: fullProduct.yield || 1 }));
         
         // Verificar si el producto tiene receta
         if (fullProduct.ingredients && fullProduct.ingredients.length > 0) {
           console.log('✅ Producto tiene receta existente, mostrando ingredientes');
           console.log('Ingredientes encontrados:', fullProduct.ingredients);
+          console.log('Rendimiento encontrado:', fullProduct.yield);
           setShowRecipeForm(false);
           // Cargar los ingredientes existentes en el estado para edición
           setRecipeIngredients(fullProduct.ingredients);
@@ -120,6 +143,7 @@ const CostAnalysisProducts = ({ selectedProduct, onProductSelect }) => {
         setShowRecipeForm(true);
         setRecipeIngredients([]);
         setEditingProduct({ ...selectedProduct });
+        setNewProduct(prev => ({ ...prev, yield: selectedProduct.yield || 1 }));
       }
     }
   }, [selectedProduct, products]);
@@ -277,6 +301,7 @@ const CostAnalysisProducts = ({ selectedProduct, onProductSelect }) => {
         equipment: laborCosts.equipment,
         packaging: laborCosts.packaging,
         additionalCosts: laborCosts.additionalCosts,
+        yield: newProduct.yield || 1,
         createdAt: new Date().toISOString(),
         addedBy: 'admin'
       });
@@ -292,7 +317,8 @@ const CostAnalysisProducts = ({ selectedProduct, onProductSelect }) => {
         laborCost: 0,
         profitMargin: 30,
         image: '',
-        category: 'galletas'
+        category: 'galletas',
+        yield: 1
       });
       setLaborCosts({
         laborHours: 0,
@@ -472,6 +498,28 @@ const CostAnalysisProducts = ({ selectedProduct, onProductSelect }) => {
     setRecipeIngredients(recipeIngredients.filter(ing => ing.ingredientId !== ingredientId));
   };
 
+  const handleOpenEditIngredient = (ingredient) => {
+    setEditingIngredientItem(ingredient);
+    setEditIngredientQuantity(ingredient.quantity);
+    setEditIngredientDialogOpen(true);
+  };
+
+  const handleUpdateIngredientQuantity = () => {
+    if (editingIngredientItem && editIngredientQuantity > 0) {
+      const ingredientData = ingredients.find(ing => ing.id === editingIngredientItem.ingredientId);
+      if (ingredientData) {
+        const newCost = calculateIngredientCost(ingredientData, editIngredientQuantity, editingIngredientItem.unit);
+        setRecipeIngredients(recipeIngredients.map(ing => 
+          ing.ingredientId === editingIngredientItem.ingredientId 
+            ? { ...ing, quantity: editIngredientQuantity, totalCost: newCost }
+            : ing
+        ));
+      }
+      setEditIngredientDialogOpen(false);
+      setEditingIngredientItem(null);
+    }
+  };
+
   const saveRecipe = async () => {
     if (recipeIngredients.length === 0) {
       alert('Por favor agrega al menos un ingrediente a la receta');
@@ -496,6 +544,7 @@ const CostAnalysisProducts = ({ selectedProduct, onProductSelect }) => {
         ingredients: recipeIngredients,
         totalIngredientCost: totalIngredientCost,
         ingredientCount: recipeIngredients.length,
+        yield: newProduct.yield || selectedProduct.yield || 1,
         updatedAt: new Date().toISOString(),
         recipeCreatedAt: new Date().toISOString()
       };
@@ -521,7 +570,7 @@ const CostAnalysisProducts = ({ selectedProduct, onProductSelect }) => {
       await loadData();
       
       // Mostrar mensaje de éxito con resumen
-      alert(`✅ Receta guardada exitosamente en Firestore!\n\nCosto total: $${totalIngredientCost.toFixed(2)}\nIngredientes: ${recipeIngredients.length}`);
+      showNotification(`✅ Receta guardada exitosamente!\nCosto: $${totalIngredientCost.toFixed(2)}`);
       
     } catch (error) {
       console.error('❌ Error guardando receta en Firestore:', error);
@@ -533,6 +582,34 @@ const CostAnalysisProducts = ({ selectedProduct, onProductSelect }) => {
         ingredients: recipeIngredients
       });
       alert(`Error al guardar la receta en Firestore: ${error.message}`);
+    }
+  };
+
+  const saveProductYield = async (yieldVal) => {
+    if (!selectedProduct || !selectedProduct.id) {
+      console.error('❌ No hay producto seleccionado para guardar rendimiento');
+      return;
+    }
+    
+    console.log(`💾 Intentando guardar rendimiento: ${yieldVal} para el producto ${selectedProduct.name} (${selectedProduct.id})`);
+    
+    try {
+      const productRef = doc(db, 'products', selectedProduct.id);
+      await updateDoc(productRef, {
+        yield: yieldVal,
+        updatedAt: new Date().toISOString()
+      });
+      
+      // Actualizar estado local
+      const updatedProduct = { ...selectedProduct, yield: yieldVal };
+      onProductSelect(updatedProduct);
+      setProducts(products.map(p => p.id === selectedProduct.id ? updatedProduct : p));
+      
+      console.log('✅ Rendimiento guardado:', yieldVal);
+      showNotification('Rendimiento guardado con éxito!', 'success');
+    } catch (error) {
+      console.error('❌ Error al guardar rendimiento:', error);
+      showNotification('Error al guardar rendimiento', 'error');
     }
   };
 
@@ -781,7 +858,7 @@ const CostAnalysisProducts = ({ selectedProduct, onProductSelect }) => {
                           <Box sx={{ flex: 1, textAlign: 'center', fontWeight: 600 }}>Unidad</Box>
                           <Box sx={{ flex: 1, textAlign: 'center', fontWeight: 600 }}>Precio/kg</Box>
                           <Box sx={{ flex: 1, textAlign: 'center', fontWeight: 600 }}>Costo</Box>
-                          <Box sx={{ width: 40, textAlign: 'center' }}></Box>
+                          <Box sx={{ width: 80, textAlign: 'center' }}>Acciones</Box>
                         </Box>
 
                         {/* Lista de ingredientes */}
@@ -829,8 +906,18 @@ const CostAnalysisProducts = ({ selectedProduct, onProductSelect }) => {
                                 ${ingredient.totalCost?.toFixed(2) || '0.00'}
                               </Box>
                               
-                              {/* Botón eliminar */}
-                              <Box sx={{ width: 40, textAlign: 'center' }}>
+                              {/* Botones de acción */}
+                              <Box sx={{ width: 80, display: 'flex', gap: 0.5, justifyContent: 'center' }}>
+                                <IconButton
+                                  onClick={() => handleOpenEditIngredient(ingredient)}
+                                  size="small"
+                                  sx={{ 
+                                    color: '#4CAF50',
+                                    '&:hover': { backgroundColor: '#e8f5e8' }
+                                  }}
+                                >
+                                  <Edit fontSize="small" />
+                                </IconButton>
                                 <IconButton
                                   onClick={() => removeIngredientFromRecipe(ingredient.ingredientId)}
                                   size="small"
@@ -862,7 +949,32 @@ const CostAnalysisProducts = ({ selectedProduct, onProductSelect }) => {
                           }}>
                             Resumen de Costos
                           </Typography>
-                          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <Box sx={{ display: 'flex', gap: 3, alignItems: 'center', mb: 2, flexWrap: 'wrap' }}>
+                            <Box sx={{ minWidth: 200 }}>
+                              <Typography variant="body2" sx={{ fontFamily: '"Asap", sans-serif', color: '#2e7d32', fontWeight: 600, mb: 0.5 }}>
+                                Cantidad de galletas (Batch Size):
+                              </Typography>
+                              <TextField
+                                type="number"
+                                size="small"
+                                value={newProduct.yield || 1}
+                                onChange={(e) => setNewProduct({...newProduct, yield: Math.max(1, parseInt(e.target.value) || 1)})}
+                                sx={{ backgroundColor: 'white', maxWidth: 100 }}
+                              />
+                            </Box>
+                            
+                            <Box sx={{ flex: 1 }}>
+                              <Typography variant="body2" sx={{ fontFamily: '"Asap", sans-serif', color: '#2e7d32', fontWeight: 600, mb: 0.5 }}>
+                                Costo Unitario (Ingredientes):
+                              </Typography>
+                              <Typography variant="h5" sx={{ fontFamily: '"Asap", sans-serif', fontWeight: 700, color: '#2e7d32' }}>
+                                ${(recipeIngredients.reduce((total, ing) => total + (ing.totalCost || 0), 0) / (newProduct.yield || 1)).toFixed(2)}
+                                <Typography component="span" variant="body2" sx={{ ml: 1 }}>/ galleta</Typography>
+                              </Typography>
+                            </Box>
+                          </Box>
+
+                          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid #4CAF50', pt: 1 }}>
                             <Typography variant="body1" sx={{ fontFamily: '"Asap", sans-serif' }}>
                               Costo Total de Ingredientes:
                             </Typography>
@@ -1496,6 +1608,7 @@ const CostAnalysisProducts = ({ selectedProduct, onProductSelect }) => {
                             <Box sx={{ flex: 1, textAlign: 'center', fontWeight: 600 }}>Unidad</Box>
                             <Box sx={{ flex: 1, textAlign: 'center', fontWeight: 600 }}>Precio/kg</Box>
                             <Box sx={{ flex: 1, textAlign: 'center', fontWeight: 600 }}>Costo</Box>
+                            <Box sx={{ width: 80, textAlign: 'center', fontWeight: 600 }}>Acciones</Box>
                           </Box>
 
                           {/* Lista de ingredientes de receta existente */}
@@ -1542,49 +1655,129 @@ const CostAnalysisProducts = ({ selectedProduct, onProductSelect }) => {
                                 }}>
                                   ${ingredient.totalCost?.toFixed(2) || '0.00'}
                                 </Box>
+
+                                {/* Botones de acción rápido */}
+                                <Box sx={{ width: 80, display: 'flex', gap: 0.5, justifyContent: 'center' }}>
+                                  <IconButton
+                                    onClick={() => {
+                                      // Asegurarnos de cargar recipeIngredients para que la edición funcione
+                                      if (!recipeIngredients.length) {
+                                        setRecipeIngredients(selectedProduct.ingredients);
+                                      }
+                                      handleOpenEditIngredient(ingredient);
+                                    }}
+                                    size="small"
+                                    sx={{ 
+                                      color: '#4CAF50',
+                                      '&:hover': { backgroundColor: '#e8f5e8' }
+                                    }}
+                                  >
+                                    <Edit fontSize="small" />
+                                  </IconButton>
+                                  <IconButton
+                                    onClick={() => {
+                                      if (window.confirm('¿Seguro que quieres eliminar este ingrediente de la receta? Deberás guardar los cambios para que se aplique en la base de datos.')) {
+                                        // Activar modo edición si no lo está
+                                        setShowRecipeForm(true);
+                                        // Cargar si está vacío
+                                        const currentIngredients = recipeIngredients.length ? recipeIngredients : selectedProduct.ingredients;
+                                        setRecipeIngredients(currentIngredients.filter(ing => ing.ingredientId !== ingredient.ingredientId));
+                                      }
+                                    }}
+                                    size="small"
+                                    sx={{ 
+                                      color: '#c8626d',
+                                      '&:hover': { backgroundColor: '#ffebee' }
+                                    }}
+                                  >
+                                    <Delete fontSize="small" />
+                                  </IconButton>
+                                </Box>
                               </Box>
                             ))}
                           </Box>
-                          
-                          {/* Mostrar resumen de costos si existe */}
-                          {selectedProduct.totalIngredientCost && (
-                            <Box sx={{ 
-                              mt: 2, 
-                              p: 2, 
-                              backgroundColor: '#e8f5e8', 
-                              borderRadius: '8px',
-                              border: '1px solid #4CAF50'
+
+                          {/* Resumen de costos con Batch Size */}
+                          <Box sx={{ 
+                            mt: 2, 
+                            p: 2, 
+                            backgroundColor: '#e8f5e8', 
+                            borderRadius: '8px',
+                            border: '1px solid #4CAF50'
+                          }}>
+                            <Typography variant="h6" sx={{ 
+                              fontFamily: '"Asap", sans-serif',
+                              fontWeight: 700,
+                              color: '#2e7d32',
+                              mb: 2
                             }}>
-                              <Typography variant="h6" sx={{ 
-                                fontFamily: '"Asap", sans-serif',
-                                fontWeight: 700,
-                                color: '#2e7d32',
-                                mb: 1
-                              }}>
-                                Resumen de Costos
-                              </Typography>
-                              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                <Typography variant="body1" sx={{ fontFamily: '"Asap", sans-serif' }}>
-                                  Costo Total de Ingredientes:
+                              Resumen de la Receta
+                            </Typography>
+                            
+                            <Grid container spacing={2} sx={{ mb: 2 }}>
+                              <Grid item xs={12} md={4}>
+                                <Typography variant="body2" sx={{ fontFamily: '"Asap", sans-serif', color: '#2e7d32', fontWeight: 600 }}>
+                                  Cantidad de galletas:
                                 </Typography>
-                                <Typography variant="h5" sx={{ 
-                                  fontFamily: '"Asap", sans-serif',
-                                  fontWeight: 700,
-                                  color: '#2e7d32'
-                                }}>
-                                  ${selectedProduct.totalIngredientCost.toFixed(2)}
+                                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                                  <TextField
+                                    type="number"
+                                    size="small"
+                                    value={selectedProduct.yield || 1}
+                                    onChange={(e) => {
+                                      const val = Math.max(1, parseInt(e.target.value) || 1);
+                                      if (selectedProduct) {
+                                        onProductSelect({ ...selectedProduct, yield: val });
+                                      }
+                                    }}
+                                    sx={{ backgroundColor: 'white', mt: 0.5, maxWidth: 80 }}
+                                  />
+                                  <IconButton 
+                                    onClick={() => saveProductYield(selectedProduct.yield)}
+                                    sx={{ color: '#4CAF50', ml: 1, mt: 0.5 }}
+                                    title="Guardar rendimiento"
+                                  >
+                                    <Save fontSize="small" />
+                                  </IconButton>
+                                </Box>
+                                <Typography variant="caption" sx={{ color: '#666' }}>
+                                  Indica cuántas galletas salen de esta receta
                                 </Typography>
-                              </Box>
-                              <Typography variant="caption" sx={{ 
-                                fontFamily: '"Asap", sans-serif',
-                                color: '#666',
-                                display: 'block',
-                                mt: 0.5
-                              }}>
-                                {selectedProduct.ingredientCount || selectedProduct.ingredients.length} ingrediente{(selectedProduct.ingredientCount || selectedProduct.ingredients.length) !== 1 ? 's' : ''} en la receta
-                              </Typography>
-                            </Box>
-                          )}
+                              </Grid>
+                              
+                              <Grid item xs={12} md={8}>
+                                <Box sx={{ display: 'flex', gap: 2, height: '100%' }}>
+                                  <Box sx={{ flex: 1, p: 1.5, backgroundColor: 'rgba(255,255,255,0.5)', borderRadius: '8px' }}>
+                                    <Typography variant="caption" sx={{ color: '#666', display: 'block' }}>
+                                      Costo Unitario (Ingredientes):
+                                    </Typography>
+                                    <Typography variant="h6" sx={{ fontFamily: '"Asap", sans-serif', fontWeight: 700, color: '#2e7d32' }}>
+                                      ${(selectedProduct.totalIngredientCost / (newProduct.yield || selectedProduct.yield || 1)).toFixed(2)}
+                                    </Typography>
+                                  </Box>
+                                  
+                                  <Box sx={{ flex: 1, p: 1.5, backgroundColor: 'rgba(255,255,255,0.5)', borderRadius: '8px' }}>
+                                    <Typography variant="caption" sx={{ color: '#666', display: 'block' }}>
+                                      Costo Total Receta:
+                                    </Typography>
+                                    <Typography variant="h6" sx={{ fontFamily: '"Asap", sans-serif', fontWeight: 700, color: '#2e7d32' }}>
+                                      ${selectedProduct.totalIngredientCost.toFixed(2)}
+                                    </Typography>
+                                  </Box>
+                                </Box>
+                              </Grid>
+                            </Grid>
+                            
+                            <Divider sx={{ my: 1, borderColor: 'rgba(76, 175, 80, 0.2)' }} />
+                            
+                            <Typography variant="caption" sx={{ 
+                              fontFamily: '"Asap", sans-serif',
+                              color: '#666',
+                              display: 'block'
+                            }}>
+                              {selectedProduct.ingredientCount || selectedProduct.ingredients.length} ingrediente{(selectedProduct.ingredientCount || selectedProduct.ingredients.length) !== 1 ? 's' : ''} en la receta
+                            </Typography>
+                          </Box>
                           
                           {/* Botón para editar ingredientes */}
                           <Box sx={{ mt: 3, display: 'flex', justifyContent: 'center' }}>
@@ -2069,7 +2262,7 @@ const CostAnalysisProducts = ({ selectedProduct, onProductSelect }) => {
                                   });
                                   
                                   console.log('✅ Cambios de mano de obra guardados exitosamente');
-                                  alert('✅ Cambios de mano de obra guardados exitosamente');
+                                  showNotification('✅ Cambios de mano de obra guardados exitosamente');
                                   
                                   // Actualizar la lista de productos
                                   const updatedProducts = products.map(p => 
@@ -2334,6 +2527,115 @@ const CostAnalysisProducts = ({ selectedProduct, onProductSelect }) => {
                                 })()}
                               </Typography>
                               
+                              <Divider sx={{ my: 2, borderColor: '#FF9800' }} />
+                              
+                              <Box sx={{ mb: 3 }}>
+                                <Typography variant="subtitle1" sx={{ fontFamily: '"Asap", sans-serif', fontWeight: 600, color: '#F57C00', mb: 1 }}>
+                                  📦 Rendimiento de la Receta
+                                </Typography>
+                                <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 2 }}>
+                                  <Typography variant="body2" sx={{ fontFamily: '"Asap", sans-serif' }}>
+                                    Cantidad de galletas que produce esta receta:
+                                  </Typography>
+                                  <TextField
+                                    type="number"
+                                    size="small"
+                                    value={selectedProduct.yield || 1}
+                                    onChange={(e) => {
+                                      const val = Math.max(1, parseInt(e.target.value) || 1);
+                                      if (selectedProduct) {
+                                        onProductSelect({ ...selectedProduct, yield: val });
+                                      }
+                                    }}
+                                    sx={{ maxWidth: 80, backgroundColor: 'white' }}
+                                  />
+                                  <IconButton 
+                                    onClick={() => saveProductYield(selectedProduct.yield)}
+                                    sx={{ color: '#FF9800', ml: 1 }}
+                                    title="Guardar rendimiento"
+                                  >
+                                    <Save fontSize="small" />
+                                  </IconButton>
+                                </Box>
+                              </Box>
+
+                              <Grid container spacing={2} sx={{ mb: 3 }}>
+                                <Grid item xs={12} md={6}>
+                                  <Box sx={{ p: 2, backgroundColor: 'white', border: '1px solid #FF9800', borderRadius: '8px' }}>
+                                    <Typography variant="caption" sx={{ color: '#F57C00', fontWeight: 600 }}>
+                                      COSTO POR GALLETA (TOTAL)
+                                    </Typography>
+                                    <Typography variant="h4" sx={{ color: '#E65100', fontWeight: 900 }}>
+                                      ${(() => {
+                                        const ingredientCost = selectedProduct.totalIngredientCost || 0;
+                                        const laborTime = selectedProduct.laborTime || selectedProduct.laborHours || 0;
+                                        const laborCost = selectedProduct.laborCost || 0;
+                                        const timeUnit = selectedProduct.laborTimeUnit || 'hours';
+                                        const hoursWorked = timeUnit === 'minutes' ? laborTime / 60 : laborTime;
+                                        const laborCostTotal = hoursWorked * laborCost;
+                                        const additionalCosts = (selectedProduct.utilities || 0) + (selectedProduct.equipment || 0) + (selectedProduct.packaging || 0) + (selectedProduct.additionalCosts || 0);
+                                        const total = ingredientCost + laborCostTotal + additionalCosts;
+                                        return (total / (newProduct.yield || selectedProduct.yield || 1)).toFixed(2);
+                                      })()}
+                                    </Typography>
+                                  </Box>
+                                </Grid>
+                                <Grid item xs={12} md={6}>
+                                  <Box sx={{ p: 2, backgroundColor: 'white', border: '1px solid #FF9800', borderRadius: '8px' }}>
+                                    <Typography variant="caption" sx={{ color: '#F57C00', fontWeight: 600 }}>
+                                      COSTO POR GALLETA (SOLO INGREDIENTES)
+                                    </Typography>
+                                    <Typography variant="h4" sx={{ color: '#E65100', fontWeight: 900 }}>
+                                      ${(selectedProduct.totalIngredientCost / (newProduct.yield || selectedProduct.yield || 1)).toFixed(2)}
+                                    </Typography>
+                                  </Box>
+                                </Grid>
+                                
+                                <Grid item xs={12}>
+                                  <Box sx={{ 
+                                    p: 3, 
+                                    backgroundColor: '#c8626d', 
+                                    borderRadius: '16px', 
+                                    boxShadow: '0 8px 16px rgba(200, 98, 109, 0.2)',
+                                    color: 'white',
+                                    mt: 2,
+                                    position: 'relative',
+                                    overflow: 'hidden'
+                                  }}>
+                                    <Box sx={{ 
+                                      position: 'absolute', 
+                                      top: -10, 
+                                      right: -10, 
+                                      opacity: 0.1, 
+                                      transform: 'rotate(15deg)' 
+                                    }}>
+                                      <Receipt sx={{ fontSize: 100 }} />
+                                    </Box>
+                                    <Typography variant="subtitle2" sx={{ fontWeight: 600, textTransform: 'uppercase', letterSpacing: 1, mb: 1 }}>
+                                      Precio Sugerido Venta ({selectedProduct.profitMargin || 30}% margen)
+                                    </Typography>
+                                    <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 1 }}>
+                                      <Typography variant="h3" sx={{ fontWeight: 900, fontFamily: '"Asap", sans-serif' }}>
+                                        ${(() => {
+                                          const ingredientCost = selectedProduct.totalIngredientCost || 0;
+                                          const laborTime = selectedProduct.laborTime || selectedProduct.laborHours || 0;
+                                          const laborCost = selectedProduct.laborCost || 0;
+                                          const timeUnit = selectedProduct.laborTimeUnit || 'hours';
+                                          const hoursWorked = timeUnit === 'minutes' ? laborTime / 60 : laborTime;
+                                          const laborCostTotal = hoursWorked * laborCost;
+                                          const additionalCosts = (selectedProduct.utilities || 0) + (selectedProduct.equipment || 0) + (selectedProduct.packaging || 0) + (selectedProduct.additionalCosts || 0);
+                                          const totalCost = ingredientCost + laborCostTotal + additionalCosts;
+                                          const margin = (selectedProduct.profitMargin || 30) / 100;
+                                          const totalPrice = totalCost * (1 + margin);
+                                          return (totalPrice / (newProduct.yield || selectedProduct.yield || 1)).toFixed(2);
+                                        })()}
+                                      </Typography>
+                                      <Typography variant="h6" sx={{ opacity: 0.8 }}>/ por galleta</Typography>
+                                    </Box>
+                                  </Box>
+                                </Grid>
+                              </Grid>
+
                               <Box sx={{ 
                                 backgroundColor: 'rgba(255, 152, 0, 0.1)', 
                                 p: 2, 
@@ -2882,7 +3184,79 @@ const CostAnalysisProducts = ({ selectedProduct, onProductSelect }) => {
           </Button>
         </DialogActions>
       </Dialog>
-
+      
+      {/* Diálogo para editar cantidad de ingrediente */}
+      <Dialog 
+        open={editIngredientDialogOpen} 
+        onClose={() => setEditIngredientDialogOpen(false)}
+        maxWidth="xs"
+        fullWidth
+      >
+        <DialogTitle sx={{ 
+          backgroundColor: '#c8626d', 
+          color: 'white', 
+          fontFamily: '"Asap", sans-serif',
+          py: 2
+        }}>
+          Editar Cantidad: {editingIngredientItem?.ingredientName}
+        </DialogTitle>
+        <DialogContent sx={{ mt: 2, p: 3 }}>
+          <Box sx={{ p: 1 }}>
+            <Typography variant="body1" sx={{ mb: 2, fontFamily: '"Asap", sans-serif', color: '#666' }}>
+              Cambia la cantidad para este ingrediente en la receta:
+            </Typography>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+              <TextField
+                fullWidth
+                label="Cantidad"
+                type="number"
+                value={editIngredientQuantity}
+                onChange={(e) => setEditIngredientQuantity(parseFloat(e.target.value) || 0)}
+                autoFocus
+                sx={{ fontFamily: '"Asap", sans-serif' }}
+              />
+              <Typography variant="h6" sx={{ fontFamily: '"Asap", sans-serif', fontWeight: 600 }}>
+                {editingIngredientItem?.unit || editingIngredientItem?.ingredientUnit}
+              </Typography>
+            </Box>
+          </Box>
+        </DialogContent>
+        <DialogActions sx={{ p: 2, borderTop: '1px solid #eee' }}>
+          <Button 
+            onClick={() => setEditIngredientDialogOpen(false)} 
+            sx={{ fontFamily: '"Asap", sans-serif', color: '#666' }}
+          >
+            Cancelar
+          </Button>
+          <Button 
+            onClick={handleUpdateIngredientQuantity}
+            variant="contained"
+            sx={{ 
+              backgroundColor: '#c8626d', 
+              fontFamily: '"Asap", sans-serif',
+              fontWeight: 600,
+              '&:hover': { backgroundColor: '#b8555a' }
+            }}
+          >
+            Actualizar Cantidad
+          </Button>
+        </DialogActions>
+      </Dialog>
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={4000}
+        onClose={handleCloseSnackbar}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Alert 
+          onClose={handleCloseSnackbar} 
+          severity={snackbar.severity} 
+          variant="filled"
+          sx={{ width: '100%', fontFamily: '"Asap", sans-serif', fontWeight: 600, borderRadius: '12px' }}
+        >
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 };
