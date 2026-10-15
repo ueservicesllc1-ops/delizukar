@@ -38,7 +38,7 @@ const CookieBoxPromo = ({ open, onClose }) => {
       const timer = setTimeout(() => {
         setVisible(false);
         onClose();
-      }, 5000);
+      }, 2800);
       return () => clearTimeout(timer);
     }
   }, [open, onClose]);

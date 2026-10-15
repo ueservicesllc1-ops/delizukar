@@ -151,7 +151,7 @@ const Home = () => {
     setShowPromo(false);
     setTimeout(() => {
       setShowPickupBanner(true);
-    }, 2500);
+    }, 600);
   };
 
   return (
