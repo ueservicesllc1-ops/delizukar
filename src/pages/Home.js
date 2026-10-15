@@ -144,10 +144,14 @@ const Home = () => {
 
   const handleClosePopupHero = () => {
     setPopupHeroOpen(false);
+    setTimeout(() => setShowPromo(true), 500);
+  };
+
+  const handleClosePromo = () => {
+    setShowPromo(false);
     setTimeout(() => {
       setShowPickupBanner(true);
-    }, 1500);
-    setTimeout(() => setShowPromo(true), 800);
+    }, 1000);
   };
 
   return (
@@ -161,14 +165,10 @@ const Home = () => {
       marginTop: { xs: '16px', md: '72px', lg: '96px' }
     }}>
       <PopupHero open={popupHeroOpen} onClose={handleClosePopupHero} />
-      <CookieBoxPromo
-        open={showPromo}
-        onClose={() => {
-          setShowPromo(false);
-          setTimeout(() => setShowPickupBanner(true), 1000);
-        }}
-      />
-      {showPickupBanner && <PickupRunningBanner />}
+      <CookieBoxPromo open={showPromo} onClose={handleClosePromo} />
+      {showPickupBanner && !popupHeroOpen && !showPromo && (
+        <PickupRunningBanner onFinish={() => setShowPickupBanner(false)} />
+      )}
       
       {/* Banner Section */}
       <Box sx={{ position: 'relative', width: '100%' }}>

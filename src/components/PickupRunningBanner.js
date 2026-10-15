@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { Box, IconButton } from '@mui/material';
 import { Close } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 
-const PickupRunningBanner = () => {
+const PickupRunningBanner = ({ onFinish }) => {
   const [dismissed, setDismissed] = useState(false);
   const [windowWidth, setWindowWidth] = useState(
-    typeof window !== 'undefined' ? window.innerWidth : 1200
+    typeof window !== 'undefined' ? window.innerWidth : 1000
   );
   const navigate = useNavigate();
 
@@ -17,46 +17,60 @@ const PickupRunningBanner = () => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
+  // Garantía de desaparición: tras 9.5s desaparece siempre por completo
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDismissed(true);
+      if (typeof onFinish === 'function') onFinish();
+    }, 9500);
+    return () => clearTimeout(timer);
+  }, [onFinish]);
+
   if (dismissed) return null;
 
-  // Distancias basadas en el ancho de pantalla
-  // Distancias basadas en el ancho de pantalla (de izquierda a derecha)
-  const offscreenLeft = -(windowWidth > 800 ? windowWidth * 0.75 : windowWidth * 0.95);
-  const peekLeft1 = offscreenLeft * 0.55;
-  const peekHide1 = offscreenLeft * 0.72;
-  const peekLeft2 = offscreenLeft * 0.45;
-  const offscreenRight = windowWidth > 800 ? windowWidth * 0.85 : windowWidth * 1.1;
+  // Distancias seguras para cualquier tamaño de pantalla (móvil y desktop)
+  const marginExtra = 350;
+  const offscreenLeft = -(windowWidth / 2 + marginExtra);
+  const peekLeft1 = -(windowWidth * 0.38);
+  const peekHide1 = -(windowWidth * 0.48);
+  const peekLeft2 = -(windowWidth * 0.28);
+  const offscreenRight = windowWidth / 2 + marginExtra;
+
+  const handleDismiss = () => {
+    setDismissed(true);
+    if (typeof onFinish === 'function') onFinish();
+  };
 
   return (
     <Box
       sx={{
         position: 'fixed',
-        top: { xs: '32%', sm: '35%', md: '38%' },
-        left: '50%',
+        inset: 0,
         zIndex: 9999,
         pointerEvents: 'none',
         display: 'flex',
+        alignItems: 'center',
         justifyContent: 'center',
-        alignItems: 'center'
+        p: 2
       }}
     >
       <motion.div
-        initial={{ x: offscreenLeft, opacity: 0, rotate: -12, scale: 0.9 }}
+        initial={{ x: offscreenLeft, opacity: 0, rotate: -12, scale: 0.85 }}
         animate={{
           // Secuencia (de izquierda a derecha):
-          // 1. Asomarse jugando desde la izquierda (0% a 30%)
-          // 2. Entrar y quedarse en la mitad de la pantalla (40% a 75%)
-          // 3. Salir corriendo hacia la derecha (80% a 100%)
+          // 1. Asomarse jugando desde la izquierda (0% - 30%)
+          // 2. Llegar y quedarse en la mitad exacta (40% - 75%)
+          // 3. Tomar impulso y salir corriendo hacia la derecha hasta desaparecer (80% - 100%)
           x: [
-            offscreenLeft,  // Inicio fuera por la izquierda
+            offscreenLeft,  // Inicio completamente fuera por la izquierda
             peekLeft1,      // Se asoma jugando
             peekHide1,      // Se esconde un poquito
             peekLeft2,      // Se asoma más jugando
-            0,              // Llega a la mitad exacta
+            0,              // Llega a la mitad exacta (0px = centrado absoluto)
             0,              // Se queda en la mitad
             0,              // Sigue en la mitad
-            35,             // Toma impulso
-            offscreenRight  // Sale corriendo a la derecha y se va
+            30,             // Toma impulso hacia atrás
+            offscreenRight  // Sale corriendo a la derecha hasta desaparecer
           ],
           y: [
             0,
@@ -67,7 +81,7 @@ const PickupRunningBanner = () => {
             -8,
             0,
             -4,
-            -12
+            -14
           ],
           rotate: [
             -10,
@@ -77,19 +91,19 @@ const PickupRunningBanner = () => {
             0,     // Centrado
             -2,    // Flotando suave
             2,
-            -5,    // Impulso
-            14     // Inclinado hacia adelante corriendo a la derecha
+            -4,    // Impulso
+            14     // Inclinado hacia adelante corriendo hacia la derecha
           ],
           scale: [
             0.85,
             0.92,
             0.88,
             0.95,
-            1.05,  // Llega al centro
+            1.04,  // Llega al centro
             1.0,
             1.02,
             0.96,
-            1.04
+            1.02
           ],
           opacity: [
             0,
@@ -104,52 +118,49 @@ const PickupRunningBanner = () => {
           ]
         }}
         transition={{
-          duration: 9.5,
-          times: [0, 0.15, 0.22, 0.30, 0.42, 0.58, 0.75, 0.82, 1.0],
+          duration: 9.0,
+          times: [0, 0.15, 0.22, 0.30, 0.42, 0.58, 0.75, 0.84, 1.0],
           ease: 'easeInOut'
         }}
-        onAnimationComplete={() => {
-          setDismissed(true);
-        }}
-        whileHover={{ scale: 1.05 }}
+        onAnimationComplete={handleDismiss}
+        whileHover={{ scale: 1.04 }}
         style={{
           pointerEvents: 'auto',
           cursor: 'pointer',
-          position: 'relative'
+          position: 'relative',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center'
         }}
         onClick={() => navigate('/faq')}
       >
         <Box
           sx={{
             position: 'relative',
-            width: { xs: '310px', sm: '420px', md: '520px' },
-            maxWidth: '92vw',
-            borderRadius: { xs: '18px', md: '24px' },
+            width: { xs: '86vw', sm: '380px', md: '480px' },
+            maxWidth: '480px',
+            borderRadius: { xs: '16px', md: '22px' },
             overflow: 'hidden',
-            boxShadow: '0 12px 35px rgba(200, 98, 109, 0.45), 0 4px 15px rgba(0,0,0,0.15)',
+            boxShadow: '0 12px 35px rgba(200, 98, 109, 0.5), 0 4px 15px rgba(0,0,0,0.2)',
             border: '3px solid #ffffff',
-            transition: 'transform 0.2s ease, box-shadow 0.2s ease',
-            backgroundColor: '#faebeb',
-            '&:hover': {
-              boxShadow: '0 16px 45px rgba(200, 98, 109, 0.6)'
-            }
+            backgroundColor: '#faebeb'
           }}
         >
-          {/* Botón cerrar sutil */}
+          {/* Botón cerrar */}
           <IconButton
             size="small"
             onClick={(e) => {
               e.stopPropagation();
-              setDismissed(true);
+              handleDismiss();
             }}
             sx={{
               position: 'absolute',
               top: 6,
               right: 6,
               zIndex: 10,
-              backgroundColor: 'rgba(255,255,255,0.85)',
+              backgroundColor: 'rgba(255,255,255,0.9)',
               color: '#c8626d',
-              padding: '3px',
+              padding: '4px',
               '&:hover': {
                 backgroundColor: '#ffffff',
                 transform: 'scale(1.1)'
