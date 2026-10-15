@@ -126,7 +126,7 @@ const CHECKOUT_TRANSLATIONS = {
   },
   en: {
     'checkout.backToCart': 'Back to cart',
-    'checkout.title': 'Complete purchase',
+    'checkout.title': 'Complete your order',
     'checkout.subtitle': 'Fill in your information to process the order',
     'checkout.contactInfo': 'Contact information',
     'checkout.firstName': 'First name',

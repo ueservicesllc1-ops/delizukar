@@ -67,12 +67,12 @@ const DEFAULT_SETTINGS = {
   slotDurationMin: 30,
   capacityPerSlot: 2,
   weeklySchedule: {
-    mon: [{ start: '10:00', end: '18:00' }],
-    tue: [{ start: '10:00', end: '18:00' }],
-    wed: [{ start: '10:00', end: '18:00' }],
-    thu: [{ start: '10:00', end: '18:00' }],
-    fri: [{ start: '10:00', end: '18:00' }],
-    sat: [{ start: '11:00', end: '16:00' }],
+    mon: [],
+    tue: [],
+    wed: [],
+    thu: [],
+    fri: [],
+    sat: [{ start: '10:00', end: '17:30' }],
     sun: []
   },
   blockedDates: [],

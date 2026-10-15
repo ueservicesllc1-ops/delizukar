@@ -20,11 +20,12 @@ const PickupRunningBanner = () => {
   if (dismissed) return null;
 
   // Distancias basadas en el ancho de pantalla
-  const offscreenRight = windowWidth > 800 ? windowWidth * 0.75 : windowWidth * 0.95;
-  const peekRight1 = offscreenRight * 0.55;
-  const peekHide1 = offscreenRight * 0.72;
-  const peekRight2 = offscreenRight * 0.45;
-  const offscreenLeft = -(windowWidth > 800 ? windowWidth * 0.85 : windowWidth * 1.1);
+  // Distancias basadas en el ancho de pantalla (de izquierda a derecha)
+  const offscreenLeft = -(windowWidth > 800 ? windowWidth * 0.75 : windowWidth * 0.95);
+  const peekLeft1 = offscreenLeft * 0.55;
+  const peekHide1 = offscreenLeft * 0.72;
+  const peekLeft2 = offscreenLeft * 0.45;
+  const offscreenRight = windowWidth > 800 ? windowWidth * 0.85 : windowWidth * 1.1;
 
   return (
     <Box
@@ -40,23 +41,22 @@ const PickupRunningBanner = () => {
       }}
     >
       <motion.div
-        initial={{ x: offscreenRight, opacity: 0, rotate: 12, scale: 0.9 }}
+        initial={{ x: offscreenLeft, opacity: 0, rotate: -12, scale: 0.9 }}
         animate={{
-          // Secuencia:
-          // 1. Asomarse jugando desde la derecha (0% a 25%)
-          // 2. Entrar y quedarse en la mitad de la pantalla (30% a 70%)
-          // 3. Salir corriendo hacia la izquierda (75% a 85%)
-          // 4. Pausa fuera de pantalla antes de repetir (85% a 100%)
+          // Secuencia (de izquierda a derecha):
+          // 1. Asomarse jugando desde la izquierda (0% a 30%)
+          // 2. Entrar y quedarse en la mitad de la pantalla (40% a 75%)
+          // 3. Salir corriendo hacia la derecha (80% a 100%)
           x: [
-            offscreenRight, // Inicio fuera
-            peekRight1,     // Se asoma
+            offscreenLeft,  // Inicio fuera por la izquierda
+            peekLeft1,      // Se asoma jugando
             peekHide1,      // Se esconde un poquito
-            peekRight2,     // Se asoma más jugando
+            peekLeft2,      // Se asoma más jugando
             0,              // Llega a la mitad exacta
             0,              // Se queda en la mitad
             0,              // Sigue en la mitad
-            -35,            // Toma impulso hacia atrás
-            offscreenLeft   // Sale corriendo a la izquierda y se va
+            35,             // Toma impulso
+            offscreenRight  // Sale corriendo a la derecha y se va
           ],
           y: [
             0,
@@ -70,15 +70,15 @@ const PickupRunningBanner = () => {
             -12
           ],
           rotate: [
-            10,
-            -12,   // Inclinación juguetona al asomarse
-            8,
             -10,
+            12,    // Inclinación juguetona al asomarse desde la izquierda
+            -8,
+            10,
             0,     // Centrado
-            2,     // Flotando suave
-            -2,
-            5,     // Impulso
-            -14    // Inclinado corriendo
+            -2,    // Flotando suave
+            2,
+            -5,    // Impulso
+            14     // Inclinado hacia adelante corriendo a la derecha
           ],
           scale: [
             0.85,
