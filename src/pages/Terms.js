@@ -3,6 +3,7 @@ import { Box, Container, Typography } from '@mui/material';
 import { db } from '../firebase/config';
 import { doc, getDoc, collection, getDocs } from 'firebase/firestore';
 import { useLanguage } from '../context/LanguageContext';
+import PickupPolicyNotice from '../components/PickupPolicyNotice';
 
 const normalizeHtmlContent = (text) => {
   if (!text) return '';
@@ -190,6 +191,7 @@ const Terms = () => {
             dangerouslySetInnerHTML={{ __html: display.content }}
           />
         </Box>
+        <PickupPolicyNotice />
       </Container>
     </Box>
   );

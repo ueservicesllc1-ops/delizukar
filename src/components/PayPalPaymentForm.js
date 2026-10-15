@@ -55,7 +55,8 @@ const PayPalPaymentForm = ({
   onPaymentSuccess, 
   onPaymentError,
   shippingAddress = null,
-  shippingInfo = null
+  shippingInfo = null,
+  isPickup = false
 }) => {
   const { language } = useLanguage();
   const t = (key) => {
@@ -77,9 +78,11 @@ const PayPalPaymentForm = ({
     if (cartItems && cartItems.length > 0) {
       const subtotal = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
       
-      // Use real shipping cost if available, otherwise default to $10
+      // Use real shipping cost if available, otherwise default to $10 (0 for pickup)
       let shipping = 0;
-      if (shippingInfo && shippingInfo.cost) {
+      if (isPickup) {
+        shipping = 0;
+      } else if (shippingInfo && shippingInfo.cost) {
         shipping = parseFloat(shippingInfo.cost);
       } else {
         shipping = 10; // Default shipping cost
@@ -94,7 +97,7 @@ const PayPalPaymentForm = ({
         total: total.toFixed(2),
       });
     }
-  }, [cartItems, shippingInfo]);
+  }, [cartItems, shippingInfo, isPickup]);
 
   const handlePaymentSuccess = (details) => {
     console.log('Payment successful:', details);

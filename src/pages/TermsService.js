@@ -4,6 +4,7 @@ import { db } from '../firebase/config';
 import { doc, getDoc, collection, getDocs } from 'firebase/firestore';
 import { useLanguage } from '../context/LanguageContext';
 import { translateText } from '../services/translateService';
+import PickupPolicyNotice from '../components/PickupPolicyNotice';
 
 const TermsService = () => {
   
@@ -203,6 +204,7 @@ const TermsService = () => {
             dangerouslySetInnerHTML={{ __html: pageData.content }}
           />
         </Box>
+        <PickupPolicyNotice />
       </Container>
     </Box>
   );

@@ -3,6 +3,7 @@ import { Box, Container, Typography } from '@mui/material';
 import { db } from '../firebase/config';
 import { doc, getDoc, setDoc, collection, getDocs } from 'firebase/firestore';
 import { useLanguage } from '../context/LanguageContext';
+import PickupPolicyNotice from '../components/PickupPolicyNotice';
 // i18n no se usa aquí: priorizamos Firestore
 
 const normalizeHtmlContent = (text) => {
@@ -233,6 +234,7 @@ No podemos programar fechas específicas de envío o entrega. Todos los pedidos 
             dangerouslySetInnerHTML={{ __html: pageData.content || '' }}
           />
         </Box>
+        <PickupPolicyNotice variant="faq" />
       </Container>
     </Box>
   );

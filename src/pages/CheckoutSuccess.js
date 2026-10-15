@@ -11,8 +11,9 @@ import {
   Alert,
   CircularProgress
 } from '@mui/material';
-import { CheckCircle, ShoppingBag, Home } from '@mui/icons-material';
+import { CheckCircle, ShoppingBag, Home, Storefront, Print } from '@mui/icons-material';
 import { useLanguage } from '../context/LanguageContext';
+import { getPickupText, formatPickupDate, formatPickupTime, getPickupQrUrl, printPickupTicket } from '../utils/pickup';
 
 const CHECKOUT_SUCCESS_TRANSLATIONS = {
   es: {
@@ -82,12 +83,15 @@ const CheckoutSuccess = () => {
   const [loading, setLoading] = useState(true);
   const [orderDetails, setOrderDetails] = useState(null);
   const [shippingInfo, setShippingInfo] = useState(null);
+  const [pickupInfo, setPickupInfo] = useState(null);
+  const [orderRecord, setOrderRecord] = useState(null);
+  const [currentOrderId, setCurrentOrderId] = useState(null);
   const [error, setError] = useState(null);
 
   useEffect(() => {
     const fetchPaymentDetails = async () => {
       try {
-        console.log('🔍 Checking for payment intent ID...');
+        console.log('🔍 Checking for payment intent ID and pickup order...');
         
         // Obtener el payment ID de la URL o localStorage (tanto Stripe como PayPal)
         const urlParams = new URLSearchParams(window.location.search);
@@ -97,6 +101,68 @@ const CheckoutSuccess = () => {
                                 localStorage.getItem('lastPaymentId');
         
         console.log('🔍 Payment Intent ID found:', paymentIntentId);
+
+        // Cargar orderId para obtener datos de la orden desde Firestore
+        const savedOrderId = localStorage.getItem('lastOrderId');
+        console.log('📋 Saved order ID:', savedOrderId);
+        if (savedOrderId) setCurrentOrderId(savedOrderId);
+
+        // Cargar posible orden de pickup guardada en localStorage
+        let localPickup = null;
+        try {
+          const rawPickup = localStorage.getItem('lastPickupOrder');
+          if (rawPickup) localPickup = JSON.parse(rawPickup);
+        } catch (e) {
+          console.warn('⚠️ Could not parse lastPickupOrder:', e);
+        }
+
+        const baseUrl = process.env.NODE_ENV === 'production' 
+          ? window.location.origin 
+          : '';
+
+        // Intentar obtener datos de la orden desde Firestore si tenemos orderId
+        let orderData = null;
+        if (savedOrderId) {
+          try {
+            const orderResponse = await fetch(`${baseUrl}/api/order/${savedOrderId}`);
+            if (orderResponse.ok) {
+              const orderResult = await orderResponse.json();
+              orderData = orderResult.order;
+              console.log('✅ Order data loaded from Firestore:', orderData);
+            }
+          } catch (error) {
+            console.warn('⚠️ Could not load order data:', error);
+          }
+        }
+
+        // Si es una orden de PICKUP (recogida en tienda)
+        const isPickupOrder = orderData?.fulfillmentType === 'pickup' || !!orderData?.pickup || !!localPickup?.pickup;
+        if (isPickupOrder) {
+          const pInfo = orderData?.pickup || localPickup?.pickup;
+          const fullOrder = orderData || localPickup?.order || {};
+          const savedPaymentAmount = localStorage.getItem('lastPaymentAmount');
+          const finalAmount = orderData?.total 
+            ? parseFloat(orderData.total) 
+            : (savedPaymentAmount ? parseFloat(savedPaymentAmount) : (parseFloat(fullOrder.total) || 0));
+
+          setPickupInfo(pInfo);
+          setOrderRecord(fullOrder);
+          if (!savedOrderId && localPickup?.orderId) {
+            setCurrentOrderId(localPickup.orderId);
+          }
+
+          setOrderDetails({
+            sessionId: paymentIntentId || fullOrder.paymentIntentId || 'PICKUP-ORDER',
+            amount: finalAmount,
+            currency: 'USD',
+            customerEmail: fullOrder.customerInfo?.email || '',
+            paymentStatus: 'completed',
+            shipping: 0,
+            subtotal: finalAmount
+          });
+          setLoading(false);
+          return;
+        }
         
         if (paymentIntentId) {
           console.log('🔍 Fetching payment data from backend...');
@@ -118,36 +184,11 @@ const CheckoutSuccess = () => {
           const savedPaymentAmount = localStorage.getItem('lastPaymentAmount');
           console.log('💰 Saved payment amount:', savedPaymentAmount);
           
-          // Cargar orderId para obtener datos de la orden desde Firestore
-          const savedOrderId = localStorage.getItem('lastOrderId');
-          console.log('📋 Saved order ID:', savedOrderId);
-          
-          // Consultar datos reales desde el backend
-          // En desarrollo usa proxy (string vacío), en producción usa window.location.origin
-          const baseUrl = process.env.NODE_ENV === 'production' 
-            ? window.location.origin 
-            : '';
-          
-          // Intentar obtener datos de la orden desde Firestore si tenemos orderId
-          let orderData = null;
-          if (savedOrderId) {
-            try {
-              const orderResponse = await fetch(`${baseUrl}/api/order/${savedOrderId}`);
-              if (orderResponse.ok) {
-                const orderResult = await orderResponse.json();
-                orderData = orderResult.order;
-                console.log('✅ Order data loaded from Firestore:', orderData);
-                
-                // Si no tenemos shippingInfo del localStorage, intentar obtenerlo de la orden
-                if (!parsedShippingInfo && orderData?.shippingInfo) {
-                  parsedShippingInfo = orderData.shippingInfo;
-                  setShippingInfo(parsedShippingInfo);
-                  console.log('📦 Shipping info loaded from order:', parsedShippingInfo);
-                }
-              }
-            } catch (error) {
-              console.warn('⚠️ Could not load order data:', error);
-            }
+          // Si no tenemos shippingInfo del localStorage, intentar obtenerlo de la orden
+          if (!parsedShippingInfo && orderData?.shippingInfo) {
+            parsedShippingInfo = orderData.shippingInfo;
+            setShippingInfo(parsedShippingInfo);
+            console.log('📦 Shipping info loaded from order:', parsedShippingInfo);
           }
           
           const response = await fetch(`${baseUrl}/api/payment-intent/${paymentIntentId}`);
@@ -232,6 +273,8 @@ const CheckoutSuccess = () => {
 
 
 
+
+  const tPickup = getPickupText(language);
 
   if (loading) {
     return (
@@ -338,9 +381,104 @@ const CheckoutSuccess = () => {
               border: '1px solid #4CAF50'
             }}>
               <Typography variant="body2" sx={{ fontWeight: 600, color: '#2E7D32', mb: 0.5, fontSize: '0.9rem' }}>
-                {translations.emailSent}
+                {pickupInfo ? tPickup.ticketEmail : translations.emailSent}
               </Typography>
             </Box>
+
+            {/* Ticket de Recogida (Pickup) */}
+            {pickupInfo && (
+              <Box sx={{
+                background: 'linear-gradient(135deg, #fff 0%, #fff7f7 100%)',
+                border: '2px dashed #c8626d',
+                borderRadius: 2,
+                p: 2.5,
+                mb: 2,
+                textAlign: 'center'
+              }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1, mb: 1, color: '#c8626d' }}>
+                  <Storefront />
+                  <Typography variant="h6" sx={{ fontWeight: 700, fontSize: '1.05rem' }}>
+                    {tPickup.ticketTitle}
+                  </Typography>
+                </Box>
+
+                <Typography variant="caption" sx={{ color: '#888', textTransform: 'uppercase', letterSpacing: 1 }}>
+                  {tPickup.ticketCode}
+                </Typography>
+                <Typography variant="h4" sx={{ fontWeight: 800, color: '#c8626d', letterSpacing: 3, my: 0.5 }}>
+                  {pickupInfo.code}
+                </Typography>
+
+                <Box sx={{ my: 1.5, display: 'flex', justifyContent: 'center' }}>
+                  <img
+                    src={getPickupQrUrl(pickupInfo.code, 160)}
+                    alt={`QR ${pickupInfo.code}`}
+                    style={{ width: 160, height: 160, borderRadius: 8, border: '1px solid #f0d0d5', display: 'block' }}
+                  />
+                </Box>
+
+                <Typography variant="caption" sx={{ color: '#666', display: 'block', mb: 1.5 }}>
+                  {tPickup.ticketReminder}
+                </Typography>
+
+                <Box sx={{ backgroundColor: '#fff', p: 1.5, borderRadius: 1.5, border: '1px solid #f0e0e0', textAlign: 'left', mb: 1.5 }}>
+                  <Typography variant="caption" sx={{ color: '#888', textTransform: 'uppercase', display: 'block' }}>
+                    {tPickup.ticketWhen}
+                  </Typography>
+                  <Typography variant="body2" sx={{ fontWeight: 700, color: '#333', mb: 1 }}>
+                    {pickupInfo.date && pickupInfo.time
+                      ? `${formatPickupDate(pickupInfo.date, language)} · ${formatPickupTime(pickupInfo.time)}`
+                      : (language === 'en' ? 'Pending schedule' : 'Pendiente de coordinar')}
+                  </Typography>
+
+                  <Typography variant="caption" sx={{ color: '#888', textTransform: 'uppercase', display: 'block' }}>
+                    {tPickup.ticketWhere}
+                  </Typography>
+                  <Typography variant="body2" sx={{ color: '#333', mb: pickupInfo.instructions ? 1 : 0 }}>
+                    {pickupInfo.address || 'Delizukar'}
+                  </Typography>
+
+                  {(pickupInfo.instructions || (language === 'en' && pickupInfo.instructionsEn)) && (
+                    <>
+                      <Typography variant="caption" sx={{ color: '#888', textTransform: 'uppercase', display: 'block', mt: 1 }}>
+                        {tPickup.instructions}
+                      </Typography>
+                      <Typography variant="body2" sx={{ color: '#555', fontSize: '0.85rem' }}>
+                        {language === 'en' && pickupInfo.instructionsEn ? pickupInfo.instructionsEn : pickupInfo.instructions}
+                      </Typography>
+                    </>
+                  )}
+                </Box>
+
+                {pickupInfo.needsReschedule && (
+                  <Alert severity="warning" sx={{ mb: 1.5, textAlign: 'left', fontSize: '0.82rem' }}>
+                    {tPickup.ticketNeedsReschedule}
+                  </Alert>
+                )}
+
+                <Alert severity="info" sx={{ mb: 1.5, textAlign: 'left', fontSize: '0.78rem', backgroundColor: '#fff9ed', color: '#8a5a00', border: '1px solid #ffe0b2' }}>
+                  <strong>{tPickup.policyTitle}:</strong> {tPickup.policyText}
+                </Alert>
+
+                <Button
+                  variant="outlined"
+                  startIcon={<Print />}
+                  onClick={() => printPickupTicket({ order: orderRecord, orderId: currentOrderId, language })}
+                  size="small"
+                  fullWidth
+                  sx={{
+                    color: '#c8626d',
+                    borderColor: '#c8626d',
+                    '&:hover': { borderColor: '#b0525d', backgroundColor: '#fff0f2' },
+                    borderRadius: 2,
+                    fontWeight: 600,
+                    textTransform: 'none'
+                  }}
+                >
+                  {tPickup.ticketPrint}
+                </Button>
+              </Box>
+            )}
 
             {orderDetails && (
               <Box sx={{ 
@@ -364,10 +502,10 @@ const CheckoutSuccess = () => {
                 
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
                   <Typography variant="body2" sx={{ fontSize: '0.8rem', color: '#666' }}>
-                    {translations.shipping}
+                    {pickupInfo ? tPickup.pickupShippingLabel : translations.shipping}
                   </Typography>
                   <Typography variant="body2" sx={{ fontSize: '0.8rem', color: '#666' }}>
-                    ${(orderDetails.shipping || 0).toFixed(2)} {orderDetails.currency?.toUpperCase()}
+                    {pickupInfo ? tPickup.free : `${(orderDetails.shipping || 0).toFixed(2)} ${orderDetails.currency?.toUpperCase()}`}
                   </Typography>
                 </Box>
                 
@@ -384,8 +522,8 @@ const CheckoutSuccess = () => {
               </Box>
             )}
 
-            {/* Shipping Information */}
-            {shippingInfo && (
+            {/* Shipping Information (solo si no es pickup) */}
+            {shippingInfo && !pickupInfo && (
               <Box sx={{ 
                 backgroundColor: '#e8f5e8', 
                 p: 2, 

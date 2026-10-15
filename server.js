@@ -3806,12 +3806,16 @@ function getStandardPackageDimensions(cartItems) {
   };
 }
 
+// ==================== PICKUP (recogida) ====================
+const pickupService = require('./pickup-server')({ db, sendEmailViaEmailJS });
+pickupService.registerRoutes(app);
+
 app.post('/api/create-order', async (req, res) => {
   try {
     console.log('🔵 [Backend] POST /api/create-order recibido');
     console.log('🔵 [Backend] Request body:', JSON.stringify(req.body, null, 2));
     
-    const { sessionId, paymentIntentId, customerInfo, cartItems, total, paymentStatus, createdAt, updatedAt, shippingInfo } = req.body;
+    const { sessionId, paymentIntentId, customerInfo, cartItems, total, paymentStatus, createdAt, updatedAt, shippingInfo, fulfillmentType, pickup: pickupInput, language } = req.body;
 
     // Validar datos requeridos
     if (!customerInfo || !customerInfo.email) {
@@ -3840,6 +3844,14 @@ app.post('/api/create-order', async (req, res) => {
 
     console.log('🔵 [Backend] Creating order in Firestore for session:', sessionId);
     console.log('🔵 [Backend] Order data received:', { sessionId, paymentIntentId, customerInfo: !!customerInfo, cartItems: cartItems?.length, total });
+
+    // Pickup: reservar franja y generar código del ticket (no rechaza: el pago ya se realizó)
+    const isPickup = fulfillmentType === 'pickup';
+    let pickupData = null;
+    if (isPickup) {
+      pickupData = await pickupService.createPickupRecord(pickupInput);
+      console.log('🎟️ [Backend] Pickup creado:', pickupData.code, pickupData.date, pickupData.time, 'needsReschedule:', pickupData.needsReschedule);
+    }
 
     // Limpiar cartItems de campos que causan problemas - solo campos básicos
     const cleanedCartItems = cartItems.map(item => {
@@ -3940,6 +3952,9 @@ app.post('/api/create-order', async (req, res) => {
       total: parseFloat(total) || 0,
       paymentStatus: paymentStatus || 'paid',
       status: 'pending', // Estado inicial
+      language: language === 'en' ? 'en' : 'es',
+      fulfillmentType: isPickup ? 'pickup' : 'shipping',
+      ...(isPickup ? { pickup: pickupData } : {}),
       // CRÍTICO: Guardar packageInfo exacto usado para calcular rates
       packageInfo: finalPackageInfo,
       createdAt: new Date(),
@@ -3971,6 +3986,23 @@ app.post('/api/create-order', async (req, res) => {
     console.log('   - Status:', savedData.status);
     console.log('   - Total:', savedData.total);
     console.log('   - Customer Email:', savedData.customerInfo?.email);
+
+    // Pickup: ticket por correo (cliente + admin); sin etiquetas ni flujo de envío
+    if (isPickup) {
+      const pickupEmailStatus = await pickupService.sendPickupOrderEmails(orderData, docRef.id);
+      return res.json({
+        success: true,
+        orderId: docRef.id,
+        order: {
+          ...orderData,
+          paymentStatus: savedData.paymentStatus,
+          status: savedData.status
+        },
+        pickup: pickupData,
+        message: 'Pickup order created successfully',
+        emailStatus: pickupEmailStatus
+      });
+    }
     
     // Enviar correos automáticamente después de crear la orden
     console.log('📧 [Backend] ========================================');

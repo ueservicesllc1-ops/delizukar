@@ -26,6 +26,7 @@ import BoxSelectionPopup from '../components/BoxSelectionPopup';
 import FeaturedProducts from '../components/FeaturedProducts';
 import ComparisonTable from '../components/ComparisonTable';
 import CookieBoxPromo from '../components/CookieBoxPromo';
+import PickupRunningBanner from '../components/PickupRunningBanner';
 import { db } from '../firebase/config';
 import { collection, query, where, orderBy, limit, doc, onSnapshot } from 'firebase/firestore';
 
@@ -41,6 +42,7 @@ const Home = () => {
   const [showBoxPopup, setShowBoxPopup] = useState(false);
   const [selectedBoxProduct, setSelectedBoxProduct] = useState(null);
   const [showPromo, setShowPromo] = useState(false);
+  const [showPickupBanner, setShowPickupBanner] = useState(false);
   const [bannerUrl, setBannerUrl] = useState(null);
   const [banner2Url, setBanner2Url] = useState(null);
   const [dynamicBannerText, setDynamicBannerText] = useState(null);
@@ -142,6 +144,9 @@ const Home = () => {
 
   const handleClosePopupHero = () => {
     setPopupHeroOpen(false);
+    setTimeout(() => {
+      setShowPickupBanner(true);
+    }, 500);
     setTimeout(() => setShowPromo(true), 800);
   };
 
@@ -156,7 +161,14 @@ const Home = () => {
       marginTop: { xs: '16px', md: '72px', lg: '96px' }
     }}>
       <PopupHero open={popupHeroOpen} onClose={handleClosePopupHero} />
-      <CookieBoxPromo open={showPromo} onClose={() => setShowPromo(false)} />
+      <CookieBoxPromo
+        open={showPromo}
+        onClose={() => {
+          setShowPromo(false);
+          setShowPickupBanner(true);
+        }}
+      />
+      {showPickupBanner && <PickupRunningBanner />}
       
       {/* Banner Section */}
       <Box sx={{ position: 'relative', width: '100%' }}>

@@ -229,11 +229,15 @@ const OrdersManager = ({ open, onClose, initialTab = 'all' }) => {
         });
         
         if (orderData.paymentStatus === 'paid') {
-          paidOrders.push({
-            id: docSnap.id,
-            ...orderData
-          });
-          console.log(`✅ Pedido ${docSnap.id} agregado (paymentStatus = paid)`);
+          if (orderData.fulfillmentType !== 'pickup') {
+            paidOrders.push({
+              id: docSnap.id,
+              ...orderData
+            });
+            console.log(`✅ Pedido ${docSnap.id} agregado (paymentStatus = paid)`);
+          } else {
+            console.log(`🏪 Pedido ${docSnap.id} es de Pickup, se gestiona en Órdenes de Pickup`);
+          }
         } else {
           // Eliminar pedidos de prueba (no pagados)
           console.log(`🗑️ Eliminando pedido de prueba: ${docSnap.id} (paymentStatus = ${orderData.paymentStatus})`);
