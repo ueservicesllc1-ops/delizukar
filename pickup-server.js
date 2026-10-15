@@ -183,6 +183,23 @@ module.exports = function createPickupService({ db, sendEmailViaEmailJS }) {
     };
   }
 
+  /**
+   * Sábados ofrecidos al cliente (máx. 2). Si se compra de domingo a jueves se ofrece el próximo
+   * sábado y el siguiente; si se compra viernes o sábado no hay tiempo de preparar (1 día o el
+   * mismo día), así que se ofrece el sábado de la semana siguiente y el posterior.
+   */
+  function getPickupSaturdays(nowMs) {
+    const today = new Date(nowMs);
+    const dow = today.getUTCDay(); // 0=dom ... 6=sáb (hora de la tienda)
+    let first = (6 - dow + 7) % 7;
+    if (first < 2) first += 7; // viernes (1 día) o sábado (hoy)
+    return [first, first + 7].map((offset) =>
+      new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate() + offset))
+        .toISOString()
+        .slice(0, 10)
+    );
+  }
+
   /** Genera todas las franjas válidas según horario semanal, fechas bloqueadas y extra. */
   function buildSlots(settings, nowMs, { ignoreLeadTime = false } = {}) {
     const slots = [];
@@ -567,7 +584,10 @@ module.exports = function createPickupService({ db, sendEmailViaEmailJS }) {
         const counts = await getSlotCounts(todayStr);
         const capacity = Math.max(1, Number(settings.capacityPerSlot) || 1);
 
+        const saturdays = isAdmin ? null : getPickupSaturdays(nowMs);
+
         const available = slots
+          .filter((s) => isAdmin || saturdays.includes(s.date))
           .map((s) => {
             const used = counts[slotId(s.date, s.time)] || 0;
             return { ...s, remaining: Math.max(0, capacity - used) };

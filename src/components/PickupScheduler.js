@@ -1,19 +1,12 @@
-import React, { useEffect, useMemo, useState } from 'react';
-import { Box, Typography, IconButton, Button, Alert, CircularProgress } from '@mui/material';
-import { ChevronLeft, ChevronRight, Place, InfoOutlined } from '@mui/icons-material';
+import React, { useEffect, useMemo } from 'react';
+import { Box, Typography, Button, Alert, CircularProgress } from '@mui/material';
+import { Place, InfoOutlined, EventAvailable } from '@mui/icons-material';
 import {
   getPickupText,
-  getLocale,
   formatPickupDate,
   formatPickupTime
 } from '../utils/pickup';
 
-const WEEKDAYS = {
-  es: ['D', 'L', 'M', 'X', 'J', 'V', 'S'],
-  en: ['S', 'M', 'T', 'W', 'T', 'F', 'S']
-};
-
-const pad = (n) => String(n).padStart(2, '0');
 
 /**
  * Calendario de fechas + horas disponibles para recoger el pedido.
@@ -34,19 +27,6 @@ const PickupScheduler = ({ availability, value, onChange, language }) => {
   }, [slots]);
 
   const availableDates = useMemo(() => Object.keys(slotsByDate).sort(), [slotsByDate]);
-
-  const monthOf = (dateStr) => {
-    const [y, m] = dateStr.split('-').map(Number);
-    return { y, m: m - 1 };
-  };
-
-  const [viewMonth, setViewMonth] = useState(null);
-
-  // Mostrar el mes del primer día disponible (o del día ya elegido)
-  useEffect(() => {
-    if (!availableDates.length) return;
-    setViewMonth((prev) => prev || monthOf(value?.date && slotsByDate[value.date] ? value.date : availableDates[0]));
-  }, [availableDates, slotsByDate, value]);
 
   // Si la selección ya no está disponible (se llenó/venció), limpiarla
   useEffect(() => {
@@ -92,7 +72,7 @@ const PickupScheduler = ({ availability, value, onChange, language }) => {
     );
   }
 
-  if (!availableDates.length || !viewMonth) {
+  if (!availableDates.length) {
     return (
       <Box>
         {header}
@@ -100,28 +80,6 @@ const PickupScheduler = ({ availability, value, onChange, language }) => {
       </Box>
     );
   }
-
-  const { y, m } = viewMonth;
-  const firstWeekday = new Date(Date.UTC(y, m, 1)).getUTCDay();
-  const daysInMonth = new Date(Date.UTC(y, m + 1, 0)).getUTCDate();
-  const firstMonth = monthOf(availableDates[0]);
-  const lastMonth = monthOf(availableDates[availableDates.length - 1]);
-  const canPrev = y > firstMonth.y || (y === firstMonth.y && m > firstMonth.m);
-  const canNext = y < lastMonth.y || (y === lastMonth.y && m < lastMonth.m);
-  const monthLabel = new Date(Date.UTC(y, m, 1)).toLocaleDateString(getLocale(language), {
-    month: 'long',
-    year: 'numeric',
-    timeZone: 'UTC'
-  });
-
-  const goMonth = (delta) => {
-    const d = new Date(Date.UTC(y, m + delta, 1));
-    setViewMonth({ y: d.getUTCFullYear(), m: d.getUTCMonth() });
-  };
-
-  const cells = [];
-  for (let i = 0; i < firstWeekday; i += 1) cells.push(null);
-  for (let d = 1; d <= daysInMonth; d += 1) cells.push(`${y}-${pad(m + 1)}-${pad(d)}`);
 
   const selectedDate = value?.date || null;
   const timesForSelected = selectedDate ? slotsByDate[selectedDate] || [] : [];
@@ -150,51 +108,33 @@ const PickupScheduler = ({ availability, value, onChange, language }) => {
         </Box>
       )}
 
-      {/* Calendario */}
-      <Box sx={{ border: '1px solid #eee', borderRadius: '12px', p: 1.5, backgroundColor: '#fff' }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
-          <IconButton size="small" onClick={() => goMonth(-1)} disabled={!canPrev} aria-label="prev-month">
-            <ChevronLeft />
-          </IconButton>
-          <Typography sx={{ fontWeight: 700, textTransform: 'capitalize', color: '#333' }}>{monthLabel}</Typography>
-          <IconButton size="small" onClick={() => goMonth(1)} disabled={!canNext} aria-label="next-month">
-            <ChevronRight />
-          </IconButton>
-        </Box>
-
-        <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 0.5, textAlign: 'center' }}>
-          {WEEKDAYS[lang].map((label, index) => (
-            <Typography key={`${label}-${index}`} variant="caption" sx={{ color: '#999', fontWeight: 700 }}>
-              {label}
-            </Typography>
-          ))}
-          {cells.map((dateStr, index) => {
-            if (!dateStr) return <Box key={`empty-${index}`} />;
-            const available = !!slotsByDate[dateStr];
-            const selected = selectedDate === dateStr;
-            return (
-              <Button
-                key={dateStr}
-                disabled={!available}
-                onClick={() => onChange({ date: dateStr, time: null })}
-                sx={{
-                  minWidth: 0,
-                  p: 0,
-                  height: 38,
-                  borderRadius: '10px',
-                  fontWeight: 700,
-                  fontSize: '0.9rem',
-                  color: selected ? '#fff' : available ? '#c8626d' : '#bbb',
-                  backgroundColor: selected ? '#c8626d' : available ? '#fdeeee' : 'transparent',
-                  '&:hover': { backgroundColor: selected ? '#b5555a' : '#fbdcdc' },
-                  '&.Mui-disabled': { color: '#ccc' }
-                }}
-              >
-                {Number(dateStr.slice(8))}
-              </Button>
-            );
-          })}
-        </Box>
+      {/* Lista de sábados disponibles */}
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+        {availableDates.map((dateStr) => {
+          const selected = selectedDate === dateStr;
+          return (
+            <Button
+              key={dateStr}
+              onClick={() => onChange({ date: dateStr, time: null })}
+              startIcon={<EventAvailable />}
+              sx={{
+                justifyContent: 'flex-start',
+                textTransform: 'capitalize',
+                p: 1.5,
+                borderRadius: '12px',
+                fontWeight: 700,
+                fontSize: '1rem',
+                border: '2px solid',
+                borderColor: selected ? '#c8626d' : '#f0dcd9',
+                color: selected ? '#fff' : '#c8626d',
+                backgroundColor: selected ? '#c8626d' : '#fdeeee',
+                '&:hover': { backgroundColor: selected ? '#b5555a' : '#fbdcdc' }
+              }}
+            >
+              {formatPickupDate(dateStr, language)}
+            </Button>
+          );
+        })}
       </Box>
 
       {/* Horas */}
