@@ -146,7 +146,7 @@ const Home = () => {
     setPopupHeroOpen(false);
     setTimeout(() => {
       setShowPickupBanner(true);
-    }, 500);
+    }, 1500);
     setTimeout(() => setShowPromo(true), 800);
   };
 
@@ -165,7 +165,7 @@ const Home = () => {
         open={showPromo}
         onClose={() => {
           setShowPromo(false);
-          setShowPickupBanner(true);
+          setTimeout(() => setShowPickupBanner(true), 1000);
         }}
       />
       {showPickupBanner && <PickupRunningBanner />}
