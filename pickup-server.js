@@ -184,20 +184,26 @@ module.exports = function createPickupService({ db, sendEmailViaEmailJS }) {
   }
 
   /**
-   * Sábados ofrecidos al cliente (máx. 2). Si se compra de domingo a jueves se ofrece el próximo
-   * sábado y el siguiente; si se compra viernes o sábado no hay tiempo de preparar (1 día o el
-   * mismo día), así que se ofrece el sábado de la semana siguiente y el posterior.
+   * Sábado de recogida automático (solo 1 sábado disponible).
+   * - Pedidos de hasta el día jueves al medio día (12:00 PM en hora de la tienda): sábado que sigue (este sábado).
+   * - Pedidos que se generen después de esto: pasan al siguiente sábado.
    */
   function getPickupSaturdays(nowMs) {
     const today = new Date(nowMs);
-    const dow = today.getUTCDay(); // 0=dom ... 6=sáb (hora de la tienda)
-    let first = (6 - dow + 7) % 7;
-    if (first < 2) first += 7; // viernes (1 día) o sábado (hoy)
-    return [first, first + 7].map((offset) =>
-      new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate() + offset))
-        .toISOString()
-        .slice(0, 10)
-    );
+    const dow = today.getUTCDay(); // 0=dom, 1=lun, 2=mar, 3=mié, 4=jue, 5=vie, 6=sáb (en hora de la tienda)
+    const hours = today.getUTCHours();
+    const minutes = today.getUTCMinutes();
+
+    // Hasta el jueves a las 12:00 PM (inclusive)
+    const isUpToThursdayNoon = dow < 4 || (dow === 4 && (hours < 12 || (hours === 12 && minutes === 0)));
+    const daysToUpcomingSaturday = (6 - dow + 7) % 7;
+
+    // Si es hasta el jueves al mediodía: sábado que sigue (este sábado)
+    // Si es después del jueves al mediodía: pasa al siguiente sábado (+7 días)
+    const offset = isUpToThursdayNoon ? daysToUpcomingSaturday : daysToUpcomingSaturday + 7;
+
+    const targetDate = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate() + offset));
+    return [targetDate.toISOString().slice(0, 10)];
   }
 
   /** Genera todas las franjas válidas según horario semanal, fechas bloqueadas y extra. */
@@ -272,7 +278,9 @@ module.exports = function createPickupService({ db, sendEmailViaEmailJS }) {
    */
   async function createPickupRecord(input = {}) {
     const settings = await getSettings();
-    const date = input?.date || null;
+    const nowMs = nowInTimezone(settings.timezone);
+    const [autoSaturday] = getPickupSaturdays(nowMs);
+    const date = input?.date || autoSaturday;
     const time = input?.time || null;
 
     const record = {
@@ -296,7 +304,6 @@ module.exports = function createPickupService({ db, sendEmailViaEmailJS }) {
       return record;
     }
 
-    const nowMs = nowInTimezone(settings.timezone);
     const valid = buildSlots(settings, nowMs, { ignoreLeadTime: true }).some(
       (s) => s.date === date && s.time === time
     );
@@ -580,7 +587,7 @@ module.exports = function createPickupService({ db, sendEmailViaEmailJS }) {
 
         const nowMs = nowInTimezone(settings.timezone);
         const todayStr = new Date(nowMs).toISOString().slice(0, 10);
-        const slots = buildSlots(settings, nowMs, { ignoreLeadTime: isAdmin });
+        const slots = buildSlots(settings, nowMs, { ignoreLeadTime: true });
         const counts = await getSlotCounts(todayStr);
         const capacity = Math.max(1, Number(settings.capacityPerSlot) || 1);
 

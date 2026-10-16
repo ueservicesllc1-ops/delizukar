@@ -335,6 +335,15 @@ const PickupSettingsManager = ({ open, onClose }) => {
                   Reglas de Capacidad y Anticipación
                 </Typography>
 
+                <Alert severity="info" icon={<AccessTime />} sx={{ my: 1, borderRadius: '10px' }}>
+                  <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
+                    Regla automática de Sábados de Recogida:
+                  </Typography>
+                  <Typography variant="body2">
+                    Los clientes ven <strong>1 solo sábado</strong> calculado automáticamente: los pedidos recibidos <strong>hasta el jueves al mediodía (12:00 PM)</strong> se agendan para ese mismo sábado. Los pedidos recibidos después pasan automáticamente al <strong>siguiente sábado</strong>.
+                  </Typography>
+                </Alert>
+
                 <Grid container spacing={2}>
                   <Grid item xs={12} sm={6} md={3}>
                     <TextField

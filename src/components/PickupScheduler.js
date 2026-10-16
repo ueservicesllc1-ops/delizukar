@@ -28,6 +28,14 @@ const PickupScheduler = ({ availability, value, onChange, language }) => {
 
   const availableDates = useMemo(() => Object.keys(slotsByDate).sort(), [slotsByDate]);
 
+  // Auto-seleccionar la fecha automáticamente en cuanto se carguen las opciones
+  useEffect(() => {
+    if (!availableDates.length || typeof onChange !== 'function') return;
+    if (!value?.date || !availableDates.includes(value.date)) {
+      onChange({ date: availableDates[0], time: null });
+    }
+  }, [availableDates, value?.date, onChange]);
+
   // Si la selección ya no está disponible (se llenó/venció), limpiarla
   useEffect(() => {
     if (!value) return;
@@ -81,7 +89,7 @@ const PickupScheduler = ({ availability, value, onChange, language }) => {
     );
   }
 
-  const selectedDate = value?.date || null;
+  const selectedDate = value?.date || availableDates[0] || null;
   const timesForSelected = selectedDate ? slotsByDate[selectedDate] || [] : [];
 
   return (
@@ -108,34 +116,60 @@ const PickupScheduler = ({ availability, value, onChange, language }) => {
         </Box>
       )}
 
-      {/* Lista de sábados disponibles */}
-      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-        {availableDates.map((dateStr) => {
-          const selected = selectedDate === dateStr;
-          return (
-            <Button
-              key={dateStr}
-              onClick={() => onChange({ date: dateStr, time: null })}
-              startIcon={<EventAvailable />}
-              sx={{
-                justifyContent: 'flex-start',
-                textTransform: 'capitalize',
-                p: 1.5,
-                borderRadius: '12px',
-                fontWeight: 700,
-                fontSize: '1rem',
-                border: '2px solid',
-                borderColor: selected ? '#c8626d' : '#f0dcd9',
-                color: selected ? '#fff' : '#c8626d',
-                backgroundColor: selected ? '#c8626d' : '#fdeeee',
-                '&:hover': { backgroundColor: selected ? '#b5555a' : '#fbdcdc' }
-              }}
-            >
-              {formatPickupDate(dateStr, language)}
-            </Button>
-          );
-        })}
-      </Box>
+      {/* Sábado de recogida: automático si es 1 fecha, o lista si hay varias */}
+      {availableDates.length === 1 ? (
+        <Box
+          sx={{
+            p: 1.8,
+            borderRadius: '12px',
+            border: '2px solid #c8626d',
+            backgroundColor: '#c8626d',
+            color: '#fff',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 1.5,
+            boxShadow: '0 3px 10px rgba(200, 98, 109, 0.25)'
+          }}
+        >
+          <EventAvailable sx={{ color: '#fff', fontSize: '1.8rem' }} />
+          <Box sx={{ flex: 1 }}>
+            <Typography variant="caption" sx={{ color: '#ffebee', textTransform: 'uppercase', letterSpacing: 0.5, fontWeight: 700, display: 'block' }}>
+              {text.autoDateBadge}
+            </Typography>
+            <Typography sx={{ fontWeight: 800, fontSize: '1.1rem', color: '#fff', textTransform: 'capitalize' }}>
+              {formatPickupDate(availableDates[0], language)}
+            </Typography>
+          </Box>
+        </Box>
+      ) : (
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+          {availableDates.map((dateStr) => {
+            const selected = selectedDate === dateStr;
+            return (
+              <Button
+                key={dateStr}
+                onClick={() => onChange({ date: dateStr, time: null })}
+                startIcon={<EventAvailable />}
+                sx={{
+                  justifyContent: 'flex-start',
+                  textTransform: 'capitalize',
+                  p: 1.5,
+                  borderRadius: '12px',
+                  fontWeight: 700,
+                  fontSize: '1rem',
+                  border: '2px solid',
+                  borderColor: selected ? '#c8626d' : '#f0dcd9',
+                  color: selected ? '#fff' : '#c8626d',
+                  backgroundColor: selected ? '#c8626d' : '#fdeeee',
+                  '&:hover': { backgroundColor: selected ? '#b5555a' : '#fbdcdc' }
+                }}
+              >
+                {formatPickupDate(dateStr, language)}
+              </Button>
+            );
+          })}
+        </Box>
+      )}
 
       {/* Horas */}
       <Box sx={{ mt: 2 }}>
