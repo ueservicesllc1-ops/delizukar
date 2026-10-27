@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Container, Typography } from '@mui/material';
+import { Box, Container, Typography, Button } from '@mui/material';
+import { Storefront } from '@mui/icons-material';
 import { db } from '../firebase/config';
 import { doc, getDoc, collection, getDocs } from 'firebase/firestore';
 import { useLanguage } from '../context/LanguageContext';
+import { useShoppingExperience } from '../context/ShoppingExperienceContext';
 import PickupPolicyNotice from '../components/PickupPolicyNotice';
 
 const normalizeHtmlContent = (text) => {
@@ -72,6 +74,7 @@ const Shipping = () => {
   const [fontsReady, setFontsReady] = useState(false);
   const [firestoreData, setFirestoreData] = useState(null);
   const { language } = useLanguage();
+  const { isPickup, openModal } = useShoppingExperience();
 
   useEffect(() => {
     loadPageData();
@@ -170,6 +173,50 @@ const Shipping = () => {
         >
           {pageData.title}
         </Typography>
+
+        {/* Aviso de modalidad si está en Pickup */}
+        {isPickup && (
+          <Box
+            sx={{
+              maxWidth: '800px',
+              mx: 'auto',
+              mb: 3,
+              p: 2,
+              borderRadius: '14px',
+              backgroundColor: '#fff4e5',
+              border: '1.5px solid #f0a030',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              gap: 2,
+              flexWrap: 'wrap'
+            }}
+          >
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <Storefront sx={{ color: '#c8626d' }} />
+              <Typography variant="body2" sx={{ color: '#8a5a00', fontWeight: 600 }}>
+                {language === 'en'
+                  ? 'You are currently in Local Pickup mode (Clifton, NJ). Pickup orders have no shipping fees!'
+                  : 'Actualmente estás en modalidad Recogida Local (Clifton, NJ). ¡Los pedidos con recogida no tienen costo de envío!'}
+              </Typography>
+            </Box>
+            <Button
+              size="small"
+              onClick={openModal}
+              sx={{
+                color: '#c8626d',
+                borderColor: '#c8626d',
+                fontWeight: 700,
+                textTransform: 'none',
+                borderRadius: '999px',
+                '&:hover': { backgroundColor: '#ffecec', borderColor: '#c8626d' }
+              }}
+              variant="outlined"
+            >
+              {language === 'en' ? 'Switch to Shipping' : 'Cambiar a Envíos'}
+            </Button>
+          </Box>
+        )}
         
         {/* Contenido de la página */}
         <Box sx={{ mt: 3, display: 'flex', justifyContent: 'center' }}>

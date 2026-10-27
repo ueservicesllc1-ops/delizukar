@@ -27,11 +27,13 @@ import FeaturedProducts from '../components/FeaturedProducts';
 import ComparisonTable from '../components/ComparisonTable';
 import CookieBoxPromo from '../components/CookieBoxPromo';
 import PickupRunningBanner from '../components/PickupRunningBanner';
+import { useShoppingExperience } from '../context/ShoppingExperienceContext';
 import { db } from '../firebase/config';
 import { collection, query, where, orderBy, limit, doc, onSnapshot } from 'firebase/firestore';
 
 const Home = () => {
   const { products, productsLoading, addToCart } = useStore();
+  const { isShipping, isModalOpen, hasSelectedModality } = useShoppingExperience();
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [isBrittanyLoaded, setIsBrittanyLoaded] = useState(false);
   const [popupHeroOpen, setPopupHeroOpen] = useState(false);
@@ -138,9 +140,11 @@ const Home = () => {
   const handleCloseDetail = () => setSelectedProduct(null);
 
   useEffect(() => {
+    // Si el modal de selección inicial está abierto, esperar a que se cierre
+    if (isModalOpen) return;
     const timer = setTimeout(() => setPopupHeroOpen(true), 1500);
     return () => clearTimeout(timer);
-  }, []);
+  }, [isModalOpen]);
 
   const handleClosePopupHero = () => {
     setPopupHeroOpen(false);
@@ -149,9 +153,12 @@ const Home = () => {
 
   const handleClosePromo = () => {
     setShowPromo(false);
-    setTimeout(() => {
-      setShowPickupBanner(true);
-    }, 600);
+    // Solo mostrar banner de pickup si NO estamos en modo shipping
+    if (!isShipping) {
+      setTimeout(() => {
+        setShowPickupBanner(true);
+      }, 600);
+    }
   };
 
   return (
@@ -166,7 +173,7 @@ const Home = () => {
     }}>
       <PopupHero open={popupHeroOpen} onClose={handleClosePopupHero} />
       <CookieBoxPromo open={showPromo} onClose={handleClosePromo} />
-      {showPickupBanner && !popupHeroOpen && !showPromo && (
+      {!isShipping && showPickupBanner && !popupHeroOpen && !showPromo && (
         <PickupRunningBanner onFinish={() => setShowPickupBanner(false)} />
       )}
       

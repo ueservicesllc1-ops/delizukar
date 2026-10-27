@@ -8,6 +8,7 @@ import { useNavigate } from 'react-router-dom';
 import AfterpayMessaging from '../components/AfterpayMessaging';
 import { useMinProducts } from '../hooks/useMinProducts';
 import { useLanguage } from '../context/LanguageContext';
+import { useShoppingExperience } from '../context/ShoppingExperienceContext';
  
 import { auth, db } from '../firebase/config';
 import { onAuthStateChanged } from 'firebase/auth';
@@ -84,6 +85,7 @@ const CART_TRANSLATIONS = {
 
 const Cart = () => {
   const { language } = useLanguage();
+  const { isPickup } = useShoppingExperience();
   const t = (key, fallbackOrVars, maybeVars) => {
     let fallback = undefined;
     let vars = {};
@@ -294,15 +296,17 @@ const Cart = () => {
     const individualCount = calculateIndividualCookiesCount();
     const hasBox = items.some(item => item.category === 'boxes');
 
+    const policyCheck = isPickup ? true : acceptShippingPolicy;
+
     // Regla según solicitud del usuario:
     // 1. Si hay galletas individuales, debe haber al menos 4 (minProducts),
     //    incluso si también hay cajas en el pedido.
     if (individualCount > 0) {
-      return individualCount >= minProducts && acceptShippingPolicy;
+      return individualCount >= minProducts && policyCheck;
     }
     
     // 2. Si no hay galletas individuales, se permite la compra si hay al menos una caja.
-    return hasBox && acceptShippingPolicy;
+    return hasBox && policyCheck;
   };
 
   return (
@@ -749,10 +753,14 @@ const Cart = () => {
                       
                       <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
                         <Typography variant="body2" sx={{ color: '#666', fontSize: '0.9rem' }}>
-                          {t('cart.shipping')}
+                          {isPickup
+                            ? (language === 'en' ? 'Local Pickup (Clifton, NJ)' : 'Recogida Local (Clifton, NJ)')
+                            : t('cart.shipping')}
                         </Typography>
-                        <Typography variant="body2" sx={{ fontWeight: 600, color: '#666', fontSize: '0.9rem' }}>
-                          {t('cart.toBeDetermined')}
+                        <Typography variant="body2" sx={{ fontWeight: 600, color: isPickup ? '#4caf50' : '#666', fontSize: '0.9rem' }}>
+                          {isPickup
+                            ? (language === 'en' ? 'Free' : 'Gratis')
+                            : t('cart.toBeDetermined')}
                         </Typography>
                       </Box>
                       
@@ -773,46 +781,48 @@ const Cart = () => {
                       <AfterpayMessaging amount={calculateTotal()} />
                     )}
 
-                    {/* Checkbox para aceptar política de envío */}
-                    <FormControlLabel
-                      control={
-                        <Checkbox
-                          checked={acceptShippingPolicy}
-                          onChange={(e) => setAcceptShippingPolicy(e.target.checked)}
-                          size="small"
-                          sx={{
-                            color: '#c8626d',
-                            '&.Mui-checked': {
-                              color: '#c8626d'
-                            }
-                          }}
-                        />
-                      }
-                      label={
-                        <Typography variant="body2" sx={{ color: '#666', fontSize: '0.8rem' }}>
-                          {t('cart.accept')}{' '}
-                          <Button
-                            variant="text"
+                    {/* Checkbox para aceptar política de envío - Solo en modo Shipping */}
+                    {!isPickup && (
+                      <FormControlLabel
+                        control={
+                          <Checkbox
+                            checked={acceptShippingPolicy}
+                            onChange={(e) => setAcceptShippingPolicy(e.target.checked)}
+                            size="small"
                             sx={{
                               color: '#c8626d',
-                              textTransform: 'none',
-                              p: 0,
-                              minWidth: 'auto',
-                              textDecoration: 'underline',
-                              fontSize: '0.8rem',
-                              '&:hover': {
-                                backgroundColor: 'transparent',
-                                textDecoration: 'underline'
+                              '&.Mui-checked': {
+                                color: '#c8626d'
                               }
                             }}
-                            onClick={() => navigate('/shipping')}
-                          >
-                            {t('cart.shippingPolicy')}
-                          </Button>
-                        </Typography>
-                      }
-                      sx={{ mb: 1.5, alignItems: 'flex-start' }}
-                    />
+                          />
+                        }
+                        label={
+                          <Typography variant="body2" sx={{ color: '#666', fontSize: '0.8rem' }}>
+                            {t('cart.accept')}{' '}
+                            <Button
+                              variant="text"
+                              sx={{
+                                color: '#c8626d',
+                                textTransform: 'none',
+                                p: 0,
+                                minWidth: 'auto',
+                                textDecoration: 'underline',
+                                fontSize: '0.8rem',
+                                '&:hover': {
+                                  backgroundColor: 'transparent',
+                                  textDecoration: 'underline'
+                                }
+                              }}
+                              onClick={() => navigate('/shipping')}
+                            >
+                              {t('cart.shippingPolicy')}
+                            </Button>
+                          </Typography>
+                        }
+                        sx={{ mb: 1.5, alignItems: 'flex-start' }}
+                      />
+                    )}
 
                     <Button
                       variant="contained"
@@ -844,7 +854,7 @@ const Cart = () => {
                             count: minProducts,
                             plural: minProducts > 1 ? 's' : ''
                           })
-                        : !acceptShippingPolicy
+                        : (!isPickup && !acceptShippingPolicy)
                         ? t('cart.acceptShipping')
                         : t('cart.cannotProceed')}
                     </Button>

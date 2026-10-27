@@ -23,7 +23,9 @@ import {
   ShoppingBag,
   Person,
   Security,
-  Login
+  Login,
+  Storefront,
+  LocalShipping
 } from '@mui/icons-material';
 import { useStore } from '../context/StoreContext';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -36,6 +38,7 @@ import {
 } from 'firebase/auth';
 import { collection, addDoc, getDocs, query, where } from 'firebase/firestore';
 import { useLanguage } from '../context/LanguageContext';
+import { useShoppingExperience } from '../context/ShoppingExperienceContext';
 import { startAutoTranslate, stopAutoTranslate } from '../utils/applyTranslations';
 import { translateText } from '../services/translateService';
 
@@ -165,6 +168,72 @@ const Header = () => {
     return null;
   }
 
+  const { modality, isPickup, isShipping, openModal } = useShoppingExperience();
+
+  const ExperienceBar = () => {
+    const isEn = language === 'en';
+    const label = isPickup
+      ? (isEn ? 'LOCAL PICKUP — CLIFTON, NJ' : 'RECOGIDA LOCAL — CLIFTON, NJ')
+      : isShipping
+      ? (isEn ? 'SHIPPING — DELIVERED TO YOU' : 'ENVÍO — DIRECTO A TU PUERTA')
+      : (isEn ? 'CHOOSE EXPERIENCE: PICKUP OR SHIPPING' : 'ELIGE EXPERIENCIA: RECOGIDA O ENVÍO');
+
+    const buttonText = modality
+      ? (isEn ? 'CHANGE' : 'CAMBIAR')
+      : (isEn ? 'SELECT' : 'ELEGIR');
+
+    return (
+      <Box
+        sx={{
+          backgroundColor: '#c8626d',
+          color: '#ffffff',
+          py: { xs: 0.5, sm: 0.6 },
+          px: { xs: 1.5, sm: 2 },
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: { xs: 0.8, sm: 1.2 },
+          fontSize: { xs: '0.7rem', sm: '0.8rem' },
+          fontWeight: 700,
+          letterSpacing: '0.4px',
+          textAlign: 'center',
+          borderBottom: '1px solid rgba(255, 255, 255, 0.2)',
+          zIndex: 10
+        }}
+      >
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.6, flexWrap: 'nowrap' }}>
+          {isPickup && <Storefront sx={{ fontSize: { xs: '0.95rem', sm: '1.05rem' }, color: '#ffe6e8' }} />}
+          {isShipping && <LocalShipping sx={{ fontSize: { xs: '0.95rem', sm: '1.05rem' }, color: '#ffe6e8' }} />}
+          <span>{label}</span>
+        </Box>
+        <Box sx={{ opacity: 0.6, mx: 0.2 }}>|</Box>
+        <Button
+          size="small"
+          onClick={openModal}
+          sx={{
+            color: '#ffffff',
+            backgroundColor: 'rgba(255, 255, 255, 0.2)',
+            textTransform: 'uppercase',
+            fontWeight: 800,
+            fontSize: { xs: '0.64rem', sm: '0.72rem' },
+            py: 0.15,
+            px: { xs: 1, sm: 1.4 },
+            minWidth: 'auto',
+            borderRadius: '999px',
+            border: '1px solid rgba(255, 255, 255, 0.45)',
+            '&:hover': {
+              backgroundColor: '#ffffff',
+              color: '#c8626d'
+            },
+            transition: 'all 0.2s ease'
+          }}
+        >
+          {buttonText}
+        </Button>
+      </Box>
+    );
+  };
+
   const drawer = (
     <Box sx={{ width: 260, height: '100%', backgroundColor: '#c8626d', color: 'white', display: 'flex', flexDirection: 'column' }}>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', px: 2, py: 2 }}>
@@ -173,6 +242,39 @@ const Header = () => {
           <MenuIcon />
         </IconButton>
       </Box>
+
+      {/* Modalidad de Compra en Drawer */}
+      <Box sx={{ mx: 2, mb: 1.5, p: 1.5, backgroundColor: 'rgba(0,0,0,0.14)', borderRadius: '14px', border: '1px solid rgba(255,255,255,0.2)' }}>
+        <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.75)', textTransform: 'uppercase', fontSize: '0.68rem', fontWeight: 600, display: 'block', mb: 0.5 }}>
+          {language === 'en' ? 'Shopping Mode' : 'Modo de Compra'}
+        </Typography>
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 1 }}>
+          <Typography variant="body2" sx={{ fontWeight: 700, fontSize: '0.82rem', display: 'flex', alignItems: 'center', gap: 0.5 }}>
+            {isPickup ? '🏪 PICKUP' : isShipping ? '📦 SHIPPING' : (language === 'en' ? 'Not chosen' : 'Sin elegir')}
+          </Typography>
+          <Button
+            size="small"
+            onClick={() => {
+              setMobileOpen(false);
+              openModal();
+            }}
+            sx={{
+              color: '#c8626d',
+              backgroundColor: '#ffffff',
+              fontSize: '0.7rem',
+              fontWeight: 800,
+              py: 0.2,
+              px: 1,
+              borderRadius: '999px',
+              minWidth: 'auto',
+              '&:hover': { backgroundColor: '#fff0f2' }
+            }}
+          >
+            {language === 'en' ? 'CHANGE' : 'CAMBIAR'}
+          </Button>
+        </Box>
+      </Box>
+
       <List sx={{ flexGrow: 1 }}>
         {menuItems.map((item) => (
           <ListItem key={item.label} disablePadding>
@@ -484,6 +586,7 @@ const Header = () => {
           zIndex: (theme) => theme.zIndex.drawer + 1
         }}
       >
+        <ExperienceBar />
         {isMobile ? renderMobileToolbar() : renderDesktopToolbar()}
       </AppBar>
 

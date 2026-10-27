@@ -14,10 +14,12 @@ import { useLanguage } from './context/LanguageContext';
 import { StoreProvider } from './context/StoreContext';
 import { TitleConfigProvider } from './context/TitleConfigContext';
 import { FeaturedProductsProvider } from './context/FeaturedProductsContext';
+import { ShoppingExperienceProvider } from './context/ShoppingExperienceContext';
 
 // Components
 import Header from './components/Header';
 import Footer from './components/Footer';
+import ShoppingExperienceModal from './components/ShoppingExperienceModal';
 // import AutoTranslateButton from './components/AutoTranslateButton';
 
 // Pages
@@ -182,20 +184,22 @@ function App() {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-            <LanguageProvider>
-            <StoreProvider>
-              <TitleConfigProvider>
-                <FeaturedProductsProvider>
-                  <Router
-          future={{
-            v7_startTransition: true,
-            v7_relativeSplatPath: true
-          }}
-        >
-          <div className="App">
-            <RouteWatcher />
-            <Box sx={{ 
-              paddingTop: { xs: '110px', sm: '115px', md: '125px' },
+      <LanguageProvider>
+        <ShoppingExperienceProvider>
+          <StoreProvider>
+            <TitleConfigProvider>
+              <FeaturedProductsProvider>
+                <Router
+                  future={{
+                    v7_startTransition: true,
+                    v7_relativeSplatPath: true
+                  }}
+                >
+                  <div className="App">
+                    <ShoppingExperienceModal />
+                    <RouteWatcher />
+                    <Box sx={{ 
+                      paddingTop: { xs: '135px', sm: '140px', md: '150px' },
               backgroundColor: '#ffffff',
               '@media (min-width: 768px) and (max-width: 1200px) and (orientation: landscape)': {
                 paddingTop: '120px'
@@ -351,11 +355,12 @@ function App() {
               }}
             />
           </div>
-                  </Router>
-                </FeaturedProductsProvider>
-              </TitleConfigProvider>
-            </StoreProvider>
-            </LanguageProvider>
+                </Router>
+              </FeaturedProductsProvider>
+            </TitleConfigProvider>
+          </StoreProvider>
+        </ShoppingExperienceProvider>
+      </LanguageProvider>
     </ThemeProvider>
   );
 }

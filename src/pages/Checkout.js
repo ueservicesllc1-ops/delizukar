@@ -36,6 +36,7 @@ import { collection, addDoc, query, where, getDocs, updateDoc, doc } from 'fireb
 import { onAuthStateChanged } from 'firebase/auth';
 import emailjs from '@emailjs/browser';
 import { useLanguage } from '../context/LanguageContext';
+import { useShoppingExperience } from '../context/ShoppingExperienceContext';
 import GiftMessageModal from '../components/GiftMessageModal';
 import toast from 'react-hot-toast';
 
@@ -244,11 +245,12 @@ const Checkout = () => {
   const [shippingError, setShippingError] = useState(null);
 
   // Estados para Pickup (recogida en tienda)
+  const { modality, openModal } = useShoppingExperience();
   const pickupAvailability = usePickupAvailability();
-  const [fulfillmentType, setFulfillmentType] = useState('shipping');
+  const [fulfillmentType, setFulfillmentType] = useState(() => (modality === 'pickup' ? 'pickup' : 'shipping'));
   const [pickupSelection, setPickupSelection] = useState(null); // { date, time }
   const [pickupPolicyAccepted, setPickupPolicyAccepted] = useState(false);
-  const isPickup = fulfillmentType === 'pickup' && pickupAvailability.enabled;
+  const isPickup = modality === 'pickup' || fulfillmentType === 'pickup';
   const pickupText = getPickupText(language);
   const pickupSlotChosen = !!(pickupSelection?.date && pickupSelection?.time);
   const fulfillmentToggleSx = {
@@ -567,6 +569,15 @@ const Checkout = () => {
       autoValidationSignatureRef.current = ''; // permite recalcular el envío
     }
   };
+
+  // Sincronizar fulfillmentType si el usuario cambia de modalidad desde el header o modal
+  useEffect(() => {
+    if (modality === 'pickup' && fulfillmentType !== 'pickup') {
+      handleFulfillmentChange('pickup');
+    } else if (modality === 'shipping' && fulfillmentType !== 'shipping') {
+      handleFulfillmentChange('shipping');
+    }
+  }, [modality]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -1059,6 +1070,50 @@ const Checkout = () => {
               {t('checkout.backToCart')}
             </Button>
 
+            {/* Selector discreto de Modalidad en Checkout */}
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 1,
+                backgroundColor: '#ffffff',
+                border: '1.5px solid #f0ccd0',
+                boxShadow: '0 2px 8px rgba(200, 98, 109, 0.1)',
+                py: 0.6,
+                px: 1.8,
+                borderRadius: '999px'
+              }}
+            >
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.8 }}>
+                {isPickup ? (
+                  <Storefront sx={{ color: '#c8626d', fontSize: '1.1rem' }} />
+                ) : (
+                  <LocalShipping sx={{ color: '#c8626d', fontSize: '1.1rem' }} />
+                )}
+                <Typography variant="body2" sx={{ fontWeight: 700, color: '#c8626d', fontSize: { xs: '0.75rem', sm: '0.82rem' } }}>
+                  {isPickup
+                    ? (language === 'en' ? 'LOCAL PICKUP — CLIFTON, NJ' : 'RECOGIDA LOCAL — CLIFTON, NJ')
+                    : (language === 'en' ? 'SHIPPING — DELIVERED TO YOU' : 'ENVÍO — DIRECTO A TU PUERTA')}
+                </Typography>
+              </Box>
+              <Typography sx={{ color: '#c8626d', opacity: 0.5 }}>|</Typography>
+              <Button
+                size="small"
+                onClick={openModal}
+                sx={{
+                  color: '#c8626d',
+                  fontWeight: 800,
+                  fontSize: '0.75rem',
+                  p: 0,
+                  minWidth: 'auto',
+                  textDecoration: 'underline',
+                  '&:hover': { backgroundColor: 'transparent', textDecoration: 'underline' }
+                }}
+              >
+                {language === 'en' ? 'CHANGE' : 'CAMBIAR'}
+              </Button>
+            </Box>
+
             <Select
               value={language}
               onChange={(event) => setLanguage(event.target.value)}
@@ -1297,60 +1352,39 @@ const Checkout = () => {
                   </CardContent>
                 </Card>
 
-                {/* Envío o Pickup */}
-                {pickupAvailability.enabled && (
+                {/* Bloque Local Pickup - Solo si isPickup */}
+                {isPickup && (
                   <Card sx={{ mb: 2, borderRadius: '15px', boxShadow: '0 4px 16px rgba(0,0,0,0.1)' }}>
                     <CardContent sx={{ p: 2.5 }}>
                       <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
                         <Storefront sx={{ color: '#c8626d', mr: 1, fontSize: '1.2rem' }} />
                         <Typography variant="h6" sx={{ fontWeight: 700, color: '#333', fontSize: '1.1rem' }}>
-                          {pickupText.optionTitle}
+                          {pickupText.pickupTitle}
                         </Typography>
                       </Box>
 
-                      <ToggleButtonGroup
-                        exclusive
-                        fullWidth
-                        value={fulfillmentType}
-                        onChange={(event, value) => handleFulfillmentChange(value)}
-                        sx={{ mb: isPickup ? 2.5 : 0 }}
-                      >
-                        <ToggleButton value="shipping" sx={fulfillmentToggleSx}>
-                          <LocalShipping sx={{ mr: 1, fontSize: '1.2rem' }} />
-                          {pickupText.optionShipping}
-                        </ToggleButton>
-                        <ToggleButton value="pickup" sx={fulfillmentToggleSx}>
-                          <Storefront sx={{ mr: 1, fontSize: '1.2rem' }} />
-                          {pickupText.optionPickup}
-                        </ToggleButton>
-                      </ToggleButtonGroup>
-
-                      {isPickup && (
-                        <>
-                          <PickupScheduler
-                            availability={pickupAvailability}
-                            value={pickupSelection}
-                            onChange={setPickupSelection}
-                            language={language}
-                          />
-                          <Box sx={{ mt: 2, p: 1.5, borderRadius: '10px', backgroundColor: '#fff4e5', border: '1px solid #f0a030' }}>
-                            <FormControlLabel
-                              control={
-                                <Checkbox
-                                  checked={pickupPolicyAccepted}
-                                  onChange={(event) => setPickupPolicyAccepted(event.target.checked)}
-                                  sx={{ color: '#c8626d', '&.Mui-checked': { color: '#c8626d' } }}
-                                />
-                              }
-                              label={
-                                <Typography variant="body2" sx={{ color: '#8a5a00' }}>
-                                  {pickupText.policyCheckbox}
-                                </Typography>
-                              }
+                      <PickupScheduler
+                        availability={pickupAvailability}
+                        value={pickupSelection}
+                        onChange={setPickupSelection}
+                        language={language}
+                      />
+                      <Box sx={{ mt: 2, p: 1.5, borderRadius: '10px', backgroundColor: '#fff4e5', border: '1px solid #f0a030' }}>
+                        <FormControlLabel
+                          control={
+                            <Checkbox
+                              checked={pickupPolicyAccepted}
+                              onChange={(event) => setPickupPolicyAccepted(event.target.checked)}
+                              sx={{ color: '#c8626d', '&.Mui-checked': { color: '#c8626d' } }}
                             />
-                          </Box>
-                        </>
-                      )}
+                          }
+                          label={
+                            <Typography variant="body2" sx={{ color: '#8a5a00' }}>
+                              {pickupText.policyCheckbox}
+                            </Typography>
+                          }
+                        />
+                      </Box>
                     </CardContent>
                   </Card>
                 )}
@@ -1647,7 +1681,7 @@ const Checkout = () => {
                       </Box>
                     )}
 
-                    {shippingInfo && (
+                    {!isPickup && shippingInfo && (
                       <Box sx={{ mb: 2, p: 1.5, backgroundColor: '#f8f9fa', borderRadius: '8px' }}>
                         <Typography variant="body1" sx={{ mb: 0.5, color: '#c8626d', fontWeight: 600, fontSize: '0.9rem' }}>
                           {t('checkout.shippingConfigured')}
@@ -1711,8 +1745,8 @@ const Checkout = () => {
 
                     {/* El envío se calcula automáticamente al completar la dirección */}
 
-                    {/* Error de envío */}
-                    {shippingError && (
+                    {/* Error de envío - Solo si es SHIPPING */}
+                    {!isPickup && shippingError && (
                       <Alert severity="error" sx={{ mb: 1.5, fontSize: '0.8rem' }}>
                         {shippingError}
                       </Alert>
@@ -2404,61 +2438,67 @@ const Checkout = () => {
           </Grid>
         </form>
 
-        {/* Address Correction */}
-        <AddressCorrection
-          open={addressCorrectionOpen}
-          onClose={() => setAddressCorrectionOpen(false)}
-          originalAddress={correctedAddress}
-          onAddressCorrected={handleAddressCorrected}
-        />
+        {/* Address Correction - Solo en modo Shipping */}
+        {!isPickup && (
+          <AddressCorrection
+            open={addressCorrectionOpen}
+            onClose={() => setAddressCorrectionOpen(false)}
+            originalAddress={correctedAddress}
+            onAddressCorrected={handleAddressCorrected}
+          />
+        )}
 
-        {/* Shipping Calculator */}
-        <ShippingCalculator
-          open={shippingOpen}
-          onClose={() => setShippingOpen(false)}
-          orderData={createShippingData()}
-          onShippingSelected={handleShippingSelected}
-        />
+        {/* Shipping Calculator - Solo en modo Shipping */}
+        {!isPickup && (
+          <ShippingCalculator
+            open={shippingOpen}
+            onClose={() => setShippingOpen(false)}
+            orderData={createShippingData()}
+            onShippingSelected={handleShippingSelected}
+          />
+        )}
 
-        {/* Shipping Confirmation Popup */}
-        <ShippingConfirmationPopup
-          open={shippingConfirmationOpen}
-          onClose={() => setShippingConfirmationOpen(false)}
-          onAccept={handleShippingAccept}
-          shippingInfo={shippingInfo}
-          cartItems={cart}
-          total={cartTotal}
-          customerInfo={{
-            email: formData.email,
-            firstName: formData.firstName,
-            lastName: formData.lastName,
-            address: {
-              line1: formData.address,
-              city: formData.city,
-              postal_code: formData.zipCode,
-              state: formData.state,
-              country: 'US'
-            },
-            phone: formData.phone
-          }}
-          onPaymentSuccess={(paymentIntent) => {
-            console.log('✅ Payment successful, clearing cart and navigating');
-            clearCart();
-            
-            // Guardar información de envío en localStorage
-            if (shippingInfo) {
-              localStorage.setItem('lastShippingInfo', JSON.stringify(shippingInfo));
-              console.log('📦 Shipping info saved:', shippingInfo);
-            }
-            
-            // Pasar el payment intent ID en la URL
-            navigate(`/checkout/success?payment_intent=${paymentIntent.id}`);
-          }}
-          onPaymentError={(error) => {
-            console.log('❌ Payment error:', error);
-            setPaymentError(error.message);
-          }}
-        />
+        {/* Shipping Confirmation Popup - Solo en modo Shipping */}
+        {!isPickup && (
+          <ShippingConfirmationPopup
+            open={shippingConfirmationOpen}
+            onClose={() => setShippingConfirmationOpen(false)}
+            onAccept={handleShippingAccept}
+            shippingInfo={shippingInfo}
+            cartItems={cart}
+            total={cartTotal}
+            customerInfo={{
+              email: formData.email,
+              firstName: formData.firstName,
+              lastName: formData.lastName,
+              address: {
+                line1: formData.address,
+                city: formData.city,
+                postal_code: formData.zipCode,
+                state: formData.state,
+                country: 'US'
+              },
+              phone: formData.phone
+            }}
+            onPaymentSuccess={(paymentIntent) => {
+              console.log('✅ Payment successful, clearing cart and navigating');
+              clearCart();
+              
+              // Guardar información de envío en localStorage
+              if (shippingInfo) {
+                localStorage.setItem('lastShippingInfo', JSON.stringify(shippingInfo));
+                console.log('📦 Shipping info saved:', shippingInfo);
+              }
+              
+              // Pasar el payment intent ID en la URL
+              navigate(`/checkout/success?payment_intent=${paymentIntent.id}`);
+            }}
+            onPaymentError={(error) => {
+              console.log('❌ Payment error:', error);
+              setPaymentError(error.message);
+            }}
+          />
+        )}
       </Container>
     </Box>
   );

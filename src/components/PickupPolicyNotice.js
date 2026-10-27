@@ -4,6 +4,8 @@ import { Storefront } from '@mui/icons-material';
 import { useLanguage } from '../context/LanguageContext';
 import { getPickupText } from '../utils/pickup';
 
+import { useShoppingExperience } from '../context/ShoppingExperienceContext';
+
 /**
  * Aviso fijo de la política de recogida (sin devoluciones).
  * variant="policy" -> bloque de política (Envíos / Términos)
@@ -11,7 +13,13 @@ import { getPickupText } from '../utils/pickup';
  */
 const PickupPolicyNotice = ({ variant = 'policy' }) => {
   const { language } = useLanguage();
+  const { isShipping } = useShoppingExperience();
   const text = getPickupText(language);
+
+  // Ocultar si el cliente ha seleccionado Shipping
+  if (isShipping) {
+    return null;
+  }
 
   return (
     <Box sx={{ maxWidth: '800px', mx: 'auto', px: 2, mt: 4 }}>
