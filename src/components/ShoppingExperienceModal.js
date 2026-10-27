@@ -18,10 +18,12 @@ import {
   LocalShipping,
   CheckCircle,
   Place,
-  ArrowForward
+  ArrowForward,
+  Translate
 } from '@mui/icons-material';
 import { useShoppingExperience } from '../context/ShoppingExperienceContext';
 import { useLanguage } from '../context/LanguageContext';
+import { stopAutoTranslate, startAutoTranslate, applyTranslations } from '../utils/applyTranslations';
 
 const MODAL_TEXTS = {
   en: {
@@ -37,7 +39,8 @@ const MODAL_TEXTS = {
     shippingButton: 'SHOP WITH SHIPPING',
     shippingBadge: 'DELIVERED TO YOU',
     currentlyActive: 'Currently selected',
-    closeAria: 'Close experience selector'
+    closeAria: 'Close experience selector',
+    selectLanguageAria: 'Select language'
   },
   es: {
     welcomeSubtitle: 'Por favor selecciona cómo deseas recibir tus deliciosas galletas recién horneadas:',
@@ -52,13 +55,14 @@ const MODAL_TEXTS = {
     shippingButton: 'COMPRAR CON ENVÍO',
     shippingBadge: 'DIRECTO A TU PUERTA',
     currentlyActive: 'Actualmente seleccionada',
-    closeAria: 'Cerrar selector de experiencia'
+    closeAria: 'Cerrar selector de experiencia',
+    selectLanguageAria: 'Seleccionar idioma'
   }
 };
 
 const ShoppingExperienceModal = () => {
   const { isModalOpen, closeModal, setModality, modality } = useShoppingExperience();
-  const { language } = useLanguage();
+  const { language, setLanguage } = useLanguage();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
@@ -66,6 +70,21 @@ const ShoppingExperienceModal = () => {
 
   const handleSelect = (mode) => {
     setModality(mode);
+  };
+
+  const handleLanguageChange = (newLang) => {
+    if (newLang === language) return;
+    setLanguage(newLang);
+    if (newLang === 'es') {
+      stopAutoTranslate();
+    } else {
+      try {
+        applyTranslations(newLang, 'es');
+        startAutoTranslate(newLang, 'es');
+      } catch (err) {
+        console.warn('Translation warning:', err);
+      }
+    }
   };
 
   return (
@@ -95,6 +114,78 @@ const ShoppingExperienceModal = () => {
         }
       }}
     >
+      {/* Selector de Idioma (Top-Left) */}
+      <Box
+        role="group"
+        aria-label={t.selectLanguageAria}
+        sx={{
+          position: 'absolute',
+          top: { xs: 12, md: 16 },
+          left: { xs: 12, md: 16 },
+          display: 'flex',
+          alignItems: 'center',
+          backgroundColor: '#ffffff',
+          border: '1.5px solid rgba(200, 98, 109, 0.28)',
+          borderRadius: '999px',
+          p: '2px',
+          boxShadow: '0 2px 8px rgba(200, 98, 109, 0.1)',
+          zIndex: 10
+        }}
+      >
+        <Translate
+          sx={{
+            fontSize: { xs: 15, sm: 17 },
+            color: '#c8626d',
+            ml: 0.8,
+            mr: 0.3
+          }}
+        />
+        <Button
+          size="small"
+          onClick={() => handleLanguageChange('en')}
+          sx={{
+            minWidth: { xs: 32, sm: 36 },
+            height: { xs: 24, sm: 26 },
+            px: { xs: 0.6, sm: 1 },
+            fontSize: { xs: '0.7rem', sm: '0.75rem' },
+            fontWeight: language === 'en' ? 800 : 600,
+            borderRadius: '999px',
+            backgroundColor: language === 'en' ? '#c8626d' : 'transparent',
+            color: language === 'en' ? '#ffffff' : '#666',
+            boxShadow: language === 'en' ? '0 2px 6px rgba(200, 98, 109, 0.3)' : 'none',
+            '&:hover': {
+              backgroundColor: language === 'en' ? '#b5555a' : 'rgba(200, 98, 109, 0.08)'
+            },
+            transition: 'all 0.2s ease',
+            lineHeight: 1
+          }}
+        >
+          EN
+        </Button>
+        <Button
+          size="small"
+          onClick={() => handleLanguageChange('es')}
+          sx={{
+            minWidth: { xs: 32, sm: 36 },
+            height: { xs: 24, sm: 26 },
+            px: { xs: 0.6, sm: 1 },
+            fontSize: { xs: '0.7rem', sm: '0.75rem' },
+            fontWeight: language === 'es' ? 800 : 600,
+            borderRadius: '999px',
+            backgroundColor: language === 'es' ? '#c8626d' : 'transparent',
+            color: language === 'es' ? '#ffffff' : '#666',
+            boxShadow: language === 'es' ? '0 2px 6px rgba(200, 98, 109, 0.3)' : 'none',
+            '&:hover': {
+              backgroundColor: language === 'es' ? '#b5555a' : 'rgba(200, 98, 109, 0.08)'
+            },
+            transition: 'all 0.2s ease',
+            lineHeight: 1
+          }}
+        >
+          ES
+        </Button>
+      </Box>
+
       {/* Botón cerrar */}
       <IconButton
         aria-label={t.closeAria}
@@ -119,9 +210,9 @@ const ShoppingExperienceModal = () => {
         <Close sx={{ fontSize: 20 }} />
       </IconButton>
 
-      <DialogContent sx={{ p: { xs: 1, sm: 2 }, overflow: 'visible' }}>
+      <DialogContent sx={{ p: { xs: 1, sm: 2 }, pt: { xs: 3, sm: 2 }, overflow: 'visible' }}>
         {/* Logo and Intro Header */}
-        <Box sx={{ textAlign: 'center', mb: { xs: 3, md: 4 } }}>
+        <Box sx={{ textAlign: 'center', mb: { xs: 3, md: 4 }, mt: { xs: 1.5, sm: 0 } }}>
           <motion.div
             initial={{ opacity: 0, y: -12 }}
             animate={{ opacity: 1, y: 0 }}
