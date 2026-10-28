@@ -19,17 +19,9 @@ export const ShoppingExperienceProvider = ({ children }) => {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  // Al montar, si no existe una modalidad guardada, abrir el selector inicial
-  useEffect(() => {
-    try {
-      const saved = localStorage.getItem(STORAGE_KEY);
-      if (!saved || (saved !== 'pickup' && saved !== 'shipping')) {
-        setIsModalOpen(true);
-      }
-    } catch (e) {
-      setIsModalOpen(true);
-    }
-  }, []);
+  // Ya no se abre el popup modal automáticamente al inicio.
+  // La selección inicial se realiza con las cartillas flotantes en el hero.
+  // El modal permanece disponible a través de openModal() desde el Header.
 
   const setModality = useCallback((mode) => {
     if (mode === 'pickup' || mode === 'shipping') {

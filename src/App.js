@@ -15,6 +15,7 @@ import { StoreProvider } from './context/StoreContext';
 import { TitleConfigProvider } from './context/TitleConfigContext';
 import { FeaturedProductsProvider } from './context/FeaturedProductsContext';
 import { ShoppingExperienceProvider } from './context/ShoppingExperienceContext';
+import { PopupsVisibilityProvider } from './context/PopupsVisibilityContext';
 
 // Components
 import Header from './components/Header';
@@ -185,7 +186,8 @@ function App() {
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <LanguageProvider>
-        <ShoppingExperienceProvider>
+        <PopupsVisibilityProvider>
+          <ShoppingExperienceProvider>
           <StoreProvider>
             <TitleConfigProvider>
               <FeaturedProductsProvider>
@@ -360,6 +362,7 @@ function App() {
             </TitleConfigProvider>
           </StoreProvider>
         </ShoppingExperienceProvider>
+        </PopupsVisibilityProvider>
       </LanguageProvider>
     </ThemeProvider>
   );

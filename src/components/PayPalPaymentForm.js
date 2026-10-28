@@ -167,14 +167,16 @@ const PayPalPaymentForm = ({
               </Box>
             </Grid>
             
-            <Grid item xs={12}>
-              <Box display="flex" justifyContent="space-between">
-                <Typography>{t('paypal.shipping')}</Typography>
-                <Typography>
-                  {orderData.shipping === '0.00' ? t('paypal.free') : `$${orderData.shipping}`}
-                </Typography>
-              </Box>
-            </Grid>
+            {!isPickup && (
+              <Grid item xs={12}>
+                <Box display="flex" justifyContent="space-between">
+                  <Typography>{t('paypal.shipping')}</Typography>
+                  <Typography>
+                    {orderData.shipping === '0.00' ? t('paypal.free') : `$${orderData.shipping}`}
+                  </Typography>
+                </Box>
+              </Grid>
+            )}
             
             <Grid item xs={12}>
               <Divider />

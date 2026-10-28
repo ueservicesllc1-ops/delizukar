@@ -26,14 +26,15 @@ import BoxSelectionPopup from '../components/BoxSelectionPopup';
 import FeaturedProducts from '../components/FeaturedProducts';
 import ComparisonTable from '../components/ComparisonTable';
 import CookieBoxPromo from '../components/CookieBoxPromo';
-import PickupRunningBanner from '../components/PickupRunningBanner';
 import { useShoppingExperience } from '../context/ShoppingExperienceContext';
+import { usePopupsVisibility } from '../context/PopupsVisibilityContext';
 import { db } from '../firebase/config';
 import { collection, query, where, orderBy, limit, doc, onSnapshot } from 'firebase/firestore';
 
 const Home = () => {
   const { products, productsLoading, addToCart } = useStore();
   const { isShipping, isModalOpen, hasSelectedModality } = useShoppingExperience();
+  const { visibility } = usePopupsVisibility();
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [isBrittanyLoaded, setIsBrittanyLoaded] = useState(false);
   const [popupHeroOpen, setPopupHeroOpen] = useState(false);
@@ -140,15 +141,17 @@ const Home = () => {
   const handleCloseDetail = () => setSelectedProduct(null);
 
   useEffect(() => {
-    // Si el modal de selección inicial está abierto, esperar a que se cierre
-    if (isModalOpen) return;
+    // Si el modal de selección inicial está abierto o el popup hero está desactivado, no abrir
+    if (isModalOpen || visibility.showPopupHero === false) return;
     const timer = setTimeout(() => setPopupHeroOpen(true), 1500);
     return () => clearTimeout(timer);
-  }, [isModalOpen]);
+  }, [isModalOpen, visibility.showPopupHero]);
 
   const handleClosePopupHero = () => {
     setPopupHeroOpen(false);
-    setTimeout(() => setShowPromo(true), 500);
+    if (visibility.showCookieBoxPromo !== false) {
+      setTimeout(() => setShowPromo(true), 500);
+    }
   };
 
   const handleClosePromo = () => {
@@ -171,12 +174,12 @@ const Home = () => {
       marginRight: '-50vw',
       marginTop: { xs: '16px', md: '72px', lg: '96px' }
     }}>
-      <PopupHero open={popupHeroOpen} onClose={handleClosePopupHero} />
-      <CookieBoxPromo open={showPromo} onClose={handleClosePromo} />
-      {!isShipping && showPickupBanner && !popupHeroOpen && !showPromo && (
-        <PickupRunningBanner onFinish={() => setShowPickupBanner(false)} />
+      {visibility.showPopupHero !== false && (
+        <PopupHero open={popupHeroOpen} onClose={handleClosePopupHero} />
       )}
-      
+      {visibility.showCookieBoxPromo !== false && (
+        <CookieBoxPromo open={showPromo} onClose={handleClosePromo} />
+      )}
       {/* Banner Section */}
       <Box sx={{ position: 'relative', width: '100%' }}>
         <Box
@@ -187,48 +190,50 @@ const Home = () => {
         />
         
         {/* Chip de peso fijo solicitado con micro-animación */}
-        <Box
-          component={motion.div}
-          animate={{ 
-            y: [0, -8, 0],
-          }}
-          transition={{ 
-            duration: 3,
-            repeat: Infinity,
-            ease: "easeInOut"
-          }}
-          sx={{
-            position: 'absolute',
-            left: { md: '5%', lg: '8%' },
-            top: { md: '18%', lg: '25%' }, 
-            display: { xs: 'none', md: 'block' },
-            zIndex: 15
-          }}
-        >
+        {visibility.showCookieWeightChip !== false && (
           <Box
+            component={motion.div}
+            animate={{ 
+              y: [0, -8, 0],
+            }}
+            transition={{ 
+              duration: 3,
+              repeat: Infinity,
+              ease: "easeInOut"
+            }}
             sx={{
-              backgroundColor: '#c8626d',
-              color: 'white',
-              fontWeight: 800,
-              fontSize: { xs: '0.4rem', sm: '0.65rem', md: '0.52rem', lg: '0.7rem' },
-              px: { xs: 1.0, sm: 1.8, md: 1.4, lg: 1.6 },
-              py: { xs: 0.7, sm: 0.9, md: 0.6, lg: 0.7 },
-              borderRadius: '999px',
-              border: '1px solid white',
-              boxShadow: '0 6px 20px rgba(200, 98, 109, 0.4)',
-              display: 'flex',
-              flexDirection: { xs: 'column', md: 'row' },
-              alignItems: 'center',
-              justifyContent: 'center',
-              textAlign: 'center',
-              lineHeight: 1.2,
-              maxWidth: { xs: '70px', md: 'none' },
-              whiteSpace: { xs: 'normal', md: 'nowrap' }
+              position: 'absolute',
+              left: { md: '5%', lg: '8%' },
+              top: { md: '18%', lg: '25%' }, 
+              display: { xs: 'none', md: 'block' },
+              zIndex: 15
             }}
           >
-            {copy.cookieWeightChip}
+            <Box
+              sx={{
+                backgroundColor: '#c8626d',
+                color: 'white',
+                fontWeight: 800,
+                fontSize: { xs: '0.4rem', sm: '0.65rem', md: '0.52rem', lg: '0.7rem' },
+                px: { xs: 1.0, sm: 1.8, md: 1.4, lg: 1.6 },
+                py: { xs: 0.7, sm: 0.9, md: 0.6, lg: 0.7 },
+                borderRadius: '999px',
+                border: '1px solid white',
+                boxShadow: '0 6px 20px rgba(200, 98, 109, 0.4)',
+                display: 'flex',
+                flexDirection: { xs: 'column', md: 'row' },
+                alignItems: 'center',
+                justifyContent: 'center',
+                textAlign: 'center',
+                lineHeight: 1.2,
+                maxWidth: { xs: '70px', md: 'none' },
+                whiteSpace: { xs: 'normal', md: 'nowrap' }
+              }}
+            >
+              {copy.cookieWeightChip}
+            </Box>
           </Box>
-        </Box>
+        )}
         
         {/* Texto Flotante sobre el Banner */}
         {heroText && (

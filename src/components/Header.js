@@ -41,6 +41,8 @@ import { useLanguage } from '../context/LanguageContext';
 import { useShoppingExperience } from '../context/ShoppingExperienceContext';
 import { startAutoTranslate, stopAutoTranslate } from '../utils/applyTranslations';
 import { translateText } from '../services/translateService';
+import HeaderExperienceFlyer from './HeaderExperienceFlyer';
+import { usePopupsVisibility } from '../context/PopupsVisibilityContext';
 
 const Header = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -49,6 +51,7 @@ const Header = () => {
   const [translatingLang, setTranslatingLang] = useState(false);
   const { getCartItemsCount } = useStore();
   const { language, setLanguage } = useLanguage();
+  const { visibility } = usePopupsVisibility();
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -364,42 +367,44 @@ const Header = () => {
         </IconButton>
 
         {/* Chip de peso en el header */}
-        <Box
-          component={motion.div}
-          animate={{ y: [0, -3, 0] }}
-          transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-          sx={{ 
-            position: 'absolute', 
-            left: '60px', 
-            top: '50px', 
-            zIndex: 100,
-            display: { xs: 'flex', md: 'none' } 
-          }}
-        >
+        {visibility.showCookieWeightChip !== false && (
           <Box
-            sx={{
-              backgroundColor: '#c8626d',
-              color: 'white',
-              fontWeight: 800,
-              fontSize: { xs: '0.42rem', sm: '0.65rem' },
-              px: { xs: 1.2, sm: 2 },
-              py: { xs: 0.8, sm: 1.2 },
-              borderRadius: '20px',
-              border: '0.5px solid white',
-              boxShadow: '0 4px 10px rgba(200, 98, 109, 0.2)',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'center',
-              textAlign: 'center',
-              lineHeight: 1.1,
-              maxWidth: { xs: '65px', sm: '100px' },
-              whiteSpace: 'normal'
+            component={motion.div}
+            animate={{ y: [0, -3, 0] }}
+            transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+            sx={{ 
+              position: 'absolute', 
+              left: '60px', 
+              top: '50px', 
+              zIndex: 100,
+              display: { xs: 'flex', md: 'none' } 
             }}
           >
-            {L.cookieWeightChip}
+            <Box
+              sx={{
+                backgroundColor: '#c8626d',
+                color: 'white',
+                fontWeight: 800,
+                fontSize: { xs: '0.42rem', sm: '0.65rem' },
+                px: { xs: 1.2, sm: 2 },
+                py: { xs: 0.8, sm: 1.2 },
+                borderRadius: '20px',
+                border: '0.5px solid white',
+                boxShadow: '0 4px 10px rgba(200, 98, 109, 0.2)',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                textAlign: 'center',
+                lineHeight: 1.1,
+                maxWidth: { xs: '65px', sm: '100px' },
+                whiteSpace: 'normal'
+              }}
+            >
+              {L.cookieWeightChip}
+            </Box>
           </Box>
-        </Box>
+        )}
 
         <motion.a href="/" whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} style={{ display: 'flex', justifyContent: 'center', width: '100%', marginTop: '6px' }}>
           <Box component="img" src="/LOGO.png" alt="Delizukar Logo" sx={{ height: 95, width: 'auto' }} />
@@ -423,41 +428,54 @@ const Header = () => {
         </Box>
       </Box>
 
+      {/* Cartillas de Recogida y Envío en cabecera móvil */}
+      {(visibility.showPickupFlyer !== false || visibility.showShippingFlyer !== false) && (
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1, width: '100%', px: 1, pt: 0.5 }}>
+          {visibility.showPickupFlyer !== false && <HeaderExperienceFlyer type="pickup" isMobile />}
+          {visibility.showShippingFlyer !== false && <HeaderExperienceFlyer type="shipping" isMobile />}
+        </Box>
+      )}
+
     </Toolbar>
   );
 
   const renderDesktopToolbar = () => (
-            <Toolbar
-              disableGutters
-              sx={{
-                display: { xs: 'none', md: 'flex' },
-                flexDirection: 'column',
-                alignItems: 'stretch',
-                gap: { md: 1.5, lg: 2 },
-                px: { md: 2, lg: 6 },
-                py: { md: 1, lg: 1.5 },
-                minHeight: 'auto'
-              }}
-            >
-      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: { md: 1.5, lg: 2 }, flex: 1 }}>
-          <IconButton sx={{ color: '#be8782', ml: { md: 1, lg: 6 } }}>
+    <Toolbar
+      disableGutters
+      sx={{
+        display: { xs: 'none', md: 'flex' },
+        flexDirection: 'column',
+        alignItems: 'stretch',
+        gap: { md: 1.5, lg: 2 },
+        px: { md: 2, lg: 6 },
+        py: { md: 1.8, lg: 2.6 },
+        minHeight: 'auto'
+      }}
+    >
+      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', gap: { md: 1.5, lg: 2 } }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: { md: 1, lg: 2 }, flex: 1, justifyContent: 'flex-start' }}>
+          <IconButton sx={{ color: '#be8782', ml: { md: 1, lg: 2 }, mr: 'auto' }}>
             <Search />
           </IconButton>
+          {visibility.showPickupFlyer !== false && (
+            <Box sx={{ mr: { md: 8, lg: 18 }, display: 'flex' }}>
+              <HeaderExperienceFlyer type="pickup" />
+            </Box>
+          )}
         </Box>
 
         <motion.a
           href="/"
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
-          style={{ display: 'flex', justifyContent: 'center', flex: 1 }}
+          style={{ display: 'flex', justifyContent: 'center', flexShrink: 0 }}
         >
           <Box 
             component="img" 
             src="/LOGO.png" 
             alt="Delizukar Logo" 
             sx={{ 
-              height: { md: 100, lg: 130 }, 
+              height: { md: 120, lg: 155 }, 
               width: 'auto', 
               maxWidth: '100%', 
               objectFit: 'contain' 
@@ -467,13 +485,24 @@ const Header = () => {
 
         <Box sx={{ 
           display: 'flex', 
-          flexDirection: 'column',
-          alignItems: 'flex-end',
-          gap: 0.5,
-          justifyContent: 'center', 
-          flex: 1, 
-          minWidth: { md: '220px', lg: '300px' } 
+          alignItems: 'center',
+          gap: { md: 1.5, lg: 2 },
+          justifyContent: 'flex-end', 
+          flex: 1
         }}>
+          {visibility.showShippingFlyer !== false && (
+            <Box sx={{ ml: { md: 8, lg: 18 }, mr: 'auto', display: 'flex' }}>
+              <HeaderExperienceFlyer type="shipping" />
+            </Box>
+          )}
+          <Box sx={{ 
+            display: 'flex', 
+            flexDirection: 'column',
+            alignItems: 'flex-end',
+            gap: 0.5,
+            justifyContent: 'center', 
+            minWidth: { md: '180px', lg: '240px' } 
+          }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: { md: 1.2, lg: 1.6 } }}>
             {user ? (
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -539,6 +568,7 @@ const Header = () => {
           <LanguageSelect sx={{ px: 1.5, py: 0.4, fontSize: '0.8rem' }} />
         </Box>
       </Box>
+    </Box>
 
       <Box
         sx={{

@@ -68,7 +68,8 @@ import {
   Movie,
   AutoAwesome,
   Storefront,
-  Schedule
+  Schedule,
+  Widgets
 } from '@mui/icons-material';
 import FontManager from '../components/FontManager';
 import BannerPhotoManager from '../components/BannerPhotoManager';
@@ -91,6 +92,7 @@ import BannerTextManager from '../components/BannerTextManager';
 import HeroTextManager from '../components/HeroTextManager';
 import PickupOrdersManager from '../components/PickupOrdersManager';
 import PickupSettingsManager from '../components/PickupSettingsManager';
+import PopupsVisibilityManager from '../components/PopupsVisibilityManager';
 
 const AdminDashboard = () => {
   const [fontManagerOpen, setFontManagerOpen] = useState(false);
@@ -143,6 +145,7 @@ const AdminDashboard = () => {
   const [giftMessagesOpen, setGiftMessagesOpen] = useState(false);
   const [pickupOrdersManagerOpen, setPickupOrdersManagerOpen] = useState(false);
   const [pickupSettingsManagerOpen, setPickupSettingsManagerOpen] = useState(false);
+  const [popupsVisibilityManagerOpen, setPopupsVisibilityManagerOpen] = useState(false);
   const [orders, setOrders] = useState([]);
   const [loadingOrders, setLoadingOrders] = useState(false);
   const navigate = useNavigate();
@@ -826,14 +829,15 @@ const AdminDashboard = () => {
         >
             <Box sx={{ mt: 12, pt: 6 }}>
             <Grid container spacing={0} sx={{ maxWidth: '1000px', mx: 'auto' }}>
-              {Array.from({ length: 30 }, (_, index) => {
+              {Array.from({ length: 32 }, (_, index) => {
                 const colors = [
                   '#c8626d', '#be8782', '#b5555a', '#c8626d',
                   '#c8626d', '#c8626d', '#c8626d', '#c8626d',
                   '#BC8F8F', '#F5DEB3', '#DDA0DD', '#98FB98',
                   '#F0E68C', '#FFB6C1', '#87CEEB', '#FFA07A',
                   '#C8626D', '#7C2815', '#EB8B8B', '#8D9A7D', '#C8626D', '#c8626d', '#be8782', '#b5555a', '#C8626D', '#7C2815', '#c8626d', '#7C2815',
-                  '#C8626D', '#7C2815'
+                  '#C8626D', '#7C2815',
+                  '#c8626d', '#7C2815'
                 ];
                 const color = colors[index];
                 
@@ -888,6 +892,7 @@ const AdminDashboard = () => {
                           index === 27 ? () => setHeroTextManagerOpen(true) :
                           index === 28 ? () => setPickupOrdersManagerOpen(true) :
                           index === 29 ? () => setPickupSettingsManagerOpen(true) :
+                          index === 30 ? () => setPopupsVisibilityManagerOpen(true) :
                           undefined
                         }
                         sx={{
@@ -1053,6 +1058,11 @@ const AdminDashboard = () => {
                             <Schedule sx={{ color: 'white', fontSize: '2rem' }} />
                             <Typography variant="body2" sx={{ color: 'white', fontWeight: 600, textShadow: '1px 1px 2px rgba(0,0,0,0.5)', textAlign: 'center' }}>Config. Pickup</Typography>
                           </Box>
+                        ) : index === 30 ? (
+                          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1 }}>
+                            <Widgets sx={{ color: 'white', fontSize: '2rem' }} />
+                            <Typography variant="body2" sx={{ color: 'white', fontWeight: 600, textShadow: '1px 1px 2px rgba(0,0,0,0.5)', textAlign: 'center' }}>Control Popups</Typography>
+                          </Box>
                         ) : (
                           <Typography
                             variant="h6"
@@ -1202,6 +1212,12 @@ const AdminDashboard = () => {
       <PickupSettingsManager
         open={pickupSettingsManagerOpen}
         onClose={() => setPickupSettingsManagerOpen(false)}
+      />
+
+      {/* Control de Popups y Flotantes */}
+      <PopupsVisibilityManager
+        open={popupsVisibilityManagerOpen}
+        onClose={() => setPopupsVisibilityManagerOpen(false)}
       />
 
       {/* Gestor de Vouchers */}

@@ -20,6 +20,7 @@ import {
   Translate
 } from '@mui/icons-material';
 import { useShoppingExperience } from '../context/ShoppingExperienceContext';
+import { usePopupsVisibility } from '../context/PopupsVisibilityContext';
 import { useLanguage } from '../context/LanguageContext';
 import { stopAutoTranslate, startAutoTranslate, applyTranslations } from '../utils/applyTranslations';
 
@@ -58,6 +59,7 @@ const MODAL_TEXTS = {
 
 const ShoppingExperienceModal = () => {
   const { isModalOpen, closeModal, setModality, modality } = useShoppingExperience();
+  const { visibility } = usePopupsVisibility();
   const { language, setLanguage } = useLanguage();
 
   const t = MODAL_TEXTS[language === 'en' ? 'en' : 'es'];
@@ -121,7 +123,7 @@ const ShoppingExperienceModal = () => {
 
   return (
     <Dialog
-      open={isModalOpen}
+      open={Boolean(isModalOpen && visibility.showExperienceModal !== false)}
       onClose={closeModal}
       maxWidth={false}
       slotProps={{

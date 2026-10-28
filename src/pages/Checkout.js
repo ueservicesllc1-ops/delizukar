@@ -123,7 +123,15 @@ const CHECKOUT_TRANSLATIONS = {
     'paypal.disclaimer': 'Pago seguro procesado por PayPal - Acepta las principales tarjetas de crédito/débito',
     'paypal.processing': 'Procesando tu pago...',
     'paypal.shippingAddress': 'Dirección de Envío',
-    'paypal.emptyCart': 'Tu carrito está vacío'
+    'paypal.emptyCart': 'Tu carrito está vacío',
+    'checkout.completeContactPrompt': 'Completa la información de contacto para continuar con el pago',
+    'checkout.requiredFields': 'Campos requeridos:',
+    'checkout.reqEmail': 'Correo electrónico',
+    'checkout.reqFirstName': 'Nombre',
+    'checkout.reqLastName': 'Apellido',
+    'checkout.reqAddress': 'Dirección',
+    'checkout.reqCity': 'Ciudad',
+    'checkout.reqZipCode': 'Código postal'
   },
   en: {
     'checkout.backToCart': 'Back to cart',
@@ -182,7 +190,15 @@ const CHECKOUT_TRANSLATIONS = {
     'paypal.disclaimer': 'Secure payment powered by PayPal - Accepts all major credit/debit cards',
     'paypal.processing': 'Processing your payment...',
     'paypal.shippingAddress': 'Shipping Address',
-    'paypal.emptyCart': 'Your cart is empty'
+    'paypal.emptyCart': 'Your cart is empty',
+    'checkout.completeContactPrompt': 'Complete contact information to continue with payment',
+    'checkout.requiredFields': 'Required fields:',
+    'checkout.reqEmail': 'Email',
+    'checkout.reqFirstName': 'First Name',
+    'checkout.reqLastName': 'Last Name',
+    'checkout.reqAddress': 'Address',
+    'checkout.reqCity': 'City',
+    'checkout.reqZipCode': 'ZIP Code'
   }
 };
 
@@ -2376,47 +2392,47 @@ const Checkout = () => {
                     ) : (
                       <Box sx={{ textAlign: 'center', py: 3 }}>
                         <Typography variant="body1" sx={{ color: '#666', mb: 2 }}>
-                          Complete contact information to continue with payment
+                          {t('checkout.completeContactPrompt', 'Completa la información de contacto para continuar con el pago')}
                         </Typography>
                         <Box sx={{ textAlign: 'left', maxWidth: '300px', mx: 'auto' }}>
                           <Typography variant="body2" sx={{ color: '#999', fontSize: '0.9rem', mb: 1 }}>
-                            Required fields:
+                            {t('checkout.requiredFields', 'Campos requeridos:')}
                           </Typography>
                           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
                             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                               <Box sx={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: formData.email ? '#C8626D' : '#EB8B8B' }} />
                               <Typography variant="body2" sx={{ fontSize: '0.8rem', color: formData.email ? '#C8626D' : '#666' }}>
-                                Email {formData.email ? '✓' : ''}
+                                {t('checkout.reqEmail', 'Correo electrónico')} {formData.email ? '✓' : ''}
                               </Typography>
                             </Box>
                             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                               <Box sx={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: formData.firstName ? '#C8626D' : '#EB8B8B' }} />
                               <Typography variant="body2" sx={{ fontSize: '0.8rem', color: formData.firstName ? '#C8626D' : '#666' }}>
-                                First Name {formData.firstName ? '✓' : ''}
+                                {t('checkout.reqFirstName', 'Nombre')} {formData.firstName ? '✓' : ''}
                               </Typography>
                             </Box>
                             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                               <Box sx={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: formData.lastName ? '#C8626D' : '#EB8B8B' }} />
                               <Typography variant="body2" sx={{ fontSize: '0.8rem', color: formData.lastName ? '#C8626D' : '#666' }}>
-                                Last Name {formData.lastName ? '✓' : ''}
+                                {t('checkout.reqLastName', 'Apellido')} {formData.lastName ? '✓' : ''}
                               </Typography>
                             </Box>
                             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                               <Box sx={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: formData.address ? '#C8626D' : '#EB8B8B' }} />
                               <Typography variant="body2" sx={{ fontSize: '0.8rem', color: formData.address ? '#C8626D' : '#666' }}>
-                                Address {formData.address ? '✓' : ''}
+                                {t('checkout.reqAddress', 'Dirección')} {formData.address ? '✓' : ''}
                               </Typography>
                             </Box>
                             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                               <Box sx={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: formData.city ? '#C8626D' : '#EB8B8B' }} />
                               <Typography variant="body2" sx={{ fontSize: '0.8rem', color: formData.city ? '#C8626D' : '#666' }}>
-                                City {formData.city ? '✓' : ''}
+                                {t('checkout.reqCity', 'Ciudad')} {formData.city ? '✓' : ''}
                               </Typography>
                             </Box>
                             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                               <Box sx={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: formData.zipCode ? '#C8626D' : '#EB8B8B' }} />
                               <Typography variant="body2" sx={{ fontSize: '0.8rem', color: formData.zipCode ? '#C8626D' : '#666' }}>
-                                ZIP Code {formData.zipCode ? '✓' : ''}
+                                {t('checkout.reqZipCode', 'Código postal')} {formData.zipCode ? '✓' : ''}
                               </Typography>
                             </Box>
                           </Box>
