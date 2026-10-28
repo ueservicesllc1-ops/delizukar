@@ -8,8 +8,6 @@ import {
   Button,
   IconButton,
   Chip,
-  useTheme,
-  useMediaQuery,
   alpha
 } from '@mui/material';
 import {
@@ -29,10 +27,9 @@ const MODAL_TEXTS = {
   en: {
     welcomeSubtitle: 'Please select how you would like to receive your freshly baked cookies:',
     pickupTitle: 'LOCAL PICKUP — CLIFTON, NJ',
-    pickupDesc: 'Order your favorite cookies online and pick them up locally in Clifton, New Jersey. No shipping fees!',
+    pickupDesc: 'Order your favorite cookies online and pick them up locally in Clifton, New Jersey.',
     pickupSubtext: 'Serving Clifton, Paterson, Garfield, and nearby New Jersey areas.',
     pickupButton: 'SHOP LOCAL PICKUP',
-    pickupBadge: 'NO SHIPPING FEES',
     shippingTitle: 'SHIPPING — DELIVERED TO YOU',
     shippingDesc: 'Shop your favorite cookies and have them delivered directly to your door.',
     shippingSubtext: 'Carefully packaged and shipped fresh across the United States.',
@@ -45,10 +42,9 @@ const MODAL_TEXTS = {
   es: {
     welcomeSubtitle: 'Por favor selecciona cómo deseas recibir tus deliciosas galletas recién horneadas:',
     pickupTitle: 'LOCAL PICKUP — CLIFTON, NJ',
-    pickupDesc: 'Ordena tus galletas favoritas online y recógelas localmente en Clifton, New Jersey. ¡Sin costo de envío!',
+    pickupDesc: 'Ordena tus galletas favoritas online y recógelas localmente en Clifton, New Jersey.',
     pickupSubtext: 'Sirviendo a Clifton, Paterson, Garfield y áreas cercanas de New Jersey.',
     pickupButton: 'COMPRAR CON RECOGIDA LOCAL',
-    pickupBadge: 'SIN COSTO DE ENVÍO',
     shippingTitle: 'SHIPPING — DELIVERED TO YOU',
     shippingDesc: 'Compra tus galletas favoritas y recíbelas directamente en la puerta de tu casa.',
     shippingSubtext: 'Cuidadosamente empacadas y enviadas frescas a todo Estados Unidos.',
@@ -63,8 +59,6 @@ const MODAL_TEXTS = {
 const ShoppingExperienceModal = () => {
   const { isModalOpen, closeModal, setModality, modality } = useShoppingExperience();
   const { language, setLanguage } = useLanguage();
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   const t = MODAL_TEXTS[language === 'en' ? 'en' : 'es'];
 
@@ -87,12 +81,49 @@ const ShoppingExperienceModal = () => {
     }
   };
 
+
+  const options = [
+    {
+      key: 'pickup',
+      Icon: Storefront,
+      title: t.pickupTitle,
+      desc: t.pickupDesc,
+      sub: t.pickupSubtext,
+      button: t.pickupButton,
+      SubIcon: Place
+    },
+    {
+      key: 'shipping',
+      Icon: LocalShipping,
+      title: t.shippingTitle,
+      desc: t.shippingDesc,
+      sub: t.shippingSubtext,
+      button: t.shippingButton,
+      badge: t.shippingBadge,
+      badgeColor: '#c8626d',
+      SubIcon: LocalShipping
+    }
+  ];
+
+  const langBtnSx = (active) => ({
+    minWidth: 30,
+    height: 22,
+    px: 0.8,
+    fontSize: '0.7rem',
+    fontWeight: active ? 800 : 600,
+    borderRadius: '999px',
+    backgroundColor: active ? '#c8626d' : 'transparent',
+    color: active ? '#ffffff' : '#666',
+    '&:hover': { backgroundColor: active ? '#b5555a' : 'rgba(200, 98, 109, 0.08)' },
+    transition: 'all 0.2s ease',
+    lineHeight: 1
+  });
+
   return (
     <Dialog
       open={isModalOpen}
       onClose={closeModal}
-      maxWidth="md"
-      fullWidth
+      maxWidth={false}
       slotProps={{
         backdrop: {
           sx: {
@@ -103,85 +134,42 @@ const ShoppingExperienceModal = () => {
       }}
       PaperProps={{
         sx: {
-          borderRadius: { xs: '20px', md: '28px' },
-          p: { xs: 2.5, sm: 4 },
+          width: { xs: 'calc(100% - 24px)', sm: 560 },
+          maxWidth: '100%',
+          maxHeight: 'calc(100% - 24px)',
+          m: { xs: 1.5, sm: 2 },
+          borderRadius: { xs: '18px', sm: '22px' },
           background: 'linear-gradient(180deg, #fffaf7 0%, #ffffff 100%)',
           boxShadow: '0 24px 60px rgba(100, 30, 40, 0.25)',
           border: '1px solid rgba(200, 98, 109, 0.15)',
           position: 'relative',
-          overflow: 'visible',
-          m: { xs: 2, sm: 3 }
+          overflowY: 'auto',
+          overflowX: 'hidden'
         }
       }}
     >
-      {/* Selector de Idioma (Top-Left) */}
+      {/* Selector de Idioma */}
       <Box
         role="group"
         aria-label={t.selectLanguageAria}
         sx={{
           position: 'absolute',
-          top: { xs: 12, md: 16 },
-          left: { xs: 12, md: 16 },
+          top: 10,
+          left: 10,
           display: 'flex',
           alignItems: 'center',
           backgroundColor: '#ffffff',
           border: '1.5px solid rgba(200, 98, 109, 0.28)',
           borderRadius: '999px',
           p: '2px',
-          boxShadow: '0 2px 8px rgba(200, 98, 109, 0.1)',
           zIndex: 10
         }}
       >
-        <Translate
-          sx={{
-            fontSize: { xs: 15, sm: 17 },
-            color: '#c8626d',
-            ml: 0.8,
-            mr: 0.3
-          }}
-        />
-        <Button
-          size="small"
-          onClick={() => handleLanguageChange('en')}
-          sx={{
-            minWidth: { xs: 32, sm: 36 },
-            height: { xs: 24, sm: 26 },
-            px: { xs: 0.6, sm: 1 },
-            fontSize: { xs: '0.7rem', sm: '0.75rem' },
-            fontWeight: language === 'en' ? 800 : 600,
-            borderRadius: '999px',
-            backgroundColor: language === 'en' ? '#c8626d' : 'transparent',
-            color: language === 'en' ? '#ffffff' : '#666',
-            boxShadow: language === 'en' ? '0 2px 6px rgba(200, 98, 109, 0.3)' : 'none',
-            '&:hover': {
-              backgroundColor: language === 'en' ? '#b5555a' : 'rgba(200, 98, 109, 0.08)'
-            },
-            transition: 'all 0.2s ease',
-            lineHeight: 1
-          }}
-        >
+        <Translate sx={{ fontSize: 15, color: '#c8626d', ml: 0.6, mr: 0.3 }} />
+        <Button size="small" onClick={() => handleLanguageChange('en')} sx={langBtnSx(language === 'en')}>
           EN
         </Button>
-        <Button
-          size="small"
-          onClick={() => handleLanguageChange('es')}
-          sx={{
-            minWidth: { xs: 32, sm: 36 },
-            height: { xs: 24, sm: 26 },
-            px: { xs: 0.6, sm: 1 },
-            fontSize: { xs: '0.7rem', sm: '0.75rem' },
-            fontWeight: language === 'es' ? 800 : 600,
-            borderRadius: '999px',
-            backgroundColor: language === 'es' ? '#c8626d' : 'transparent',
-            color: language === 'es' ? '#ffffff' : '#666',
-            boxShadow: language === 'es' ? '0 2px 6px rgba(200, 98, 109, 0.3)' : 'none',
-            '&:hover': {
-              backgroundColor: language === 'es' ? '#b5555a' : 'rgba(200, 98, 109, 0.08)'
-            },
-            transition: 'all 0.2s ease',
-            lineHeight: 1
-          }}
-        >
+        <Button size="small" onClick={() => handleLanguageChange('es')} sx={langBtnSx(language !== 'en')}>
           ES
         </Button>
       </Box>
@@ -192,64 +180,46 @@ const ShoppingExperienceModal = () => {
         onClick={closeModal}
         sx={{
           position: 'absolute',
-          top: { xs: 12, md: 16 },
-          right: { xs: 12, md: 16 },
+          top: 10,
+          right: 10,
           color: '#888',
           backgroundColor: '#f5f5f5',
-          width: 36,
-          height: 36,
-          '&:hover': {
-            backgroundColor: '#c8626d',
-            color: '#fff',
-            transform: 'rotate(90deg)'
-          },
+          width: 30,
+          height: 30,
+          '&:hover': { backgroundColor: '#c8626d', color: '#fff', transform: 'rotate(90deg)' },
           transition: 'all 0.25s ease',
           zIndex: 10
         }}
       >
-        <Close sx={{ fontSize: 20 }} />
+        <Close sx={{ fontSize: 18 }} />
       </IconButton>
 
-      <DialogContent sx={{ p: { xs: 1, sm: 2 }, pt: { xs: 3, sm: 2 }, overflow: 'visible' }}>
-        {/* Logo and Intro Header */}
-        <Box sx={{ textAlign: 'center', mb: { xs: 3, md: 4 }, mt: { xs: 1.5, sm: 0 } }}>
-          <motion.div
-            initial={{ opacity: 0, y: -12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4 }}
-          >
+      <DialogContent sx={{ p: { xs: 2, sm: 3 }, pt: { xs: 5, sm: 4 } }}>
+        {/* Solo logo */}
+        <Box sx={{ textAlign: 'center', mb: { xs: 2, sm: 2.5 } }}>
+          <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
             <Box
               component="img"
               src="/LOGO.png"
               alt="DeliZukar"
               sx={{
-                height: { xs: 65, md: 85 },
+                height: { xs: 52, sm: 64 },
+                maxWidth: '70%',
+                objectFit: 'contain',
                 width: 'auto',
                 mx: 'auto',
-                mb: 1.5,
+                mb: 1,
                 display: 'block'
               }}
             />
             <Typography
-              variant="h4"
-              sx={{
-                fontFamily: '"Playfair Display", serif',
-                fontWeight: 700,
-                color: '#c8626d',
-                fontSize: { xs: '1.4rem', sm: '1.8rem', md: '2.1rem' },
-                mb: 1
-              }}
-            >
-              DeliZukar Bakery
-            </Typography>
-            <Typography
-              variant="body1"
+              variant="body2"
               sx={{
                 color: '#666',
-                maxWidth: '560px',
+                maxWidth: 420,
                 mx: 'auto',
-                fontSize: { xs: '0.9rem', md: '1.02rem' },
-                lineHeight: 1.5
+                fontSize: { xs: '0.82rem', sm: '0.9rem' },
+                lineHeight: 1.4
               }}
             >
               {t.welcomeSubtitle}
@@ -257,308 +227,129 @@ const ShoppingExperienceModal = () => {
           </motion.div>
         </Box>
 
-        {/* Options Grid */}
+        {/* Opciones */}
         <Box
           sx={{
             display: 'grid',
-            gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' },
-            gap: { xs: 2.5, md: 3 },
+            gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' },
+            gap: { xs: 1.5, sm: 2 },
             alignItems: 'stretch'
           }}
         >
-          {/* OPCIÓN 1: LOCAL PICKUP */}
-          <Box
-            component={motion.div}
-            initial={{ opacity: 0, x: -16 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.45, delay: 0.1 }}
-            whileHover={{ y: -4, boxShadow: '0 16px 36px rgba(200, 98, 109, 0.18)' }}
-            sx={{
-              display: 'flex',
-              flexDirection: 'column',
-              justifyContent: 'space-between',
-              borderRadius: '20px',
-              p: { xs: 2.5, sm: 3 },
-              backgroundColor: modality === 'pickup' ? '#fff7f7' : '#ffffff',
-              border: modality === 'pickup' ? '2.5px solid #c8626d' : '1.5px solid #f0d5d8',
-              boxShadow: '0 8px 24px rgba(0, 0, 0, 0.05)',
-              position: 'relative',
-              transition: 'border-color 0.25s ease'
-            }}
-          >
-            {/* Badge superior */}
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-              <Chip
-                label={t.pickupBadge}
-                size="small"
-                sx={{
-                  backgroundColor: '#4caf50',
-                  color: '#fff',
-                  fontWeight: 700,
-                  fontSize: '0.72rem',
-                  letterSpacing: '0.5px',
-                  height: 24
-                }}
-              />
-              {modality === 'pickup' && (
-                <Chip
-                  icon={<CheckCircle sx={{ fontSize: '14px !important', color: '#c8626d !important' }} />}
-                  label={t.currentlyActive}
-                  size="small"
-                  variant="outlined"
-                  sx={{
-                    borderColor: '#c8626d',
-                    color: '#c8626d',
-                    fontWeight: 600,
-                    fontSize: '0.7rem'
-                  }}
-                />
-              )}
-            </Box>
-
-            {/* Icono + Títulos */}
-            <Box sx={{ mb: 2 }}>
-              <Box
-                sx={{
-                  width: 56,
-                  height: 56,
-                  borderRadius: '16px',
-                  backgroundColor: alpha('#c8626d', 0.12),
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  mb: 2,
-                  color: '#c8626d'
-                }}
-              >
-                <Storefront sx={{ fontSize: 32 }} />
-              </Box>
-
-              <Typography
-                variant="h6"
-                sx={{
-                  fontFamily: '"Playfair Display", serif',
-                  fontWeight: 700,
-                  color: '#2c1e21',
-                  fontSize: { xs: '1.15rem', md: '1.25rem' },
-                  letterSpacing: '0.3px',
-                  mb: 1.2
-                }}
-              >
-                {t.pickupTitle}
-              </Typography>
-
-              <Typography
-                variant="body2"
-                sx={{
-                  color: '#444',
-                  fontSize: '0.92rem',
-                  lineHeight: 1.55,
-                  mb: 1.5
-                }}
-              >
-                {t.pickupDesc}
-              </Typography>
-
-              <Box
-                sx={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 0.8,
-                  backgroundColor: '#fbf5f2',
-                  p: 1.2,
-                  borderRadius: '10px',
-                  border: '1px dashed #e8c4c8'
-                }}
-              >
-                <Place sx={{ fontSize: 18, color: '#c8626d', flexShrink: 0 }} />
-                <Typography
-                  variant="caption"
-                  sx={{
-                    color: '#775257',
-                    fontWeight: 500,
-                    fontSize: '0.78rem',
-                    lineHeight: 1.35
-                  }}
-                >
-                  {t.pickupSubtext}
-                </Typography>
-              </Box>
-            </Box>
-
-            {/* Botón de Selección */}
-            <Button
-              variant="contained"
-              fullWidth
-              onClick={() => handleSelect('pickup')}
-              endIcon={<ArrowForward />}
+          {options.map(({ key, Icon, title, desc, sub, button, badge, badgeColor, SubIcon }, i) => (
+            <Box
+              key={key}
+              component={motion.div}
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, delay: 0.08 + i * 0.07 }}
+              whileHover={{ y: -2 }}
               sx={{
-                mt: 2,
-                py: 1.4,
-                backgroundColor: '#c8626d',
-                color: '#ffffff',
-                fontWeight: 700,
-                fontSize: { xs: '0.9rem', md: '0.95rem' },
-                borderRadius: '14px',
-                textTransform: 'none',
-                letterSpacing: '0.4px',
-                boxShadow: '0 6px 18px rgba(200, 98, 109, 0.35)',
-                '&:hover': {
-                  backgroundColor: '#b5555a',
-                  boxShadow: '0 8px 24px rgba(200, 98, 109, 0.45)'
-                }
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'space-between',
+                minWidth: 0,
+                borderRadius: '16px',
+                p: { xs: 1.6, sm: 2 },
+                backgroundColor: modality === key ? '#fff7f7' : '#ffffff',
+                border: modality === key ? '2px solid #c8626d' : '1.5px solid #f0d5d8',
+                boxShadow: '0 4px 14px rgba(0, 0, 0, 0.05)',
+                transition: 'border-color 0.25s ease'
               }}
             >
-              {t.pickupButton}
-            </Button>
-          </Box>
+              <Box>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.2, mb: 1 }}>
+                  <Box
+                    sx={{
+                      width: 40,
+                      height: 40,
+                      flexShrink: 0,
+                      borderRadius: '12px',
+                      backgroundColor: alpha('#c8626d', 0.12),
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      color: '#c8626d'
+                    }}
+                  >
+                    <Icon sx={{ fontSize: 24 }} />
+                  </Box>
+                  <Typography
+                    sx={{
+                      fontFamily: '"Playfair Display", serif',
+                      fontWeight: 700,
+                      color: '#2c1e21',
+                      fontSize: { xs: '0.9rem', sm: '0.95rem' },
+                      lineHeight: 1.2,
+                      overflowWrap: 'anywhere'
+                    }}
+                  >
+                    {title}
+                  </Typography>
+                </Box>
 
-          {/* OPCIÓN 2: SHIPPING */}
-          <Box
-            component={motion.div}
-            initial={{ opacity: 0, x: 16 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.45, delay: 0.15 }}
-            whileHover={{ y: -4, boxShadow: '0 16px 36px rgba(200, 98, 109, 0.18)' }}
-            sx={{
-              display: 'flex',
-              flexDirection: 'column',
-              justifyContent: 'space-between',
-              borderRadius: '20px',
-              p: { xs: 2.5, sm: 3 },
-              backgroundColor: modality === 'shipping' ? '#fff7f7' : '#ffffff',
-              border: modality === 'shipping' ? '2.5px solid #c8626d' : '1.5px solid #f0d5d8',
-              boxShadow: '0 8px 24px rgba(0, 0, 0, 0.05)',
-              position: 'relative',
-              transition: 'border-color 0.25s ease'
-            }}
-          >
-            {/* Badge superior */}
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-              <Chip
-                label={t.shippingBadge}
-                size="small"
+                {(badge || modality === key) && (
+                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.6, mb: 1 }}>
+                  {badge && (
+                  <Chip
+                    label={badge}
+                    size="small"
+                    sx={{
+                      backgroundColor: badgeColor,
+                      color: '#fff',
+                      fontWeight: 700,
+                      fontSize: '0.62rem',
+                      letterSpacing: '0.4px',
+                      height: 20
+                    }}
+                  />
+                  )}
+                  {modality === key && (
+                    <Chip
+                      icon={<CheckCircle sx={{ fontSize: '12px !important', color: '#c8626d !important' }} />}
+                      label={t.currentlyActive}
+                      size="small"
+                      variant="outlined"
+                      sx={{ borderColor: '#c8626d', color: '#c8626d', fontWeight: 600, fontSize: '0.62rem', height: 20 }}
+                    />
+                  )}
+                </Box>
+                )}
+
+                <Typography variant="body2" sx={{ color: '#444', fontSize: '0.8rem', lineHeight: 1.45, mb: 1 }}>
+                  {desc}
+                </Typography>
+
+                <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 0.6, color: '#775257' }}>
+                  <SubIcon sx={{ fontSize: 14, color: '#c8626d', flexShrink: 0, mt: '2px' }} />
+                  <Typography variant="caption" sx={{ fontSize: '0.7rem', lineHeight: 1.35 }}>
+                    {sub}
+                  </Typography>
+                </Box>
+              </Box>
+
+              <Button
+                variant="contained"
+                fullWidth
+                onClick={() => handleSelect(key)}
+                endIcon={<ArrowForward sx={{ fontSize: '16px !important' }} />}
                 sx={{
+                  mt: 1.6,
+                  py: 0.9,
                   backgroundColor: '#c8626d',
-                  color: '#fff',
+                  color: '#ffffff',
                   fontWeight: 700,
-                  fontSize: '0.72rem',
-                  letterSpacing: '0.5px',
-                  height: 24
+                  fontSize: { xs: '0.78rem', sm: '0.8rem' },
+                  borderRadius: '12px',
+                  textTransform: 'none',
+                  boxShadow: '0 4px 12px rgba(200, 98, 109, 0.3)',
+                  '&:hover': { backgroundColor: '#b5555a', boxShadow: '0 6px 16px rgba(200, 98, 109, 0.4)' }
                 }}
-              />
-              {modality === 'shipping' && (
-                <Chip
-                  icon={<CheckCircle sx={{ fontSize: '14px !important', color: '#c8626d !important' }} />}
-                  label={t.currentlyActive}
-                  size="small"
-                  variant="outlined"
-                  sx={{
-                    borderColor: '#c8626d',
-                    color: '#c8626d',
-                    fontWeight: 600,
-                    fontSize: '0.7rem'
-                  }}
-                />
-              )}
+              >
+                {button}
+              </Button>
             </Box>
-
-            {/* Icono + Títulos */}
-            <Box sx={{ mb: 2 }}>
-              <Box
-                sx={{
-                  width: 56,
-                  height: 56,
-                  borderRadius: '16px',
-                  backgroundColor: alpha('#c8626d', 0.12),
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  mb: 2,
-                  color: '#c8626d'
-                }}
-              >
-                <LocalShipping sx={{ fontSize: 32 }} />
-              </Box>
-
-              <Typography
-                variant="h6"
-                sx={{
-                  fontFamily: '"Playfair Display", serif',
-                  fontWeight: 700,
-                  color: '#2c1e21',
-                  fontSize: { xs: '1.15rem', md: '1.25rem' },
-                  letterSpacing: '0.3px',
-                  mb: 1.2
-                }}
-              >
-                {t.shippingTitle}
-              </Typography>
-
-              <Typography
-                variant="body2"
-                sx={{
-                  color: '#444',
-                  fontSize: '0.92rem',
-                  lineHeight: 1.55,
-                  mb: 1.5
-                }}
-              >
-                {t.shippingDesc}
-              </Typography>
-
-              <Box
-                sx={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 0.8,
-                  backgroundColor: '#fbf5f2',
-                  p: 1.2,
-                  borderRadius: '10px',
-                  border: '1px dashed #e8c4c8'
-                }}
-              >
-                <LocalShipping sx={{ fontSize: 18, color: '#c8626d', flexShrink: 0 }} />
-                <Typography
-                  variant="caption"
-                  sx={{
-                    color: '#775257',
-                    fontWeight: 500,
-                    fontSize: '0.78rem',
-                    lineHeight: 1.35
-                  }}
-                >
-                  {t.shippingSubtext}
-                </Typography>
-              </Box>
-            </Box>
-
-            {/* Botón de Selección */}
-            <Button
-              variant="contained"
-              fullWidth
-              onClick={() => handleSelect('shipping')}
-              endIcon={<ArrowForward />}
-              sx={{
-                mt: 2,
-                py: 1.4,
-                backgroundColor: '#c8626d',
-                color: '#ffffff',
-                fontWeight: 700,
-                fontSize: { xs: '0.9rem', md: '0.95rem' },
-                borderRadius: '14px',
-                textTransform: 'none',
-                letterSpacing: '0.4px',
-                boxShadow: '0 6px 18px rgba(200, 98, 109, 0.35)',
-                '&:hover': {
-                  backgroundColor: '#b5555a',
-                  boxShadow: '0 8px 24px rgba(200, 98, 109, 0.45)'
-                }
-              }}
-            >
-              {t.shippingButton}
-            </Button>
-          </Box>
+          ))}
         </Box>
       </DialogContent>
     </Dialog>
