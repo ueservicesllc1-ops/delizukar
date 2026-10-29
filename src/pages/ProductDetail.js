@@ -93,7 +93,7 @@ const ProductDetail = () => {
   };
 
   return (
-    <Box sx={{ py: 4, pt: 18, backgroundColor: '#fafafa', minHeight: '100vh' }}>
+    <Box sx={{ py: 4, pt: { xs: 3, md: 4 }, backgroundColor: '#fafafa', minHeight: '100vh' }}>
       <Container maxWidth="lg">
         {/* Botón de regreso */}
         <motion.div

@@ -187,8 +187,8 @@ const SweetBoxes = () => {
 
   return (
     <Box sx={{ 
-      py: { xs: 8, md: 12 }, 
-      pt: { xs: 12, md: 24 }, 
+      py: { xs: 4, md: 6 }, 
+      pt: { xs: 3, md: 4 }, 
       backgroundColor: '#fafafa', 
       minHeight: '100vh' 
     }}>

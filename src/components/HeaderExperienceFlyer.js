@@ -43,16 +43,16 @@ export const HeaderExperienceFlyer = ({ type = 'pickup', isMobile = false }) => 
           cursor: 'pointer',
           position: 'relative',
           width: isMobile
-            ? { xs: 'calc(50% - 6px)', sm: '190px' }
-            : { md: '165px', lg: '205px', xl: '240px' },
-          maxWidth: isMobile ? '200px' : '250px',
-          borderRadius: { xs: '8px', sm: '12px', md: '14px' },
+            ? { xs: 'calc(50% - 6px)', sm: '140px' }
+            : { md: '110px', lg: '128px', xl: '142px' },
+          maxWidth: isMobile ? '160px' : '150px',
+          borderRadius: { xs: '6px', sm: '8px', md: '10px' },
           overflow: 'hidden',
           backgroundColor: '#faebeb',
-          border: isSelected ? '2px solid #c8626d' : '2px solid #ffffff',
+          border: isSelected ? '2px solid #c8626d' : '1.5px solid #ffffff',
           boxShadow: isSelected
-            ? '0 6px 18px rgba(200, 98, 109, 0.45), 0 0 0 2px #c8626d'
-            : '0 4px 12px rgba(0, 0, 0, 0.1), 0 1px 4px rgba(200, 98, 109, 0.15)',
+            ? '0 4px 14px rgba(200, 98, 109, 0.4), 0 0 0 1.5px #c8626d'
+            : '0 3px 8px rgba(0, 0, 0, 0.08), 0 1px 3px rgba(200, 98, 109, 0.12)',
           transition: 'all 0.25s ease',
           display: 'block',
           flexShrink: 0
@@ -65,13 +65,13 @@ export const HeaderExperienceFlyer = ({ type = 'pickup', isMobile = false }) => 
           aria-label={isEn ? `Close ${type}` : `Cerrar ${type}`}
           sx={{
             position: 'absolute',
-            top: { xs: 2, sm: 4 },
-            right: { xs: 2, sm: 4 },
+            top: { xs: 1, sm: 2 },
+            right: { xs: 1, sm: 2 },
             zIndex: 10,
             backgroundColor: 'rgba(255, 255, 255, 0.92)',
             color: '#c8626d',
-            padding: { xs: '2px', sm: '3px' },
-            boxShadow: '0 2px 6px rgba(0,0,0,0.15)',
+            padding: '1.5px',
+            boxShadow: '0 1px 4px rgba(0,0,0,0.15)',
             '&:hover': {
               backgroundColor: '#c8626d',
               color: '#ffffff',
@@ -81,27 +81,27 @@ export const HeaderExperienceFlyer = ({ type = 'pickup', isMobile = false }) => 
           }}
           title={isEn ? 'Close' : 'Cerrar'}
         >
-          <Close sx={{ fontSize: { xs: 11, sm: 13, md: 15 } }} />
+          <Close sx={{ fontSize: { xs: 10, sm: 11, md: 12 } }} />
         </IconButton>
 
         {/* Badge si está seleccionado */}
         {isSelected && (
           <Chip
-            icon={<CheckCircle sx={{ fontSize: '11px !important', color: '#ffffff !important' }} />}
+            icon={<CheckCircle sx={{ fontSize: '9px !important', color: '#ffffff !important' }} />}
             label={activeLabel}
             size="small"
             sx={{
               position: 'absolute',
-              bottom: { xs: 3, sm: 5 },
-              left: { xs: 3, sm: 5 },
+              bottom: { xs: 2, sm: 3 },
+              left: { xs: 2, sm: 3 },
               zIndex: 9,
               backgroundColor: '#c8626d',
               color: '#ffffff',
               fontWeight: 700,
-              fontSize: { xs: '0.5rem', sm: '0.62rem', md: '0.68rem' },
-              height: { xs: 16, sm: 20 },
-              px: { xs: 0.2, sm: 0.6 },
-              boxShadow: '0 2px 8px rgba(200, 98, 109, 0.4)'
+              fontSize: { xs: '0.45rem', sm: '0.52rem', md: '0.56rem' },
+              height: { xs: 14, sm: 16 },
+              px: { xs: 0.2, sm: 0.4 },
+              boxShadow: '0 2px 6px rgba(200, 98, 109, 0.4)'
             }}
           />
         )}

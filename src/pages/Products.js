@@ -333,7 +333,7 @@ const Products = () => {
   return (
     <Box className="products-page-mobile" sx={{ 
       py: 4, 
-      pt: { xs: 6, sm: 18, md: 18 }, 
+      pt: { xs: 3, md: 4 }, 
       backgroundColor: '#fafafa', 
       minHeight: '100vh' 
     }}>
@@ -344,7 +344,7 @@ const Products = () => {
             sx={{
               fontFamily: 'BrittanySignature',
               fontSize: { xs: '2.4rem', md: '3rem' },
-              mt: { xs: 0, md: 2.5 },
+              mt: { xs: 0, md: 1 },
               color: '#c8626d'
             }}
           >

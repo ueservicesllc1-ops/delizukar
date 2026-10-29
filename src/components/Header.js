@@ -453,13 +453,23 @@ const Header = () => {
       }}
     >
       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', gap: { md: 1.5, lg: 2 } }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: { md: 1, lg: 2 }, flex: 1, justifyContent: 'flex-start' }}>
-          <IconButton sx={{ color: '#be8782', ml: { md: 1, lg: 2 }, mr: 'auto' }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: { md: 1, lg: 1.5 }, flex: 1, justifyContent: 'flex-start' }}>
+          <IconButton sx={{ color: '#be8782', ml: { md: 0.5, lg: 1 }, mr: { md: 1, lg: 2 } }}>
             <Search />
           </IconButton>
-          {visibility.showPickupFlyer !== false && (
-            <Box sx={{ mr: { md: 8, lg: 18 }, display: 'flex' }}>
-              <HeaderExperienceFlyer type="pickup" />
+          {(visibility.showPickupFlyer !== false || visibility.showShippingFlyer !== false) && (
+            <Box sx={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              gap: { md: 1.2, lg: 1.8 },
+              ml: { md: 5, lg: 8, xl: 11 }
+            }}>
+              {visibility.showPickupFlyer !== false && (
+                <HeaderExperienceFlyer type="pickup" />
+              )}
+              {visibility.showShippingFlyer !== false && (
+                <HeaderExperienceFlyer type="shipping" />
+              )}
             </Box>
           )}
         </Box>
@@ -490,11 +500,6 @@ const Header = () => {
           justifyContent: 'flex-end', 
           flex: 1
         }}>
-          {visibility.showShippingFlyer !== false && (
-            <Box sx={{ ml: { md: 8, lg: 18 }, mr: 'auto', display: 'flex' }}>
-              <HeaderExperienceFlyer type="shipping" />
-            </Box>
-          )}
           <Box sx={{ 
             display: 'flex', 
             flexDirection: 'column',
@@ -609,11 +614,10 @@ const Header = () => {
   return (
     <div data-no-translate>
       <AppBar
-        position="fixed"
+        position="static"
         sx={{
           backgroundColor: '#ffece5',
-          boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
-          zIndex: (theme) => theme.zIndex.drawer + 1
+          boxShadow: '0 4px 20px rgba(0,0,0,0.1)'
         }}
       >
         <ExperienceBar />

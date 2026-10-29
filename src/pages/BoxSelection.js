@@ -234,7 +234,7 @@ const BoxSelection = () => {
   if (loading || !boxProduct) return <Box sx={{ p: 5, textAlign: 'center' }}><LinearProgress /></Box>;
 
   return (
-    <Box sx={{ pb: 8, pt: { xs: 12, md: 24 }, backgroundColor: '#fafafa', minHeight: '100vh' }}>
+    <Box sx={{ pb: 8, pt: { xs: 3, md: 4 }, backgroundColor: '#fafafa', minHeight: '100vh' }}>
       <Container maxWidth="lg">
         {/* Header Seccion */}
         <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }}>

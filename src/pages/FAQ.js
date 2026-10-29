@@ -167,8 +167,8 @@ No podemos programar fechas específicas de envío o entrega. Todos los pedidos 
 
   return (
     <Box className="faq-page-mobile" sx={{ 
-      py: 8, 
-      pt: { xs: 10, sm: 35, md: 35 }, 
+      py: { xs: 4, md: 6 }, 
+      pt: { xs: 4, md: 6 }, 
       opacity: fontsReady ? 1 : 0, 
       transition: 'opacity 200ms ease' 
     }}>

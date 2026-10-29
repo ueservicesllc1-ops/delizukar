@@ -25,7 +25,6 @@ import ProductImage from '../components/ProductImage';
 import BoxSelectionPopup from '../components/BoxSelectionPopup';
 import FeaturedProducts from '../components/FeaturedProducts';
 import ComparisonTable from '../components/ComparisonTable';
-import CookieBoxPromo from '../components/CookieBoxPromo';
 import { useShoppingExperience } from '../context/ShoppingExperienceContext';
 import { usePopupsVisibility } from '../context/PopupsVisibilityContext';
 import { db } from '../firebase/config';
@@ -149,19 +148,6 @@ const Home = () => {
 
   const handleClosePopupHero = () => {
     setPopupHeroOpen(false);
-    if (visibility.showCookieBoxPromo !== false) {
-      setTimeout(() => setShowPromo(true), 500);
-    }
-  };
-
-  const handleClosePromo = () => {
-    setShowPromo(false);
-    // Solo mostrar banner de pickup si NO estamos en modo shipping
-    if (!isShipping) {
-      setTimeout(() => {
-        setShowPickupBanner(true);
-      }, 600);
-    }
   };
 
   return (
@@ -172,14 +158,12 @@ const Home = () => {
       right: '50%',
       marginLeft: '-50vw',
       marginRight: '-50vw',
-      marginTop: { xs: '16px', md: '72px', lg: '96px' }
+      marginTop: 0
     }}>
       {visibility.showPopupHero !== false && (
         <PopupHero open={popupHeroOpen} onClose={handleClosePopupHero} />
       )}
-      {visibility.showCookieBoxPromo !== false && (
-        <CookieBoxPromo open={showPromo} onClose={handleClosePromo} />
-      )}
+
       {/* Banner Section */}
       <Box sx={{ position: 'relative', width: '100%' }}>
         <Box

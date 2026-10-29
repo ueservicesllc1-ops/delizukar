@@ -30,7 +30,7 @@ const UserDashboard = () => {
   };
 
   return (
-    <Box sx={{ py: 4, pt: 30, backgroundColor: '#fafafa', minHeight: '100vh' }}>
+    <Box sx={{ py: 4, pt: { xs: 3, md: 4 }, backgroundColor: '#fafafa', minHeight: '100vh' }}>
       <Container maxWidth="lg">
 
         <Grid container spacing={1}>

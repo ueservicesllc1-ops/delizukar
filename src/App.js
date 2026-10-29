@@ -201,12 +201,8 @@ function App() {
                     <ShoppingExperienceModal />
                     <RouteWatcher />
                     <Box sx={{ 
-                      paddingTop: { xs: '135px', sm: '140px', md: '150px' },
-              backgroundColor: '#ffffff',
-              '@media (min-width: 768px) and (max-width: 1200px) and (orientation: landscape)': {
-                paddingTop: '120px'
-              }
-            }}>
+                      backgroundColor: '#ffffff'
+                    }}>
               <Routes>
               <Route path="/" element={
                 <>

@@ -3,9 +3,9 @@ import { doc, onSnapshot, setDoc } from 'firebase/firestore';
 import { db } from '../firebase/config';
 
 export const DEFAULT_POPUPS_VISIBILITY = {
-  showCookieBoxPromo: true,   // Popup inferior derecho ("Arma tu caja de galletas")
-  showPickupFlyer: true,      // Cartilla izquierda en cabecera (Recogida Local)
-  showShippingFlyer: true,    // Cartilla derecha en cabecera (Envíos Nacionales)
+  showCookieBoxPromo: false,  // Desactivado: Popup inferior derecho ("Arma tu caja de galletas")
+  showPickupFlyer: true,      // Cartilla en cabecera (Recogida Local)
+  showShippingFlyer: true,    // Cartilla en cabecera (Envíos Nacionales)
   showCookieWeightChip: true, // Chip flotante de peso sobre el banner
   showPopupHero: true,        // Popup central de bienvenida / ofertas
   showExperienceModal: true   // Modal emergente de modalidad de compra
