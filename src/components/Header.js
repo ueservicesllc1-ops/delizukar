@@ -460,9 +460,10 @@ const Header = () => {
           {(visibility.showPickupFlyer !== false || visibility.showShippingFlyer !== false) && (
             <Box sx={{ 
               display: 'flex', 
+              flexDirection: 'column',
               alignItems: 'center', 
-              gap: { md: 1.2, lg: 1.8 },
-              ml: { md: 5, lg: 8, xl: 11 }
+              gap: { md: 0.6, lg: 0.8 },
+              ml: { md: 2, lg: 4, xl: 6 }
             }}>
               {visibility.showPickupFlyer !== false && (
                 <HeaderExperienceFlyer type="pickup" />
