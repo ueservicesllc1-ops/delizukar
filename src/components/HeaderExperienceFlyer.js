@@ -17,9 +17,6 @@ export const HeaderExperienceFlyer = ({ type = 'pickup', isMobile = false }) => 
   const altText = isPickup ? 'Local Pick Up - Delizukar' : 'Delivery Shipping - Delizukar';
   const labelText = isPickup ? 'PICK UP' : 'SHIPPING';
   const activeLabel = isEn ? 'Selected' : 'Seleccionado';
-  const imgHeight = isMobile
-    ? { xs: 40, sm: 52 }
-    : { md: 74, lg: 84, xl: 92 };
 
   const handleClick = (e) => {
     e.stopPropagation();
@@ -55,11 +52,12 @@ export const HeaderExperienceFlyer = ({ type = 'pickup', isMobile = false }) => 
             : { md: '106px', lg: '120px', xl: '128px' },
           maxWidth: isMobile ? '100px' : '140px',
           borderRadius: { xs: '10px', sm: '12px' },
-          p: { xs: '8px 6px', md: '8px 8px', lg: '10px 10px' },
+          aspectRatio: '1 / 1',
+          overflow: 'hidden',
+          p: 0,
           display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
+          alignItems: 'stretch',
+          justifyContent: 'stretch',
           background: isSelected
             ? 'linear-gradient(180deg, #fffcfb 0%, #fae8e8 100%)'
             : 'linear-gradient(180deg, #ffffff 0%, #faf0ef 100%)',
@@ -98,32 +96,22 @@ export const HeaderExperienceFlyer = ({ type = 'pickup', isMobile = false }) => 
           <Close sx={{ fontSize: { xs: 10, sm: 11, md: 11 } }} />
         </IconButton>
 
-        {/* Ilustración grande con la etiqueta debajo */}
+        {/* Ilustración a pleno tamaño dentro del marco */}
         <Box
+          component="img"
+          src={stickerSrc}
+          alt={altText}
           sx={{
-            position: 'relative',
-            display: 'inline-flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            height: imgHeight,
-            maxWidth: '100%'
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover',
+            display: 'block',
+            mixBlendMode: 'multiply',
+            transform: `scale(${isPickup ? 1.14 : 1.06})`,
+            transformOrigin: isPickup ? '55% 52%' : '50% 52%',
+            transition: 'transform 0.25s ease'
           }}
-        >
-          <Box
-            component="img"
-            src={stickerSrc}
-            alt={altText}
-            sx={{
-              height: '100%',
-              width: 'auto',
-              maxWidth: '100%',
-              objectFit: 'contain',
-              display: 'block',
-              mixBlendMode: 'multiply',
-              transition: 'transform 0.25s ease'
-            }}
-          />
-        </Box>
+        />
       </Box>
     </AnimatePresence>
   );
