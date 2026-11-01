@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Box, IconButton, Typography } from '@mui/material';
+import { Box, IconButton } from '@mui/material';
 import { Close } from '@mui/icons-material';
 import { useShoppingExperience } from '../context/ShoppingExperienceContext';
 import { useLanguage } from '../context/LanguageContext';
@@ -13,16 +13,13 @@ export const HeaderExperienceFlyer = ({ type = 'pickup', isMobile = false }) => 
   const isEn = language === 'en';
   const isSelected = modality === type;
   const isPickup = type === 'pickup';
-  const stickerSrc = isPickup ? '/pickup-sticker.png' : '/shipping-sticker.png';
+  const stickerSrc = isPickup ? '/pickup-sticker-text.jpg' : '/shipping-sticker-text.jpg';
   const altText = isPickup ? 'Local Pick Up - Delizukar' : 'Delivery Shipping - Delizukar';
   const labelText = isPickup ? 'PICK UP' : 'SHIPPING';
   const activeLabel = isEn ? 'Selected' : 'Seleccionado';
   const imgHeight = isMobile
-    ? { xs: 68, sm: 80 }
-    : { md: 68, lg: 78, xl: 85 };
-  const labelFontSize = isPickup
-    ? (isMobile ? { xs: '0.52rem', sm: '0.62rem' } : { md: '0.55rem', lg: '0.65rem', xl: '0.7rem' })
-    : (isMobile ? { xs: '0.5rem', sm: '0.6rem' } : { md: '0.52rem', lg: '0.62rem', xl: '0.68rem' });
+    ? { xs: 74, sm: 84 }
+    : { md: 74, lg: 84, xl: 92 };
 
   const handleClick = (e) => {
     e.stopPropagation();
@@ -122,26 +119,11 @@ export const HeaderExperienceFlyer = ({ type = 'pickup', isMobile = false }) => 
               maxWidth: '100%',
               objectFit: 'contain',
               display: 'block',
-              filter: 'drop-shadow(0 2px 4px rgba(200, 98, 109, 0.18))',
+              mixBlendMode: 'multiply',
               transition: 'transform 0.25s ease'
             }}
           />
         </Box>
-        <Typography
-          component="span"
-          sx={{
-            mt: 0.5,
-            whiteSpace: 'nowrap',
-            color: '#c8626d',
-            fontWeight: 900,
-            lineHeight: 1,
-            letterSpacing: '0.6px',
-            textTransform: 'uppercase',
-            fontSize: labelFontSize
-          }}
-        >
-          {labelText}
-        </Typography>
       </Box>
     </AnimatePresence>
   );
