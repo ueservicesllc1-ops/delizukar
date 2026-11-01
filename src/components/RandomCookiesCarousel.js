@@ -115,12 +115,34 @@ const RandomCookiesCarousel = ({ onOpenDetail }) => {
                     }
                   }}
                 >
-                  <Box sx={{ height: { xs: 155, md: 175 }, overflow: 'hidden', position: 'relative' }}>
-                    <img
+                  <Box
+                    sx={{
+                      height: { xs: 165, md: 185 },
+                      width: '100%',
+                      p: { xs: 1, md: 1.5 },
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      backgroundColor: '#faf6f5',
+                      overflow: 'hidden',
+                      position: 'relative'
+                    }}
+                  >
+                    <Box
+                      component="img"
                       src={item.image}
                       alt={item.name}
-                      style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                       loading="lazy"
+                      sx={{
+                        maxWidth: '100%',
+                        maxHeight: '100%',
+                        width: 'auto',
+                        height: 'auto',
+                        objectFit: 'contain',
+                        display: 'block',
+                        filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.06))',
+                        transition: 'transform 0.3s ease'
+                      }}
                     />
                   </Box>
 
