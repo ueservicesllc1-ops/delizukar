@@ -15,7 +15,14 @@ import {
   useMediaQuery,
   Menu,
   MenuItem,
-  Avatar
+  Avatar,
+  Dialog,
+  DialogContent,
+  TextField,
+  InputAdornment,
+  Chip,
+  ListItemAvatar,
+  ListItemText
 } from '@mui/material';
 import {
   Menu as MenuIcon,
@@ -25,7 +32,9 @@ import {
   Security,
   Login,
   Storefront,
-  LocalShipping
+  LocalShipping,
+  Close,
+  ArrowForward
 } from '@mui/icons-material';
 import { useStore } from '../context/StoreContext';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -43,13 +52,16 @@ import { startAutoTranslate, stopAutoTranslate } from '../utils/applyTranslation
 import { translateText } from '../services/translateService';
 import HeaderExperienceFlyer from './HeaderExperienceFlyer';
 import { usePopupsVisibility } from '../context/PopupsVisibilityContext';
+import { PRODUCT_TRANSLATIONS } from '../pages/Products';
 
 const Header = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
   const [user, setUser] = useState(null);
   const [translatingLang, setTranslatingLang] = useState(false);
-  const { getCartItemsCount } = useStore();
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const { getCartItemsCount, products } = useStore();
   const { language, setLanguage } = useLanguage();
   const { visibility } = usePopupsVisibility();
 
@@ -377,52 +389,20 @@ const Header = () => {
           <MenuIcon />
         </IconButton>
 
-        {/* Chip de peso en el header */}
-        {visibility.showCookieWeightChip !== false && (
-          <Box
-            component={motion.div}
-            animate={{ y: [0, -3, 0] }}
-            transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-            sx={{ 
-              position: 'absolute', 
-              left: '60px', 
-              top: '50px', 
-              zIndex: 100,
-              display: { xs: 'flex', md: 'none' } 
-            }}
-          >
-            <Box
-              sx={{
-                backgroundColor: '#c8626d',
-                color: 'white',
-                fontWeight: 800,
-                fontSize: { xs: '0.42rem', sm: '0.65rem' },
-                px: { xs: 1.2, sm: 2 },
-                py: { xs: 0.8, sm: 1.2 },
-                borderRadius: '20px',
-                border: '0.5px solid white',
-                boxShadow: '0 4px 10px rgba(200, 98, 109, 0.2)',
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center',
-                textAlign: 'center',
-                lineHeight: 1.1,
-                maxWidth: { xs: '65px', sm: '100px' },
-                whiteSpace: 'normal'
-              }}
-            >
-              {L.cookieWeightChip}
-            </Box>
-          </Box>
-        )}
 
         <motion.a href="/" whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} style={{ display: 'flex', justifyContent: 'center', width: '100%', marginTop: '6px' }}>
           <Box component="img" src="/LOGO.png" alt="Delizukar Logo" sx={{ height: 95, width: 'auto' }} />
         </motion.a>
 
         <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 0.5, position: 'absolute', right: 8, top: 8 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+            <IconButton
+              onClick={() => setSearchOpen(true)}
+              aria-label={language === 'en' ? 'Search cookies' : 'Buscar galletas'}
+              sx={{ color: '#c8626d' }}
+            >
+              <Search />
+            </IconButton>
             <IconButton
               onClick={user ? (e) => setAnchorEl(e.currentTarget) : handleGoogleAuth}
               sx={{ color: '#c8626d' }}
@@ -458,7 +438,22 @@ const Header = () => {
     >
       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', gap: { md: 1.5, lg: 2 } }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: { md: 1, lg: 1.5 }, flex: 1, justifyContent: 'flex-start' }}>
-          <IconButton sx={{ color: '#be8782', ml: { md: 0.5, lg: 1 }, mr: { md: 1, lg: 2 } }}>
+          <IconButton
+            onClick={() => setSearchOpen(true)}
+            aria-label={language === 'en' ? 'Search cookies' : 'Buscar galletas'}
+            sx={{
+              color: '#c8626d',
+              backgroundColor: 'rgba(200, 98, 109, 0.08)',
+              ml: { md: 0.5, lg: 1 },
+              mr: { md: 1, lg: 2 },
+              '&:hover': {
+                backgroundColor: 'rgba(200, 98, 109, 0.16)',
+                transform: 'scale(1.05)'
+              },
+              transition: 'all 0.2s ease'
+            }}
+            title={language === 'en' ? 'Search cookies' : 'Buscar galletas'}
+          >
             <Search />
           </IconButton>
         </Box>
@@ -654,6 +649,202 @@ const Header = () => {
           </MenuItem>
         </Menu>
       )}
+
+      {/* Modal de Búsqueda interactivo */}
+      <Dialog
+        open={searchOpen}
+        onClose={() => {
+          setSearchOpen(false);
+          setSearchQuery('');
+        }}
+        maxWidth="sm"
+        fullWidth
+        PaperProps={{
+          sx: {
+            borderRadius: '20px',
+            p: { xs: 2, sm: 2.5 },
+            position: 'relative',
+            mt: { xs: 4, sm: 8 },
+            verticalAlign: 'top',
+            border: '2px solid rgba(200, 98, 109, 0.3)',
+            boxShadow: '0 20px 45px rgba(0,0,0,0.2)'
+          }
+        }}
+      >
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+          <Typography variant="h6" sx={{ fontWeight: 800, color: '#c8626d', display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Search sx={{ color: '#c8626d' }} />
+            {language === 'en' ? 'Search Cookies' : 'Buscar Galletas'}
+          </Typography>
+          <IconButton
+            size="small"
+            onClick={() => {
+              setSearchOpen(false);
+              setSearchQuery('');
+            }}
+            sx={{
+              color: '#c8626d',
+              backgroundColor: 'rgba(200, 98, 109, 0.08)',
+              '&:hover': { backgroundColor: 'rgba(200, 98, 109, 0.18)' }
+            }}
+          >
+            <Close />
+          </IconButton>
+        </Box>
+
+        {/* Input de búsqueda */}
+        <TextField
+          fullWidth
+          autoFocus
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' && searchQuery.trim()) {
+              setSearchOpen(false);
+              navigate(`/productos?search=${encodeURIComponent(searchQuery.trim())}`);
+            }
+          }}
+          placeholder={language === 'en' ? 'Search by name, flavor or ingredient...' : 'Buscar por nombre, sabor o ingrediente...'}
+          variant="outlined"
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <Search sx={{ color: '#c8626d' }} />
+              </InputAdornment>
+            ),
+            endAdornment: searchQuery ? (
+              <InputAdornment position="end">
+                <IconButton size="small" onClick={() => setSearchQuery('')}>
+                  <Close fontSize="small" />
+                </IconButton>
+              </InputAdornment>
+            ) : null,
+            sx: {
+              borderRadius: '14px',
+              backgroundColor: '#fafafa',
+              '&.Mui-focused fieldset': {
+                borderColor: '#c8626d'
+              }
+            }
+          }}
+        />
+
+        {/* Sugerencias rápidas si no ha escrito nada */}
+        {!searchQuery.trim() && (
+          <Box sx={{ mt: 2.5 }}>
+            <Typography variant="caption" sx={{ fontWeight: 700, color: '#888', textTransform: 'uppercase', letterSpacing: '0.5px', display: 'block', mb: 1 }}>
+              {language === 'en' ? 'Popular searches' : 'Búsquedas populares'}
+            </Typography>
+            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+              {['Chocolate Chip', 'Lotus Biscoff', 'Dubai Pistacho', 'Red Velvet', 'Ferrero'].map((tag) => (
+                <Chip
+                  key={tag}
+                  label={tag}
+                  clickable
+                  onClick={() => setSearchQuery(tag)}
+                  sx={{
+                    backgroundColor: '#ffece5',
+                    color: '#c8626d',
+                    fontWeight: 600,
+                    fontSize: '0.8rem',
+                    '&:hover': { backgroundColor: '#ffd7cc' }
+                  }}
+                />
+              ))}
+            </Box>
+          </Box>
+        )}
+
+        {/* Lista de resultados en tiempo real */}
+        {searchQuery.trim() && (
+          <Box sx={{ mt: 2, maxHeight: '380px', overflowY: 'auto' }}>
+            {(() => {
+              const q = searchQuery.trim().toLowerCase();
+              const filtered = (products || []).filter((p) => {
+                if (p.active === false) return false;
+                const orig = (p.name || '').toLowerCase();
+                const es = (PRODUCT_TRANSLATIONS?.es?.[p.name]?.name || '').toLowerCase();
+                const en = (PRODUCT_TRANSLATIONS?.en?.[p.name]?.name || '').toLowerCase();
+                const desc = (p.description || '').toLowerCase();
+                const cat = (p.category || '').toLowerCase();
+                return orig.includes(q) || es.includes(q) || en.includes(q) || desc.includes(q) || cat.includes(q);
+              });
+
+              if (filtered.length === 0) {
+                return (
+                  <Box sx={{ py: 4, textAlign: 'center', color: '#999' }}>
+                    <Typography variant="body1" sx={{ fontWeight: 600 }}>
+                      {language === 'en' ? 'No cookies found matching your search' : 'No se encontraron galletas con esa búsqueda'}
+                    </Typography>
+                    <Typography variant="caption" sx={{ mt: 0.5, display: 'block' }}>
+                      {language === 'en' ? 'Try searching for another flavor' : 'Intenta buscar con otro sabor o nombre'}
+                    </Typography>
+                  </Box>
+                );
+              }
+
+              return (
+                <List sx={{ p: 0 }}>
+                  {filtered.map((item) => {
+                    const translatedName = PRODUCT_TRANSLATIONS?.[language]?.[item.name]?.name || item[`name_${language}`] || item.name;
+                    return (
+                      <ListItem
+                        key={item.id}
+                        button
+                        onClick={() => {
+                          setSearchOpen(false);
+                          setSearchQuery('');
+                          if (item.category === 'boxes') {
+                            navigate('/cajas');
+                          } else {
+                            navigate(`/productos?id=${encodeURIComponent(item.id)}`);
+                          }
+                        }}
+                        sx={{
+                          borderRadius: '12px',
+                          mb: 1,
+                          backgroundColor: '#fafafa',
+                          border: '1px solid #f0f0f0',
+                          '&:hover': {
+                            backgroundColor: '#fff3f0',
+                            borderColor: '#c8626d'
+                          },
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 1.5,
+                          py: 1
+                        }}
+                      >
+                        <ListItemAvatar sx={{ minWidth: 50 }}>
+                          <Avatar
+                            src={item.image}
+                            alt={translatedName}
+                            variant="rounded"
+                            sx={{ width: 48, height: 48, backgroundColor: '#ffffff', border: '1px solid #eee' }}
+                          />
+                        </ListItemAvatar>
+                        <ListItemText
+                          primary={
+                            <Typography sx={{ fontWeight: 700, color: '#333', fontSize: '0.92rem' }}>
+                              {translatedName}
+                            </Typography>
+                          }
+                          secondary={
+                            <Typography sx={{ color: '#c8626d', fontWeight: 800, fontSize: '0.85rem' }}>
+                              ${Number(item.price || 0).toFixed(2)}
+                            </Typography>
+                          }
+                        />
+                        <ArrowForward sx={{ color: '#c8626d', fontSize: '1.2rem' }} />
+                      </ListItem>
+                    );
+                  })}
+                </List>
+              );
+            })()}
+          </Box>
+        )}
+      </Dialog>
     </div>
   );
 };

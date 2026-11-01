@@ -48,21 +48,21 @@ export const HeaderExperienceFlyer = ({ type = 'pickup', isMobile = false }) => 
           cursor: 'pointer',
           position: 'relative',
           width: isMobile
-            ? { xs: '46px', sm: '54px' }
-            : { md: '60px', lg: '68px', xl: '74px' },
-          maxWidth: isMobile ? '56px' : '80px',
+            ? { xs: '68px', sm: '78px' }
+            : { md: '94px', lg: '108px', xl: '118px' },
+          maxWidth: isMobile ? '84px' : '130px',
           borderRadius: { xs: '8px', sm: '10px' },
-          aspectRatio: '1 / 1',
+          aspectRatio: '1.26 / 1',
           overflow: 'hidden',
           p: 0,
           display: 'flex',
           alignItems: 'stretch',
           justifyContent: 'stretch',
           background: '#ffffff',
-          border: isSelected ? '3px solid #ffd166' : '2px solid rgba(255, 255, 255, 0.35)',
+          border: isSelected ? '3px solid #8a2533' : '2px solid rgba(255, 255, 255, 0.4)',
           opacity: isSelected ? 1 : 0.85,
           boxShadow: isSelected
-            ? '0 0 0 2px rgba(255, 209, 102, 0.55), 0 4px 14px rgba(0, 0, 0, 0.25)'
+            ? '0 0 0 2px rgba(138, 37, 51, 0.45), 0 4px 14px rgba(0, 0, 0, 0.25)'
             : '0 2px 7px rgba(0, 0, 0, 0.18)',
           transition: 'all 0.25s ease',
           flexShrink: 0,
@@ -95,7 +95,7 @@ export const HeaderExperienceFlyer = ({ type = 'pickup', isMobile = false }) => 
           <Close sx={{ fontSize: { xs: 8, sm: 9, md: 10 } }} />
         </IconButton>
 
-        {/* Ilustración a pleno tamaño dentro del marco */}
+        {/* Ilustración a pleno tamaño dentro del marco llenando la cartilla sin salirse */}
         <Box
           component="img"
           src={stickerSrc}
@@ -103,12 +103,10 @@ export const HeaderExperienceFlyer = ({ type = 'pickup', isMobile = false }) => 
           sx={{
             width: '100%',
             height: '100%',
-            objectFit: 'cover',
+            objectFit: 'contain',
             display: 'block',
             mixBlendMode: 'multiply',
-            transform: `scale(${isPickup ? 1.14 : 1.06})`,
-            transformOrigin: isPickup ? '55% 52%' : '50% 52%',
-            transition: 'transform 0.25s ease'
+            p: { xs: '1px', sm: '2px', md: '3px' }
           }}
         />
       </Box>

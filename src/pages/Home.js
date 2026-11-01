@@ -173,12 +173,12 @@ const Home = () => {
           sx={{ width: '100%', display: 'block' }}
         />
         
-        {/* Chip de peso fijo solicitado con micro-animación */}
+        {/* Chip de peso fijo solicitado con micro-animación en esquina superior derecha para evitar solaparse con logo o texto */}
         {visibility.showCookieWeightChip !== false && (
           <Box
             component={motion.div}
             animate={{ 
-              y: [0, -8, 0],
+              y: [0, -6, 0],
             }}
             transition={{ 
               duration: 3,
@@ -187,9 +187,10 @@ const Home = () => {
             }}
             sx={{
               position: 'absolute',
-              left: { md: '5%', lg: '8%' },
-              top: { md: '18%', lg: '25%' }, 
-              display: { xs: 'none', md: 'block' },
+              right: { xs: '8px', sm: '14px', md: '18px', lg: '36px' },
+              top: { xs: '6px', sm: '8px', md: '10px', lg: '18px' },
+              left: 'auto',
+              display: 'block',
               zIndex: 15
             }}
           >
@@ -198,20 +199,20 @@ const Home = () => {
                 backgroundColor: '#c8626d',
                 color: 'white',
                 fontWeight: 800,
-                fontSize: { xs: '0.4rem', sm: '0.65rem', md: '0.52rem', lg: '0.7rem' },
-                px: { xs: 1.0, sm: 1.8, md: 1.4, lg: 1.6 },
-                py: { xs: 0.7, sm: 0.9, md: 0.6, lg: 0.7 },
+                fontSize: { xs: '0.42rem', sm: '0.52rem', md: '0.58rem', lg: '0.72rem' },
+                px: { xs: 0.9, sm: 1.3, md: 1.5, lg: 1.8 },
+                py: { xs: 0.4, sm: 0.5, md: 0.55, lg: 0.65 },
                 borderRadius: '999px',
-                border: '1px solid white',
-                boxShadow: '0 6px 20px rgba(200, 98, 109, 0.4)',
+                border: { xs: '0.5px solid white', sm: '1px solid white' },
+                boxShadow: '0 4px 15px rgba(200, 98, 109, 0.35)',
                 display: 'flex',
-                flexDirection: { xs: 'column', md: 'row' },
                 alignItems: 'center',
                 justifyContent: 'center',
                 textAlign: 'center',
-                lineHeight: 1.2,
-                maxWidth: { xs: '70px', md: 'none' },
-                whiteSpace: { xs: 'normal', md: 'nowrap' }
+                lineHeight: { xs: 1.15, sm: 1.18, md: 1.2 },
+                maxWidth: { xs: '95px', sm: '125px', md: '170px', lg: 'none' },
+                whiteSpace: { xs: 'normal', md: 'normal', lg: 'nowrap' },
+                userSelect: 'none'
               }}
             >
               {copy.cookieWeightChip}

@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Box, Container, Typography, Grid, Card, CardContent, CardActions, Button, Chip, Rating, IconButton, TextField, InputAdornment, Dialog, DialogContent, Skeleton, Accordion, AccordionSummary, AccordionDetails, useMediaQuery, useTheme } from '@mui/material';
 import { Close, ExpandMore } from '@mui/icons-material';
@@ -325,6 +325,46 @@ const Products = () => {
     };
     fetchAccordionData();
   }, []);
+  const location = useLocation();
+  const searchParams = useMemo(() => new URLSearchParams(location.search), [location.search]);
+  const urlId = searchParams.get('id');
+  const urlSearch = searchParams.get('search');
+  const [searchTerm, setSearchTerm] = useState('');
+
+  React.useEffect(() => {
+    if (urlSearch !== null) {
+      setSearchTerm(urlSearch);
+    }
+  }, [urlSearch]);
+
+  React.useEffect(() => {
+    if (urlId && products && products.length > 0) {
+      const match = products.find((p) => p.id === urlId);
+      if (match) {
+        if (match.category === 'boxes') {
+          setSelectedBox(match);
+          setShowBoxPopup(true);
+        } else {
+          setSelected(match);
+          setOpen(true);
+        }
+      }
+    }
+  }, [urlId, products]);
+
+  const displayedCookies = useMemo(() => {
+    const list = (products || []).filter(p => p.category !== 'boxes' && p.active !== false);
+    const q = searchTerm.trim().toLowerCase();
+    if (!q) return list;
+    return list.filter((p) => {
+      const orig = (p.name || '').toLowerCase();
+      const es = (PRODUCT_TRANSLATIONS?.es?.[p.name]?.name || '').toLowerCase();
+      const en = (PRODUCT_TRANSLATIONS?.en?.[p.name]?.name || '').toLowerCase();
+      const desc = (p.description || '').toLowerCase();
+      return orig.includes(q) || es.includes(q) || en.includes(q) || desc.includes(q);
+    });
+  }, [products, searchTerm]);
+
   const translatedTexts = useMemo(
     () => TEXTS[language] || TEXTS.es,
     [language]
@@ -339,7 +379,7 @@ const Products = () => {
     }}>
       <Container maxWidth="xl" sx={{ maxWidth: '1400px' }}>
         {/* Header */}
-        <Box sx={{ mb: 4, textAlign: 'center' }}>
+        <Box sx={{ mb: 2, textAlign: 'center' }}>
           <Typography
             sx={{
               fontFamily: 'BrittanySignature',
@@ -350,6 +390,39 @@ const Products = () => {
           >
             {translatedTexts.title}
           </Typography>
+        </Box>
+
+        {/* Barra de búsqueda de productos */}
+        <Box sx={{ maxWidth: '460px', mx: 'auto', mb: 4, px: 2 }}>
+          <TextField
+            fullWidth
+            size="small"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            placeholder={language === 'en' ? 'Search cookies...' : 'Buscar galletas...'}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <Search sx={{ color: '#c8626d' }} />
+                </InputAdornment>
+              ),
+              endAdornment: searchTerm ? (
+                <InputAdornment position="end">
+                  <IconButton size="small" onClick={() => setSearchTerm('')}>
+                    <Close fontSize="small" />
+                  </IconButton>
+                </InputAdornment>
+              ) : null,
+              sx: {
+                borderRadius: '999px',
+                backgroundColor: '#ffffff',
+                boxShadow: '0 2px 10px rgba(0,0,0,0.06)',
+                '&.Mui-focused fieldset': {
+                  borderColor: '#c8626d'
+                }
+              }
+            }}
+          />
         </Box>
 
         {/* Grid de productos */}
@@ -381,8 +454,33 @@ const Products = () => {
                 </Card>
               </Box>
             ))
+          ) : displayedCookies.length === 0 ? (
+            <Box sx={{ gridColumn: '1 / -1', py: 6, textAlign: 'center', color: '#888' }}>
+              <Typography variant="h6" sx={{ fontWeight: 700, color: '#c8626d', mb: 1 }}>
+                {language === 'en' ? 'No cookies found' : 'No se encontraron galletas'}
+              </Typography>
+              <Typography variant="body2">
+                {language === 'en'
+                  ? `No cookies match "${searchTerm}". Try another flavor or clear your search.`
+                  : `No hay galletas que coincidan con "${searchTerm}". Intenta con otro sabor o limpia la búsqueda.`}
+              </Typography>
+              <Button
+                variant="outlined"
+                onClick={() => setSearchTerm('')}
+                sx={{
+                  mt: 2,
+                  borderColor: '#c8626d',
+                  color: '#c8626d',
+                  borderRadius: '999px',
+                  textTransform: 'none',
+                  fontWeight: 700
+                }}
+              >
+                {language === 'en' ? 'Show all cookies' : 'Ver todas las galletas'}
+              </Button>
+            </Box>
           ) : (
-            products.filter(p => p.category !== 'boxes').map((product, index) => (
+            displayedCookies.map((product, index) => (
             <Box key={product.id}>
               <motion.div
                 initial={{ opacity: 0, y: 50 }}
