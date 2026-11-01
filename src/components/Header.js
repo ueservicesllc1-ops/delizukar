@@ -460,7 +460,7 @@ const Header = () => {
           {(visibility.showPickupFlyer !== false || visibility.showShippingFlyer !== false) && (
             <Box sx={{ 
               display: 'flex', 
-              flexDirection: 'column',
+              flexDirection: 'row',
               alignItems: 'center', 
               gap: { md: 0.6, lg: 0.8 },
               ml: { md: 2, lg: 4, xl: 6 }

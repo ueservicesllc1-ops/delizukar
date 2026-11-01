@@ -276,6 +276,7 @@ const FeaturedProductsManager = ({ open, onClose }) => {
                   <Select
                     value={titleConfig.font}
                     onChange={(e) => setTitleConfig(prev => ({ ...prev, font: e.target.value }))}
+                    MenuProps={{ sx: { zIndex: 10000000 } }}
                   >
                     {/* Fuentes predefinidas */}
                     {availableFonts.map(font => (
@@ -447,26 +448,23 @@ const FeaturedProductsManager = ({ open, onClose }) => {
                                   Selecciona un producto para reemplazar:
                                 </Typography>
                                 <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
-                                  {products
-                                    .filter(p => !featuredProducts.includes(p.id))
-                                    .slice(0, 3)
-                                    .map(availableProduct => (
-                                      <Button
-                                        key={availableProduct.id}
-                                        size="small"
-                                        variant="outlined"
-                                        startIcon={<SwapHoriz />}
-                                        onClick={() => handleReplaceWithProduct(availableProduct.id)}
-                                        sx={{ 
-                                          fontSize: '0.7rem',
-                                          py: 0.5,
-                                          px: 1,
-                                          minWidth: 'auto'
-                                        }}
-                                      >
-                                        {availableProduct.name.substring(0, 15)}...
-                                      </Button>
-                                    ))}
+                                  <Select
+                                    size="small"
+                                    displayEmpty
+                                    value=""
+                                    onChange={(e) => handleReplaceWithProduct(e.target.value)}
+                                    MenuProps={{ sx: { zIndex: 10000000 } }}
+                                    sx={{ minWidth: 200, fontSize: '0.8rem' }}
+                                  >
+                                    <MenuItem value="" disabled>Elegir producto...</MenuItem>
+                                    {products
+                                      .filter(p => !featuredProducts.includes(p.id))
+                                      .map(availableProduct => (
+                                        <MenuItem key={availableProduct.id} value={availableProduct.id}>
+                                          {availableProduct.name}
+                                        </MenuItem>
+                                      ))}
+                                  </Select>
                                   <Button
                                     size="small"
                                     variant="text"
@@ -545,6 +543,7 @@ const FeaturedProductsManager = ({ open, onClose }) => {
       <Snackbar
         open={snackbar.open}
         autoHideDuration={4000}
+        sx={{ zIndex: 10000001 }}
         onClose={() => setSnackbar({ ...snackbar, open: false })}
       >
         <Alert severity={snackbar.severity}>

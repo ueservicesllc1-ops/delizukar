@@ -33,9 +33,11 @@ export const FeaturedProductsProvider = ({ children }) => {
         console.log('✅ Configuración de productos destacados cargada:', newConfig);
         setFeaturedConfig(newConfig);
         
-        // Cargar productos destacados
+        // Cargar productos destacados (si se vació la selección, limpiar la lista)
         if (newConfig.selectedProducts.length > 0) {
           await loadFeaturedProducts(newConfig.selectedProducts);
+        } else {
+          setFeaturedProducts([]);
         }
         
         // Cargar la fuente
@@ -123,7 +125,11 @@ export const FeaturedProductsProvider = ({ children }) => {
         ...doc.data()
       }));
       
-      const featured = productIds.map(id => allProducts.find(p => p.id === id)).filter(Boolean);
+      // Ignorar productos desactivados para que no aparezcan en la página principal
+      const featured = productIds
+        .map(id => allProducts.find(p => p.id === id))
+        .filter(p => p && p.active !== false);
+
       
       console.log('✅ Productos destacados cargados:', featured);
       setFeaturedProducts(featured);
