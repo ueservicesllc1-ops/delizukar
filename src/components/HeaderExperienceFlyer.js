@@ -48,10 +48,10 @@ export const HeaderExperienceFlyer = ({ type = 'pickup', isMobile = false }) => 
           cursor: 'pointer',
           position: 'relative',
           width: isMobile
-            ? { xs: '76px', sm: '92px' }
-            : { md: '106px', lg: '120px', xl: '128px' },
-          maxWidth: isMobile ? '100px' : '140px',
-          borderRadius: { xs: '10px', sm: '12px' },
+            ? { xs: '46px', sm: '54px' }
+            : { md: '60px', lg: '68px', xl: '74px' },
+          maxWidth: isMobile ? '56px' : '80px',
+          borderRadius: { xs: '8px', sm: '10px' },
           aspectRatio: '1 / 1',
           overflow: 'hidden',
           p: 0,
@@ -61,10 +61,11 @@ export const HeaderExperienceFlyer = ({ type = 'pickup', isMobile = false }) => 
           background: isSelected
             ? 'linear-gradient(180deg, #fffcfb 0%, #fae8e8 100%)'
             : 'linear-gradient(180deg, #ffffff 0%, #faf0ef 100%)',
-          border: isSelected ? '2px solid #c8626d' : '1.5px solid rgba(200, 98, 109, 0.25)',
+          border: isSelected ? '3px solid #ffd166' : '2px solid rgba(255, 255, 255, 0.35)',
+          opacity: isSelected ? 1 : 0.85,
           boxShadow: isSelected
-            ? '0 4px 14px rgba(200, 98, 109, 0.38), 0 0 0 1px #c8626d'
-            : '0 2px 7px rgba(0, 0, 0, 0.05), 0 1px 3px rgba(200, 98, 109, 0.08)',
+            ? '0 0 0 2px rgba(255, 209, 102, 0.55), 0 4px 14px rgba(0, 0, 0, 0.25)'
+            : '0 2px 7px rgba(0, 0, 0, 0.18)',
           transition: 'all 0.25s ease',
           flexShrink: 0,
           userSelect: 'none'
@@ -77,13 +78,13 @@ export const HeaderExperienceFlyer = ({ type = 'pickup', isMobile = false }) => 
           aria-label={isEn ? `Close ${labelText}` : `Cerrar ${labelText}`}
           sx={{
             position: 'absolute',
-            top: 2,
-            right: 2,
+            top: 1,
+            right: 1,
             zIndex: 10,
             backgroundColor: 'rgba(255, 255, 255, 0.92)',
             color: '#c8626d',
-            padding: '1.5px',
-            boxShadow: '0 1px 4px rgba(0,0,0,0.12)',
+            padding: '1px',
+            boxShadow: '0 1px 3px rgba(0,0,0,0.12)',
             '&:hover': {
               backgroundColor: '#c8626d',
               color: '#ffffff',
@@ -93,7 +94,7 @@ export const HeaderExperienceFlyer = ({ type = 'pickup', isMobile = false }) => 
           }}
           title={isEn ? 'Close' : 'Cerrar'}
         >
-          <Close sx={{ fontSize: { xs: 10, sm: 11, md: 11 } }} />
+          <Close sx={{ fontSize: { xs: 8, sm: 9, md: 10 } }} />
         </IconButton>
 
         {/* Ilustración a pleno tamaño dentro del marco */}

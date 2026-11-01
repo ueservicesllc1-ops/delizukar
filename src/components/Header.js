@@ -185,17 +185,20 @@ const Header = () => {
       ? (isEn ? 'CHANGE' : 'CAMBIAR')
       : (isEn ? 'SELECT' : 'ELEGIR');
 
+    const showFlyers = visibility.showPickupFlyer !== false || visibility.showShippingFlyer !== false;
+
     return (
       <Box
         sx={{
           backgroundColor: '#c8626d',
           color: '#ffffff',
-          py: { xs: 0.5, sm: 0.6 },
+          py: { xs: 0.6, sm: 0.7, md: 0.8 },
           px: { xs: 1.5, sm: 2 },
           display: 'flex',
+          flexDirection: { xs: 'column', md: 'row' },
           alignItems: 'center',
           justifyContent: 'center',
-          gap: { xs: 0.8, sm: 1.2 },
+          gap: { xs: 0.6, md: 2.5 },
           fontSize: { xs: '0.7rem', sm: '0.8rem' },
           fontWeight: 700,
           letterSpacing: '0.4px',
@@ -204,6 +207,13 @@ const Header = () => {
           zIndex: 10
         }}
       >
+        {showFlyers && (
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: { xs: 0.8, md: 1.2 } }}>
+            {visibility.showPickupFlyer !== false && <HeaderExperienceFlyer type="pickup" isMobile={isMobile} />}
+            {visibility.showShippingFlyer !== false && <HeaderExperienceFlyer type="shipping" isMobile={isMobile} />}
+          </Box>
+        )}
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: { xs: 0.8, sm: 1.2 }, flexWrap: 'wrap' }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.6, flexWrap: 'nowrap' }}>
           {isPickup && <Storefront sx={{ fontSize: { xs: '0.95rem', sm: '1.05rem' }, color: '#ffe6e8' }} />}
           {isShipping && <LocalShipping sx={{ fontSize: { xs: '0.95rem', sm: '1.05rem' }, color: '#ffe6e8' }} />}
@@ -233,6 +243,7 @@ const Header = () => {
         >
           {buttonText}
         </Button>
+        </Box>
       </Box>
     );
   };
@@ -428,13 +439,6 @@ const Header = () => {
         </Box>
       </Box>
 
-      {/* Cartillas de Recogida y Envío en cabecera móvil */}
-      {(visibility.showPickupFlyer !== false || visibility.showShippingFlyer !== false) && (
-        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1, width: '100%', px: 1, pt: 0.5 }}>
-          {visibility.showPickupFlyer !== false && <HeaderExperienceFlyer type="pickup" isMobile />}
-          {visibility.showShippingFlyer !== false && <HeaderExperienceFlyer type="shipping" isMobile />}
-        </Box>
-      )}
 
     </Toolbar>
   );
@@ -457,22 +461,6 @@ const Header = () => {
           <IconButton sx={{ color: '#be8782', ml: { md: 0.5, lg: 1 }, mr: { md: 1, lg: 2 } }}>
             <Search />
           </IconButton>
-          {(visibility.showPickupFlyer !== false || visibility.showShippingFlyer !== false) && (
-            <Box sx={{ 
-              display: 'flex', 
-              flexDirection: 'row',
-              alignItems: 'center', 
-              gap: { md: 0.6, lg: 0.8 },
-              ml: { md: 2, lg: 4, xl: 6 }
-            }}>
-              {visibility.showPickupFlyer !== false && (
-                <HeaderExperienceFlyer type="pickup" />
-              )}
-              {visibility.showShippingFlyer !== false && (
-                <HeaderExperienceFlyer type="shipping" />
-              )}
-            </Box>
-          )}
         </Box>
 
         <motion.a
@@ -621,7 +609,7 @@ const Header = () => {
           boxShadow: '0 4px 20px rgba(0,0,0,0.1)'
         }}
       >
-        <ExperienceBar />
+        {ExperienceBar()}
         {isMobile ? renderMobileToolbar() : renderDesktopToolbar()}
       </AppBar>
 

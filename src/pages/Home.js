@@ -23,8 +23,8 @@ import PopupHero from '../components/PopupHero';
 import TestimonialsSection from '../components/TestimonialsSection';
 import ProductImage from '../components/ProductImage';
 import BoxSelectionPopup from '../components/BoxSelectionPopup';
-import FeaturedProducts from '../components/FeaturedProducts';
 import ComparisonTable from '../components/ComparisonTable';
+import RandomCookiesCarousel from '../components/RandomCookiesCarousel';
 import { useShoppingExperience } from '../context/ShoppingExperienceContext';
 import { usePopupsVisibility } from '../context/PopupsVisibilityContext';
 import { db } from '../firebase/config';
@@ -256,7 +256,7 @@ const Home = () => {
         sx={{
           backgroundColor: '#c8626d',
           color: 'white',
-          py: { xs: 1.4, md: 1.8 },
+          py: { xs: 1.0, md: 1.3 },
           display: 'flex',
           justifyContent: 'center',
           px: 2
@@ -274,8 +274,8 @@ const Home = () => {
         </Typography>
       </Box>
 
-      {/* Productos */}
-      <FeaturedProducts onOpenDetail={handleOpenDetail} />
+      {/* Carrusel rotativo de galletas aleatorias */}
+      <RandomCookiesCarousel onOpenDetail={handleOpenDetail} />
 
       {/* Segundo Banner */}
       {banner2Url && banner2Url !== 'none' && (
