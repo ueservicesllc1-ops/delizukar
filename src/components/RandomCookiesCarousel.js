@@ -123,7 +123,7 @@ const RandomCookiesCarousel = ({ onOpenDetail }) => {
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      backgroundColor: '#faf6f5',
+                      backgroundColor: '#ffffff',
                       overflow: 'hidden',
                       position: 'relative'
                     }}
@@ -140,7 +140,6 @@ const RandomCookiesCarousel = ({ onOpenDetail }) => {
                         height: 'auto',
                         objectFit: 'contain',
                         display: 'block',
-                        filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.06))',
                         transition: 'transform 0.3s ease'
                       }}
                     />

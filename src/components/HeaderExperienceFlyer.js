@@ -58,9 +58,7 @@ export const HeaderExperienceFlyer = ({ type = 'pickup', isMobile = false }) => 
           display: 'flex',
           alignItems: 'stretch',
           justifyContent: 'stretch',
-          background: isSelected
-            ? 'linear-gradient(180deg, #fffcfb 0%, #fae8e8 100%)'
-            : 'linear-gradient(180deg, #ffffff 0%, #faf0ef 100%)',
+          background: '#ffffff',
           border: isSelected ? '3px solid #ffd166' : '2px solid rgba(255, 255, 255, 0.35)',
           opacity: isSelected ? 1 : 0.85,
           boxShadow: isSelected
