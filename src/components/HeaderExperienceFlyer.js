@@ -18,7 +18,7 @@ export const HeaderExperienceFlyer = ({ type = 'pickup', isMobile = false }) => 
   const labelText = isPickup ? 'PICK UP' : 'SHIPPING';
   const activeLabel = isEn ? 'Selected' : 'Seleccionado';
   const imgHeight = isMobile
-    ? { xs: 74, sm: 84 }
+    ? { xs: 40, sm: 52 }
     : { md: 74, lg: 84, xl: 92 };
 
   const handleClick = (e) => {
@@ -51,9 +51,9 @@ export const HeaderExperienceFlyer = ({ type = 'pickup', isMobile = false }) => 
           cursor: 'pointer',
           position: 'relative',
           width: isMobile
-            ? { xs: 'calc(50% - 6px)', sm: '140px' }
+            ? { xs: '76px', sm: '92px' }
             : { md: '106px', lg: '120px', xl: '128px' },
-          maxWidth: isMobile ? '160px' : '140px',
+          maxWidth: isMobile ? '100px' : '140px',
           borderRadius: { xs: '10px', sm: '12px' },
           p: { xs: '8px 6px', md: '8px 8px', lg: '10px 10px' },
           display: 'flex',
