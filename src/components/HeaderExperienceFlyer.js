@@ -48,10 +48,10 @@ export const HeaderExperienceFlyer = ({ type = 'pickup', isMobile = false }) => 
           cursor: 'pointer',
           position: 'relative',
           width: isMobile
-            ? { xs: '68px', sm: '78px' }
-            : { md: '94px', lg: '108px', xl: '118px' },
-          maxWidth: isMobile ? '84px' : '130px',
-          borderRadius: { xs: '8px', sm: '10px' },
+            ? { xs: '61px', sm: '70px' }
+            : { md: '85px', lg: '97px', xl: '106px' },
+          maxWidth: isMobile ? '76px' : '117px',
+          borderRadius: { xs: '7px', sm: '9px' },
           aspectRatio: '1.26 / 1',
           overflow: 'hidden',
           p: 0,

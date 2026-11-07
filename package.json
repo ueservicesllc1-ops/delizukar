@@ -66,7 +66,8 @@
     "test-paypal": "node test-paypal-integration.js",
     "debug-paypal": "node debug-paypal.js",
     "dev:full": "concurrently \"npm run server\" \"npm start\"",
-    "kill-node": "node kill-all-node.js"
+    "kill-node": "node kill-all-node.js",
+    "restart": "powershell -ExecutionPolicy Bypass -File ./start-servers.ps1"
   },
   "eslintConfig": {
     "extends": [
